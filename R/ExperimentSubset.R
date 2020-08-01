@@ -35,20 +35,30 @@ ExperimentSubset <- function(
                     subsets = subsets)
 }
 
-setGeneric(name="subsetAssay",
-           def=function(obj, subsetName, rowIndex, colIndex)
+setGeneric(name = "subsetAssay",
+           def = function(object, subsetName, rowIndex, colIndex)
            {
              standardGeneric("subsetAssay")
            }
 )
 
-setMethod(f="subsetAssay",
-          signature="ExperimentSubset",
-          definition=function(obj, subsetName, rowIndex, colIndex)
+setMethod(f = "subsetAssay",
+          signature = "ExperimentSubset",
+          definition = function(object, subsetName, rowIndex, colIndex)
           {
             scs <- SingleCellSubset(subsetName = subsetName, rowIndex = rowIndex, colIndex = colIndex)
-            obj@subsets[[subsetName]] <- scs
-            return(obj)
+            object@subsets[[subsetName]] <- scs
+            return(object)
           }
 )
+
+setMethod(f = "show",
+          signature = "ExperimentSubset",
+          definition = function(object) {
+  callNextMethod()
+  cat(
+    "subsets(0):",
+    sep=""
+  )
+})
 
