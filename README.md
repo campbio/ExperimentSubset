@@ -23,15 +23,18 @@ es <- subsetAssay(es, "subset2", subsetRows = c(2,3,4,5), subsetCols = c(4,5,6))
 es <- subsetAssay(es, "subset3", subsetRows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), subsetCols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"))
 
 #subset by both indices and names
-es <- subsetAssay(es, "subset3", subsetRows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), subsetCols = c(1:10))
+es <- subsetAssay(es, "subset4", subsetRows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), subsetCols = c(1:10))
 ```
 See available subset assays:
 ```r
 subsetNames(es)
 ```
-Extract "subset1" subsetted assay:
+Extract subsetted assays:
 ```r
-subsetAssay <- assay(es, "subset1")
+subsetAssay1 <- assay(es, "subset1")
+subsetAssay2 <- assay(es, "subset2")
+subsetAssay3 <- assay(es, "subset3")
+subsetAssay4 <- assay(es, "subset4")
 ```
 # Features
 
