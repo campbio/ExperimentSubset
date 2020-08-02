@@ -66,6 +66,23 @@ setMethod(f = "subsetAssay",
 )
 
 #' @export
+setGeneric(name = "subsetNames",
+           def = function(object)
+           {
+             standardGeneric("subsetNames")
+           }
+)
+
+#' @export
+setMethod(f = "subsetNames",
+          signature = "ExperimentSubset",
+          definition = function(object)
+          {
+            return(names(object@subsets))
+          }
+)
+
+#' @export
 #' @importMethodsFrom SingleCellExperiment show
 setMethod(f = "show",
           signature = "ExperimentSubset",
@@ -73,17 +90,18 @@ setMethod(f = "show",
             {
               callNextMethod()
               cat(
-                  "subsets(", length(names(scs@subsets)), "): ",
+                  "subsets(", length(subsetNames(object)), "): ",
                   sep="")
               cat(
-                  names(object@subsets))
+                  subsetNames(object)
+                  )
           }
 )
 
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay
 setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
-  if(i %in% names(x@subsets)){ #create a function subsetNames()
+  if(i %in% subsetNames(x)){
     subsetName = i
     i = "counts"
     out <- callNextMethod()
