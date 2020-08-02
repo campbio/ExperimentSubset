@@ -43,9 +43,17 @@ ExperimentSubset <- function(
                     subsets = subsets)
 }
 
+#' @title subsetAssay
+#'
+#' @param object \code{ExperimentSubset}, \code{SingleCellExperiment} or \code{SummarizedExperiment} object.
+#'
+#' @param subsetName Specify the name of the new subset.
+#' @param subsetRows Specify which rows/features to subset from the input object. Either indices or names.
+#' @param subsetCols Specify which columns/cells to subset from the input object. Either indices or names.
+#'
 #' @export
 setGeneric(name = "subsetAssay",
-           def = function(object, subsetName, rowIndices, colIndices)
+           def = function(object, subsetName, subsetRows, subsetCols)
            {
              standardGeneric("subsetAssay")
            }
@@ -54,12 +62,18 @@ setGeneric(name = "subsetAssay",
 #' @export
 setMethod(f = "subsetAssay",
           signature = "ExperimentSubset",
-          definition = function(object, subsetName, rowIndices, colIndices)
+          definition = function(object, subsetName, subsetRows, subsetCols)
             {
+            if(is.character(subsetRows)){
+              subsetRows <- match(subsetRows, rownames(assay(object, "counts")))
+            }
+            if(is.character(subsetCols)){
+              subsetCols <- match(subsetCols, colnames(assay(object, "counts")))
+            }
               scs <- SingleCellSubset(
                 subsetName = subsetName,
-                rowIndices = rowIndices,
-                colIndices = colIndices)
+                rowIndices = subsetRows,
+                colIndices = subsetCols)
               object@subsets[[subsetName]] <- scs
               return(object)
           }
