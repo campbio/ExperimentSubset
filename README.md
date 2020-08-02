@@ -1,5 +1,5 @@
 # ExperimentSubset
-Efficiently subset single cell RNA seqeuncing data
+Manages subsets of data with Bioconductor Experiment objects
 
 # Sample Workflow
 Load sample data:
