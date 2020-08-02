@@ -4,8 +4,8 @@
 .SingleCellSubset <- setClass("SingleCellSubset",
                               slots = representation(
                                 subsetName = "character",
-                                rowIndex = "numeric",
-                                colIndex = "numeric"
+                                rowIndices = "numeric",
+                                colIndices = "numeric"
                               )
 )
 
@@ -13,13 +13,13 @@
 #' @importFrom SingleCellExperiment SingleCellExperiment
 SingleCellSubset <- function(
   subsetName = "subset",
-  rowIndex = 0,
-  colIndex = 0,
+  rowIndices = NULL,
+  colIndices = NULL,
   ...)
 {
   .SingleCellSubset(subsetName = subsetName,
-                    rowIndex = rowIndex,
-                    colIndex = colIndex)
+                    rowIndices = rowIndices,
+                    colIndices = colIndices)
 }
 
 #' @export
@@ -45,7 +45,7 @@ ExperimentSubset <- function(
 
 #' @export
 setGeneric(name = "subsetAssay",
-           def = function(object, subsetName, rowIndex, colIndex)
+           def = function(object, subsetName, rowIndices, colIndices)
            {
              standardGeneric("subsetAssay")
            }
@@ -54,12 +54,12 @@ setGeneric(name = "subsetAssay",
 #' @export
 setMethod(f = "subsetAssay",
           signature = "ExperimentSubset",
-          definition = function(object, subsetName, rowIndex, colIndex)
+          definition = function(object, subsetName, rowIndices, colIndices)
             {
               scs <- SingleCellSubset(
                 subsetName = subsetName,
-                rowIndex = rowIndex,
-                colIndex = colIndex)
+                rowIndices = rowIndices,
+                colIndices = colIndices)
               object@subsets[[subsetName]] <- scs
               return(object)
           }
@@ -82,8 +82,15 @@ setMethod(f = "show",
 
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay
-setMethod("assay", c("ExperimentSubset", "numeric"), function(x, i, ...) {
-  out <- callNextMethod()
-  out <- out[1:5, 1:5]
+setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
+  if(i %in% names(x@subsets)){ #create a function subsetNames()
+    subsetName = i
+    i = "counts"
+    out <- callNextMethod()
+    out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
+  }
+  else{
+    out <- callNextMethod()
+  }
   out
 })
