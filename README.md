@@ -49,7 +49,7 @@ es
 class: ExperimentSubset</br>
 dim: 2000 2000 </br>
 metadata(0):</br>
-assays(1): counts
+assays(1): counts</br>
 rownames(2000): C12orf73 RNU6-1256P ... FOXF1 PRR3</br>
 rowData names(0):</br>
 colnames(2000): CTGCTGTCAGGGTATG CAGTCCTTCGGTTAAC ... GATGCTATCAGCAACT ATTTCTGGTGATGATA</br>
