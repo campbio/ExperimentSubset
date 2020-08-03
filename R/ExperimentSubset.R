@@ -130,6 +130,22 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
   out
 })
 
+#' @export
+#' @importMethodsFrom SummarizedExperiment assay<-
+setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, ..., value) {
+  if((nrow(value)!= nrow(x))
+     || (ncol(value) != ncol(x))){
+    saveSubset(
+      object = x,
+      subsetName = i,
+      inputMatrix = value
+    )
+  }
+  else{
+    callNextMethod()
+  }
+})
+
 
 #' @export
 setGeneric(name = "saveSubset",
@@ -163,7 +179,7 @@ setMethod(f = "saveSubset",
 
             object <- subsetAssay(object, subsetName, r, c) #add parameter here to store useAssay name in line below
 
-            object@subsets[[subsetName]]@useAssay <- paste0(subsetName, "_internal")
+            object@subsets[[subsetName]]@useAssay <- paste0(subsetName, "_internal") #omit this line
 
             return(object)
           }
