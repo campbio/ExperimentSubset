@@ -1,7 +1,7 @@
 # ExperimentSubset
 Manages subsets of data with Bioconductor Experiment objects
 
-# Sample Workflow
+## Sample Workflow
 Load sample data:
 ```r
 data(sce_chcl, package = "scds")
@@ -122,6 +122,6 @@ Slot "useAssay":</br>
 [1] "logSubset2_internal"
 </blockquote>
 
-# Features
+## Features
 
-# Installation
+## Installation
