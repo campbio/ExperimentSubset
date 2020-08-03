@@ -2,11 +2,13 @@
 
 export(ExperimentSubset)
 export(SingleCellSubset)
+export(saveSubset)
 export(subsetAssay)
 export(subsetNames)
 exportClasses(ExperimentSubset)
 exportClasses(SingleCellSubset)
 exportMethods(assay)
+exportMethods(saveSubset)
 exportMethods(show)
 exportMethods(subsetAssay)
 exportMethods(subsetNames)

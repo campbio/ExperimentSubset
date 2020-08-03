@@ -13,4 +13,5 @@ RoxygenNote: 7.1.0
 Imports: 
   SingleCellExperiment, 
   SummarizedExperiment, 
-  methods
+  methods,
+  Matrix

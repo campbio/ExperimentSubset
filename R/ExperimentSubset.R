@@ -5,7 +5,8 @@
                               slots = representation(
                                 subsetName = "character",
                                 rowIndices = "numeric",
-                                colIndices = "numeric"
+                                colIndices = "numeric",
+                                useAssay = "character"
                               )
 )
 
@@ -15,11 +16,13 @@ SingleCellSubset <- function(
   subsetName = "subset",
   rowIndices = NULL,
   colIndices = NULL,
+  useAssay = "counts",
   ...)
 {
   .SingleCellSubset(subsetName = subsetName,
                     rowIndices = rowIndices,
-                    colIndices = colIndices)
+                    colIndices = colIndices,
+                    useAssay = useAssay)
 }
 
 #' @export
@@ -117,7 +120,7 @@ setMethod(f = "show",
 setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
   if(i %in% subsetNames(x)){
     subsetName = i
-    i = "counts"
+    i = paste0(subsetName, "_internal")
     out <- callNextMethod()
     out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
   }
@@ -126,3 +129,42 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
   }
   out
 })
+
+
+#' @export
+setGeneric(name = "saveSubset",
+           def = function(object, subsetName, inputMatrix)
+           {
+             standardGeneric("saveSubset")
+           }
+)
+
+#' @export
+setMethod(f = "saveSubset",
+          signature = "ExperimentSubset",
+          definition = function(object, subsetName, inputMatrix)
+          {
+            r <- rownames(inputMatrix)
+            c <- colnames(inputMatrix)
+            counts <- assay(object, "counts")
+
+            m <- Matrix::Matrix(
+              nrow = nrow(counts),
+              ncol = ncol(counts),
+              data = 0,
+              dimnames = list(
+                rownames(counts),
+                colnames(counts)),
+              sparse = TRUE)
+
+            m[r,c] <- inputMatrix
+
+            SummarizedExperiment::assay(object, paste0(subsetName, "_internal")) <- m
+
+            object <- subsetAssay(object, subsetName, r, c) #add parameter here to store useAssay name in line below
+
+            object@subsets[[subsetName]]@useAssay <- paste0(subsetName, "_internal")
+
+            return(object)
+          }
+)
