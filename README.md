@@ -2,12 +2,12 @@
 Manages subsets of data with Bioconductor Experiment objects
 
 ## Sample Workflow
-Load sample data:
+**Load sample data:**
 ```r
 data(sce_chcl, package = "scds")
 ```
 
-Load ExperimentSubset and create ES object:
+**Load ExperimentSubset and create ES object:**
 ```r
 library(ExperimentSubset)
 es <- ExperimentSubset::ExperimentSubset(assays = list(counts = assay(sce_chcl, "counts"), logcounts = assay(sce_chcl, "logcounts")), colData=colData(sce_chcl), rowData= rowData(sce_chcl))
@@ -28,7 +28,7 @@ altExpNames(0):</br>
 subsets(0):
 </blockquote>
 
-Create multiple new subset assays:
+**Create multiple new subset assays:**
 ```r
 #subset by continuous indices
 es <- subsetAssay(es, "subset1", subsetRows = c(1:5), subsetCols = c(1:3))
@@ -66,7 +66,7 @@ subsetNames(es)
 ```
 >[1] "subset1" "subset2" "subset3" "subset4"
 
-Extract subsetted assays:
+**Extract subsetted assays:**
 ```r
 subsetAssay1 <- assay(es, "subset1")
 subsetAssay2 <- assay(es, "subset2")
@@ -74,7 +74,7 @@ subsetAssay3 <- assay(es, "subset3")
 subsetAssay4 <- assay(es, "subset4")
 ```
 
-Store an external subset assay with different data:
+**Store an external subset assay with different data:**
 ```r
 #imitate an external assay
 logCounts <- log1p(assay(sce_chcl, "counts"))
@@ -106,7 +106,7 @@ altExpNames(0):</br>
 subsets(6): subset1 subset2 subset3 subset4 logSubset1 logSubset2
 </blockquote>
 
-View internal storage mechanism of subsets:
+**View internal storage mechanism of subsets:**
 ```r
 es@subsets$logSubset2
 ```
@@ -122,7 +122,7 @@ Slot "useAssay":</br>
 [1] "logSubset2_internal"
 </blockquote>
 
-View colData from a subset:
+**View colData from a subset:**
 ```r
 subsetColData(es, "logSubset1")
 ```
@@ -138,7 +138,7 @@ CTGCTGTCAGGGTATG                   Singlet   THP1_A  Singlet             Singlet
 CAGTCCTTCGGTTAAC                   Singlet    KG1_A  Singlet             Singlet
 </blockquote>
                                    
-View rowData from a subset:
+**View rowData from a subset:**
 ```r
 subsetRowData(es, "logSubset1")
 ```
