@@ -7,6 +7,7 @@ Manages subsets of data with Bioconductor Experiment objects
 data(sce_chcl, package = "scds")
 ```
 
+
 **Load ExperimentSubset and create ES object:**
 ```r
 library(ExperimentSubset)
@@ -27,6 +28,7 @@ spikeNames(0):</br>
 altExpNames(0):</br>
 subsets(0):
 </blockquote>
+
 
 **Create multiple new subset assays:**
 ```r
@@ -60,11 +62,13 @@ altExpNames(0):</br>
 subsets(4): subset1 subset2 subset3 subset4
 </blockquote>
 
-See available subset assays:
+
+**See available subset assays:**
 ```r
 subsetNames(es)
 ```
 >[1] "subset1" "subset2" "subset3" "subset4"
+
 
 **Extract subsetted assays:**
 ```r
@@ -73,6 +77,7 @@ subsetAssay2 <- assay(es, "subset2")
 subsetAssay3 <- assay(es, "subset3")
 subsetAssay4 <- assay(es, "subset4")
 ```
+
 
 **Store an external subset assay with different data:**
 ```r
@@ -106,6 +111,7 @@ altExpNames(0):</br>
 subsets(6): subset1 subset2 subset3 subset4 logSubset1 logSubset2
 </blockquote>
 
+
 **View internal storage mechanism of subsets:**
 ```r
 es@subsets$logSubset2
@@ -122,6 +128,7 @@ Slot "useAssay":</br>
 [1] "logSubset2_internal"
 </blockquote>
 
+
 **View colData from a subset:**
 ```r
 subsetColData(es, "logSubset1")
@@ -137,7 +144,8 @@ CAGTCCTTCGGTTAAC       775      1207 SeuratProject      KG1_A        THP1_A 1.75
 CTGCTGTCAGGGTATG                   Singlet   THP1_A  Singlet             Singlet</br>
 CAGTCCTTCGGTTAAC                   Singlet    KG1_A  Singlet             Singlet
 </blockquote>
-                                   
+     
+     
 **View rowData from a subset:**
 ```r
 subsetRowData(es, "logSubset1")
@@ -157,6 +165,7 @@ DCLRE1C             DCLRE1C</br>
 RP11-1H15.2     RP11-1H15.2</br>
 OPCML                 OPCML
 </blockquote>
+
 
 ## Features
 
