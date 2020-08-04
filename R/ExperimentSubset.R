@@ -146,6 +146,41 @@ setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...
   }
 })
 
+#' @export
+setGeneric(name = "subsetRowData",
+           def = function(object, subsetName)
+           {
+             standardGeneric("subsetRowData")
+           }
+)
+
+
+#' @export
+setMethod(f = "subsetRowData",
+          signature = c("ExperimentSubset", "character"),
+          definition = function(object, subsetName)
+          {
+            SummarizedExperiment::rowData(object)[object@subsets[[subsetName]]@rowIndices, , drop = F]
+          }
+)
+
+#' @export
+setGeneric(name = "subsetColData",
+           def = function(object, subsetName)
+           {
+             standardGeneric("subsetColData")
+           }
+)
+
+
+#' @export
+setMethod(f = "subsetColData",
+          signature = c("ExperimentSubset", "character"),
+          definition = function(object, subsetName)
+          {
+            SummarizedExperiment::colData(object)[object@subsets[[subsetName]]@colIndices, , drop = F]
+          }
+)
 
 #' @export
 setGeneric(name = "saveSubset",
