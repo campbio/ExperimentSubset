@@ -199,6 +199,10 @@ setMethod(f = "saveSubset",
             c <- colnames(inputMatrix)
             counts <- assay(object, "counts")
 
+            #analyze this further (needed for SCTK)
+            rownames(counts) <- gsub("_", "-", rownames(object))
+            colnames(counts) <- gsub("_", "-", colnames(object))
+
             m <- Matrix::Matrix(
               nrow = nrow(counts),
               ncol = ncol(counts),
