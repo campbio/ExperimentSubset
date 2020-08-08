@@ -122,7 +122,7 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
     subsetName = i
     i = paste0(subsetName, "_internal")
     if(!i %in% SummarizedExperiment::assayNames(x)){
-      i = "counts" #update this so it refers to the $useAssay in subset
+      i = x@subsets[[subsetName]]@useAssay
     }
     out <- callNextMethod()
     out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
