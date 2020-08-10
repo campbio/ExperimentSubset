@@ -131,7 +131,11 @@ Slot "useAssay":</br>
 
 **View colData from a subset:**
 ```r
+#either use subsetcolData
 subsetColData(es, "logSubset1")
+
+#or use colData with subsetName parameter
+colData(es, subsetName = "logSubset1")
 ```
 <blockquote>
  DataFrame with 2 rows and 11 columns</br>
@@ -148,7 +152,11 @@ CAGTCCTTCGGTTAAC                   Singlet    KG1_A  Singlet             Singlet
      
 **View rowData from a subset:**
 ```r
+#either use subsetRowData
 subsetRowData(es, "logSubset1")
+
+#or use rowData with subsetName parameter
+rowData(es, subsetName = "logSubset1")
 ```
 <blockquote>
  DataFrame with 10 rows and 1 column</br>
