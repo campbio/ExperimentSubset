@@ -33,16 +33,16 @@ subsets(0):
 **Create multiple new subset assays:**
 ```r
 #subset by continuous indices
-es <- subsetAssay(es, "subset1", subsetRows = c(1:5), subsetCols = c(1:3))
+es <- subsetAssay(es, "subset1", rows = c(1:5), cols = c(1:3), useAssay = "counts")
 
 #subset by intermittent indices
-es <- subsetAssay(es, "subset2", subsetRows = c(2,3,4,5), subsetCols = c(4,5,6))
+es <- subsetAssay(es, "subset2", rows = c(2,3,4,5), cols = c(4,5,6), useAssay = "counts")
 
 #subset by feature and cell names
-es <- subsetAssay(es, "subset3", subsetRows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), subsetCols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"))
+es <- subsetAssay(es, "subset3", rows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), useAssay = "counts")
 
 #subset by both indices and names
-es <- subsetAssay(es, "subset4", subsetRows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), subsetCols = c(1:10))
+es <- subsetAssay(es, "subset4", rows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), cols = c(1:10), useAssay = "counts")
 
 #view es object
 es
