@@ -44,6 +44,11 @@ es <- subsetAssay(es, "subset3", rows = c("C12orf73", "RNU6-1256P", "RN7SL749P",
 #subset by both indices and names
 es <- subsetAssay(es, "subset4", rows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), cols = c(1:10), useAssay = "counts")
 
+#or use assay<- function to input a subset assay using "useAssay" parameter as long as the assay already resides inside the es object
+c <- assay(es, "counts")
+c <- c[1:10, 1:5]
+assay(es, "subset5", useAssay = "counts") <- c
+
 #view es object
 es
 ```
@@ -76,6 +81,7 @@ subsetAssay1 <- assay(es, "subset1")
 subsetAssay2 <- assay(es, "subset2")
 subsetAssay3 <- assay(es, "subset3")
 subsetAssay4 <- assay(es, "subset4")
+subsetAssay5 <- assay(es, "subset5")
 ```
 
 
