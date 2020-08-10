@@ -51,12 +51,13 @@ ExperimentSubset <- function(
 #' @param object \code{ExperimentSubset}, \code{SingleCellExperiment} or \code{SummarizedExperiment} object.
 #'
 #' @param subsetName Specify the name of the new subset.
-#' @param subsetRows Specify which rows/features to subset from the input object. Either indices or names.
-#' @param subsetCols Specify which columns/cells to subset from the input object. Either indices or names.
+#' @param rows Specify which rows/features to subset from the input object. Either indices or names.
+#' @param cols Specify which columns/cells to subset from the input object. Either indices or names.
+#' @param useAssay Assay to use against the subset data
 #'
 #' @export
 setGeneric(name = "subsetAssay",
-           def = function(object, subsetName, subsetRows, subsetCols)
+           def = function(object, subsetName, rows, cols, useAssay)
            {
              standardGeneric("subsetAssay")
            }
@@ -65,18 +66,19 @@ setGeneric(name = "subsetAssay",
 #' @export
 setMethod(f = "subsetAssay",
           signature = "ExperimentSubset",
-          definition = function(object, subsetName, subsetRows, subsetCols)
+          definition = function(object, subsetName, rows, cols, useAssay)
             {
-            if(is.character(subsetRows)){
-              subsetRows <- match(subsetRows, rownames(assay(object, "counts")))
+            if(is.character(rows)){
+              rows <- match(rows, rownames(assay(object, useAssay)))
             }
-            if(is.character(subsetCols)){
-              subsetCols <- match(subsetCols, colnames(assay(object, "counts")))
+            if(is.character(cols)){
+              cols <- match(cols, colnames(assay(object, useAssay)))
             }
               scs <- SingleCellSubset(
                 subsetName = subsetName,
-                rowIndices = subsetRows,
-                colIndices = subsetCols)
+                rowIndices = rows,
+                colIndices = cols,
+                useAssay = useAssay)
               object@subsets[[subsetName]] <- scs
               return(object)
           }
@@ -219,9 +221,9 @@ setMethod(f = "saveSubset",
 
             SummarizedExperiment::assay(object, paste0(subsetName, "_internal")) <- m
 
-            object <- subsetAssay(object, subsetName, r, c) #add parameter here to store useAssay name in line below
+            object <- subsetAssay(object, subsetName, r, c, paste0(subsetName, "_internal")) #add parameter here to store useAssay name in line below
 
-            object@subsets[[subsetName]]@useAssay <- paste0(subsetName, "_internal") #omit this line
+            #object@subsets[[subsetName]]@useAssay <- paste0(subsetName, "_internal") #omit this line
 
             return(object)
           }

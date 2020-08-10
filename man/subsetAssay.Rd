@@ -4,16 +4,18 @@
 \alias{subsetAssay}
 \title{subsetAssay}
 \usage{
-subsetAssay(object, subsetName, subsetRows, subsetCols)
+subsetAssay(object, subsetName, rows, cols, useAssay)
 }
 \arguments{
 \item{object}{\code{ExperimentSubset}, \code{SingleCellExperiment} or \code{SummarizedExperiment} object.}
 
 \item{subsetName}{Specify the name of the new subset.}
 
-\item{subsetRows}{Specify which rows/features to subset from the input object. Either indices or names.}
+\item{rows}{Specify which rows/features to subset from the input object. Either indices or names.}
 
-\item{subsetCols}{Specify which columns/cells to subset from the input object. Either indices or names.}
+\item{cols}{Specify which columns/cells to subset from the input object. Either indices or names.}
+
+\item{useAssay}{Assay to use against the subset data}
 }
 \description{
 subsetAssay
