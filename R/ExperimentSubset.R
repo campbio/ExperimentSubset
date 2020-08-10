@@ -226,3 +226,33 @@ setMethod(f = "saveSubset",
             return(object)
           }
 )
+
+#' @export
+#' @importMethodsFrom SummarizedExperiment rowData
+setMethod("rowData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) {
+  if(!is.null(subsetName)){
+    out <- subsetRowData(
+      object = x,
+      subsetName = subsetName
+    )
+  }
+  else{
+    out <- callNextMethod()
+  }
+  out
+})
+
+#' @export
+#' @importMethodsFrom SummarizedExperiment colData
+setMethod("colData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) {
+  if(!is.null(subsetName)){
+    out <- subsetColData(
+      object = x,
+      subsetName = subsetName
+    )
+  }
+  else{
+    out <- callNextMethod()
+  }
+  out
+})
