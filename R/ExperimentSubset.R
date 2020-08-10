@@ -137,14 +137,25 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
 
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay<-
-setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, ..., value) {
+setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, useAssay = NULL, ..., value) {
   if((nrow(value)!= nrow(x))
      || (ncol(value) != ncol(x))){
-    saveSubset(
-      object = x,
-      subsetName = i,
-      inputMatrix = value
-    )
+    if(is.null(useAssay)){
+      saveSubset(
+        object = x,
+        subsetName = i,
+        inputMatrix = value
+      )
+    }
+    else{
+      subsetAssay(
+        object = x,
+        subsetName = i,
+        rows = rownames(value),
+        cols = colnames(value),
+        useAssay = useAssay
+      )
+    }
   }
   else{
     callNextMethod()
@@ -217,13 +228,11 @@ setMethod(f = "saveSubset",
                 colnames(counts)),
               sparse = TRUE)
 
-            m[r,c] <- inputMatrix
+            m[r,c] <- inputMatrix #find a faster copying mechanism
 
             SummarizedExperiment::assay(object, paste0(subsetName, "_internal")) <- m
 
-            object <- subsetAssay(object, subsetName, r, c, paste0(subsetName, "_internal")) #add parameter here to store useAssay name in line below
-
-            #object@subsets[[subsetName]]@useAssay <- paste0(subsetName, "_internal") #omit this line
+            object <- subsetAssay(object, subsetName, r, c, paste0(subsetName, "_internal"))
 
             return(object)
           }
