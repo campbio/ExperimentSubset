@@ -210,7 +210,13 @@ setMethod(f = "subsetRowData",
           signature = c("ExperimentSubset", "character"),
           definition = function(object, subsetName)
           {
-            SummarizedExperiment::rowData(object)[object@subsets[[subsetName]]@rowIndices, , drop = F]
+            out <- SummarizedExperiment::rowData(object)[object@subsets[[subsetName]]@rowIndices, , drop = F]
+            if(!is.null(object@subsets[[subsetName]]@internalAssay)){
+              if(ncol(rowData(object@subsets[[subsetName]]@internalAssay)) > 0){
+                out <- cbind(out, rowData(object@subsets[[subsetName]]@internalAssay))
+              }
+            }
+            out
           }
 )
 
@@ -228,7 +234,13 @@ setMethod(f = "subsetColData",
           signature = c("ExperimentSubset", "character"),
           definition = function(object, subsetName)
           {
-            SummarizedExperiment::colData(object)[object@subsets[[subsetName]]@colIndices, , drop = F]
+            out <- SummarizedExperiment::colData(object)[object@subsets[[subsetName]]@colIndices, , drop = F]
+            if(!is.null(object@subsets[[subsetName]]@internalAssay)){
+              if(ncol(colData(object@subsets[[subsetName]]@internalAssay)) > 0){
+                out <- cbind(out, colData(object@subsets[[subsetName]]@internalAssay))
+              }
+            }
+            out
           }
 )
 
@@ -245,29 +257,12 @@ setMethod(f = "saveSubset",
           signature = "ExperimentSubset",
           definition = function(object, subsetName, inputMatrix)
           {
-             r <- rownames(inputMatrix)
-             c <- colnames(inputMatrix)
-            # counts <- assay(object, "counts")
-            #
-            # #analyze this further (needed for SCTK)
-            # rownames(counts) <- gsub("_", "-", rownames(object))
-            # colnames(counts) <- gsub("_", "-", colnames(object))
-            #
-            # m <- Matrix::Matrix(
-            #   nrow = nrow(counts),
-            #   ncol = ncol(counts),
-            #   data = 0,
-            #   dimnames = list(
-            #     rownames(counts),
-            #     colnames(counts)),
-            #   sparse = TRUE)
-
-            #m[r,c] <- inputMatrix #find a faster copying mechanism
-
-            #SummarizedExperiment::assay(object, paste0(subsetName, "_internal")) <- m
-#es@subsets$subset1@internalAssay <- SingleCellExperiment::SingleCellExperiment(list(counts = Matrix::Matrix(nrow = 5, ncol = 3, data = 0, sparse = TRUE)))
-            #irzam
-             object <- subsetAssay(object, subsetName, r, c, useAssay = NULL)
+            object <- subsetAssay(
+              object,
+              subsetName,
+              rownames(inputMatrix),
+              colnames(inputMatrix),
+              useAssay = NULL)
 
             object@subsets[[subsetName]]@internalAssay <- SingleCellExperiment::SingleCellExperiment(list(counts = inputMatrix))
 
