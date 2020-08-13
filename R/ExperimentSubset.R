@@ -1,7 +1,6 @@
 setClassUnion("NullOrCharacter", c("NULL", "character"))
 setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 setClassUnion("NullOrNumericOrCharacter", c("NULL", "numeric", "character"))
-setClassUnion("NullOrSingleCellExperiment", c("NULL", "SingleCellExperiment"))
 #add these restrictions for all functions
 
 #' @export
@@ -13,7 +12,7 @@ setClassUnion("NullOrSingleCellExperiment", c("NULL", "SingleCellExperiment"))
                                 rowIndices = "NullOrNumeric",
                                 colIndices = "NullOrNumeric",
                                 useAssay = "NullOrCharacter",
-                                internalAssay = "NullOrSingleCellExperiment"
+                                internalAssay = "SingleCellExperiment"
                               )
 )
 
@@ -24,7 +23,7 @@ SingleCellSubset <- function(
   rowIndices = NULL,
   colIndices = NULL,
   useAssay = "counts",
-  internalAssay = NULL,
+  internalAssay = SingleCellExperiment::SingleCellExperiment(),
   ...)
 {
   .SingleCellSubset(subsetName = subsetName,
@@ -102,7 +101,14 @@ setMethod(f = "subsetAssay",
                 subsetName = subsetName,
                 rowIndices = rows,
                 colIndices = cols,
-                useAssay = useAssay)
+                useAssay = useAssay,
+                internalAssay = SingleCellExperiment::SingleCellExperiment(
+                  list(
+                    counts = Matrix::Matrix(
+                      nrow = length(rows),
+                      ncol = length(cols),
+                      data = 0,
+                      sparse = TRUE))))
               object@subsets[[subsetName]] <- scs
               return(object)
           }
@@ -259,7 +265,8 @@ setMethod(f = "saveSubset",
             #m[r,c] <- inputMatrix #find a faster copying mechanism
 
             #SummarizedExperiment::assay(object, paste0(subsetName, "_internal")) <- m
-
+#es@subsets$subset1@internalAssay <- SingleCellExperiment::SingleCellExperiment(list(counts = Matrix::Matrix(nrow = 5, ncol = 3, data = 0, sparse = TRUE)))
+            #irzam
              object <- subsetAssay(object, subsetName, r, c, useAssay = NULL)
 
             object@subsets[[subsetName]]@internalAssay <- SingleCellExperiment::SingleCellExperiment(list(counts = inputMatrix))
@@ -296,4 +303,11 @@ setMethod("colData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) 
     out <- callNextMethod()
   }
   out
+})
+
+#' @export
+#' @importMethodsFrom SummarizedExperiment rowData<-
+setReplaceMethod("rowData", c("ExperimentSubset", "character"), function(x, subsetName, ..., value) {
+  rowData(x@subsets[[subsetName]]@internalAssay) <- value
+  callNextMethod()
 })
