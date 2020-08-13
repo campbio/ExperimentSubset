@@ -1,13 +1,19 @@
+setClassUnion("NullOrCharacter", c("NULL", "character"))
+setClassUnion("NullOrNumeric", c("NULL", "numeric"))
+setClassUnion("NullOrNumericOrCharacter", c("NULL", "numeric", "character"))
+setClassUnion("NullOrSingleCellExperiment", c("NULL", "SingleCellExperiment"))
+#add these restrictions for all functions
+
 #' @export
 #' @import methods
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
 .SingleCellSubset <- setClass("SingleCellSubset",
                               slots = representation(
                                 subsetName = "character",
-                                rowIndices = "numeric",
-                                colIndices = "numeric",
-                                useAssay = "character",
-                                internalAssay = "SingleCellExperiment"
+                                rowIndices = "NullOrNumeric",
+                                colIndices = "NullOrNumeric",
+                                useAssay = "NullOrCharacter",
+                                internalAssay = "NullOrSingleCellExperiment"
                               )
 )
 
@@ -18,7 +24,7 @@ SingleCellSubset <- function(
   rowIndices = NULL,
   colIndices = NULL,
   useAssay = "counts",
-  internalAssay = SingleCellExperiment::SingleCellExperiment(),
+  internalAssay = NULL,
   ...)
 {
   .SingleCellSubset(subsetName = subsetName,
@@ -68,14 +74,29 @@ setGeneric(name = "subsetAssay",
 
 #' @export
 setMethod(f = "subsetAssay",
-          signature = "ExperimentSubset",
-          definition = function(object, subsetName, rows, cols, useAssay)
+          signature = c("ExperimentSubset",
+                        "character",
+                        "NullOrNumericOrCharacter",
+                        "NullOrNumericOrCharacter",
+                        "NullOrCharacter"),
+          definition = function(object,
+                                subsetName,
+                                rows,
+                                cols,
+                                useAssay)
             {
+            tempAssay <- "" #better way to use this?
+            if(is.null(useAssay)){
+              tempAssay <- "counts" #get first assay instead of counts
+            }
+            else{
+              tempAssay <- useAssay
+            }
             if(is.character(rows)){
-              rows <- match(rows, rownames(assay(object, useAssay)))
+              rows <- match(rows, rownames(assay(object, tempAssay)))
             }
             if(is.character(cols)){
-              cols <- match(cols, colnames(assay(object, useAssay)))
+              cols <- match(cols, colnames(assay(object, tempAssay)))
             }
               scs <- SingleCellSubset(
                 subsetName = subsetName,
@@ -216,26 +237,26 @@ setMethod(f = "saveSubset",
           {
              r <- rownames(inputMatrix)
              c <- colnames(inputMatrix)
-            counts <- assay(object, "counts")
+            # counts <- assay(object, "counts")
+            #
+            # #analyze this further (needed for SCTK)
+            # rownames(counts) <- gsub("_", "-", rownames(object))
+            # colnames(counts) <- gsub("_", "-", colnames(object))
+            #
+            # m <- Matrix::Matrix(
+            #   nrow = nrow(counts),
+            #   ncol = ncol(counts),
+            #   data = 0,
+            #   dimnames = list(
+            #     rownames(counts),
+            #     colnames(counts)),
+            #   sparse = TRUE)
 
-            #analyze this further (needed for SCTK)
-            rownames(counts) <- gsub("_", "-", rownames(object))
-            colnames(counts) <- gsub("_", "-", colnames(object))
+            #m[r,c] <- inputMatrix #find a faster copying mechanism
 
-            m <- Matrix::Matrix(
-              nrow = nrow(counts),
-              ncol = ncol(counts),
-              data = 0,
-              dimnames = list(
-                rownames(counts),
-                colnames(counts)),
-              sparse = TRUE)
+            #SummarizedExperiment::assay(object, paste0(subsetName, "_internal")) <- m
 
-            m[r,c] <- inputMatrix #find a faster copying mechanism
-
-            SummarizedExperiment::assay(object, paste0(subsetName, "_internal")) <- m
-
-             object <- subsetAssay(object, subsetName, r, c, paste0(subsetName, "_internal"))
+             object <- subsetAssay(object, subsetName, r, c, useAssay = NULL)
 
             object@subsets[[subsetName]]@internalAssay <- SingleCellExperiment::SingleCellExperiment(list(counts = inputMatrix))
 
