@@ -219,7 +219,7 @@ RP11-1H15.2     RP11-1H15.2</br>
 OPCML                 OPCML
 </blockquote>
 
-**Add new colData or rowData only to the existing subset
+**Add new colData or rowData only to the existing subset**
 ```r
 #add a "DummyGeneID" column to rowData only against the "subset1"
 rowData(es, subsetName = "subset1") <- DataFrame(DummyGeneID = c("a", "b", "c", "d", "e"))
