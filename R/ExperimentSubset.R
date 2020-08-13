@@ -7,7 +7,7 @@
                                 rowIndices = "numeric",
                                 colIndices = "numeric",
                                 useAssay = "character",
-                                internalAssay = "dgCMatrix"
+                                internalAssay = "SingleCellExperiment"
                               )
 )
 
@@ -18,7 +18,7 @@ SingleCellSubset <- function(
   rowIndices = NULL,
   colIndices = NULL,
   useAssay = "counts",
-  internalAssay = NULL,
+  internalAssay = SingleCellExperiment::SingleCellExperiment(),
   ...)
 {
   .SingleCellSubset(subsetName = subsetName,
@@ -214,30 +214,31 @@ setMethod(f = "saveSubset",
           signature = "ExperimentSubset",
           definition = function(object, subsetName, inputMatrix)
           {
-            # r <- rownames(inputMatrix)
-            # c <- colnames(inputMatrix)
-            # counts <- assay(object, "counts")
-            #
-            # #analyze this further (needed for SCTK)
-            # rownames(counts) <- gsub("_", "-", rownames(object))
-            # colnames(counts) <- gsub("_", "-", colnames(object))
-            #
-            # m <- Matrix::Matrix(
-            #   nrow = nrow(counts),
-            #   ncol = ncol(counts),
-            #   data = 0,
-            #   dimnames = list(
-            #     rownames(counts),
-            #     colnames(counts)),
-            #   sparse = TRUE)
-            #
-            # m[r,c] <- inputMatrix #find a faster copying mechanism
-            #
-            # SummarizedExperiment::assay(object, paste0(subsetName, "_internal")) <- m
-            #
-            # object <- subsetAssay(object, subsetName, r, c, paste0(subsetName, "_internal"))
+             r <- rownames(inputMatrix)
+             c <- colnames(inputMatrix)
+            counts <- assay(object, "counts")
 
-            object@subsets[[subsetName]]@internalAssay <- inputMatrix
+            #analyze this further (needed for SCTK)
+            rownames(counts) <- gsub("_", "-", rownames(object))
+            colnames(counts) <- gsub("_", "-", colnames(object))
+
+            m <- Matrix::Matrix(
+              nrow = nrow(counts),
+              ncol = ncol(counts),
+              data = 0,
+              dimnames = list(
+                rownames(counts),
+                colnames(counts)),
+              sparse = TRUE)
+
+            m[r,c] <- inputMatrix #find a faster copying mechanism
+
+            SummarizedExperiment::assay(object, paste0(subsetName, "_internal")) <- m
+
+             object <- subsetAssay(object, subsetName, r, c, paste0(subsetName, "_internal"))
+
+            object@subsets[[subsetName]]@internalAssay <- SingleCellExperiment::SingleCellExperiment(list(counts = inputMatrix))
+
             return(object)
           }
 )
