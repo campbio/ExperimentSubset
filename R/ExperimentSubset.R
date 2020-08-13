@@ -305,9 +305,21 @@ setMethod("colData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) 
   out
 })
 
+
 #' @export
 #' @importMethodsFrom SummarizedExperiment rowData<-
-setReplaceMethod("rowData", c("ExperimentSubset", "character"), function(x, subsetName, ..., value) {
-  rowData(x@subsets[[subsetName]]@internalAssay) <- value
+setReplaceMethod("rowData", c("ExperimentSubset"), function(x, ..., subsetName, value) { #test if this needs DataFrame too
+  tempValue <- rowData(x)
+  rowData(x@subsets[[subsetName]]@internalAssay) <- value #DataFrame(test = c("a", "b", "c","d", "e"))
+  value <- tempValue
+  callNextMethod()
+})
+
+#' @export
+#' @importMethodsFrom SummarizedExperiment colData<-
+setReplaceMethod("colData", c("ExperimentSubset" , "DataFrame"), function(x, ..., subsetName, value) {
+  tempValue <- colData(x)
+  colData(x@subsets[[subsetName]]@internalAssay) <- value #DataFrame(test = c("a", "b", "c","d", "e"))
+  value <- tempValue
   callNextMethod()
 })
