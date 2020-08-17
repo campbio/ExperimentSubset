@@ -64,7 +64,7 @@ colData names(11): nGene nUMI ... ident doublet_true_labels</br>
 reducedDimNames(0):</br>
 spikeNames(0):</br>
 altExpNames(0):</br>
-subsets(4): subset1 subset2 subset3 subset4
+subsets(4): subset1 subset2 subset3 subset4 subset5
 </blockquote>
 
 
@@ -114,16 +114,43 @@ colData names(11): nGene nUMI ... ident doublet_true_labels</br>
 reducedDimNames(0):</br>
 spikeNames(0):</br>
 altExpNames(0):</br>
-subsets(6): subset1 subset2 subset3 subset4 logSubset1 logSubset2
+subsets(6): subset1 subset2 subset3 subset4 subset5 logSubset1 logSubset2
 </blockquote>
 
 
 **View internal storage mechanism of subsets:**
 ```r
+es@subsets$subset1
+```
+<blockquote>
+ An object of class "SingleCellSubset"</br>
+Slot "subsetName":</br>
+[1] "subset1"</br></br>
+Slot "rowIndices":</br>
+[1] 1 2 3 4 5</br></br>
+Slot "colIndices":</br>
+[1] 1 2 3</br></br>
+Slot "useAssay":</br>
+[1] "counts"</br></br>
+Slot "internalAssay":</br>
+class: SingleCellExperiment</br> 
+dim: 5 3 </br>
+metadata(0):</br>
+assays(1): counts</br>
+rownames: NULL</br>
+rowData names(0):</br>
+colnames: NULL</br>
+colData names(0):</br>
+reducedDimNames(0):</br>
+spikeNames(0):</br>
+altExpNames(0):
+</blockquote>
+
+```r
 es@subsets$logSubset2
 ```
 <blockquote>
-An object of class "SingleCellSubset"</br></br>
+An object of class "SingleCellSubset"</br>
 Slot "subsetName":</br>
 [1] "logSubset2"</br></br>
 Slot "rowIndices":</br>
@@ -131,7 +158,19 @@ Slot "rowIndices":</br>
 Slot "colIndices":</br>
 [1] 1 2</br></br>
 Slot "useAssay":</br>
-[1] "logSubset2_internal"
+NULL</br></br>
+Slot "internalAssay":</br>
+class: SingleCellExperiment</br> 
+dim: 10 2 </br>
+metadata(0):</br>
+assays(1): counts</br>
+rownames(10): C12orf73 RNU6-1256P ... RP11-1H15.2 OPCML</br>
+rowData names(0):</br>
+colnames(2): CTGCTGTCAGGGTATG CAGTCCTTCGGTTAAC</br>
+colData names(0):</br>
+reducedDimNames(0):</br>
+spikeNames(0):</br>
+altExpNames(0):
 </blockquote>
 
 
@@ -178,6 +217,34 @@ AC005498.3       AC005498.3</br>
 DCLRE1C             DCLRE1C</br>
 RP11-1H15.2     RP11-1H15.2</br>
 OPCML                 OPCML
+</blockquote>
+
+**Add new colData or rowData only to the existing subset**
+```r
+#add a "DummyGeneID" column to rowData only against the "subset1"
+rowData(es, subsetName = "subset1") <- DataFrame(DummyGeneID = c("a", "b", "c", "d", "e"))
+
+#add a "SampleID" column to colData only against the "subset1"
+colData(es, subsetName = "subset1") <- DataFrame(SampleID = c("1", "2", "3"))
+```
+
+**View subset colData or rowData**
+```r
+#displays the previously added "DummyGeneID" column as well which is only present against the "subset1"
+rowData(es, subsetName = "subset1")
+
+#similarly for colData
+colData(es, subsetName = "subset1")
+```
+<blockquote>
+ DataFrame with 5 rows and 2 columns</br>
+                  gene DummyGeneID</br>
+           <character> <character></br>
+C12orf73      C12orf73           a</br>
+RNU6-1256P  RNU6-1256P           b</br>
+RN7SL749P    RN7SL749P           c</br>
+RNU6-157P    RNU6-157P           d</br>
+SP1                SP1           e
 </blockquote>
 
 
