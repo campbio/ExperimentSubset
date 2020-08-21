@@ -4,7 +4,7 @@
 \alias{subsetAssay}
 \title{subsetAssay}
 \usage{
-subsetAssay(object, subsetName, rows, cols, useAssay)
+subsetAssay(object, subsetName, rows, cols, parentAssay)
 }
 \arguments{
 \item{object}{\code{ExperimentSubset}, \code{SingleCellExperiment} or \code{SummarizedExperiment} object.}
@@ -15,7 +15,7 @@ subsetAssay(object, subsetName, rows, cols, useAssay)
 
 \item{cols}{Specify which columns/cells to subset from the input object. Either indices or names.}
 
-\item{useAssay}{Assay to use against the subset data}
+\item{parentAssay}{Assay to use against the subset data}
 }
 \description{
 subsetAssay

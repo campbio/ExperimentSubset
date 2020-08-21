@@ -11,7 +11,7 @@ setClassUnion("NullOrNumericOrCharacter", c("NULL", "numeric", "character"))
                                 subsetName = "character",
                                 rowIndices = "NullOrNumeric",
                                 colIndices = "NullOrNumeric",
-                                useAssay = "NullOrCharacter",
+                                parentAssay = "NullOrCharacter",
                                 internalAssay = "SingleCellExperiment"
                               )
 )
@@ -22,14 +22,14 @@ SingleCellSubset <- function(
   subsetName = "subset",
   rowIndices = NULL,
   colIndices = NULL,
-  useAssay = "counts",
+  parentAssay = "counts",
   internalAssay = SingleCellExperiment::SingleCellExperiment(),
   ...)
 {
   .SingleCellSubset(subsetName = subsetName,
                     rowIndices = rowIndices,
                     colIndices = colIndices,
-                    useAssay = useAssay,
+                    parentAssay = parentAssay,
                     internalAssay = internalAssay)
 }
 
@@ -61,11 +61,11 @@ ExperimentSubset <- function(
 #' @param subsetName Specify the name of the new subset.
 #' @param rows Specify which rows/features to subset from the input object. Either indices or names.
 #' @param cols Specify which columns/cells to subset from the input object. Either indices or names.
-#' @param useAssay Assay to use against the subset data
+#' @param parentAssay Assay to use against the subset data
 #'
 #' @export
 setGeneric(name = "subsetAssay",
-           def = function(object, subsetName, rows, cols, useAssay)
+           def = function(object, subsetName, rows, cols, parentAssay)
            {
              standardGeneric("subsetAssay")
            }
@@ -82,14 +82,14 @@ setMethod(f = "subsetAssay",
                                 subsetName,
                                 rows,
                                 cols,
-                                useAssay)
+                                parentAssay)
             {
             tempAssay <- "" #better way to use this?
-            if(is.null(useAssay)){
+            if(is.null(parentAssay)){
               tempAssay <- "counts" #get first assay instead of counts
             }
             else{
-              tempAssay <- useAssay
+              tempAssay <- parentAssay
             }
             if(is.character(rows)){
               rows <- match(rows, rownames(assay(object, tempAssay)))
@@ -101,7 +101,7 @@ setMethod(f = "subsetAssay",
                 subsetName = subsetName,
                 rowIndices = rows,
                 colIndices = cols,
-                useAssay = useAssay,
+                parentAssay = parentAssay,
                 internalAssay = SingleCellExperiment::SingleCellExperiment(
                   list(
                     counts = Matrix::Matrix(
@@ -153,9 +153,9 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
   if(i %in% subsetNames(x)){
     subsetName = i
     if(!i %in% SummarizedExperiment::assayNames(x)){
-      i = x@subsets[[subsetName]]@useAssay
+      i = x@subsets[[subsetName]]@parentAssay
     }
-    if(!is.null(x@subsets[[subsetName]]@useAssay)){
+    if(!is.null(x@subsets[[subsetName]]@parentAssay)){
       out <- callNextMethod()
       out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
     }
@@ -171,10 +171,10 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
 
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay<-
-setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, useAssay = NULL, newInternalAssay = NULL, ..., value) {
+setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, parentAssay = NULL, newInternalAssay = NULL, ..., value) {
   if((nrow(value)!= nrow(x))
      || (ncol(value) != ncol(x))){
-    if(is.null(useAssay)){
+    if(is.null(parentAssay)){
       if(is.null(newInternalAssay)){
         saveSubset(
           object = x,
@@ -183,12 +183,24 @@ setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, use
         )
       }
       else{
-        saveSubset(
-          object = x,
-          subsetName = i,
-          inputMatrix = value,
-          newInternalAssay = newInternalAssay
-        )
+        if((nrow(value)!= nrow(x@subsets[[i]]@internalAssay))
+           || (ncol(value) != ncol(x@subsets[[i]]@internalAssay))){
+              subsetAssay(
+                object = x,
+                subsetName = newInternalAssay,
+                rows = match(rownames(value), rownames(x)),
+                cols = match(colnames(value), colnames(x)),
+                parentAssay = i
+              )
+        }
+        else{
+          saveSubset(
+            object = x,
+            subsetName = i,
+            inputMatrix = value,
+            newInternalAssay = newInternalAssay
+          )
+        }
       }
     }
     else{
@@ -197,7 +209,7 @@ setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, use
         subsetName = i,
         rows = rownames(value),
         cols = colnames(value),
-        useAssay = useAssay
+        parentAssay = parentAssay
       )
     }
   }
@@ -273,7 +285,7 @@ setMethod(f = "saveSubset",
                 subsetName,
                 rownames(inputMatrix),
                 colnames(inputMatrix),
-                useAssay = NULL)
+                parentAssay = NULL)
 
               object@subsets[[subsetName]]@internalAssay <- SingleCellExperiment::SingleCellExperiment(list(counts = inputMatrix))
 
