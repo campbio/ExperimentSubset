@@ -171,15 +171,25 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
 
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay<-
-setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, useAssay = NULL, ..., value) {
+setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, useAssay = NULL, newInternalAssay = NULL, ..., value) {
   if((nrow(value)!= nrow(x))
      || (ncol(value) != ncol(x))){
     if(is.null(useAssay)){
-      saveSubset(
-        object = x,
-        subsetName = i,
-        inputMatrix = value
-      )
+      if(is.null(newInternalAssay)){
+        saveSubset(
+          object = x,
+          subsetName = i,
+          inputMatrix = value
+        )
+      }
+      else{
+        saveSubset(
+          object = x,
+          subsetName = i,
+          inputMatrix = value,
+          newInternalAssay = newInternalAssay
+        )
+      }
     }
     else{
       subsetAssay(
@@ -246,7 +256,7 @@ setMethod(f = "subsetColData",
 
 #' @export
 setGeneric(name = "saveSubset",
-           def = function(object, subsetName, inputMatrix)
+           def = function(object, subsetName, inputMatrix, newInternalAssay)
            {
              standardGeneric("saveSubset")
            }
@@ -255,16 +265,22 @@ setGeneric(name = "saveSubset",
 #' @export
 setMethod(f = "saveSubset",
           signature = "ExperimentSubset",
-          definition = function(object, subsetName, inputMatrix)
+          definition = function(object, subsetName, inputMatrix, newInternalAssay = NULL)
           {
-            object <- subsetAssay(
-              object,
-              subsetName,
-              rownames(inputMatrix),
-              colnames(inputMatrix),
-              useAssay = NULL)
+            if(is.null(newInternalAssay)){
+              object <- subsetAssay(
+                object,
+                subsetName,
+                rownames(inputMatrix),
+                colnames(inputMatrix),
+                useAssay = NULL)
 
-            object@subsets[[subsetName]]@internalAssay <- SingleCellExperiment::SingleCellExperiment(list(counts = inputMatrix))
+              object@subsets[[subsetName]]@internalAssay <- SingleCellExperiment::SingleCellExperiment(list(counts = inputMatrix))
+
+            }
+            else{
+              assay(object@subsets[[subsetName]]@internalAssay, newInternalAssay) <- inputMatrix
+            }
 
             return(object)
           }
