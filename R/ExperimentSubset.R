@@ -147,24 +147,55 @@ setMethod(f = "show",
           }
 )
 
+#' #' @export
+#' #' @importMethodsFrom SummarizedExperiment assay
+#' setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
+#'   if(i %in% subsetNames(x)){
+#'     subsetName = i
+#'     if(!i %in% SummarizedExperiment::assayNames(x)){
+#'       i = x@subsets[[subsetName]]@parentAssay
+#'     }
+#'     if(!is.null(x@subsets[[subsetName]]@parentAssay)){
+#'       out <- callNextMethod()
+#'       out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
+#'     }
+#'     else{
+#'       out <- assay(x@subsets[[subsetName]]@internalAssay, "counts")
+#'     }
+#'   }
+#'   else{
+#'     out <- callNextMethod()
+#'   }
+#'   out
+#' })
+#'
+
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay
 setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
-  if(i %in% subsetNames(x)){
-    subsetName = i
-    if(!i %in% SummarizedExperiment::assayNames(x)){
-      i = x@subsets[[subsetName]]@parentAssay
-    }
-    if(!is.null(x@subsets[[subsetName]]@parentAssay)){
-      out <- callNextMethod()
-      out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
-    }
-    else{
-      out <- assay(x@subsets[[subsetName]]@internalAssay, "counts")
-    }
-  }
-  else{
+  #look at main assays
+  if(i %in% assayNames(x)){
     out <- callNextMethod()
+  }
+  #look at subsets
+  else if(i %in% subsetNames(x)){
+    subsetName <- i
+    i <- x@subsets[[subsetName]]@parentAssay
+    out <- assay(x, i)
+    out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
+  }
+  #look inside subsets
+  else{
+    for(j in seq(length(x@subsets))){
+      if(i %in% assayNames(x@subsets[[j]]@internalAssay)){
+        out <- assay(x@subsets[[j]]@internalAssay, i)
+        colnames(out) <- colnames(x)[x@subsets[[j]]@colIndices]
+        rownames(out) <- rownames(x)[x@subsets[[j]]@rowIndices]
+      }
+      else{
+        stop("assay not found")
+      }
+    }
   }
   out
 })
