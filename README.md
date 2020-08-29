@@ -247,6 +247,48 @@ RNU6-157P    RNU6-157P           d</br>
 SP1                SP1           e
 </blockquote>
 
+**Sample Nested Assay Script for Testing**
+```r
+es <- ExperimentSubset::ExperimentSubset(assays = list(counts = assay(sce_chcl, "counts"), logcounts = assay(sce_chcl, "logcounts")), colData=colData(sce_chcl), rowData= rowData(sce_chcl))
+es
+
+#subset1
+es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+
+#scaledSubset1
+scaledCounts <- assay(es, "subset1")
+scaledCounts[,] <- scaledCounts[,] + 1
+es <- storeSubset(es, "subset1", scaledCounts, "scaledSubset1")
+
+
+#topHVGSubset1
+es <- createSubset(es, "topHVGSubset1", rows = c("NPSR1", "GABRA2", "CAB39", "LYRM1", "RP1-178F10.3"), cols = c(1:10), parentAssay = "subset1")
+
+#topHVGSubset2
+scaledCounts <- assay(es, "topHVGSubset1")
+scaledCounts[,] <- scaledCounts[,] + 1.77
+es <- storeSubset(es, "topHVGSubset1", scaledCounts, "topHVGSubset2")
+
+#subsetHVG
+es <- createSubset(es, "subsetHVG", rows = c(1:5), cols = c(1:2), parentAssay = "topHVGSubset1")
+
+
+#scaledTopHVGSubset1
+scaledCounts <- assay(es, "subsetHVG")
+scaledCounts[,] <- scaledCounts[,] + 56
+es <- storeSubset(es, "subsetHVG", scaledCounts, "scaledTopHVGSubset1")
+
+
+#smallScaledSubset1
+es <- createSubset(es, "smallScaledSubset1", c("NPSR1", "LYRM1"), c(3:4), "scaledSubset1") 
+
+
+#logSmallScaledSubset1
+scaledCounts <- assay(es, "smallScaledSubset1")
+scaledCounts[,] <- scaledCounts[,] + 1000
+es <- storeSubset(es, "smallScaledSubset1", scaledCounts, "logSmallScaledSubset1")
+
+```
 
 ## Features
 
