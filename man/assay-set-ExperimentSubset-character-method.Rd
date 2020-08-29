@@ -4,7 +4,7 @@
 \alias{assay<-,ExperimentSubset,character-method}
 \title{assay}
 \usage{
-\S4method{assay}{ExperimentSubset,character}(x, i, parentAssay = NULL, newInternalAssay = NULL, ...) <- value
+\S4method{assay}{ExperimentSubset,character}(x, i, newInternalAssay = NULL, ...) <- value
 }
 \description{
 assay

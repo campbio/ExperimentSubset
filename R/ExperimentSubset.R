@@ -222,14 +222,14 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
 #' @title assay
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay<-
-setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, parentAssay = NULL, newInternalAssay = NULL, ..., value) {
+setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, newInternalAssay = NULL, ..., value) {
   if((nrow(value)!= nrow(x))
      || (ncol(value) != ncol(x))){
     storeSubset(
                 object = x,
                 subsetName = i,
                 inputMatrix = value,
-                newInternalAssay = NULL
+                newInternalAssay = newInternalAssay
               )
   }
   else{
@@ -367,4 +367,3 @@ setReplaceMethod("colData", c("ExperimentSubset" , "DataFrame"), function(x, ...
   value <- tempValue
   callNextMethod()
 })
-
