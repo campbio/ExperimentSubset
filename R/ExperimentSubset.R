@@ -54,7 +54,7 @@ ExperimentSubset <- function(
                     subsets = subsets)
 }
 
-#' @title subsetAssay
+#' @title createSubset
 #'
 #' @param object \code{ExperimentSubset}, \code{SingleCellExperiment} or \code{SummarizedExperiment} object.
 #'
@@ -64,15 +64,15 @@ ExperimentSubset <- function(
 #' @param parentAssay Assay to use against the subset data
 #'
 #' @export
-setGeneric(name = "subsetAssay",
+setGeneric(name = "createSubset",
            def = function(object, subsetName, rows, cols, parentAssay)
            {
-             standardGeneric("subsetAssay")
+             standardGeneric("createSubset")
            }
 )
 
 #' @export
-setMethod(f = "subsetAssay",
+setMethod(f = "createSubset",
           signature = c("ExperimentSubset",
                         "character",
                         "NullOrNumericOrCharacter",
@@ -170,6 +170,7 @@ setMethod(f = "show",
 #' })
 #'
 
+#' @title assay
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay
 setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
@@ -181,8 +182,13 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
   else if(i %in% subsetNames(x)){
     subsetName <- i
     i <- x@subsets[[subsetName]]@parentAssay
-    out <- assay(x, i)
-    out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
+    if(is.null(i)){
+      out <- assay(x@subsets[[subsetName]]@internalAssay, "counts")
+    }
+    else{
+      out <- assay(x, i)
+      out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
+    }
   }
   #look inside subsets
   else{
@@ -200,49 +206,66 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
   out
 })
 
+#' #' @export
+#' #' @importMethodsFrom SummarizedExperiment assay<-
+#' setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, parentAssay = NULL, newInternalAssay = NULL, ..., value) {
+#'   if((nrow(value)!= nrow(x))
+#'      || (ncol(value) != ncol(x))){
+#'     if(is.null(parentAssay)){
+#'       if(is.null(newInternalAssay)){
+#'         storeSubset(
+#'           object = x,
+#'           subsetName = i,
+#'           inputMatrix = value
+#'         )
+#'       }
+#'       else{
+#'         if((nrow(value)!= nrow(x@subsets[[i]]@internalAssay))
+#'            || (ncol(value) != ncol(x@subsets[[i]]@internalAssay))){
+#'               createSubset(
+#'                 object = x,
+#'                 subsetName = newInternalAssay,
+#'                 rows = match(rownames(value), rownames(x)),
+#'                 cols = match(colnames(value), colnames(x)),
+#'                 parentAssay = i
+#'               )
+#'         }
+#'         else{
+#'           storeSubset(
+#'             object = x,
+#'             subsetName = i,
+#'             inputMatrix = value,
+#'             newInternalAssay = newInternalAssay
+#'           )
+#'         }
+#'       }
+#'     }
+#'     else{
+#'       createSubset(
+#'         object = x,
+#'         subsetName = i,
+#'         rows = rownames(value),
+#'         cols = colnames(value),
+#'         parentAssay = parentAssay
+#'       )
+#'     }
+#'   }
+#'   else{
+#'     callNextMethod()
+#'   }
+#' })
+
+#' @title assay
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay<-
 setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, parentAssay = NULL, newInternalAssay = NULL, ..., value) {
   if((nrow(value)!= nrow(x))
      || (ncol(value) != ncol(x))){
-    if(is.null(parentAssay)){
-      if(is.null(newInternalAssay)){
-        saveSubset(
-          object = x,
-          subsetName = i,
-          inputMatrix = value
-        )
-      }
-      else{
-        if((nrow(value)!= nrow(x@subsets[[i]]@internalAssay))
-           || (ncol(value) != ncol(x@subsets[[i]]@internalAssay))){
-              subsetAssay(
+    storeSubset(
                 object = x,
-                subsetName = newInternalAssay,
-                rows = match(rownames(value), rownames(x)),
-                cols = match(colnames(value), colnames(x)),
-                parentAssay = i
+                subsetName = i,
+                inputMatrix = value
               )
-        }
-        else{
-          saveSubset(
-            object = x,
-            subsetName = i,
-            inputMatrix = value,
-            newInternalAssay = newInternalAssay
-          )
-        }
-      }
-    }
-    else{
-      subsetAssay(
-        object = x,
-        subsetName = i,
-        rows = rownames(value),
-        cols = colnames(value),
-        parentAssay = parentAssay
-      )
-    }
   }
   else{
     callNextMethod()
@@ -298,20 +321,20 @@ setMethod(f = "subsetColData",
 )
 
 #' @export
-setGeneric(name = "saveSubset",
+setGeneric(name = "storeSubset",
            def = function(object, subsetName, inputMatrix, newInternalAssay)
            {
-             standardGeneric("saveSubset")
+             standardGeneric("storeSubset")
            }
 )
 
 #' @export
-setMethod(f = "saveSubset",
+setMethod(f = "storeSubset",
           signature = "ExperimentSubset",
           definition = function(object, subsetName, inputMatrix, newInternalAssay = NULL)
           {
             if(is.null(newInternalAssay)){
-              object <- subsetAssay(
+              object <- createSubset(
                 object,
                 subsetName,
                 rownames(inputMatrix),
