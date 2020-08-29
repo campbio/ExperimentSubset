@@ -7,5 +7,5 @@
 \S4method{assay}{ExperimentSubset,character}(x, i, ...)
 }
 \description{
-
+assay
 }

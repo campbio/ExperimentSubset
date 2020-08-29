@@ -7,52 +7,5 @@
 \S4method{assay}{ExperimentSubset,character}(x, i, parentAssay = NULL, newInternalAssay = NULL, ...) <- value
 }
 \description{
-#' @export
-#' @importMethodsFrom SummarizedExperiment assay<-
-setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, parentAssay = NULL, newInternalAssay = NULL, ..., value) {
-  if((nrow(value)!= nrow(x))
-     || (ncol(value) != ncol(x))){
-    if(is.null(parentAssay)){
-      if(is.null(newInternalAssay)){
-        storeSubset(
-          object = x,
-          subsetName = i,
-          inputMatrix = value
-        )
-      }
-      else{
-        if((nrow(value)!= nrow(x@subsets[[i]]@internalAssay))
-           || (ncol(value) != ncol(x@subsets[[i]]@internalAssay))){
-              createSubset(
-                object = x,
-                subsetName = newInternalAssay,
-                rows = match(rownames(value), rownames(x)),
-                cols = match(colnames(value), colnames(x)),
-                parentAssay = i
-              )
-        }
-        else{
-          storeSubset(
-            object = x,
-            subsetName = i,
-            inputMatrix = value,
-            newInternalAssay = newInternalAssay
-          )
-        }
-      }
-    }
-    else{
-      createSubset(
-        object = x,
-        subsetName = i,
-        rows = rownames(value),
-        cols = colnames(value),
-        parentAssay = parentAssay
-      )
-    }
-  }
-  else{
-    callNextMethod()
-  }
-})
+assay
 }

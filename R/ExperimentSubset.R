@@ -154,28 +154,6 @@ setMethod(f = "show",
           }
 )
 
-#' #' @export
-#' #' @importMethodsFrom SummarizedExperiment assay
-#' setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
-#'   if(i %in% subsetNames(x)){
-#'     subsetName = i
-#'     if(!i %in% SummarizedExperiment::assayNames(x)){
-#'       i = x@subsets[[subsetName]]@parentAssay
-#'     }
-#'     if(!is.null(x@subsets[[subsetName]]@parentAssay)){
-#'       out <- callNextMethod()
-#'       out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
-#'     }
-#'     else{
-#'       out <- assay(x@subsets[[subsetName]]@internalAssay, "counts")
-#'     }
-#'   }
-#'   else{
-#'     out <- callNextMethod()
-#'   }
-#'   out
-#' })
-#'
 
 #' @title assay
 #' @export
@@ -200,65 +178,14 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
   #look inside subsets
   else{
     for(j in seq(length(x@subsets))){
-      print(assayNames(x@subsets[[j]]@internalAssay))
       if(i %in% assayNames(x@subsets[[j]]@internalAssay)){
         out <- assay(x@subsets[[j]]@internalAssay, i)
-        colnames(out) <- colnames(x)[x@subsets[[j]]@colIndices]
-        rownames(out) <- rownames(x)[x@subsets[[j]]@rowIndices]
       }
     }
   }
   out
 })
 
-#' #' @export
-#' #' @importMethodsFrom SummarizedExperiment assay<-
-#' setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, parentAssay = NULL, newInternalAssay = NULL, ..., value) {
-#'   if((nrow(value)!= nrow(x))
-#'      || (ncol(value) != ncol(x))){
-#'     if(is.null(parentAssay)){
-#'       if(is.null(newInternalAssay)){
-#'         storeSubset(
-#'           object = x,
-#'           subsetName = i,
-#'           inputMatrix = value
-#'         )
-#'       }
-#'       else{
-#'         if((nrow(value)!= nrow(x@subsets[[i]]@internalAssay))
-#'            || (ncol(value) != ncol(x@subsets[[i]]@internalAssay))){
-#'               createSubset(
-#'                 object = x,
-#'                 subsetName = newInternalAssay,
-#'                 rows = match(rownames(value), rownames(x)),
-#'                 cols = match(colnames(value), colnames(x)),
-#'                 parentAssay = i
-#'               )
-#'         }
-#'         else{
-#'           storeSubset(
-#'             object = x,
-#'             subsetName = i,
-#'             inputMatrix = value,
-#'             newInternalAssay = newInternalAssay
-#'           )
-#'         }
-#'       }
-#'     }
-#'     else{
-#'       createSubset(
-#'         object = x,
-#'         subsetName = i,
-#'         rows = rownames(value),
-#'         cols = colnames(value),
-#'         parentAssay = parentAssay
-#'       )
-#'     }
-#'   }
-#'   else{
-#'     callNextMethod()
-#'   }
-#' })
 
 #' @title assay
 #' @export
@@ -352,6 +279,8 @@ setMethod(f = "storeSubset",
             }
             else{
               assay(object@subsets[[subsetName]]@internalAssay, newInternalAssay) <- inputMatrix
+              rownames(object@subsets[[subsetName]]@internalAssay) <- rownames(inputMatrix)
+              colnames(object@subsets[[subsetName]]@internalAssay) <- colnames(inputMatrix)
             }
 
             return(object)
