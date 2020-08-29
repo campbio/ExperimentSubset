@@ -116,6 +116,7 @@ setMethod(f = "createSubset",
                       ncol = length(cols),
                       data = 0,
                       sparse = TRUE))))
+              assay(scs@internalAssay, "counts") <- NULL #a better way to do this
               object@subsets[[subsetName]] <- scs
               return(object)
           }
@@ -139,6 +140,29 @@ setMethod(f = "subsetNames",
 )
 
 #' @export
+setGeneric(name = "subsetAssayNames",
+           def = function(object)
+           {
+             standardGeneric("subsetAssayNames")
+           }
+)
+
+#' @export
+setMethod(f = "subsetAssayNames",
+          signature = "ExperimentSubset",
+          definition = function(object)
+          {
+            tempNames <- names(object@subsets)
+            if(length(object@subsets)>0){
+              for(i in seq(length(object@subsets))){
+                tempNames <- c(tempNames, assayNames(object@subsets[[i]]@internalAssay))
+              }
+            }
+            return(tempNames)
+          }
+)
+
+#' @export
 #' @importMethodsFrom SingleCellExperiment show
 setMethod(f = "show",
           signature = "ExperimentSubset",
@@ -147,10 +171,18 @@ setMethod(f = "show",
               callNextMethod()
               cat(
                   "subsets(", length(subsetNames(object)), "): ",
-                  sep="")
+                  sep=""
+                  )
               cat(
                   subsetNames(object)
                   )
+              cat(
+                "\nsubsetAssays(", length(subsetAssayNames(object)), "): ",
+                sep = ""
+              )
+              cat(
+                subsetAssayNames(object)
+              )
           }
 )
 
@@ -335,3 +367,4 @@ setReplaceMethod("colData", c("ExperimentSubset" , "DataFrame"), function(x, ...
   value <- tempValue
   callNextMethod()
 })
+
