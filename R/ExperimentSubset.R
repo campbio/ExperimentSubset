@@ -50,8 +50,15 @@ ExperimentSubset <- function(
   ...)
 {
   se <- SingleCellExperiment::SingleCellExperiment(...)
-  .ExperimentSubset(se,
-                    subsets = subsets)
+  es <- .ExperimentSubset(se)
+  if(!missing(subsets)){
+      es <- ExperimentSubset::createSubset(es,
+                         subsetName = subsets[[1]],
+                         rows = subsets[[2]],
+                         cols = subsets[[3]],
+                         parentAssay = subsets[[4]])
+  }
+  es
 }
 
 #' @title createSubset
@@ -193,13 +200,11 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
   #look inside subsets
   else{
     for(j in seq(length(x@subsets))){
+      print(assayNames(x@subsets[[j]]@internalAssay))
       if(i %in% assayNames(x@subsets[[j]]@internalAssay)){
         out <- assay(x@subsets[[j]]@internalAssay, i)
         colnames(out) <- colnames(x)[x@subsets[[j]]@colIndices]
         rownames(out) <- rownames(x)[x@subsets[[j]]@rowIndices]
-      }
-      else{
-        stop("assay not found")
       }
     }
   }
@@ -264,7 +269,8 @@ setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, par
     storeSubset(
                 object = x,
                 subsetName = i,
-                inputMatrix = value
+                inputMatrix = value,
+                newInternalAssay = NULL
               )
   }
   else{
