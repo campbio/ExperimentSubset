@@ -245,21 +245,44 @@ setGeneric(name = "subsetRowData",
            }
 )
 
-
 #' @export
 setMethod(f = "subsetRowData",
           signature = c("ExperimentSubset", "character"),
           definition = function(object, subsetName)
           {
-            out <- SummarizedExperiment::rowData(object)[object@subsets[[subsetName]]@rowIndices, , drop = F]
-            if(!is.null(object@subsets[[subsetName]]@internalAssay)){
-              if(ncol(rowData(object@subsets[[subsetName]]@internalAssay)) > 0){
-                out <- cbind(out, rowData(object@subsets[[subsetName]]@internalAssay))
-              }
+            if(subsetName %in% subsetNames(object)){
+              #is a subset
+              out <- SummarizedExperiment::rowData(object)[object@subsets[[subsetName]]@rowIndices, , drop = F]
+              out <- cbind(out, rowData(object@subsets[[subsetName]]@internalAssay))
             }
-            out
+            else if(subsetName %in% subsetAssayNames(object)){
+              #is a subset assay
+              subsetName <- .getParentAssayName(object, subsetName)
+              out <- SummarizedExperiment::rowData(object)[object@subsets[[subsetName]]@rowIndices, , drop = F]
+              out <- cbind(out, rowData(object@subsets[[subsetName]]@internalAssay))
+            }
+            else{
+              #neither a subset nor a subset assay
+              print("neither a subset nor a subset assay")
+            }
+            return(out)
           }
 )
+
+#' #' @export
+#' setMethod(f = "subsetRowData",
+#'           signature = c("ExperimentSubset", "character"),
+#'           definition = function(object, subsetName)
+#'           {
+#'             out <- SummarizedExperiment::rowData(object)[object@subsets[[subsetName]]@rowIndices, , drop = F]
+#'             if(!is.null(object@subsets[[subsetName]]@internalAssay)){
+#'               if(ncol(rowData(object@subsets[[subsetName]]@internalAssay)) > 0){
+#'                 out <- cbind(out, rowData(object@subsets[[subsetName]]@internalAssay))
+#'               }
+#'             }
+#'             out
+#'           }
+#' )
 
 #' @export
 setGeneric(name = "subsetColData",
@@ -269,21 +292,67 @@ setGeneric(name = "subsetColData",
            }
 )
 
+.getParentAssayName <- function(object, childAssayName){
+  print("in parentassay name")
+  for(i in seq(length(object@subsets))){
+    if(childAssayName %in% assayNames(object@subsets[[i]]@internalAssay)){
+      return(object@subsets[[i]]@subsetName)
+    }
+  }
+}
 
 #' @export
 setMethod(f = "subsetColData",
           signature = c("ExperimentSubset", "character"),
           definition = function(object, subsetName)
           {
-            out <- SummarizedExperiment::colData(object)[object@subsets[[subsetName]]@colIndices, , drop = F]
-            if(!is.null(object@subsets[[subsetName]]@internalAssay)){
-              if(ncol(colData(object@subsets[[subsetName]]@internalAssay)) > 0){
-                out <- cbind(out, colData(object@subsets[[subsetName]]@internalAssay))
-              }
+            if(subsetName %in% subsetNames(object)){
+              #is a subset
+              out <- SummarizedExperiment::colData(object)[object@subsets[[subsetName]]@colIndices, , drop = F]
+              out <- cbind(out, colData(object@subsets[[subsetName]]@internalAssay))
             }
-            out
+            else if(subsetName %in% subsetAssayNames(object)){
+              #is a subset assay
+              subsetName <- .getParentAssayName(object, subsetName)
+              out <- SummarizedExperiment::colData(object)[object@subsets[[subsetName]]@colIndices, , drop = F]
+              out <- cbind(out, colData(object@subsets[[subsetName]]@internalAssay))
+            }
+            else{
+              #neither a subset nor a subset assay
+              print("neither a subset nor a subset assay")
+            }
+            return(out)
           }
 )
+
+#' #' @export
+#' setMethod(f = "subsetColData",
+#'           signature = c("ExperimentSubset", "character"),
+#'           definition = function(object, subsetName)
+#'           {
+#'             if(!is.null(object@subsets[[subsetName]]@internalAssay)){ #recheck this condition since internal assay is never null after new update to ES
+#'               if(ncol(colData(object@subsets[[subsetName]]@internalAssay)) > 0){
+#'                 if(subsetName %in% ExperimentSubset::subsetNames(object)){
+#'                   print("inside here")
+#'                   out <- SummarizedExperiment::colData(object)[object@subsets[[subsetName]]@colIndices, , drop = F]
+#'                   out <- cbind(out, colData(object@subsets[[subsetName]]@internalAssay))
+#'                 }
+#'                 else if(subsetName %in% ExperimentSubset::subsetAssayNames(object@subsets[[subsetName]]@internalAssay)){
+#'
+#'                   subsetName = .getParentAssayName(es, subsetName)
+#'                   print(subsetName)
+#'                   print(object@subsets[[subsetName]]@internalAssay)
+#'                   out <- SummarizedExperiment::colData(object)[object@subsets[[subsetName]]@colIndices, , drop = F]
+#'                   out <- cbind(out, colData(object@subsets[[subsetName]]@internalAssay))
+#'                 }
+#'               }
+#'             }
+#'             else{
+#'               out <- SummarizedExperiment::colData(object)[object@subsets[[subsetName]]@colIndices, , drop = F]
+#'             }
+#'             out
+#'           }
+#' )
 
 #' @export
 setGeneric(name = "storeSubset",
