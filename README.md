@@ -33,16 +33,16 @@ subsets(0):
 **Create multiple new subset assays:**
 ```r
 #subset by continuous indices
-es <- createSubset(es, "subset1", rows = c(1:5), cols = c(1:3), useAssay = "counts")
+es <- createSubset(es, "subset1", rows = c(1:5), cols = c(1:3), parentAssay = "counts")
 
 #subset by intermittent indices
-es <- createSubset(es, "subset2", rows = c(2,3,4,5), cols = c(4,5,6), useAssay = "counts")
+es <- createSubset(es, "subset2", rows = c(2,3,4,5), cols = c(4,5,6), parentAssay = "counts")
 
 #subset by feature and cell names
-es <- createSubset(es, "subset3", rows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), useAssay = "counts")
+es <- createSubset(es, "subset3", rows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts")
 
 #subset by both indices and names
-es <- createSubset(es, "subset4", rows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), cols = c(1:10), useAssay = "counts")
+es <- createSubset(es, "subset4", rows = c("C12orf73", "RNU6-1256P", "RN7SL749P", "RNU6-157P"), cols = c(1:10), parentAssay = "counts")
 
 #or use assay<- function to input a subset assay using "useAssay" parameter as long as the assay already resides inside the es object
 c <- assay(es, "counts")
