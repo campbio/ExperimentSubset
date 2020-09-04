@@ -140,6 +140,103 @@ setMethod(f = "subsetNames",
 )
 
 #' @export
+setGeneric(name = "subsetCount",
+           def = function(object)
+           {
+             standardGeneric("subsetCount")
+           }
+)
+
+#' @export
+setMethod(f = "subsetCount",
+          signature = "ExperimentSubset",
+          definition = function(object)
+          {
+            return(length(subsetNames(object)))
+          }
+)
+
+#' @export
+setGeneric(name = "subsetAssayCount",
+           def = function(object)
+           {
+             standardGeneric("subsetAssayCount")
+           }
+)
+
+#' @export
+setMethod(f = "subsetAssayCount",
+          signature = "ExperimentSubset",
+          definition = function(object)
+          {
+            return(length(subsetAssayNames(object)))
+          }
+)
+
+#' @export
+setGeneric(name = "showSubsetLink",
+           def = function(object)
+           {
+             standardGeneric("showSubsetLink")
+           }
+)
+
+#' @export
+setMethod(f = "showSubsetLink",
+          signature = "ExperimentSubset",
+          definition = function(object)
+          {
+         #   for(i in seq(length(assayNames(object)))){
+          #    print(paste("Main Assay:", assayNames(object)[i]))
+              #final[[assayNames(object)[i]]] <- ""
+              for(j in seq(subsetCount(object))){
+                # final[[assayNames(object)[i]]][[object@subsets[[j]]@parentAssay]][[subsetNames(object)[j]]]<-
+                #   assayNames(object@subsets[[j]]@internalAssay)
+                if(object@subsets[[j]]@parentAssay %in% assayNames(object)){
+                  cat(paste("Main Assay: ", assayNames(object)[match(object@subsets[[j]]@parentAssay, assayNames(es))]), "\n")
+                }
+
+                cat(paste("Subsets: ", subsetNames(object)[j]
+                            , " : SubsetAssays: ", assayNames(object@subsets[[j]]@internalAssay),
+                            " : Parent: ", object@subsets[[j]]@parentAssay), "\n")
+                }
+          #  }
+            # return(final)
+            # assays = assayNames(object)
+            # for(i in seq(length(assays))){
+            #   print(paste("Main Assay: ",assays[i]))
+            #   print(subsetCount(object))
+            #   for(j in seq(subsetCount(object))){
+            #     if(object@subsets[[j]]@parentAssay == assays[i]){
+            #       print(paste("Subset: ",subsetNames(object)[j]))
+            #       print(paste("Subset Assay: ",assayNames(object@subsets[[j]]@internalAssay)))
+            #     }
+            #   }
+            # }
+          }
+)
+
+#' #' @export
+#' setMethod(f = "showSubsetLink",
+#'           signature = "ExperimentSubset",
+#'           definition = function(object)
+#'           {
+#'             temp = ""
+#'             for(i in seq(subsetCount(object))){
+#'               temp =  paste0(temp, object@subsets[[i]]@subsetName)
+#'               if(length(assayNames(object@subsets[[i]]@internalAssay))>0){
+#'                 temp = paste0(temp, assayNames(object@subsets[[i]]@internalAssay))
+#'               }
+#'               temp = paste0(temp, "p", object@subsets[[i]]@parentAssay)
+#'               #also find all subsets with current as parent assay
+#'
+#'               temp = paste(temp,"")
+#'             }
+#'             return(temp)
+#'           }
+#' )
+
+#' @export
 setGeneric(name = "rownames",
            def = function(object, ...)
            {
