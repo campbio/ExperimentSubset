@@ -16,5 +16,5 @@ Imports:
   methods,
   Matrix,
   BiocStyle
-Suggests: knitr, rmarkdown
+Suggests: knitr, rmarkdown, testthat
 VignetteBuilder: knitr
