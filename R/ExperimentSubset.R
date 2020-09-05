@@ -186,19 +186,44 @@ setMethod(f = "showSubsetLink",
           signature = "ExperimentSubset",
           definition = function(object)
           {
-              for(i in seq(length(subsetAssayNames(object)))){
-                print(paste0("Assay ", i, " out of ", length(subsetAssayNames(object)), ":"))
-                getFirstParent(object, subsetAssayNames(object)[i])
-              }
+            # cat("Main assay(s):\n", assayNames(es),"\n")
+            # cat("Subset(s):\n")
+            #   for(i in seq(length(subsetNames(object)))){
+            #     cat(" ", sep = "")
+            #     parent <- getFirstParent(object, subsetAssayNames(object)[i])
+            #     cat(i,") ", subsetNames(object)[i], ", parent =", sep = "")
+            #     for(j in seq(length(parent))){
+            #       cat(" ", parent[[j]], sep = "")
+            #     }
+            #     cat(", assay(s) = ", assayNames(object@subsets[[i]]@internalAssay))
+            #     cat("\n")
+            #   }
 
+            cat("Main assay(s):\n", assayNames(es),"\n\n")
+            cat("Subset(s):")
+            Name <- list()
+            Parent <- list()
+            Assays <- list()
+            for(i in seq(length(subsetNames(object)))){
+              parent <- getFirstParent(object, subsetAssayNames(object)[i])
+              Name[[i]] <- subsetNames(object)[i]
+              Parent[[i]] <- paste(unlist(parent), collapse = ' ')
+              Assays[[i]] <- assayNames(object@subsets[[i]]@internalAssay)
+            }
+
+            Assays[lengths(Assays) == 0] <- ""
+
+            df <- data.frame(Name = as.character(Name), Parent = as.character(Parent), Assays = as.character(Assays))
+            knitr::kable(df)
           }
 )
 
 #' @export
 getFirstParent <- function(object, subsetName){
+  parentList <- list()
   parent <- subsetName
   while(TRUE){
-    print(parent)
+    parentList <- c(parentList, parent)
     if(!is.null(object@subsets[[parent]])){
       parent <- object@subsets[[parent]]@parentAssay
     }
@@ -208,15 +233,17 @@ getFirstParent <- function(object, subsetName){
           parent <- object@subsets[[i]]@subsetName
         }
       }
-      print(parent)
+      parentList <- c(parentList, parent)
       parent <- object@subsets[[parent]]@parentAssay
       #print(parent)
     }
     if(parent %in% assayNames(object)){
-      print(parent)
+      parentList <- c(parentList, parent)
       break
     }
   }
+  parentList[[1]] <- NULL
+  return(parentList)
 }
 
 
