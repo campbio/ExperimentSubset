@@ -543,8 +543,14 @@ setMethod("colData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) 
 #' @export
 #' @importMethodsFrom SummarizedExperiment rowData<-
 setReplaceMethod("rowData", c("ExperimentSubset"), function(x, ..., subsetName, value) { #test if this needs DataFrame too
-  tempValue <- rowData(x)
-  rowData(x@subsets[[subsetName]]@internalAssay) <- value #DataFrame(test = c("a", "b", "c","d", "e"))
+  tempValue <- NULL
+  if(!missing(subsetName)){
+    tempValue <- rowData(x)
+    rowData(x@subsets[[subsetName]]@internalAssay) <- value #DataFrame(test = c("a", "b", "c","d", "e"))
+  }
+  else{
+    tempValue <- value
+  }
   value <- tempValue
   callNextMethod()
 })
@@ -552,8 +558,14 @@ setReplaceMethod("rowData", c("ExperimentSubset"), function(x, ..., subsetName, 
 #' @export
 #' @importMethodsFrom SummarizedExperiment colData<-
 setReplaceMethod("colData", c("ExperimentSubset" , "DataFrame"), function(x, ..., subsetName, value) {
-  tempValue <- colData(x)
-  colData(x@subsets[[subsetName]]@internalAssay) <- value #DataFrame(test = c("a", "b", "c","d", "e"))
+  tempValue <- NULL
+  if(!missing(subsetName)){
+    tempValue <- colData(x)
+    colData(x@subsets[[subsetName]]@internalAssay) <- value #DataFrame(test = c("a", "b", "c","d", "e"))
+  }
+  else{
+    tempValue <- value
+  }
   value <- tempValue
   callNextMethod()
 })
