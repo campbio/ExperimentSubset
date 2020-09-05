@@ -526,7 +526,7 @@ setMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacter", "Mi
     withDimnames = TRUE
   }
   if(!missing(subsetName)){
-    out <- reducedDim(object@subsets[[subsetName]]@internalAssay)
+    out <- SingleCellExperiment::reducedDim(object@subsets[[subsetName]]@internalAssay, type, withDimnames)
   }
   else{
     out <- SingleCellExperiment::reducedDim(object, type, withDimnames)
