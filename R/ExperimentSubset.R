@@ -1,6 +1,9 @@
 setClassUnion("NullOrCharacter", c("NULL", "character"))
 setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 setClassUnion("NullOrNumericOrCharacter", c("NULL", "numeric", "character"))
+setClassUnion("MissingOrNumericOrCharacter", c("missing", "numeric", "character"))
+setClassUnion("MissingOrLogical", c("missing", "logical"))
+setClassUnion("MissingOrCharacter", c("missing", "character"))
 #add these restrictions for all functions
 
 #' @export
@@ -510,6 +513,30 @@ setMethod(f = "storeSubset",
 )
 
 #' @export
+setGeneric(name = "reducedDim",
+           def = function(object, type, withDimnames, subsetName)
+           {
+             standardGeneric("reducedDim")
+           }
+)
+
+#' @export
+setMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacter", "MissingOrLogical", "MissingOrCharacter"), function(object, type, withDimnames, subsetName) {
+  if(missing(withDimnames)){
+    withDimnames = TRUE
+  }
+  if(!missing(subsetName)){
+    out <- reducedDim(object@subsets[[subsetName]]@internalAssay)
+  }
+  else{
+    out <- SingleCellExperiment::reducedDim(object, type, withDimnames)
+  }
+  out
+})
+
+
+
+#' @export
 #' @importMethodsFrom SummarizedExperiment rowData
 setMethod("rowData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) {
   if(!is.null(subsetName)){
@@ -523,6 +550,8 @@ setMethod("rowData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) 
   }
   out
 })
+
+
 
 #' @export
 #' @importMethodsFrom SummarizedExperiment colData
