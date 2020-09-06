@@ -544,13 +544,10 @@ setGeneric(name = "reducedDim<-",
 
 #' @export
 setReplaceMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacter", "MissingOrCharacter"), function(object, type, subsetName, value) {
-  print("in reduced dim set replace")
   if(!missing(subsetName)){
-    print("in reduced dim set replace1")
     SingleCellExperiment::reducedDim(object@subsets[[subsetName]]@internalAssay, type) <- value
   }
   else{
-    print("in reduced dim set replace2")
     SingleCellExperiment::reducedDim(object, type) <- value
   }
   return(object)
