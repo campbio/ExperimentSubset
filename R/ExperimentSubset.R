@@ -29,6 +29,10 @@ SingleCellSubset <- function(
   internalAssay = SingleCellExperiment::SingleCellExperiment(),
   ...)
 {
+  if(grepl("\\s+", subsetName)){
+    subsetName <- gsub("\\s", "", subsetName)
+    warning("Removing spaces from subsetName argument.")
+  }
   .SingleCellSubset(subsetName = subsetName,
                     rowIndices = rowIndices,
                     colIndices = colIndices,
@@ -43,18 +47,36 @@ SingleCellSubset <- function(
                           slots = representation(
                             subsets = "list"
                           ),
+                          prototype = list(
+                            subsets = list()
+                          ),
                           contains = "SingleCellExperiment"
 )
 
 #' @export
 #' @importFrom SingleCellExperiment SingleCellExperiment
 ExperimentSubset <- function(
-  subsets = list(),
-  ...)
+  object,
+  ...,
+  subsets = list())
 {
-  se <- SingleCellExperiment::SingleCellExperiment(...)
-  es <- .ExperimentSubset(se)
-  if(!missing(subsets)){
+  if(!missing(object)){
+    se <- SingleCellExperiment::SingleCellExperiment(object)
+    es <- .ExperimentSubset(se)
+    if(inherits(object, "SummarizedExperiment")){
+      colData(es) <- colData(object)
+      rowData(es) <- rowData(object)
+      metadata(es) <- metadata(object)
+    }
+    if(inherits(object, "SingleCellExperment")){
+      reducedDim(es) <- reducedDim(object)
+    }
+  }
+  else{
+    se <- SingleCellExperiment::SingleCellExperiment(...)
+    es <- .ExperimentSubset(se)
+  }
+  if(length(subsets) > 0){
       es <- ExperimentSubset::createSubset(es,
                          subsetName = subsets[[1]],
                          rows = subsets[[2]],
