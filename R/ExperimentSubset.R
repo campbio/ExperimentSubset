@@ -62,15 +62,15 @@ ExperimentSubset <- function(
   subsets = list())
 {
   if(!missing(object)){
-    se <- SingleCellExperiment::SingleCellExperiment(object)
-    es <- .ExperimentSubset(se)
     if(inherits(object, "SummarizedExperiment")){
+      es <- .ExperimentSubset(object)
       colData(es) <- colData(object)
       rowData(es) <- rowData(object)
       S4Vectors::metadata(es) <- S4Vectors::metadata(object)
-    }
-    if(inherits(object, "SingleCellExperment")){
-      reducedDim(es) <- reducedDim(object)
+      if(inherits(object, "SingleCellExperiment")){
+        SingleCellExperiment::reducedDim(es) <- SingleCellExperiment::reducedDim(object)
+        SingleCellExperiment::altExp(es) <- SingleCellExperiment::altExp(object)
+      }
     }
   }
   else{
