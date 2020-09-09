@@ -66,7 +66,7 @@ ExperimentSubset <- function(
     if(inherits(object, "SummarizedExperiment")){
       colData(es) <- colData(object)
       rowData(es) <- rowData(object)
-      metadata(es) <- metadata(object)
+      S4Vectors::metadata(es) <- S4Vectors::metadata(object)
     }
     if(inherits(object, "SingleCellExperment")){
       reducedDim(es) <- reducedDim(object)
@@ -165,6 +165,57 @@ setMethod(f = "subsetNames",
 )
 
 #' @export
+setGeneric(name = "metadata",
+           def = function(object, subsetName)
+           {
+             standardGeneric("metadata")
+           }
+)
+
+#' @export
+setMethod(f = "metadata",
+          signature = c("ExperimentSubset", "MissingOrCharacter"),
+          definition = function(object, subsetName)
+          {
+            if(!missing(subsetName)){
+              if(is.null(object@subsets[[subsetName]])){
+                stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+              }
+              S4Vectors::metadata(object@subsets[[subsetName]]@internalAssay)
+            }
+            else{
+              S4Vectors::metadata(object)
+            }
+          }
+)
+
+#' @export
+setGeneric(name = "metadata<-",
+           def = function(object, subsetName, value)
+           {
+             standardGeneric("metadata<-")
+           }
+)
+
+#' @export
+setReplaceMethod(f = "metadata",
+          signature = c("ExperimentSubset", "MissingOrCharacter"),
+          definition = function(object, subsetName, value)
+          {
+            if(!missing(subsetName)){
+              if(is.null(object@subsets[[subsetName]])){
+                stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+              }
+              S4Vectors::metadata(object@subsets[[subsetName]]@internalAssay) <- value
+            }
+            else{
+              S4Vectors::metadata(object) <- value
+            }
+            object
+          }
+)
+
+#' @export
 setGeneric(name = "subsetCount",
            def = function(object)
            {
@@ -211,24 +262,13 @@ setMethod(f = "showSubsetLink",
           signature = "ExperimentSubset",
           definition = function(object)
           {
-            # cat("Main assay(s):\n", assayNames(es),"\n")
-            # cat("Subset(s):\n")
-            #   for(i in seq(length(subsetNames(object)))){
-            #     cat(" ", sep = "")
-            #     parent <- getFirstParent(object, subsetAssayNames(object)[i])
-            #     cat(i,") ", subsetNames(object)[i], ", parent =", sep = "")
-            #     for(j in seq(length(parent))){
-            #       cat(" ", parent[[j]], sep = "")
-            #     }
-            #     cat(", assay(s) = ", assayNames(object@subsets[[i]]@internalAssay))
-            #     cat("\n")
-            #   }
-
             cat("Main assay(s):\n", assayNames(es),"\n\n")
             cat("Subset(s):")
+
             Name <- list()
             Parent <- list()
             Assays <- list()
+
             for(i in seq(length(subsetNames(object)))){
               parent <- getFirstParent(object, subsetAssayNames(object)[i])
               Name[[i]] <- subsetNames(object)[i]
@@ -239,7 +279,7 @@ setMethod(f = "showSubsetLink",
             Assays[lengths(Assays) == 0] <- ""
 
             df <- data.frame(Name = as.character(Name), Parent = as.character(Parent), Assays = as.character(Assays))
-            knitr::kable(df)
+            print(df)
           }
 )
 

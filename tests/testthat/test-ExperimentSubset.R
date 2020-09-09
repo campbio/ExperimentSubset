@@ -62,4 +62,7 @@ testthat::test_that("Testing SingleCellSubset constructor",{
 
 })
 
+testthat::test_that("Testing createSubset",{
+
+})
 
