@@ -263,6 +263,23 @@ setMethod(f = "metadata",
 )
 
 #' @export
+setGeneric(name = "subsetDim",
+           def = function(object, subsetName)
+           {
+             standardGeneric("subsetDim")
+           }
+)
+
+#' @export
+setMethod(f = "subsetDim",
+          signature = c("ExperimentSubset", "character"),
+          definition = function(object, subsetName)
+          {
+            dim(object@subsets[[subsetName]]@internalAssay)
+          }
+)
+
+#' @export
 setGeneric(name = "metadata<-",
            def = function(object, subsetName, value)
            {
@@ -336,22 +353,32 @@ setMethod(f = "showSubsetLink",
           definition = function(object)
           {
             cat("Main assay(s):\n", assayNames(es),"\n\n")
-            cat("Subset(s):")
+            cat("Subset(s):\n")
 
             Name <- list()
+            Dimensions <- list()
             Parent <- list()
             Assays <- list()
-
+            Metadata <- list()
+            ReducedDims <- list()
+            AltExperiments <- list()
             for(i in seq(length(subsetNames(object)))){
               parent <- getFirstParent(object, subsetAssayNames(object)[i])
               Name[[i]] <- subsetNames(object)[i]
               Parent[[i]] <- paste(unlist(parent), collapse = ' ')
               Assays[[i]] <- assayNames(object@subsets[[i]]@internalAssay)
+              Dimensions[[i]] <- paste(unlist(subsetDim(object, subsetNames(object)[i])), collapse = ', ')
+              #Metadata[[i]] <- metadata(object, subsetNames(object)[i]) #how to display metadata names?
+              #ReducedDims[[i]] <- reducedDim(object, "") #need reduceddimnames
+              #AltExperiments[[i]] <- altExp() #need altexpnames
             }
 
             Assays[lengths(Assays) == 0] <- ""
+            Metadata[lengths(Metadata) == 0] <- ""
+            ReducedDims[lengths(ReducedDims) == 0] <- ""
+            #AltExperiments[lengths(AltExperiments) == 0] <- "" #run once above is done
 
-            df <- data.frame(Name = as.character(Name), Parent = as.character(Parent), Assays = as.character(Assays))
+            df <- data.frame(Name = as.character(Name), Dim = as.character(Dimensions), Parent = as.character(Parent), Assays = as.character(Assays))
             print(df)
           }
 )
