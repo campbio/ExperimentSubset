@@ -251,6 +251,31 @@ setMethod(f = "altExpNames",
 )
 
 #' @export
+setGeneric(name = "reducedDimNames",
+           def = function(x, subsetName)
+           {
+             standardGeneric("reducedDimNames")
+           }
+)
+
+#' @export
+setMethod(f = "reducedDimNames",
+          signature = "ExperimentSubset",
+          definition = function(x, subsetName)
+          {
+            if(!missing(subsetName)){
+              if(is.null(x@subsets[[subsetName]])){
+                stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+              }
+              SingleCellExperiment::reducedDimNames(x@subsets[[subsetName]]@internalAssay)
+            }
+            else{
+              SingleCellExperiment::reducedDimNames(x)
+            }
+          }
+)
+
+#' @export
 setGeneric(name = "altExpNames<-",
            def = function(x, subsetName, value)
            {
@@ -271,6 +296,32 @@ setReplaceMethod(f = "altExpNames",
                    }
                    else{
                      SingleCellExperiment::altExpNames(x) <- value
+                   }
+                   x
+                 }
+)
+
+#' @export
+setGeneric(name = "reducedDimNames<-",
+           def = function(x, subsetName, value)
+           {
+             standardGeneric("reducedDimNames<-")
+           }
+)
+
+#' @export
+setReplaceMethod(f = "reducedDimNames",
+                 signature = "ExperimentSubset",
+                 definition = function(x, subsetName, value)
+                 {
+                   if(!missing(subsetName)){
+                     if(is.null(x@subsets[[subsetName]])){
+                       stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+                     }
+                     SingleCellExperiment::reducedDimNames(x@subsets[[subsetName]]@internalAssay) <- value
+                   }
+                   else{
+                     SingleCellExperiment::reducedDimNames(x) <- value
                    }
                    x
                  }
@@ -456,32 +507,45 @@ setMethod(f = "showSubsetLink",
           {
             cat("Main assay(s):\n", assayNames(es),"\n\n")
             cat("Subset(s):\n")
+            if(!is.null(subsetNames(object))){
+              Name <- list()
+              Dimensions <- list()
+              Parent <- list()
+              Assays <- list()
+              Metadata <- list()
+              ReducedDims <- list()
+              AltExperiments <- list()
 
-            Name <- list()
-            Dimensions <- list()
-            Parent <- list()
-            Assays <- list()
-            Metadata <- list()
-            ReducedDims <- list()
-            AltExperiments <- list()
-            for(i in seq(length(subsetNames(object)))){
-              parent <- getFirstParent(object, subsetAssayNames(object)[i])
-              Name[[i]] <- subsetNames(object)[i]
-              Parent[[i]] <- paste(unlist(parent), collapse = ' ')
-              Assays[[i]] <- assayNames(object@subsets[[i]]@internalAssay)
-              Dimensions[[i]] <- paste(unlist(subsetDim(object, subsetNames(object)[i])), collapse = ', ')
-              #Metadata[[i]] <- metadata(object, subsetNames(object)[i]) #how to display metadata names?
-              #ReducedDims[[i]] <- reducedDim(object, "") #need reduceddimnames
-              #AltExperiments[[i]] <- altExp() #need altexpnames
+              for(i in seq(length(subsetNames(object)))){
+                parent <- getFirstParent(object, subsetAssayNames(object)[i])
+                Name[[i]] <- subsetNames(object)[i]
+                Parent[[i]] <- paste(unlist(parent), collapse = ' -> ')
+                Assays[[i]] <- assayNames(object@subsets[[i]]@internalAssay)
+                Dimensions[[i]] <- paste(unlist(subsetDim(object, subsetNames(object)[i])), collapse = ', ')
+                Metadata[[i]] <- length(metadata(es, subsetNames(object)[i]))
+                ReducedDims[[i]] <- paste(unlist(reducedDimNames(es, subsetNames(object)[i])), collapse = ", ")
+                AltExperiments[[i]] <- paste(unlist(altExpNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
+              }
+
+              Assays[lengths(Assays) == 0] <- ""
+              Metadata[lengths(Metadata) == 0] <- ""
+              ReducedDims[lengths(ReducedDims) == 0] <- ""
+              AltExperiments[lengths(AltExperiments) == 0] <- ""
+
+              df <- data.frame(
+                Name = as.character(Name),
+                Dim = as.character(Dimensions),
+                Parent = as.character(Parent),
+                Assays = as.character(Assays),
+                Metadata = as.character(Metadata),
+                AltExperiments = as.character(AltExperiments),
+                ReducedDims = as.character(ReducedDims)
+                )
+              print(df)
             }
-
-            Assays[lengths(Assays) == 0] <- ""
-            Metadata[lengths(Metadata) == 0] <- ""
-            ReducedDims[lengths(ReducedDims) == 0] <- ""
-            #AltExperiments[lengths(AltExperiments) == 0] <- "" #run once above is done
-
-            df <- data.frame(Name = as.character(Name), Dim = as.character(Dimensions), Parent = as.character(Parent), Assays = as.character(Assays))
-            print(df)
+            else{
+              cat("NULL\n")
+            }
           }
 )
 
@@ -800,6 +864,28 @@ setMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacter", "Mi
 })
 
 #' @export
+setGeneric(name = "reducedDims",
+           def = function(object, withDimnames, subsetName)
+           {
+             standardGeneric("reducedDims")
+           }
+)
+
+#' @export
+setMethod("reducedDims", c("ExperimentSubset", "MissingOrLogical", "MissingOrCharacter"), function(object, withDimnames, subsetName) {
+  if(missing(withDimnames)){
+    withDimnames = TRUE
+  }
+  if(!missing(subsetName)){
+    out <- SingleCellExperiment::reducedDims(object@subsets[[subsetName]]@internalAssay, withDimnames)
+  }
+  else{
+    out <- SingleCellExperiment::reducedDims(object, withDimnames)
+  }
+  out
+})
+
+#' @export
 setGeneric(name = "reducedDim<-",
            def = function(object, type, subsetName, value)
            {
@@ -814,6 +900,25 @@ setReplaceMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacte
   }
   else{
     SingleCellExperiment::reducedDim(object, type) <- value
+  }
+  return(object)
+})
+
+#' @export
+setGeneric(name = "reducedDims<-",
+           def = function(object, subsetName, value)
+           {
+             standardGeneric("reducedDims<-")
+           }
+)
+
+#' @export
+setReplaceMethod("reducedDims", c("ExperimentSubset", "MissingOrCharacter"), function(object, subsetName, value) {
+  if(!missing(subsetName)){
+    SingleCellExperiment::reducedDims(object@subsets[[subsetName]]@internalAssay) <- value
+  }
+  else{
+    SingleCellExperiment::reducedDims(object) <- value
   }
   return(object)
 })
