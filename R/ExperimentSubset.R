@@ -1,7 +1,9 @@
 setClassUnion("NullOrCharacter", c("NULL", "character"))
+setClassUnion("MissingOrNullOrCharacter", c("missing","NULL", "character"))
 setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 setClassUnion("NullOrNumericOrCharacter", c("NULL", "numeric", "character"))
 setClassUnion("MissingOrNumericOrCharacter", c("missing", "numeric", "character"))
+setClassUnion("NullOrMissingOrNumericOrCharacter", c("NULL", "missing", "numeric", "character"))
 setClassUnion("MissingOrLogical", c("missing", "logical"))
 setClassUnion("MissingOrCharacter", c("missing", "character"))
 setClassUnion("CharacterOrNumeric", c("character", "numeric"))
@@ -87,18 +89,10 @@ ExperimentSubset <- function(
   es
 }
 
-#' @title createSubset
-#'
-#' @param object \code{ExperimentSubset}, \code{SingleCellExperiment} or \code{SummarizedExperiment} object.
-#'
-#' @param subsetName Specify the name of the new subset.
-#' @param rows Specify which rows/features to subset from the input object. Either indices or names.
-#' @param cols Specify which columns/cells to subset from the input object. Either indices or names.
-#' @param parentAssay Assay to use against the subset data
-#'
+
 #' @export
 setGeneric(name = "createSubset",
-           def = function(object, subsetName, rows, cols, parentAssay)
+           def = function(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
            {
              standardGeneric("createSubset")
            }
@@ -108,9 +102,9 @@ setGeneric(name = "createSubset",
 setMethod(f = "createSubset",
           signature = c("ExperimentSubset",
                         "character",
-                        "NullOrNumericOrCharacter",
-                        "NullOrNumericOrCharacter",
-                        "NullOrCharacter"),
+                        "NullOrMissingOrNumericOrCharacter",
+                        "NullOrMissingOrNumericOrCharacter",
+                        "MissingOrNullOrCharacter"),
           definition = function(object,
                                 subsetName,
                                 rows,
@@ -119,16 +113,29 @@ setMethod(f = "createSubset",
             {
             tempAssay <- "" #better way to use this?
             if(is.null(parentAssay)){
-              tempAssay <- "counts" #get first assay instead of counts
+              tempAssay <- SummarizedExperiment::assayNames(object)[1]
+              parentAssay <- tempAssay
             }
             else{
-              tempAssay <- parentAssay
+              if(parentAssay %in% SummarizedExperiment::assayNames(object)
+                 || parentAssay %in% subsetAssayNames(object)){
+                tempAssay <- parentAssay
+              }
+              else{
+                stop("Input parentAssay does not exist.")
+              }
             }
             if(is.character(rows)){
               rows <- match(rows, rownames(assay(object, tempAssay)))
             }
             if(is.character(cols)){
               cols <- match(cols, colnames(assay(object, tempAssay)))
+            }
+            if(is.null(rows)){
+              rows <- seq(1, dim(assay(object, tempAssay))[1])
+            }
+            if(is.null(cols)){
+              cols <- seq(1, dim(assay(object, tempAssay))[2])
             }
               scs <- SingleCellSubset(
                 subsetName = subsetName,
@@ -140,8 +147,12 @@ setMethod(f = "createSubset",
                     counts = Matrix::Matrix(
                       nrow = length(rows),
                       ncol = length(cols),
-                      data = 0,
-                      sparse = TRUE))))
+                      data = NA,
+                      sparse = TRUE
+                      )
+                    )
+                  )
+                )
               assay(scs@internalAssay, "counts") <- NULL #a better way to do this
               object@subsets[[subsetName]] <- scs
               return(object)
