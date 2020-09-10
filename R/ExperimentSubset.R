@@ -166,6 +166,31 @@ setMethod(f = "subsetNames",
 )
 
 #' @export
+setGeneric(name = "altExps",
+           def = function(x, withColData = FALSE, subsetName)
+           {
+             standardGeneric("altExps")
+           }
+)
+
+#' @export
+setMethod(f = "altExps",
+          signature = "ExperimentSubset",
+          definition = function(x, withColData, subsetName)
+          {
+            if(!missing(subsetName)){
+              if(is.null(x@subsets[[subsetName]])){
+                stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+              }
+              SingleCellExperiment::altExps(x@subsets[[subsetName]]@internalAssay, withColData = withColData)
+            }
+            else{
+              SingleCellExperiment::altExps(x, withColData = withColData)
+            }
+          }
+)
+
+#' @export
 setGeneric(name = "altExp",
            def = function(x, e, withColData = FALSE, subsetName)
            {
@@ -198,6 +223,57 @@ setMethod(f = "altExp",
               }
             }
           }
+)
+
+#' @export
+setGeneric(name = "altExpNames",
+           def = function(x, subsetName)
+           {
+             standardGeneric("altExpNames")
+           }
+)
+
+#' @export
+setMethod(f = "altExpNames",
+          signature = "ExperimentSubset",
+          definition = function(x, subsetName)
+          {
+            if(!missing(subsetName)){
+              if(is.null(x@subsets[[subsetName]])){
+                stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+              }
+              SingleCellExperiment::altExpNames(x@subsets[[subsetName]]@internalAssay)
+            }
+            else{
+              SingleCellExperiment::altExpNames(x)
+            }
+          }
+)
+
+#' @export
+setGeneric(name = "altExpNames<-",
+           def = function(x, subsetName, value)
+           {
+             standardGeneric("altExpNames<-")
+           }
+)
+
+#' @export
+setReplaceMethod(f = "altExpNames",
+                 signature = "ExperimentSubset",
+                 definition = function(x, subsetName, value)
+                 {
+                   if(!missing(subsetName)){
+                     if(is.null(x@subsets[[subsetName]])){
+                       stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+                     }
+                     SingleCellExperiment::altExpNames(x@subsets[[subsetName]]@internalAssay) <- value
+                   }
+                   else{
+                     SingleCellExperiment::altExpNames(x) <- value
+                   }
+                   x
+                 }
 )
 
 #' @export
@@ -234,6 +310,32 @@ setReplaceMethod(f = "altExp",
             }
             x
           }
+)
+
+#' @export
+setGeneric(name = "altExps<-",
+           def = function(x, withColData = FALSE, subsetName, value)
+           {
+             standardGeneric("altExps<-")
+           }
+)
+
+#' @export
+setReplaceMethod(f = "altExps",
+                 signature = "ExperimentSubset",
+                 definition = function(x, withColData, subsetName, value)
+                 {
+                   if(!missing(subsetName)){
+                     if(is.null(x@subsets[[subsetName]])){
+                       stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+                     }
+                     SingleCellExperiment::altExps(x@subsets[[subsetName]]@internalAssay, withColData = withColData) <- value
+                   }
+                   else{
+                     SingleCellExperiment::altExps(x, withColData = withColData) <- value
+                   }
+                   x
+                 }
 )
 
 
