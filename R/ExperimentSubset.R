@@ -147,6 +147,12 @@ setMethod(f = "createSubset",
                     )
                   )
                 )
+              if(TRUE %in% is.na(scs@rowIndices)){ #replace with na.fail if this is slow
+                stop("NAs introduced in input rows. Some or all indicated rows not found in specified parent.")
+              }
+              if(TRUE %in% is.na(scs@colIndices)){ #replace with na.fail if this is slow
+                stop("NAs introduced in input rows. Some or all indicated rows not found in specified parent.")
+              }
               assay(scs@internalAssay, "counts") <- NULL #a better way to do this
               object@subsets[[subsetName]] <- scs
               return(object)
