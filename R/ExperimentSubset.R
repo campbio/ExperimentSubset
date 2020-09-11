@@ -550,25 +550,32 @@ setMethod(f = "showSubsetLink",
                 Parent[[i]] <- paste(unlist(parent), collapse = ' -> ')
                 Assays[[i]] <- assayNames(object@subsets[[i]]@internalAssay)
                 Dimensions[[i]] <- paste(unlist(subsetDim(object, subsetNames(object)[i])), collapse = ', ')
-                Metadata[[i]] <- length(metadata(es, subsetNames(object)[i]))
                 ReducedDims[[i]] <- paste(unlist(reducedDimNames(es, subsetNames(object)[i])), collapse = ", ")
                 AltExperiments[[i]] <- paste(unlist(altExpNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
               }
 
               Assays[lengths(Assays) == 0] <- ""
-              Metadata[lengths(Metadata) == 0] <- ""
               ReducedDims[lengths(ReducedDims) == 0] <- ""
               AltExperiments[lengths(AltExperiments) == 0] <- ""
 
               df <- data.frame(
                 Name = as.character(Name),
                 Dim = as.character(Dimensions),
-                Parent = as.character(Parent),
-                Assays = as.character(Assays),
-                Metadata = as.character(Metadata),
-                AltExperiments = as.character(AltExperiments),
-                ReducedDims = as.character(ReducedDims)
+                Parent = as.character(Parent)
                 )
+
+              if(length(which(as.character(Assays) == "")) != subsetCount(object)){
+                df <- cbind(df, Assays = as.character(Assays))
+              }
+
+              if(length(which(as.character(AltExperiments) == "")) != subsetCount(object)){
+                df <- cbind(df, AltExperiments = as.character(AltExperiments))
+              }
+
+              if(length(which(as.character(ReducedDims) == "")) != subsetCount(object)){
+                df <- cbind(df, ReducedDims = as.character(ReducedDims))
+              }
+
               print(df)
             }
             else{
