@@ -1,3 +1,5 @@
+library(SingleCellExperiment)
+
 setClassUnion("NullOrCharacter", c("NULL", "character"))
 setClassUnion("MissingOrNullOrCharacter", c("missing","NULL", "character"))
 setClassUnion("NullOrNumeric", c("NULL", "numeric"))
@@ -147,13 +149,18 @@ setMethod(f = "createSubset",
                     )
                   )
                 )
-              if(TRUE %in% is.na(scs@rowIndices)){ #replace with na.fail if this is slow
-                stop("NAs introduced in input rows. Some or all indicated rows not found in specified parent.")
-              }
-              if(TRUE %in% is.na(scs@colIndices)){ #replace with na.fail if this is slow
-                stop("NAs introduced in input rows. Some or all indicated rows not found in specified parent.")
-              }
+
+              #Check if NAs introduced in the subset
+              tryCatch({
+                na.fail(scs@rowIndices)
+                na.fail(scs@colIndices)
+              }, error = function(e){
+                stop("NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
+              })
+
+              #Remove counts assay from internal SCE object of the subset to save memory
               assay(scs@internalAssay, "counts") <- NULL #a better way to do this
+
               object@subsets[[subsetName]] <- scs
               return(object)
           }
