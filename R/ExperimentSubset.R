@@ -65,14 +65,8 @@ ExperimentSubset <- function(
 {
   if(!missing(object)){
     if(inherits(object, "SummarizedExperiment")){
+      object <- as(object, "SingleCellExperiment")
       es <- .ExperimentSubset(object)
-      colData(es) <- colData(object)
-      rowData(es) <- rowData(object)
-      S4Vectors::metadata(es) <- S4Vectors::metadata(object)
-      if(inherits(object, "SingleCellExperiment")){
-        SingleCellExperiment::reducedDim(es) <- SingleCellExperiment::reducedDim(object)
-        SingleCellExperiment::altExp(es) <- SingleCellExperiment::altExp(object)
-      }
     }
   }
   else{
