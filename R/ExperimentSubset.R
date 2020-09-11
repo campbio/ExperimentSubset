@@ -193,7 +193,8 @@ setGeneric(name = "altExps",
 
 #' @export
 setMethod(f = "altExps",
-          signature = "ExperimentSubset",
+          # signature = "ExperimentSubset",
+          signature = "ANY",
           definition = function(x, withColData, subsetName)
           {
             if(!missing(subsetName)){
@@ -218,7 +219,8 @@ setGeneric(name = "altExp",
 
 #' @export
 setMethod(f = "altExp",
-          signature = "ExperimentSubset",
+          # signature = "ExperimentSubset",
+          signature = "ANY",
           definition = function(x, e, withColData, subsetName)
           {
             if(!missing(subsetName)){
@@ -253,7 +255,8 @@ setGeneric(name = "altExpNames",
 
 #' @export
 setMethod(f = "altExpNames",
-          signature = "ExperimentSubset",
+          # signature = "ExperimentSubset",
+          signature = "ANY",
           definition = function(x, subsetName)
           {
             if(!missing(subsetName)){
@@ -278,7 +281,8 @@ setGeneric(name = "reducedDimNames",
 
 #' @export
 setMethod(f = "reducedDimNames",
-          signature = "ExperimentSubset",
+          # signature = "ExperimentSubset",
+          signature = "ANY",
           definition = function(x, subsetName)
           {
             if(!missing(subsetName)){
@@ -303,7 +307,8 @@ setGeneric(name = "altExpNames<-",
 
 #' @export
 setReplaceMethod(f = "altExpNames",
-                 signature = "ExperimentSubset",
+                 # signature = "ExperimentSubset",
+                 signature = "ANY",
                  definition = function(x, subsetName, value)
                  {
                    if(!missing(subsetName)){
@@ -329,7 +334,8 @@ setGeneric(name = "reducedDimNames<-",
 
 #' @export
 setReplaceMethod(f = "reducedDimNames",
-                 signature = "ExperimentSubset",
+                 # signature = "ExperimentSubset",
+                 signature = "ANY",
                  definition = function(x, subsetName, value)
                  {
                    if(!missing(subsetName)){
@@ -355,7 +361,8 @@ setGeneric(name = "altExp<-",
 
 #' @export
 setReplaceMethod(f = "altExp",
-          signature = "ExperimentSubset",
+          # signature = "ExperimentSubset",
+          signature = "ANY",
           definition = function(x, e, withColData, subsetName, value)
           {
             if(!missing(subsetName)){
@@ -391,7 +398,8 @@ setGeneric(name = "altExps<-",
 
 #' @export
 setReplaceMethod(f = "altExps",
-                 signature = "ExperimentSubset",
+                 # signature = "ExperimentSubset",
+                 signature = "ANY",
                  definition = function(x, withColData, subsetName, value)
                  {
                    if(!missing(subsetName)){
@@ -418,7 +426,8 @@ setGeneric(name = "metadata",
 
 #' @export
 setMethod(f = "metadata",
-          signature = c("ExperimentSubset", "MissingOrCharacter"),
+          #signature = c("ExperimentSubset", "MissingOrCharacter"),
+          signature = "ANY",
           definition = function(object, subsetName)
           {
             if(!missing(subsetName)){
@@ -460,7 +469,8 @@ setGeneric(name = "metadata<-",
 
 #' @export
 setReplaceMethod(f = "metadata",
-          signature = c("ExperimentSubset", "MissingOrCharacter"),
+          #signature = c("ExperimentSubset", "MissingOrCharacter"),
+          signature = "ANY",
           definition = function(object, subsetName, value)
           {
             if(!missing(subsetName)){
@@ -868,7 +878,8 @@ setGeneric(name = "reducedDim",
 )
 
 #' @export
-setMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacter", "MissingOrLogical", "MissingOrCharacter"), function(object, type, withDimnames, subsetName) {
+#setMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacter", "MissingOrLogical", "MissingOrCharacter"), function(object, type, withDimnames, subsetName) {
+setMethod("reducedDim", "ANY", function(object, type, withDimnames, subsetName) {
   if(missing(withDimnames)){
     withDimnames = TRUE
   }
@@ -890,7 +901,8 @@ setGeneric(name = "reducedDims",
 )
 
 #' @export
-setMethod("reducedDims", c("ExperimentSubset", "MissingOrLogical", "MissingOrCharacter"), function(object, withDimnames, subsetName) {
+#setMethod("reducedDims", c("ExperimentSubset", "MissingOrLogical", "MissingOrCharacter"), function(object, withDimnames, subsetName) {
+setMethod("reducedDims", "ANY", function(object, withDimnames, subsetName) {
   if(missing(withDimnames)){
     withDimnames = TRUE
   }
@@ -912,7 +924,8 @@ setGeneric(name = "reducedDim<-",
 )
 
 #' @export
-setReplaceMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacter", "MissingOrCharacter"), function(object, type, subsetName, value) {
+#setReplaceMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacter", "MissingOrCharacter"), function(object, type, subsetName, value) {
+setReplaceMethod("reducedDim", "ANY", function(object, type, subsetName, value) {
   if(!missing(subsetName)){
     SingleCellExperiment::reducedDim(object@subsets[[subsetName]]@internalAssay, type) <- value
   }
@@ -931,7 +944,8 @@ setGeneric(name = "reducedDims<-",
 )
 
 #' @export
-setReplaceMethod("reducedDims", c("ExperimentSubset", "MissingOrCharacter"), function(object, subsetName, value) {
+#setReplaceMethod("reducedDims", c("ExperimentSubset", "MissingOrCharacter"), function(object, subsetName, value) {
+setReplaceMethod("reducedDims", "ANY", function(object, subsetName, value) {
   if(!missing(subsetName)){
     SingleCellExperiment::reducedDims(object@subsets[[subsetName]]@internalAssay) <- value
   }
