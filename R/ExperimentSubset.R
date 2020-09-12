@@ -1,3 +1,9 @@
+if (!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("SingleCellExperiment")
+
+
 library(SingleCellExperiment)
 
 setClassUnion("NullOrCharacter", c("NULL", "character"))
