@@ -855,6 +855,10 @@ setMethod(f = "storeSubset",
           signature = "ExperimentSubset",
           definition = function(object, subsetName, inputMatrix, newInternalAssay = NULL)
           {
+            if(!all(dim(object@subsets[[subsetName]]@internalAssay) == dim(inputMatrix))){
+              stop("Dimensions of the inputMatrix not equal to the subset. You need to create a new subset with createSubset() function.")
+            }
+
             if(is.null(newInternalAssay)){
               object <- createSubset(
                 object,
@@ -863,7 +867,8 @@ setMethod(f = "storeSubset",
                 colnames(inputMatrix),
                 parentAssay = NULL)
 
-              object@subsets[[subsetName]]@internalAssay <- SingleCellExperiment::SingleCellExperiment(list(counts = inputMatrix))
+              object@subsets[[subsetName]]@internalAssay <- SingleCellExperiment::SingleCellExperiment(
+                list(counts = inputMatrix))
 
             }
             else{
