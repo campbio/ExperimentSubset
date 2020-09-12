@@ -1,4 +1,7 @@
 # ExperimentSubset
+[![Build Status](https://travis-ci.org/campbio/ExperimentSubset.svg?branch=master)](https://travis-ci.org/campbio/ExperimentSubset)
+
+## Introduction
 Manages subsets of data with Bioconductor Experiment objects
 
 ## Sample Workflow
