@@ -63,7 +63,7 @@ SingleCellSubset <- function(
 ExperimentSubset <- function(
   object,
   ...,
-  subsets = list())
+  subset = list(subsetName = NA, rows = NA, cols = NA, parentAssay = NA))
 {
   if(!missing(object)){
     if(inherits(object, "SummarizedExperiment")){
@@ -75,12 +75,12 @@ ExperimentSubset <- function(
     se <- SingleCellExperiment::SingleCellExperiment(...)
     es <- .ExperimentSubset(se)
   }
-  if(length(subsets) > 0){
+  if(!anyNA(subset)){
       es <- ExperimentSubset::createSubset(es,
-                         subsetName = subsets[[1]],
-                         rows = subsets[[2]],
-                         cols = subsets[[3]],
-                         parentAssay = subsets[[4]])
+                         subsetName = subset$subsetName,
+                         rows = subset$rows,
+                         cols = subset$cols,
+                         parentAssay = subset$parentAssay)
   }
   es
 }
