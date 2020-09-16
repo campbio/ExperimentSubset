@@ -1,18 +1,24 @@
 Package: ExperimentSubset
 Type: Package
 Title: Manages subsets of data with Bioconductor Experiment objects
-Version: 0.1.0
-Author: Irzam Sarfraz
-Maintainer: The package maintainer <irzam9095@gmail.com>
+Version: 0.9.0
+Authors@R:c(person(given="Irzam", family="Sarfraz", email="irzam9095@gmail.com", role=c("aut"),
+              comment = c(ORCID = "0000-0001-8121-792X")),
+            person(given="Muhammad", family="Asif", email="asif@ntu.edu.pk", role=c("aut","ths"),
+              comment = c(ORCID = "0000-0003-1839-2527")),
+            person(given=c("Joshua","D."), family="Campbell", email="camp@bu.edu", role=c("aut","cre")))
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.0
+Depends:
+  R (>= 3.6.1),
+  SummarizedExperiment,
+  SingleCellExperiment
+biocViews: Infrastructure, Software, DataImport, DataRepresentation
 Imports: 
-  SingleCellExperiment, 
-  SummarizedExperiment, 
   methods,
   Matrix,
   BiocStyle

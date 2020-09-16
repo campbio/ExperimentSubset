@@ -59,6 +59,8 @@ SingleCellSubset <- function(
 )
 
 #' @export
+#' @import BiocStyle
+#' @import Matrix
 #' @importFrom SingleCellExperiment SingleCellExperiment
 ExperimentSubset <- function(
   object,
@@ -143,7 +145,7 @@ setMethod(f = "createSubset",
                     counts = Matrix::Matrix(
                       nrow = length(rows),
                       ncol = length(cols),
-                      data = NA,
+                      data = 0,
                       sparse = TRUE
                       )
                     )
