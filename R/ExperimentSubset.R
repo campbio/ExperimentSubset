@@ -535,7 +535,7 @@ setMethod(f = "showSubsetLink",
           signature = "ExperimentSubset",
           definition = function(object)
           {
-            cat("Main assay(s):\n", assayNames(es),"\n\n")
+            cat("Main assay(s):\n", assayNames(object),"\n\n")
             cat("Subset(s):\n")
             if(!is.null(subsetNames(object))){
               Name <- list()
@@ -552,7 +552,7 @@ setMethod(f = "showSubsetLink",
                 Parent[[i]] <- paste(unlist(parent), collapse = ' -> ')
                 Assays[[i]] <- assayNames(object@subsets[[i]]@internalAssay)
                 Dimensions[[i]] <- paste(unlist(subsetDim(object, subsetNames(object)[i])), collapse = ', ')
-                ReducedDims[[i]] <- paste(unlist(reducedDimNames(es, subsetNames(object)[i])), collapse = ", ")
+                ReducedDims[[i]] <- paste(unlist(reducedDimNames(object, subsetNames(object)[i])), collapse = ", ")
                 AltExperiments[[i]] <- paste(unlist(altExpNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
               }
 
@@ -736,7 +736,7 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
       out <- assay(x@subsets[[subsetName]]@internalAssay, "counts")
     }
     else{
-      out <- assay(x, i)
+      out <- SummarizedExperiment::assay(x, i)
       out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
     }
   }
