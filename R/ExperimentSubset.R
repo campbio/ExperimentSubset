@@ -547,7 +547,7 @@ setMethod(f = "showSubsetLink",
               AltExperiments <- list()
 
               for(i in seq(length(subsetNames(object)))){
-                parent <- getFirstParent(object, subsetAssayNames(object)[i])
+                parent <- subsetParent(object, subsetAssayNames(object)[i])
                 Name[[i]] <- subsetNames(object)[i]
                 Parent[[i]] <- paste(unlist(parent), collapse = ' -> ')
                 Assays[[i]] <- assayNames(object@subsets[[i]]@internalAssay)
@@ -587,7 +587,7 @@ setMethod(f = "showSubsetLink",
 )
 
 #' @export
-getFirstParent <- function(object, subsetName){
+subsetParent <- function(object, subsetName){
   parentList <- list()
   parent <- subsetName
   while(TRUE){
@@ -755,14 +755,14 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
 #' @title assay
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay<-
-setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, newInternalAssay = NULL, ..., value) {
+setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, subsetAssay = NULL, ..., value) {
   if((nrow(value)!= nrow(x))
      || (ncol(value) != ncol(x))){
     storeSubset(
                 object = x,
                 subsetName = i,
                 inputMatrix = value,
-                newInternalAssay = newInternalAssay
+                subsetAssay = subsetAssay
               )
   }
   else{
@@ -846,7 +846,7 @@ setMethod(f = "subsetColData",
 
 #' @export
 setGeneric(name = "storeSubset",
-           def = function(object, subsetName, inputMatrix, newInternalAssay)
+           def = function(object, subsetName, inputMatrix, subsetAssay)
            {
              standardGeneric("storeSubset")
            }
@@ -855,13 +855,13 @@ setGeneric(name = "storeSubset",
 #' @export
 setMethod(f = "storeSubset",
           signature = "ExperimentSubset",
-          definition = function(object, subsetName, inputMatrix, newInternalAssay = NULL)
+          definition = function(object, subsetName, inputMatrix, subsetAssay = NULL)
           {
             if(!all(dim(object@subsets[[subsetName]]@internalAssay) == dim(inputMatrix))){
               stop("Dimensions of the inputMatrix not equal to the subset. You need to create a new subset with createSubset() function.")
             }
 
-            if(is.null(newInternalAssay)){
+            if(is.null(subsetAssay)){
               object <- createSubset(
                 object,
                 subsetName,
@@ -874,7 +874,7 @@ setMethod(f = "storeSubset",
 
             }
             else{
-              assay(object@subsets[[subsetName]]@internalAssay, newInternalAssay) <- inputMatrix
+              assay(object@subsets[[subsetName]]@internalAssay, subsetAssay) <- inputMatrix
               rownames(object@subsets[[subsetName]]@internalAssay) <- rownames(inputMatrix)
               colnames(object@subsets[[subsetName]]@internalAssay) <- colnames(inputMatrix)
             }
