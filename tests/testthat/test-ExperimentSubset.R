@@ -125,9 +125,92 @@ testthat::test_that("Testing 2",{
   ExperimentSubset::altExp(es, "alt1", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
   ExperimentSubset::altExp(es, "alt2", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
   ExperimentSubset::altExp(es, "alt1", subsetName = "hvg1000")
+
+  ExperimentSubset::altExp(es, subsetName = "hvg1000")
+
+  ExperimentSubset::altExp(es) <- tenx_pbmc4k
+
+  ExperimentSubset::altExp(es)
+
+  ExperimentSubset::altExp(es, "a1") <- tenx_pbmc4k
+
+  testthat::expect_error(ExperimentSubset::altExpNames(es, subsetName = "s12121"),
+                         "s12121 does not exist in the subsets slot of the object.")
+
+  ExperimentSubset::altExpNames(es)
+
+  testthat::expect_error(ExperimentSubset::altExp(es, "alt1", subsetName = "hvg10002"),
+                         "hvg10002 does not exist in the subsets slot of the object.")
+
   ExperimentSubset::altExpNames(es, subsetName = "hvg1000") <- c("a1", "a2")
   ExperimentSubset::altExpNames(es, subsetName = "hvg1000")
+
+  testthat::expect_error(ExperimentSubset::altExpNames(es, subsetName = "hvg1000x"),
+                         "hvg1000x does not exist in the subsets slot of the object.")
+
+  ExperimentSubset::altExps(es, subsetName = "hvg1000") <- list(a = es@subsets$hvg1000@internalAssay, b = es@subsets$hvg1000@internalAssay)
+  ExperimentSubset::altExps(es, subsetName = "hvg1000")
+
+  testthat::expect_error(ExperimentSubset::altExps(es, subsetName = "hvg10002"),
+                         "hvg10002 does not exist in the subsets slot of the object.")
+
+  ExperimentSubset::altExps(es)
+
+  ExperimentSubset::subsetDim(es, "hvg1000")
+  ExperimentSubset::reducedDimNames(es, subsetName = "hvg1000") <- c("PCA_1")
+  ExperimentSubset::reducedDimNames(es, subsetName = "hvg1000")
+
+  testthat::expect_error(ExperimentSubset::reducedDimNames(es, subsetName = "hvg123"),
+                         "hvg123 does not exist in the subsets slot of the object.")
+
+  ExperimentSubset::reducedDimNames(es)
+
+  ExperimentSubset::assay(es, "counts")
 
   testthat::expect_true(validObject(es))
 })
 
+testthat::test_that("Testint 3",{
+
+  data(sce_chcl, package = "scds")
+
+  #constructor subset
+  es <- ExperimentSubset::ExperimentSubset(sce_chcl, subset = list(subsetName = "subset10", rows = c(1:10), cols = c(1:2), parentAssay = "counts"))
+
+  #no parent assay
+  es <- ExperimentSubset::createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299))
+
+  testthat::expect_true(validObject(es))
+
+})
+
+
+testthat::test_that("Testint 4",{
+
+  data(sce_chcl, package = "scds")
+
+  es <- ExperimentSubset::ExperimentSubset(sce_chcl)
+
+  #wrong parent assay
+  testthat::expect_error(es <- ExperimentSubset::createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "none"), "Input parentAssay does not exist.")
+
+
+  #colnames
+  es <- ExperimentSubset::createSubset(es, "subset22", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts")
+  testthat::expect_true(validObject(es))
+
+  #null rows and null cols
+  es <- ExperimentSubset::createSubset(es, "subset223", parentAssay = "counts")
+  testthat::expect_true(validObject(es))
+
+  #nas introduced in rows or cols
+  testthat::expect_error(  es <- ExperimentSubset::createSubset(es, "subset22", rows = c("as", "asd", "asd"), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
+
+
+  testthat::expect_error(es <- ExperimentSubset::createSubset(es, "subset22", cols = c("CTGTG", "CAGTCC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
+
+
+
+
+
+})

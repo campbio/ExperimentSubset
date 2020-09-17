@@ -392,7 +392,7 @@ setReplaceMethod(f = "altExp",
 
 #' @export
 setGeneric(name = "altExps<-",
-           def = function(x, withColData = FALSE, subsetName, value)
+           def = function(x, subsetName, value)
            {
              standardGeneric("altExps<-")
            }
@@ -402,13 +402,13 @@ setGeneric(name = "altExps<-",
 setReplaceMethod(f = "altExps",
                  # signature = "ExperimentSubset",
                  signature = "ANY",
-                 definition = function(x, withColData, subsetName, value)
+                 definition = function(x, subsetName, value)
                  {
                    if(!missing(subsetName)){
                      if(is.null(x@subsets[[subsetName]])){
                        stop(paste(subsetName, "does not exist in the subsets slot of the object."))
                      }
-                     SingleCellExperiment::altExps(x@subsets[[subsetName]]@internalAssay, withColData = withColData) <- value
+                     SingleCellExperiment::altExps(x@subsets[[subsetName]]@internalAssay) <- value
                    }
                    else{
                      SingleCellExperiment::altExps(x, withColData = withColData) <- value
