@@ -7,15 +7,13 @@
 metadata(object, subsetName)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \link{S4Vectors}.}
+\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.}
 
-\item{subsetName}{Name of the subset to get the \code{metadata} from. If \code{missing}, \code{metadata} is
-fetched from the main input object.}
+\item{subsetName}{Name of the subset to get the \code{metadata} from. If \code{missing}, \code{metadata} is fetched from the main input object.}
 }
 \value{
 A \code{list} of \code{metadata} elements.
 }
 \description{
-Get \code{metadata} from an \code{ExperimentSubset} object or any object supported by
-\link{S4Vectors}.
+Get \code{metadata} from an \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
 }

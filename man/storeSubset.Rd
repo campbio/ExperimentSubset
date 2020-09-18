@@ -9,19 +9,15 @@ storeSubset(object, subsetName, inputMatrix, subsetAssayName)
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object}
 
-\item{subsetName}{Specify the name of the existing subset inside which the new subset \code{assay}
-should be stored.}
+\item{subsetName}{Specify the name of the existing subset inside which the new subset \code{assay} should be stored.}
 
 \item{inputMatrix}{The input subset \code{assay}.}
 
-\item{subsetAssayName}{Specify the name of the new \code{assay} against the \code{inputMatrix} parameter.
-If \code{NULL}, a new subset is created internally using the \code{createSubset} function.
-Default \code{NULL}.}
+\item{subsetAssayName}{Specify the name of the new \code{assay} against the \code{inputMatrix} parameter. If \code{NULL}, a new subset is created internally using the \code{createSubset} function. Default \code{NULL}.}
 }
 \value{
 Updated \code{ExperimentSubset} object with the new \code{assay} stored inside the specified subset.
 }
 \description{
-Store a new subset \code{assay} inside a specified subset in the input
-\code{ExperimentSubset} object.
+Store a new subset \code{assay} inside a specified subset in the input \code{ExperimentSubset} object.
 }

@@ -9,8 +9,7 @@ subsetParent(object, subsetName)
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Specify the name of the subset against which the subset to parent link
-should be retrieved.}
+\item{subsetName}{Specify the name of the subset against which the subset to parent link should be retrieved.}
 }
 \value{
 A \code{list} containing the parent link of the subset.

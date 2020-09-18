@@ -10,8 +10,7 @@ subsetAssayNames(object)
 \item{object}{Input \code{ExperimentSubset} object.}
 }
 \value{
-A \code{vector} containing the names of the subsets and the subset assays
-available in the input \code{ExperimentSubset} object.
+A \code{vector} containing the names of the subsets and the subset assays available in the input \code{ExperimentSubset} object.
 }
 \description{
 Retrieves the names of all the subsets as well as the subset assays.

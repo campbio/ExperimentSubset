@@ -13,6 +13,5 @@ subsetAssayCount(object)
 A \code{numeric} value representing the sum of the subset count and subset assay count.
 }
 \description{
-Get the count of the total available subsets and the subset assays inside
-these subsets in an \code{ExperimentSubset} object.
+Get the count of the total available subsets and the subset assays inside these subsets in an \code{ExperimentSubset} object.
 }

@@ -7,22 +7,17 @@
 reducedDim(object, type, withDimnames, subsetName)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{reducedDim} from
-\link[SingleCellExperiment]{reducedDims} method.}
+\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method.}
 
 \item{type}{Same as \code{type} in \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method.}
 
 \item{withDimnames}{Same as \code{withDimnames} in \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method.}
 
-\item{subsetName}{Specify the name of the subset from which the \code{reducedDim}
-should be fetched from. If \code{missing}, \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method
-is called on the main object.}
+\item{subsetName}{Specify the name of the subset from which the \code{reducedDim} should be fetched from. If \code{missing}, \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.}
 }
 \value{
-\code{reducedDim} from the specified subset or same as \code{reducedDim} from \link[SingleCellExperiment]{reducedDims}
-when \code{subsetName} is \code{missing}.
+The \code{reducedDim} from the specified subset or same as \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
 }
 \description{
-A wrapper to the \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method
-with additional support for subsets.
+A wrapper to the \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 }

@@ -12,7 +12,7 @@ subsetRowData(object, subsetName)
 \item{subsetName}{Name of the subset to get \code{rowData} from.}
 }
 \value{
-\code{rowData} from input object.
+The \code{rowData} from input object.
 }
 \description{
 Get \code{rowData} from a subset.

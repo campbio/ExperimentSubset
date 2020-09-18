@@ -12,8 +12,7 @@ subsetDim(object, subsetName)
 \item{subsetName}{Name of the subset to retrieve the dimensions from.}
 }
 \value{
-A \code{vector} containing the dimensions of the specified
-subset i.e. the number of rows and the number of columns in the subset.
+A \code{vector} containing the dimensions of the specified subset i.e. the number of rows and the number of columns in the subset.
 }
 \description{
 Retrieves the dimensions of the specified subset in an \code{ExperimentSubset} object.

@@ -7,18 +7,13 @@
 altExpNames(x, subsetName)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{altExpNames} from
-\link[SingleCellExperiment]{altExps} method.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{altExpNames} from \link[SingleCellExperiment]{altExps} method.}
 
-\item{subsetName}{Specify the name of the subset from which the \code{altExpNames}
-should be fetched from. If \code{missing}, \code{altExpNames} from \link[SingleCellExperiment]{altExps} method
-is called on the main object.}
+\item{subsetName}{Specify the name of the subset from which the \code{altExpNames} should be fetched from. If \code{missing}, \code{altExpNames} from \link[SingleCellExperiment]{altExps} method is called on the main object.}
 }
 \value{
-\code{altExpNames} from the specified subset or same as \code{altExpNames} from \link[SingleCellExperiment]{altExps}
-when \code{subsetName} is \code{missing}.
+The \code{altExpNames} from the specified subset or same as \code{altExpNames} from \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
 }
 \description{
-A wrapper to the \code{altExpNames} from \link[SingleCellExperiment]{altExps} method
-with additional support for subsets.
+A wrapper to the \code{altExpNames} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
 }

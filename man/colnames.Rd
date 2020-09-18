@@ -7,18 +7,13 @@
 colnames(object, ...)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by
-\code{colnames} in \link[BiocGenerics] package.}
+\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.}
 
-\item{...}{Additional parameters}
-
-\item{subsetName}{Name of the subset to get \code{colnames} from.}
+\item{...}{Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.}
 }
 \value{
 A \code{vector} of \code{colnames}.
 }
 \description{
-Get \code{colnames} from an \code{ExperimentSubset} object or a subset
-in the \code{ExperimentSubset} object or any object supported by \code{colnames}
-in \link[BiocGenerics] package.
+Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
 }

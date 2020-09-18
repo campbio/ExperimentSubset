@@ -7,24 +7,19 @@
 \S4method{assay}{ExperimentSubset,character}(x, i, subsetAssayName = NULL, ...) <- value
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{assay}
-from \link[SummarizedExperiment].}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.}
 
-\item{i}{Name of an \code{assay} or name of the subset if storing to an
-\code{ExperimentSubset} object.}
+\item{i}{Name of an \code{assay} or name of the subset if storing to an \code{ExperimentSubset} object.}
 
-\item{subsetAssayName}{Name of the assay to store if storing to an
-\code{ExperimentSubset} object.}
+\item{subsetAssayName}{Name of the assay to store if storing to an \code{ExperimentSubset} object.}
 
 \item{...}{Additional parameters.}
 
-\item{value}{\code{assay} to store.}
+\item{value}{The \code{assay} to store.}
 }
 \value{
 Input object with \code{assay} stored.
 }
 \description{
-Method to set an \code{assay} to an \code{ExperimentSubset} object
-or a subset from an \code{ExperimentSubset} object or any object supported by
-\code{assay<-} from \link[SummarizedExperiment].
+Method to set an \code{assay} to an \code{ExperimentSubset} object or a subset from an \code{ExperimentSubset} object or any object supported by \code{assay<-} from \code{SummarizedExperiment}.
 }

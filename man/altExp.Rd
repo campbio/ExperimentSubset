@@ -7,22 +7,17 @@
 altExp(x, e, withColData = FALSE, subsetName)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{altExp} from
-\link[SingleCellExperiment]{altExps} method.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{altExp} from \link[SingleCellExperiment]{altExps} method.}
 
 \item{e}{Same as \code{altExp} from \link[SingleCellExperiment]{altExps}.}
 
 \item{withColData}{Same as \code{altExp} from \link[SingleCellExperiment]{altExps}. Default \code{FALSE}.}
 
-\item{subsetName}{Specify the name of the subset from which the \code{altExp}
-should be fetched from. If \code{missing}, \code{altExp} from \link[SingleCellExperiment]{altExps} method
-is called on the main object.}
+\item{subsetName}{Specify the name of the subset from which the \code{altExp} should be fetched from. If \code{missing}, \code{altExp} from \link[SingleCellExperiment]{altExps} method is called on the main object.}
 }
 \value{
-\code{altExp} from the specified subset or same as \code{altExp} from \link[SingleCellExperiment]{altExps}
-when \code{subsetName} is \code{missing}.
+The \code{altExp} from the specified subset or same as \code{altExp} from \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
 }
 \description{
-A wrapper to the \code{altExp} from \link[SingleCellExperiment]{altExps} method
-with additional support for subsets.
+A wrapper to the \code{altExp} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
 }

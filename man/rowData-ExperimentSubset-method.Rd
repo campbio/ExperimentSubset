@@ -7,16 +7,14 @@
 \S4method{rowData}{ExperimentSubset}(x, subsetName = NULL, ...)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{rowData}
-from \link[SummarizedExperiment].}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{rowData} from \code{SummarizedExperiment}.}
 
-\item{subsetName}{Name of the subset to get \code{rowData} from. If \code{NULL} or
-\code{missing}, \code{rowData} from main input object is fetched.}
+\item{subsetName}{Name of the subset to get \code{rowData} from. If \code{NULL} or \code{missing}, \code{rowData} from main input object is fetched.}
 
 \item{...}{Additional parameters.}
 }
 \value{
-\code{rowData} from input object or subset of an input object.
+The \code{rowData} from input object or subset of an input object.
 }
 \description{
 Get \code{rowData} from a subset of an input object or the object itself.

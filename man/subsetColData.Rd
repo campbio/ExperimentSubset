@@ -12,7 +12,7 @@ subsetColData(object, subsetName)
 \item{subsetName}{Name of the subset to get \code{colData} from.}
 }
 \value{
-\code{colData} from input object.
+The \code{colData} from input object.
 }
 \description{
 Get \code{colData} from a subset.
