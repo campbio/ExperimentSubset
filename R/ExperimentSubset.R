@@ -411,7 +411,7 @@ setReplaceMethod(f = "altExps",
                      SingleCellExperiment::altExps(x@subsets[[subsetName]]@internalAssay) <- value
                    }
                    else{
-                     SingleCellExperiment::altExps(x, withColData = withColData) <- value
+                     SingleCellExperiment::altExps(x) <- value
                    }
                    x
                  }
@@ -796,7 +796,7 @@ setMethod(f = "subsetRowData",
             }
             else{
               #neither a subset nor a subset assay
-              print("neither a subset nor a subset assay")
+              stop("Neither a subset nor a subsetAssay.")
             }
             return(out)
           }
@@ -837,7 +837,7 @@ setMethod(f = "subsetColData",
             }
             else{
               #neither a subset nor a subset assay
-              print("neither a subset nor a subset assay")
+              stop("Neither a subset nor a subsetAssay.")
             }
             return(out)
           }
@@ -857,6 +857,10 @@ setMethod(f = "storeSubset",
           signature = "ExperimentSubset",
           definition = function(object, subsetName, inputMatrix, subsetAssay = NULL)
           {
+            if(is.null(object@subsets[[subsetName]])){
+              stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+            }
+
             if(!all(dim(object@subsets[[subsetName]]@internalAssay) == dim(inputMatrix))){
               stop("Dimensions of the inputMatrix not equal to the subset. You need to create a new subset with createSubset() function.")
             }
