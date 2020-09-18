@@ -1,15 +1,8 @@
-library(SingleCellExperiment)
-
 setClassUnion("NullOrCharacter", c("NULL", "character"))
 setClassUnion("MissingOrNullOrCharacter", c("missing","NULL", "character"))
 setClassUnion("NullOrNumeric", c("NULL", "numeric"))
-setClassUnion("NullOrNumericOrCharacter", c("NULL", "numeric", "character"))
-setClassUnion("MissingOrNumericOrCharacter", c("missing", "numeric", "character"))
 setClassUnion("NullOrMissingOrNumericOrCharacter", c("NULL", "missing", "numeric", "character"))
-setClassUnion("MissingOrLogical", c("missing", "logical"))
-setClassUnion("MissingOrCharacter", c("missing", "character"))
-setClassUnion("CharacterOrNumeric", c("character", "numeric"))
-#add these restrictions for all functions
+
 
 #' @export
 #' @import methods
@@ -87,7 +80,26 @@ ExperimentSubset <- function(
   es
 }
 
-
+#' @title createSubset
+#' @description Create a subset from an already available \code{assay} in the
+#' input \code{ExperimentSubset} object by specifying the rows and columns
+#' to include in the subset.
+#' @param object Input \code{ExperimentSubset} object.
+#' @param subsetName Specify the name of the subset to create.
+#' @param rows Specify the rows to include in this subset.
+#' If \code{missing} or \code{NULL}, all rows are included in the subset.
+#' Values can be \code{numeric} or \code{character}.
+#' Default \code{NULL}.
+#' @param cols Specify the columns to include in this subset.
+#' If \code{missing} or \cude{NULL}, all columns are included in the subset.
+#' Values can be \code{numeric} or \code{character}.
+#' Default \code{NULL}.
+#' @param parentAssay Specify the parent \code{assay} of the subset. This parent
+#' \code{assay} must already be available in the \code{ExperimentSubset} object.
+#' If \code{NULL}, the first available main \code{assay} will be marked as parent.
+#' Default \code{NULL}.
+#' @return An \code{ExperimentSubset} object that now contains the newly created subset.
+#'
 #' @export
 setGeneric(name = "createSubset",
            def = function(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
@@ -109,7 +121,7 @@ setMethod(f = "createSubset",
                                 cols,
                                 parentAssay)
             {
-            tempAssay <- "" #better way to use this?
+            tempAssay <- ""
             if(is.null(parentAssay)){
               tempAssay <- SummarizedExperiment::assayNames(object)[1]
               parentAssay <- tempAssay
@@ -157,17 +169,23 @@ setMethod(f = "createSubset",
                 na.fail(scs@rowIndices)
                 na.fail(scs@colIndices)
               }, error = function(e){
-                stop("NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
+                stop("NAs introduced in input rows or columns.
+                     Some or all indicated rows or columns not found in specified parent.")
               })
 
               #Remove counts assay from internal SCE object of the subset to save memory
-              assay(scs@internalAssay, "counts") <- NULL #a better way to do this
+              assay(scs@internalAssay, "counts") <- NULL
 
               object@subsets[[subsetName]] <- scs
               return(object)
           }
 )
 
+#' @title subsetNames
+#' @description Retrieves the names of the available subsets in an \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
+#' @return A \code{vector} of subset names.
+#'
 #' @export
 setGeneric(name = "subsetNames",
            def = function(object)
@@ -195,7 +213,6 @@ setGeneric(name = "altExps",
 
 #' @export
 setMethod(f = "altExps",
-          # signature = "ExperimentSubset",
           signature = "ANY",
           definition = function(x, withColData, subsetName)
           {
@@ -221,7 +238,6 @@ setGeneric(name = "altExp",
 
 #' @export
 setMethod(f = "altExp",
-          # signature = "ExperimentSubset",
           signature = "ANY",
           definition = function(x, e, withColData, subsetName)
           {
@@ -257,7 +273,6 @@ setGeneric(name = "altExpNames",
 
 #' @export
 setMethod(f = "altExpNames",
-          # signature = "ExperimentSubset",
           signature = "ANY",
           definition = function(x, subsetName)
           {
@@ -283,7 +298,6 @@ setGeneric(name = "reducedDimNames",
 
 #' @export
 setMethod(f = "reducedDimNames",
-          # signature = "ExperimentSubset",
           signature = "ANY",
           definition = function(x, subsetName)
           {
@@ -309,7 +323,6 @@ setGeneric(name = "altExpNames<-",
 
 #' @export
 setReplaceMethod(f = "altExpNames",
-                 # signature = "ExperimentSubset",
                  signature = "ANY",
                  definition = function(x, subsetName, value)
                  {
@@ -336,7 +349,6 @@ setGeneric(name = "reducedDimNames<-",
 
 #' @export
 setReplaceMethod(f = "reducedDimNames",
-                 # signature = "ExperimentSubset",
                  signature = "ANY",
                  definition = function(x, subsetName, value)
                  {
@@ -363,7 +375,6 @@ setGeneric(name = "altExp<-",
 
 #' @export
 setReplaceMethod(f = "altExp",
-          # signature = "ExperimentSubset",
           signature = "ANY",
           definition = function(x, e, withColData, subsetName, value)
           {
@@ -400,7 +411,6 @@ setGeneric(name = "altExps<-",
 
 #' @export
 setReplaceMethod(f = "altExps",
-                 # signature = "ExperimentSubset",
                  signature = "ANY",
                  definition = function(x, subsetName, value)
                  {
@@ -428,7 +438,6 @@ setGeneric(name = "metadata",
 
 #' @export
 setMethod(f = "metadata",
-          #signature = c("ExperimentSubset", "MissingOrCharacter"),
           signature = "ANY",
           definition = function(object, subsetName)
           {
@@ -444,6 +453,12 @@ setMethod(f = "metadata",
           }
 )
 
+#' @title subsetDim
+#' @description Retrieves the dimensions of the specified subset in an \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
+#' @param subsetName Name of the subset to retrieve the dimensions from.
+#' @return A \code{vector} containing the dimensions of the specified
+#' subset i.e. the number of rows and the number of columns in the subset.
 #' @export
 setGeneric(name = "subsetDim",
            def = function(object, subsetName)
@@ -471,7 +486,6 @@ setGeneric(name = "metadata<-",
 
 #' @export
 setReplaceMethod(f = "metadata",
-          #signature = c("ExperimentSubset", "MissingOrCharacter"),
           signature = "ANY",
           definition = function(object, subsetName, value)
           {
@@ -488,6 +502,10 @@ setReplaceMethod(f = "metadata",
           }
 )
 
+#' @title subsetCount
+#' @description Get the total count of the available subsets in an \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
+#' @return A \code{numeric} value representing the total count of the subsets.
 #' @export
 setGeneric(name = "subsetCount",
            def = function(object)
@@ -505,6 +523,11 @@ setMethod(f = "subsetCount",
           }
 )
 
+#' @title subsetAssayCount
+#' @description Get the count of the total available subsets and the subset assays inside
+#' these subsets in an \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
+#' @return A \code{numeric} value representing the sum of the subset count and subset assay count.
 #' @export
 setGeneric(name = "subsetAssayCount",
            def = function(object)
@@ -513,6 +536,8 @@ setGeneric(name = "subsetAssayCount",
            }
 )
 
+#' @param ExperimentSubset
+#'
 #' @export
 setMethod(f = "subsetAssayCount",
           signature = "ExperimentSubset",
@@ -522,6 +547,15 @@ setMethod(f = "subsetAssayCount",
           }
 )
 
+#' @title showSubsetLink
+#' @description The function displays the content of an \code{ExperimentSubset} object
+#' including all available main assays, all subsets and the subset assays inside these subsets.
+#' This function also depicts how and in what order the subsets in the object are linked with
+#' their parents. Moreover, all supplementary data inside the subsets such as \code{reducedDims}
+#' and \code{altExps} are also displayed against each subset entry.
+#' @param object Input \code{ExperimentSubset} object.
+#' @return Prints all the available subset information against the input \code{ExperimentSubset}
+#' object.
 #' @export
 setGeneric(name = "showSubsetLink",
            def = function(object)
@@ -586,33 +620,50 @@ setMethod(f = "showSubsetLink",
           }
 )
 
+#' @title subsetParent
+#' @description Retrieves a complete subset to parent link from a specified subset.
+#' @param object Input \code{ExperimentSubset} object.
+#' @param subsetName Specify the name of the subset against which the subset to parent link
+#' should be retrieved.
+#' @return A \code{list} containing the parent link of the subset.
 #' @export
-subsetParent <- function(object, subsetName){
-  parentList <- list()
-  parent <- subsetName
-  while(TRUE){
-    parentList <- c(parentList, parent)
-    if(!is.null(object@subsets[[parent]])){
-      parent <- object@subsets[[parent]]@parentAssay
-    }
-    else{
-      for(i in seq(subsetCount(object))){
-        if(parent %in% assayNames(object@subsets[[i]]@internalAssay)){
-          parent <- object@subsets[[i]]@subsetName
-        }
-      }
-      parentList <- c(parentList, parent)
-      parent <- object@subsets[[parent]]@parentAssay
-      #print(parent)
-    }
-    if(parent %in% assayNames(object)){
-      parentList <- c(parentList, parent)
-      break
-    }
-  }
-  parentList[[1]] <- NULL
-  return(parentList)
-}
+setGeneric(name = "subsetParent",
+           def = function(object, subsetName)
+           {
+             standardGeneric("subsetParent")
+           }
+)
+
+#' @export
+setMethod(f = "subsetParent",
+          signature = "ANY",
+          definition = function(object, subsetName)
+          {
+            parentList <- list()
+            parent <- subsetName
+            while(TRUE){
+              parentList <- c(parentList, parent)
+              if(!is.null(object@subsets[[parent]])){
+                parent <- object@subsets[[parent]]@parentAssay
+              }
+              else{
+                for(i in seq(subsetCount(object))){
+                  if(parent %in% assayNames(object@subsets[[i]]@internalAssay)){
+                    parent <- object@subsets[[i]]@subsetName
+                  }
+                }
+                parentList <- c(parentList, parent)
+                parent <- object@subsets[[parent]]@parentAssay
+              }
+              if(parent %in% assayNames(object)){
+                parentList <- c(parentList, parent)
+                break
+              }
+            }
+            parentList[[1]] <- NULL
+            return(parentList)
+          }
+)
 
 
 #' @export
@@ -671,6 +722,11 @@ setMethod(f = "colnames",
           }
 )
 
+#' @title subsetAssayNames
+#' @description Retrieves the names of all the subsets as well as the subset assays.
+#' @param object Input \code{ExperimentSubset} object.
+#' @return A \code{vector} containing the names of the subsets and the subset assays
+#' available in the input \code{ExperimentSubset} object.
 #' @export
 setGeneric(name = "subsetAssayNames",
            def = function(object)
@@ -755,14 +811,14 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
 #' @title assay
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay<-
-setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, subsetAssay = NULL, ..., value) {
+setReplaceMethod("assay", c("ExperimentSubset", "character"), function(x, i, subsetAssayName = NULL, ..., value) {
   if((nrow(value)!= nrow(x))
      || (ncol(value) != ncol(x))){
     storeSubset(
                 object = x,
                 subsetName = i,
                 inputMatrix = value,
-                subsetAssay = subsetAssay
+                subsetAssayName = subsetAssayName
               )
   }
   else{
@@ -844,9 +900,21 @@ setMethod(f = "subsetColData",
 )
 
 
+#' @title storeSubset
+#' @description Store a new subset \code{assay} inside a specified subset in the input
+#' \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object
+#' @param subsetName Specify the name of the existing subset inside which the new subset \code{assay}
+#' should be stored.
+#' @param inputMatrix The input subset \code{assay}.
+#' @param subsetAssayName Specify the name of the new \code{assay} against the \code{inputMatrix} parameter.
+#' If \code{NULL}, a new subset is created internally using the \code{createSubset} function.
+#' Default \code{NULL}.
+#' @return Updated \code{ExperimentSubset} object with the new \code{assay} stored inside the specified subset.
+#'
 #' @export
 setGeneric(name = "storeSubset",
-           def = function(object, subsetName, inputMatrix, subsetAssay)
+           def = function(object, subsetName, inputMatrix, subsetAssayName)
            {
              standardGeneric("storeSubset")
            }
@@ -855,7 +923,7 @@ setGeneric(name = "storeSubset",
 #' @export
 setMethod(f = "storeSubset",
           signature = "ExperimentSubset",
-          definition = function(object, subsetName, inputMatrix, subsetAssay = NULL)
+          definition = function(object, subsetName, inputMatrix, subsetAssayName = NULL)
           {
             if(is.null(object@subsets[[subsetName]])){
               stop(paste(subsetName, "does not exist in the subsets slot of the object."))
@@ -865,7 +933,7 @@ setMethod(f = "storeSubset",
               stop("Dimensions of the inputMatrix not equal to the subset. You need to create a new subset with createSubset() function.")
             }
 
-            if(is.null(subsetAssay)){
+            if(is.null(subsetAssayName)){
               object <- createSubset(
                 object,
                 subsetName,
@@ -878,7 +946,7 @@ setMethod(f = "storeSubset",
 
             }
             else{
-              assay(object@subsets[[subsetName]]@internalAssay, subsetAssay) <- inputMatrix
+              assay(object@subsets[[subsetName]]@internalAssay, subsetAssayName) <- inputMatrix
               rownames(object@subsets[[subsetName]]@internalAssay) <- rownames(inputMatrix)
               colnames(object@subsets[[subsetName]]@internalAssay) <- colnames(inputMatrix)
             }
@@ -896,7 +964,6 @@ setGeneric(name = "reducedDim",
 )
 
 #' @export
-#setMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacter", "MissingOrLogical", "MissingOrCharacter"), function(object, type, withDimnames, subsetName) {
 setMethod("reducedDim", "ANY", function(object, type, withDimnames, subsetName) {
   if(missing(withDimnames)){
     withDimnames = TRUE
@@ -919,7 +986,6 @@ setGeneric(name = "reducedDims",
 )
 
 #' @export
-#setMethod("reducedDims", c("ExperimentSubset", "MissingOrLogical", "MissingOrCharacter"), function(object, withDimnames, subsetName) {
 setMethod("reducedDims", "ANY", function(object, withDimnames, subsetName) {
   if(missing(withDimnames)){
     withDimnames = TRUE
@@ -942,7 +1008,6 @@ setGeneric(name = "reducedDim<-",
 )
 
 #' @export
-#setReplaceMethod("reducedDim", c("ExperimentSubset", "MissingOrNumericOrCharacter", "MissingOrCharacter"), function(object, type, subsetName, value) {
 setReplaceMethod("reducedDim", "ANY", function(object, type, subsetName, value) {
   if(!missing(subsetName)){
     SingleCellExperiment::reducedDim(object@subsets[[subsetName]]@internalAssay, type) <- value
@@ -962,7 +1027,6 @@ setGeneric(name = "reducedDims<-",
 )
 
 #' @export
-#setReplaceMethod("reducedDims", c("ExperimentSubset", "MissingOrCharacter"), function(object, subsetName, value) {
 setReplaceMethod("reducedDims", "ANY", function(object, subsetName, value) {
   if(!missing(subsetName)){
     SingleCellExperiment::reducedDims(object@subsets[[subsetName]]@internalAssay) <- value
