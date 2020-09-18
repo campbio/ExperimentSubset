@@ -74,7 +74,7 @@ testthat::test_that("Testing createSubset and storeSubset",{
 
   testthat::expect_true(validObject(es))
 
-  scaledCounts <- assay(es, "subset1")
+  scaledCounts <- ExperimentSubset::assay(es, "subset1")
   scaledCounts[,] <- scaledCounts[,] + 1
 
   es <- ExperimentSubset::storeSubset(es, "subset1", scaledCounts, "scaledSubset1")
@@ -118,9 +118,9 @@ testthat::test_that("Testing createSubset and storeSubset",{
 
 
   es@subsets$subset1@parentAssay = NULL
-  assay2 <- assay(es, "subset1")
+  assay2 <- ExperimentSubset::assay(es, "subset1")
 
-  assay(es, "counts2") <- assay(es, "counts")
+  ExperimentSubset::assay(es, "counts2") <- ExperimentSubset::assay(es, "counts")
 
   testthat::expect_true(validObject(es))
 })
@@ -133,42 +133,42 @@ testthat::test_that("Testing 2",{
   es <- ExperimentSubset::ExperimentSubset(assays = list(counts = assay(tenx_pbmc4k, "counts")), colData = colData(tenx_pbmc4k), rowData = rowData(tenx_pbmc4k))
 
   #2 = perform colsums on counts matrix (4340 cells)
-  colData(es) <- cbind(colData(es), colSums = colSums(assay(es, "counts")))
-  rowData(es) <- cbind(rowData(es), rowSums = rowSums(assay(es, "counts")))
+  ExperimentSubset::colData(es) <- cbind(ExperimentSubset::colData(es), colSums = colSums(assay(es, "counts")))
+  ExperimentSubset::rowData(es) <- cbind(ExperimentSubset::rowData(es), rowSums = rowSums(assay(es, "counts")))
 
   #3 = filter columns with low colsums and create new subset
-  es <- createSubset(es, "filteredAssay", rows = rownames(es), cols = which(colData(es)$colSums > mean(colData(es)$colSums)), parentAssay = "counts")
+  es <- ExperimentSubset::createSubset(es, "filteredAssay", rows = rownames(es), cols = which(colData(es)$colSums > mean(colData(es)$colSums)), parentAssay = "counts")
 
   #4 = create normalized assay from subset in #3 using scater function
-  assay(es, "filteredAssay", subsetAssay = "filteredAssayNormalized") <- scater::normalizeCounts(assay(es, "filteredAssay"))
+  ExperimentSubset::assay(es, "filteredAssay", subsetAssay = "filteredAssayNormalized") <- scater::normalizeCounts(assay(es, "filteredAssay"))
 
   #5 = find variable genes and create subset
-  es <- createSubset(es, "hvg10", rows = scran::getTopHVGs(scran::modelGeneVar(assay(es, "filteredAssayNormalized")), n = 10), cols = seq(1:1622), parentAssay = "filteredAssayNormalized")
-  es <- createSubset(es, "hvg1000", rows = scran::getTopHVGs(scran::modelGeneVar(assay(es, "filteredAssayNormalized")), n = 1000), cols = seq(1:1622), parentAssay = "filteredAssayNormalized")
+  es <- ExperimentSubset::createSubset(es, "hvg10", rows = scran::getTopHVGs(scran::modelGeneVar(assay(es, "filteredAssayNormalized")), n = 10), cols = seq(1:1622), parentAssay = "filteredAssayNormalized")
+  es <- ExperimentSubset::createSubset(es, "hvg1000", rows = scran::getTopHVGs(scran::modelGeneVar(assay(es, "filteredAssayNormalized")), n = 1000), cols = seq(1:1622), parentAssay = "filteredAssayNormalized")
 
   #6 = run pca on hvg, run clustering and store back cluster labels into subset colData
   #pca
-  reducedDim(es, type = "PCA", subsetName = "hvg1000") <- scater::calculatePCA(assay(es, "hvg1000"))
+  ExperimentSubset::reducedDim(es, type = "PCA", subsetName = "hvg1000") <- scater::calculatePCA(assay(es, "hvg1000"))
 
-  reducedDims(es, subsetName = "hvg1000") <- list(a = scater::calculatePCA(assay(es, "hvg1000")), b = scater::calculatePCA(assay(es, "hvg1000")))
+  ExperimentSubset::reducedDims(es, subsetName = "hvg1000") <- list(a = scater::calculatePCA(assay(es, "hvg1000")), b = scater::calculatePCA(assay(es, "hvg1000")))
 
-  reducedDims(es, subsetName = "hvg1000")
+  ExperimentSubset::reducedDims(es, subsetName = "hvg1000")
 
   #clustering
   set.seed(20)
-  colData(es, subsetName = "hvg1000") <- cbind(colData(es, subsetName = "hvg1000"), cluster = kmeans(t(assay(es, "hvg1000")), 5)$cluster)
-  reducedDim(es, type = "PCA", subsetName = "hvg1000")
-  metadata(es, subsetName = "hvg1000") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
-  metadata(es, subsetName = "hvg1000")
+  ExperimentSubset::colData(es, subsetName = "hvg1000") <- cbind(colData(es, subsetName = "hvg1000"), cluster = kmeans(t(assay(es, "hvg1000")), 5)$cluster)
+  ExperimentSubset::reducedDim(es, type = "PCA", subsetName = "hvg1000")
+  ExperimentSubset::metadata(es, subsetName = "hvg1000") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
+  ExperimentSubset::metadata(es, subsetName = "hvg1000")
 
-  testthat::expect_error(metadata(es, subsetName = "hvg") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2"),
+  testthat::expect_error(ExperimentSubset::metadata(es, subsetName = "hvg") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2"),
                          "hvg does not exist in the subsets slot of the object.")
 
-  testthat::expect_error(metadata(es, subsetName = "hvg"),
+  testthat::expect_error(ExperimentSubset::metadata(es, subsetName = "hvg"),
                          "hvg does not exist in the subsets slot of the object.")
 
-  metadata(es) <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
-  metadata(es)
+  ExperimentSubset::metadata(es) <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
+  ExperimentSubset::metadata(es)
 
   ExperimentSubset::altExp(es, "alt1", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
   ExperimentSubset::altExp(es, "alt2", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
@@ -235,11 +235,11 @@ testthat::test_that("Testing 2",{
   testthat::expect_error(ExperimentSubset::reducedDimNames(es, subsetName = "hvg123") <- c("PCA_1"),
                          "hvg123 does not exist in the subsets slot of the object.")
 
-  reducedDim(es, type = "PCA") <- scater::calculatePCA(assay(es, "counts"))
-  reducedDim(es, type = "PCA")
+  ExperimentSubset::reducedDim(es, type = "PCA") <- scater::calculatePCA(assay(es, "counts"))
+  ExperimentSubset::reducedDim(es, type = "PCA")
 
-  reducedDims(es) <- list(a = scater::calculatePCA(assay(es, "counts")), b = scater::calculatePCA(assay(es, "counts")))
-  reducedDims(es)
+  ExperimentSubset::reducedDims(es) <- list(a = scater::calculatePCA(assay(es, "counts")), b = scater::calculatePCA(assay(es, "counts")))
+  ExperimentSubset::reducedDims(es)
 
   ExperimentSubset::reducedDimNames(es)
   ExperimentSubset::reducedDimNames(es) <- c("PCA_Counts")
