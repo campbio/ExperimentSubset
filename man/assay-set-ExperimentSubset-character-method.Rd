@@ -2,10 +2,29 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{assay<-,ExperimentSubset,character-method}
 \alias{assay<-,ExperimentSubset,character-method}
-\title{assay}
+\title{assay<-}
 \usage{
 \S4method{assay}{ExperimentSubset,character}(x, i, subsetAssayName = NULL, ...) <- value
 }
+\arguments{
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{assay}
+from \link[SummarizedExperiment].}
+
+\item{i}{Name of an \code{assay} or name of the subset if storing to an
+\code{ExperimentSubset} object.}
+
+\item{subsetAssayName}{Name of the assay to store if storing to an
+\code{ExperimentSubset} object.}
+
+\item{...}{Additional parameters.}
+
+\item{value}{\code{assay} to store.}
+}
+\value{
+Input object with \code{assay} stored.
+}
 \description{
-assay
+Method to set an \code{assay} to an \code{ExperimentSubset} object
+or a subset from an \code{ExperimentSubset} object or any object supported by
+\code{assay<-} from \link[SummarizedExperiment].
 }

@@ -6,6 +6,19 @@
 \usage{
 \S4method{assay}{ExperimentSubset,character}(x, i, ...)
 }
+\arguments{
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{assay}
+from \link[SummarizedExperiment].}
+
+\item{i}{Name of an \code{assay} or name of a subset or name of a subset \code{assay}.}
+
+\item{...}{Additional parameters.}
+}
+\value{
+\code{assay} from the input object.
+}
 \description{
-assay
+Method to get an \code{assay} from an \code{ExperimentSubset} object
+or a subset from an \code{ExperimentSubset} object or any object supported by
+\code{assay} from \link[SummarizedExperiment].
 }
