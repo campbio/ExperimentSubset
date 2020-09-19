@@ -140,7 +140,7 @@ testthat::test_that("Testing 2",{
   es <- ExperimentSubset::createSubset(es, "filteredAssay", rows = rownames(es), cols = which(colData(es)$colSums > mean(colData(es)$colSums)), parentAssay = "counts")
 
   #4 = create normalized assay from subset in #3 using scater function
-  ExperimentSubset::assay(es, "filteredAssay", subsetAssay = "filteredAssayNormalized") <- scater::normalizeCounts(assay(es, "filteredAssay"))
+  ExperimentSubset::assay(es, "filteredAssay", withDimnames = FALSE, subsetAssay = "filteredAssayNormalized") <- scater::normalizeCounts(assay(es, "filteredAssay"))
 
   #5 = find variable genes and create subset
   es <- ExperimentSubset::createSubset(es, "hvg10", rows = scran::getTopHVGs(scran::modelGeneVar(assay(es, "filteredAssayNormalized")), n = 10), cols = seq(1:1622), parentAssay = "filteredAssayNormalized")
@@ -152,12 +152,12 @@ testthat::test_that("Testing 2",{
 
   ExperimentSubset::reducedDims(es, subsetName = "hvg1000") <- list(a = scater::calculatePCA(assay(es, "hvg1000")), b = scater::calculatePCA(assay(es, "hvg1000")))
 
-  ExperimentSubset::reducedDims(es, subsetName = "hvg1000")
+  print(ExperimentSubset::reducedDims(es, subsetName = "hvg1000"))
 
   #clustering
   set.seed(20)
   ExperimentSubset::colData(es, subsetName = "hvg1000") <- cbind(colData(es, subsetName = "hvg1000"), cluster = kmeans(t(assay(es, "hvg1000")), 5)$cluster)
-  ExperimentSubset::reducedDim(es, type = "PCA", subsetName = "hvg1000")
+  ExperimentSubset::reducedDim(es, type = "a", subsetName = "hvg1000")
   ExperimentSubset::metadata(es, subsetName = "hvg1000") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
   ExperimentSubset::metadata(es, subsetName = "hvg1000")
 

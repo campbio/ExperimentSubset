@@ -1046,7 +1046,7 @@ setMethod(f = "storeSubset",
 
             }
             else{
-              assay(object@subsets[[subsetName]]@internalAssay, subsetAssayName) <- inputMatrix
+              assay(object@subsets[[subsetName]]@internalAssay, withDimnames = FALSE, subsetAssayName) <- inputMatrix
               rownames(object@subsets[[subsetName]]@internalAssay) <- rownames(inputMatrix)
               colnames(object@subsets[[subsetName]]@internalAssay) <- colnames(inputMatrix)
             }
