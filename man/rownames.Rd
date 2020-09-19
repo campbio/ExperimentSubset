@@ -2,14 +2,19 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{rownames}
 \alias{rownames}
+\alias{rownames,ANY-method}
 \title{rownames}
 \usage{
 rownames(object, ...)
+
+\S4method{rownames}{ANY}(object, subsetName)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.}
 
 \item{...}{Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.}
+
+\item{subsetName}{Name of the subset to get \code{rownames} from. If \code{missing}, \code{rownames} from main object are returned.}
 }
 \value{
 A \code{vector} of \code{rownames}.

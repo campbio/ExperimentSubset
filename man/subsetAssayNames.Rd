@@ -2,9 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetAssayNames}
 \alias{subsetAssayNames}
+\alias{subsetAssayNames,ExperimentSubset-method}
 \title{subsetAssayNames}
 \usage{
 subsetAssayNames(object)
+
+\S4method{subsetAssayNames}{ExperimentSubset}(object)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}

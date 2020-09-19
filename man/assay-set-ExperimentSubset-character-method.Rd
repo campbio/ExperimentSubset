@@ -4,12 +4,14 @@
 \alias{assay<-,ExperimentSubset,character-method}
 \title{assay<-}
 \usage{
-\S4method{assay}{ExperimentSubset,character}(x, i, subsetAssayName = NULL, ...) <- value
+\S4method{assay}{ExperimentSubset,character}(x, i, withDimnames = FALSE, subsetAssayName = NULL, ...) <- value
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.}
 
 \item{i}{Name of an \code{assay} or name of the subset if storing to an \code{ExperimentSubset} object.}
+
+\item{withDimnames}{Set whether dimnames should be applied to \code{assay}. Default \code{TRUE}.}
 
 \item{subsetAssayName}{Name of the assay to store if storing to an \code{ExperimentSubset} object.}
 

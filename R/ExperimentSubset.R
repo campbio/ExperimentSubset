@@ -3,7 +3,13 @@ setClassUnion("MissingOrNullOrCharacter", c("missing","NULL", "character"))
 setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 setClassUnion("NullOrMissingOrNumericOrCharacter", c("NULL", "missing", "numeric", "character"))
 
-
+#' An S4 class to create subset objects to store inside an \code{ExperimentSubset} object.
+#'
+#' @slot subsetName Name of the subset.
+#' @slot rowIndices Indices of the rows to include in the subset.
+#' @slot colIndices Indices of the columns to include in the subset.
+#' @slot parentAssay Name of the parent of this subset.
+#' @slot internalAssay An internal \code{SingleCellExperiment} object to store additional subset data.
 #' @export
 #' @import methods
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
@@ -17,6 +23,13 @@ setClassUnion("NullOrMissingOrNumericOrCharacter", c("NULL", "missing", "numeric
                               )
 )
 
+#' @title SingleCellSubset Constructor
+#' @description Constructor for creating a \code{SingleCellSubset} object internally by the \code{ExperimentSubset} object.
+#' @param subsetName Name of the subset.
+#' @param rowIndices Indices of the rows to include in the subset.
+#' @param colIndices Indices of the columns to include in the subset.
+#' @param parentAssay Name of the parent of this subset.
+#' @param internalAssay An internal \code{SingleCellExperiment} object to store additional subset data.
 #' @export
 #' @importFrom SingleCellExperiment SingleCellExperiment
 SingleCellSubset <- function(
@@ -24,8 +37,7 @@ SingleCellSubset <- function(
   rowIndices = NULL,
   colIndices = NULL,
   parentAssay = "counts",
-  internalAssay = SingleCellExperiment::SingleCellExperiment(),
-  ...)
+  internalAssay = SingleCellExperiment::SingleCellExperiment())
 {
   if(grepl("\\s+", subsetName)){
     subsetName <- gsub("\\s", "", subsetName)
@@ -38,6 +50,9 @@ SingleCellSubset <- function(
                     internalAssay = internalAssay)
 }
 
+#' An S4 class to create an \code{ExperimentSubset} object with support for subsets.
+#'
+#' @slot subsets A \code{list} of \code{SingleCellSubset} objects.
 #' @export
 #' @import methods
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
@@ -94,6 +109,7 @@ ExperimentSubset <- function(
 #' @param cols Specify the columns to include in this subset. If \code{missing} or \code{NULL}, all columns are included in the subset. Values can be \code{numeric} or \code{character}. Default \code{NULL}.
 #' @param parentAssay Specify the parent \code{assay} of the subset. This parent \code{assay} must already be available in the \code{ExperimentSubset} object. If \code{NULL}, the first available main \code{assay} will be marked as parent. Default \code{NULL}.
 #' @return An \code{ExperimentSubset} object that now contains the newly created subset.
+#' @rdname createSubset
 #' @export
 setGeneric(name = "createSubset",
            def = function(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
@@ -102,6 +118,7 @@ setGeneric(name = "createSubset",
            }
 )
 
+#' @rdname createSubset
 setMethod(f = "createSubset",
           signature = c("ExperimentSubset",
                         "character",
@@ -177,6 +194,7 @@ setMethod(f = "createSubset",
 #' @description Retrieves the names of the available subsets in an \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object.
 #' @return A \code{vector} of subset names.
+#' @rdname subsetNames
 #' @export
 setGeneric(name = "subsetNames",
            def = function(object)
@@ -185,6 +203,7 @@ setGeneric(name = "subsetNames",
            }
 )
 
+#' @rdname subsetNames
 setMethod(f = "subsetNames",
           signature = "ExperimentSubset",
           definition = function(object)
@@ -199,6 +218,7 @@ setMethod(f = "subsetNames",
 #' @param withColData Same as \link[SingleCellExperiment]{altExps}. Default \code{FALSE}.
 #' @param subsetName Specify the name of the subset from which the \code{altExps} should be fetched from. If \code{missing}, \link[SingleCellExperiment]{altExps} method is called on the main object.
 #' @return \code{altExps} from the specified subset or same as \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
+#' @rdname altExps
 #' @export
 setGeneric(name = "altExps",
            def = function(x, withColData = FALSE, subsetName)
@@ -207,7 +227,7 @@ setGeneric(name = "altExps",
            }
 )
 
-
+#' @rdname altExps
 setMethod(f = "altExps",
           signature = "ANY",
           definition = function(x, withColData, subsetName)
@@ -231,6 +251,7 @@ setMethod(f = "altExps",
 #' @param withColData Same as \code{altExp} from \link[SingleCellExperiment]{altExps}. Default \code{FALSE}.
 #' @param subsetName Specify the name of the subset from which the \code{altExp} should be fetched from. If \code{missing}, \code{altExp} from \link[SingleCellExperiment]{altExps} method is called on the main object.
 #' @return The \code{altExp} from the specified subset or same as \code{altExp} from \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
+#' @rdname altExp
 #' @export
 setGeneric(name = "altExp",
            def = function(x, e, withColData = FALSE, subsetName)
@@ -239,7 +260,7 @@ setGeneric(name = "altExp",
            }
 )
 
-
+#' @rdname altExp
 setMethod(f = "altExp",
           signature = "ANY",
           definition = function(x, e, withColData, subsetName)
@@ -271,6 +292,7 @@ setMethod(f = "altExp",
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{altExpNames} from \link[SingleCellExperiment]{altExps} method.
 #' @param subsetName Specify the name of the subset from which the \code{altExpNames} should be fetched from. If \code{missing}, \code{altExpNames} from \link[SingleCellExperiment]{altExps} method is called on the main object.
 #' @return The \code{altExpNames} from the specified subset or same as \code{altExpNames} from \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
+#' @rdname altExpNames
 #' @export
 setGeneric(name = "altExpNames",
            def = function(x, subsetName)
@@ -279,7 +301,7 @@ setGeneric(name = "altExpNames",
            }
 )
 
-
+#' @rdname altExpNames
 setMethod(f = "altExpNames",
           signature = "ANY",
           definition = function(x, subsetName)
@@ -301,6 +323,7 @@ setMethod(f = "altExpNames",
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.
 #' @param subsetName Specify the name of the subset from which the \code{reducedDimNames} should be fetched from. If \code{missing}, \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
 #' @return The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
+#' @rdname reducedDimNames
 #' @export
 setGeneric(name = "reducedDimNames",
            def = function(x, subsetName)
@@ -309,7 +332,7 @@ setGeneric(name = "reducedDimNames",
            }
 )
 
-
+#' @rdname reducedDimNames
 setMethod(f = "reducedDimNames",
           signature = "ANY",
           definition = function(x, subsetName)
@@ -332,6 +355,7 @@ setMethod(f = "reducedDimNames",
 #' @param subsetName Specify the name of the subset to which the \code{altExpNames<-} should be set to. If \code{missing}, \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method is called on the main object.
 #' @param value Input value same as \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method.
 #' @return Input object with \code{altExpNames} set.
+#' @rdname altExpNames-set
 #' @export
 setGeneric(name = "altExpNames<-",
            def = function(x, subsetName, value)
@@ -340,13 +364,7 @@ setGeneric(name = "altExpNames<-",
            }
 )
 
-#' @title altExpNames<-
-#' @description A wrapper to the \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method.
-#' @param subsetName Specify the name of the subset to which the \code{altExpNames<-} should be set to. If \code{missing}, \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method is called on the main object.
-#' @param value Input value same as \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method.
-#' @return Input object with \code{altExpNames} set.
-#' @export
+#' @rdname altExpNames-set
 setReplaceMethod(f = "altExpNames",
                  signature = "ANY",
                  definition = function(x, subsetName, value)
@@ -370,6 +388,7 @@ setReplaceMethod(f = "altExpNames",
 #' @param subsetName Specify the name of the subset to which the \code{reducedDimNames<-} should be set to. If \code{missing}, \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
 #' @param value Input value same as \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method.
 #' @return Input object with \code{reducedDimNames<-} set.
+#' @rdname reducedDimNames-set
 #' @export
 setGeneric(name = "reducedDimNames<-",
            def = function(x, subsetName, value)
@@ -378,13 +397,7 @@ setGeneric(name = "reducedDimNames<-",
            }
 )
 
-#' @title reducedDimNames<-
-#' @description A wrapper to the \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset to which the \code{reducedDimNames<-} should be set to. If \code{missing}, \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
-#' @param value Input value same as \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method.
-#' @return Input object with \code{reducedDimNames<-} set.
-#' @export
+#' @rdname reducedDimNames-set
 setReplaceMethod(f = "reducedDimNames",
                  signature = "ANY",
                  definition = function(x, subsetName, value)
@@ -410,6 +423,7 @@ setReplaceMethod(f = "reducedDimNames",
 #' @param subsetName Specify the name of the subset to which the \code{altExp<-} should be set to. If \code{missing}, \code{altExp<-} from \link[SingleCellExperiment]{altExps} method is called on the main object.
 #' @param value Input value same as \code{altExp<-} from \link[SingleCellExperiment]{altExps} method.
 #' @return Input object with \code{altExp<-} set.
+#' @rdname altExp-set
 #' @export
 setGeneric(name = "altExp<-",
            def = function(x, e, withColData = FALSE, subsetName, value)
@@ -418,15 +432,7 @@ setGeneric(name = "altExp<-",
            }
 )
 
-#' @title altExp<-
-#' @description A wrapper to the \code{altExp<-} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{altExp<-} from \link[SingleCellExperiment]{altExps} method.
-#' @param e Same as \code{altExp<-} from \link[SingleCellExperiment]{altExps} method.
-#' @param withColData Same as \code{altExp<-} from \link[SingleCellExperiment]{altExps} method. Default \code{FALSE}.
-#' @param subsetName Specify the name of the subset to which the \code{altExp<-} should be set to. If \code{missing}, \code{altExp<-} from \link[SingleCellExperiment]{altExps} method is called on the main object.
-#' @param value Input value same as \code{altExp<-} from \link[SingleCellExperiment]{altExps} method.
-#' @return Input object with \code{altExp<-} set.
-#' @export
+#' @rdname altExp-set
 setReplaceMethod(f = "altExp",
           signature = "ANY",
           definition = function(x, e, withColData, subsetName, value)
@@ -460,6 +466,7 @@ setReplaceMethod(f = "altExp",
 #' @param subsetName Specify the name of the subset to which the \code{altExps<-} should be set to. If \code{missing}, \code{altExps<-} from \link[SingleCellExperiment]{altExps} method is called on the main object.
 #' @param value Input value same as \code{altExps<-} from \link[SingleCellExperiment]{altExps} method.
 #' @return Input object with \code{altExps<-} set.
+#' @rdname altExps-set
 #' @export
 setGeneric(name = "altExps<-",
            def = function(x, subsetName, value)
@@ -468,13 +475,7 @@ setGeneric(name = "altExps<-",
            }
 )
 
-#' @title altExps<-
-#' @description A wrapper to the \code{altExps<-} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{altExps<-} from \link[SingleCellExperiment]{altExps} method.
-#' @param subsetName Specify the name of the subset to which the \code{altExps<-} should be set to. If \code{missing}, \code{altExps<-} from \link[SingleCellExperiment]{altExps} method is called on the main object.
-#' @param value Input value same as \code{altExps<-} from \link[SingleCellExperiment]{altExps} method.
-#' @return Input object with \code{altExps<-} set.
-#' @export
+#' @rdname altExps-set
 setReplaceMethod(f = "altExps",
                  signature = "ANY",
                  definition = function(x, subsetName, value)
@@ -498,6 +499,7 @@ setReplaceMethod(f = "altExps",
 #' @param object Input \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
 #' @param subsetName Name of the subset to get the \code{metadata} from. If \code{missing}, \code{metadata} is fetched from the main input object.
 #' @return A \code{list} of \code{metadata} elements.
+#' @rdname metadata
 #' @export
 setGeneric(name = "metadata",
            def = function(object, subsetName)
@@ -506,7 +508,7 @@ setGeneric(name = "metadata",
            }
 )
 
-
+#' @rdname metadata
 setMethod(f = "metadata",
           signature = "ANY",
           definition = function(object, subsetName)
@@ -528,6 +530,7 @@ setMethod(f = "metadata",
 #' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to retrieve the dimensions from.
 #' @return A \code{vector} containing the dimensions of the specified subset i.e. the number of rows and the number of columns in the subset.
+#' @rdname subsetDim
 #' @export
 setGeneric(name = "subsetDim",
            def = function(object, subsetName)
@@ -536,7 +539,7 @@ setGeneric(name = "subsetDim",
            }
 )
 
-
+#' @rdname subsetDim
 setMethod(f = "subsetDim",
           signature = c("ExperimentSubset", "character"),
           definition = function(object, subsetName)
@@ -587,6 +590,7 @@ setReplaceMethod(f = "metadata",
 #' @description Get the total count of the available subsets in an \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object.
 #' @return A \code{numeric} value representing the total count of the subsets.
+#' @rdname subsetCount
 #' @export
 setGeneric(name = "subsetCount",
            def = function(object)
@@ -595,7 +599,7 @@ setGeneric(name = "subsetCount",
            }
 )
 
-
+#' @rdname subsetCount
 setMethod(f = "subsetCount",
           signature = "ExperimentSubset",
           definition = function(object)
@@ -608,6 +612,7 @@ setMethod(f = "subsetCount",
 #' @description Get the count of the total available subsets and the subset assays inside these subsets in an \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object.
 #' @return A \code{numeric} value representing the sum of the subset count and subset assay count.
+#' @rdname subsetAssayCount
 #' @export
 setGeneric(name = "subsetAssayCount",
            def = function(object)
@@ -617,7 +622,7 @@ setGeneric(name = "subsetAssayCount",
 )
 
 
-
+#' @rdname subsetAssayCount
 setMethod(f = "subsetAssayCount",
           signature = "ExperimentSubset",
           definition = function(object)
@@ -630,6 +635,7 @@ setMethod(f = "subsetAssayCount",
 #' @description The function displays the content of an \code{ExperimentSubset} object including all available main assays, all subsets and the subset assays inside these subsets. This function also depicts how and in what order the subsets in the object are linked with their parents. Moreover, all supplementary data inside the subsets such as \code{reducedDims} and \code{altExps} are also displayed against each subset entry.
 #' @param object Input \code{ExperimentSubset} object.
 #' @return Prints all the available subset information against the input \code{ExperimentSubset} object.
+#' @rdname showSubsetLink
 #' @export
 setGeneric(name = "showSubsetLink",
            def = function(object)
@@ -638,7 +644,7 @@ setGeneric(name = "showSubsetLink",
            }
 )
 
-
+#' @rdname showSubsetLink
 setMethod(f = "showSubsetLink",
           signature = "ExperimentSubset",
           definition = function(object)
@@ -699,6 +705,7 @@ setMethod(f = "showSubsetLink",
 #' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Specify the name of the subset against which the subset to parent link should be retrieved.
 #' @return A \code{list} containing the parent link of the subset.
+#' @rdname subsetParent
 #' @export
 setGeneric(name = "subsetParent",
            def = function(object, subsetName)
@@ -707,7 +714,7 @@ setGeneric(name = "subsetParent",
            }
 )
 
-
+#' @rdname subsetParent
 setMethod(f = "subsetParent",
           signature = "ANY",
           definition = function(object, subsetName)
@@ -743,7 +750,9 @@ setMethod(f = "subsetParent",
 #' @description Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
 #' @param object Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
 #' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.
+#' @param subsetName Name of the subset to get \code{rownames} from. If \code{missing}, \code{rownames} from main object are returned.
 #' @return A \code{vector} of \code{rownames}.
+#' @rdname rownames
 #' @export
 setGeneric(name = "rownames",
            def = function(object, ...)
@@ -752,7 +761,7 @@ setGeneric(name = "rownames",
            }
 )
 
-
+#' @rdname rownames
 setMethod(f = "rownames",
           signature = "ANY",
           definition = function(object, subsetName)
@@ -776,7 +785,9 @@ setMethod(f = "rownames",
 #' @description Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
 #' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
 #' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.
+#' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
 #' @return A \code{vector} of \code{colnames}.
+#' @rdname colnames
 #' @export
 setGeneric(name = "colnames",
            def = function(object, ...)
@@ -785,7 +796,7 @@ setGeneric(name = "colnames",
            }
 )
 
-
+#' @rdname colnames
 setMethod(f = "colnames",
           signature = "ANY",
           definition = function(object, subsetName)
@@ -809,6 +820,7 @@ setMethod(f = "colnames",
 #' @description Retrieves the names of all the subsets as well as the subset assays.
 #' @param object Input \code{ExperimentSubset} object.
 #' @return A \code{vector} containing the names of the subsets and the subset assays available in the input \code{ExperimentSubset} object.
+#' @rdname subsetAssayNames
 #' @export
 setGeneric(name = "subsetAssayNames",
            def = function(object)
@@ -817,7 +829,7 @@ setGeneric(name = "subsetAssayNames",
            }
 )
 
-
+#' @rdname subsetAssayNames
 setMethod(f = "subsetAssayNames",
           signature = "ExperimentSubset",
           definition = function(object)
@@ -833,6 +845,10 @@ setMethod(f = "subsetAssayNames",
 )
 
 
+#' @title show
+#' @description Show the \code{ExperimentSubset} object
+#' @param object Input \code{ExperimentSubset} object.
+#' @rdname show
 #' @export
 #' @importMethodsFrom SingleCellExperiment show
 setMethod(f = "show",
@@ -862,11 +878,12 @@ setMethod(f = "show",
 #' @description Method to get an \code{assay} from an \code{ExperimentSubset} object or a subset from an \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.
 #' @param i Name of an \code{assay} or name of a subset or name of a subset \code{assay}.
+#' @param withDimnames Set whether dimnames should be applied to \code{assay}. Default \code{TRUE}.
 #' @param ... Additional parameters.
 #' @return The \code{assay} from the input object.
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay
-setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
+setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnames = TRUE, ...) {
   #look at main assays
   if(i %in% SummarizedExperiment::assayNames(x)){
     out <- callNextMethod()
@@ -899,6 +916,7 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
 #' @description Method to set an \code{assay} to an \code{ExperimentSubset} object or a subset from an \code{ExperimentSubset} object or any object supported by \code{assay<-} from \code{SummarizedExperiment}.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.
 #' @param i Name of an \code{assay} or name of the subset if storing to an \code{ExperimentSubset} object.
+#' @param withDimnames Set whether dimnames should be applied to \code{assay}. Default \code{TRUE}.
 #' @param subsetAssayName Name of the assay to store if storing to an \code{ExperimentSubset} object.
 #' @param ... Additional parameters.
 #' @param value The \code{assay} to store.
@@ -907,7 +925,7 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, ...) {
 #' @importMethodsFrom SummarizedExperiment assay<-
 setReplaceMethod("assay",
                  c("ExperimentSubset", "character"),
-                 function(x, i, subsetAssayName = NULL, ..., value) {
+                 function(x, i, withDimnames = FALSE, subsetAssayName = NULL, ..., value) {
   if((nrow(value)!= nrow(x))
      || (ncol(value) != ncol(x))){
     storeSubset(
@@ -927,6 +945,7 @@ setReplaceMethod("assay",
 #' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to get \code{rowData} from.
 #' @return The \code{rowData} from input object.
+#' @rdname subsetRowData
 #' @export
 setGeneric(name = "subsetRowData",
            def = function(object, subsetName)
@@ -935,6 +954,7 @@ setGeneric(name = "subsetRowData",
            }
 )
 
+#' @rdname subsetRowData
 setMethod(f = "subsetRowData",
           signature = c("ExperimentSubset", "character"),
           definition = function(object, subsetName)
@@ -964,6 +984,7 @@ setMethod(f = "subsetRowData",
 #' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to get \code{colData} from.
 #' @return The \code{colData} from input object.
+#' @rdname subsetColData
 #' @export
 setGeneric(name = "subsetColData",
            def = function(object, subsetName)
@@ -980,7 +1001,7 @@ setGeneric(name = "subsetColData",
   }
 }
 
-
+#' @rdname subsetColData
 setMethod(f = "subsetColData",
           signature = c("ExperimentSubset", "character"),
           definition = function(object, subsetName)
@@ -1012,6 +1033,7 @@ setMethod(f = "subsetColData",
 #' @param inputMatrix The input subset \code{assay}.
 #' @param subsetAssayName Specify the name of the new \code{assay} against the \code{inputMatrix} parameter. If \code{NULL}, a new subset is created internally using the \code{createSubset} function. Default \code{NULL}.
 #' @return Updated \code{ExperimentSubset} object with the new \code{assay} stored inside the specified subset.
+#' @rdname storeSubset
 #' @export
 setGeneric(name = "storeSubset",
            def = function(object, subsetName, inputMatrix, subsetAssayName)
@@ -1020,7 +1042,7 @@ setGeneric(name = "storeSubset",
            }
 )
 
-
+#' @rdname storeSubset
 setMethod(f = "storeSubset",
           signature = "ExperimentSubset",
           definition = function(object, subsetName, inputMatrix, subsetAssayName = NULL)
@@ -1062,6 +1084,7 @@ setMethod(f = "storeSubset",
 #' @param withDimnames Same as \code{withDimnames} in \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method.
 #' @param subsetName Specify the name of the subset from which the \code{reducedDim} should be fetched from. If \code{missing}, \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
 #' @return The \code{reducedDim} from the specified subset or same as \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
+#' @rdname reducedDim
 #' @export
 setGeneric(name = "reducedDim",
            def = function(object, type, withDimnames, subsetName)
@@ -1070,7 +1093,7 @@ setGeneric(name = "reducedDim",
            }
 )
 
-
+#' @rdname reducedDim
 setMethod("reducedDim", "ANY", function(object, type, withDimnames, subsetName) {
   if(missing(withDimnames)){
     withDimnames = TRUE
@@ -1090,6 +1113,7 @@ setMethod("reducedDim", "ANY", function(object, type, withDimnames, subsetName) 
 #' @param withDimnames Same as \code{withDimnames} in \link[SingleCellExperiment]{reducedDims} method.
 #' @param subsetName Specify the name of the subset from which the \code{reducedDims} should be fetched from. If \code{missing}, \link[SingleCellExperiment]{reducedDims} method is called on the main object.
 #' @return The \code{reducedDims} from the specified subset or same as link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
+#' @rdname reducedDims
 #' @export
 setGeneric(name = "reducedDims",
            def = function(object, withDimnames, subsetName)
@@ -1098,7 +1122,7 @@ setGeneric(name = "reducedDims",
            }
 )
 
-
+#' @rdname reducedDims
 setMethod("reducedDims", "ANY", function(object, withDimnames, subsetName) {
   if(missing(withDimnames)){
     withDimnames = TRUE

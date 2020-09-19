@@ -2,9 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetAssayCount}
 \alias{subsetAssayCount}
+\alias{subsetAssayCount,ExperimentSubset-method}
 \title{subsetAssayCount}
 \usage{
 subsetAssayCount(object)
+
+\S4method{subsetAssayCount}{ExperimentSubset}(object)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}

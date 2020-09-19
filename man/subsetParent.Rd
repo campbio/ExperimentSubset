@@ -2,9 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetParent}
 \alias{subsetParent}
+\alias{subsetParent,ANY-method}
 \title{subsetParent}
 \usage{
 subsetParent(object, subsetName)
+
+\S4method{subsetParent}{ANY}(object, subsetName)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}

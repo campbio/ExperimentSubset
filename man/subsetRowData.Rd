@@ -2,9 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetRowData}
 \alias{subsetRowData}
+\alias{subsetRowData,ExperimentSubset,character-method}
 \title{subsetRowData}
 \usage{
 subsetRowData(object, subsetName)
+
+\S4method{subsetRowData}{ExperimentSubset,character}(object, subsetName)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}

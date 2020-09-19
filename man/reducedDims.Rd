@@ -2,9 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{reducedDims}
 \alias{reducedDims}
+\alias{reducedDims,ANY-method}
 \title{reducedDims}
 \usage{
 reducedDims(object, withDimnames, subsetName)
+
+\S4method{reducedDims}{ANY}(object, withDimnames, subsetName)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object or any object supported by \link[SingleCellExperiment]{reducedDims} method.}

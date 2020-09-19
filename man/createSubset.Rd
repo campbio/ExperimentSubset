@@ -2,9 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{createSubset}
 \alias{createSubset}
+\alias{createSubset,ExperimentSubset,character,NullOrMissingOrNumericOrCharacter,NullOrMissingOrNumericOrCharacter,MissingOrNullOrCharacter-method}
 \title{createSubset}
 \usage{
 createSubset(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+
+\S4method{createSubset}{ExperimentSubset,character,NullOrMissingOrNumericOrCharacter,NullOrMissingOrNumericOrCharacter,MissingOrNullOrCharacter}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}

@@ -2,9 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{showSubsetLink}
 \alias{showSubsetLink}
+\alias{showSubsetLink,ExperimentSubset-method}
 \title{showSubsetLink}
 \usage{
 showSubsetLink(object)
+
+\S4method{showSubsetLink}{ExperimentSubset}(object)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}

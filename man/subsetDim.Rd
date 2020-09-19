@@ -2,9 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetDim}
 \alias{subsetDim}
+\alias{subsetDim,ExperimentSubset,character-method}
 \title{subsetDim}
 \usage{
 subsetDim(object, subsetName)
+
+\S4method{subsetDim}{ExperimentSubset,character}(object, subsetName)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}

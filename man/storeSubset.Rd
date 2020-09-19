@@ -2,9 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{storeSubset}
 \alias{storeSubset}
+\alias{storeSubset,ExperimentSubset-method}
 \title{storeSubset}
 \usage{
 storeSubset(object, subsetName, inputMatrix, subsetAssayName)
+
+\S4method{storeSubset}{ExperimentSubset}(object, subsetName, inputMatrix, subsetAssayName = NULL)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object}

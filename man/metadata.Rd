@@ -2,9 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{metadata}
 \alias{metadata}
+\alias{metadata,ANY-method}
 \title{metadata}
 \usage{
 metadata(object, subsetName)
+
+\S4method{metadata}{ANY}(object, subsetName)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.}
