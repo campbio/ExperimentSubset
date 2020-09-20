@@ -4,14 +4,14 @@
 \alias{assay,ExperimentSubset,character-method}
 \title{assay}
 \usage{
-\S4method{assay}{ExperimentSubset,character}(x, i, withDimnames = TRUE, ...)
+\S4method{assay}{ExperimentSubset,character}(x, i, withDimnames = FALSE, ...)
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.}
 
 \item{i}{Name of an \code{assay} or name of a subset or name of a subset \code{assay}.}
 
-\item{withDimnames}{Set whether dimnames should be applied to \code{assay}. Default \code{TRUE}.}
+\item{withDimnames}{Set whether dimnames should be applied to \code{assay}. Default \code{FALSE}.}
 
 \item{...}{Additional parameters.}
 }

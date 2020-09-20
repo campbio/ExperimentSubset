@@ -146,16 +146,16 @@ setMethod(f = "createSubset",
               }
             }
             if(is.character(rows)){
-              rows <- match(rows, rownames(assay(object, tempAssay)))
+              rows <- match(rows, rownames(SummarizedExperiment::assay(object, withDimnames = FALSE, tempAssay)))
             }
             if(is.character(cols)){
-              cols <- match(cols, colnames(assay(object, tempAssay)))
+              cols <- match(cols, colnames(SummarizedExperiment::assay(object, withDimnames = FALSE, tempAssay)))
             }
             if(is.null(rows)){
-              rows <- seq(1, dim(assay(object, tempAssay))[1])
+              rows <- seq(1, dim(SummarizedExperiment::assay(object, withDimnames = FALSE, tempAssay))[1])
             }
             if(is.null(cols)){
-              cols <- seq(1, dim(assay(object, tempAssay))[2])
+              cols <- seq(1, dim(SummarizedExperiment::assay(object, withDimnames = FALSE, tempAssay))[2])
             }
               scs <- SingleCellSubset(
                 subsetName = subsetName,
@@ -183,7 +183,7 @@ setMethod(f = "createSubset",
               })
 
               #Remove counts assay from internal SCE object of the subset to save memory
-              assay(scs@internalAssay, "counts") <- NULL
+              SummarizedExperiment::assay(scs@internalAssay, withDimnames = FALSE, "counts") <- NULL
 
               object@subsets[[subsetName]] <- scs
               return(object)
@@ -878,12 +878,12 @@ setMethod(f = "show",
 #' @description Method to get an \code{assay} from an \code{ExperimentSubset} object or a subset from an \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.
 #' @param i Name of an \code{assay} or name of a subset or name of a subset \code{assay}.
-#' @param withDimnames Set whether dimnames should be applied to \code{assay}. Default \code{TRUE}.
+#' @param withDimnames Set whether dimnames should be applied to \code{assay}. Default \code{FALSE}.
 #' @param ... Additional parameters.
 #' @return The \code{assay} from the input object.
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay
-setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnames = TRUE, ...) {
+setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnames = FALSE, ...) {
   #look at main assays
   if(i %in% SummarizedExperiment::assayNames(x)){
     out <- callNextMethod()
@@ -893,10 +893,10 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnam
     subsetName <- i
     i <- x@subsets[[subsetName]]@parentAssay
     if(is.null(i)){
-      out <- assay(x@subsets[[subsetName]]@internalAssay, "counts")
+      out <- SummarizedExperiment::assay(x@subsets[[subsetName]]@internalAssay, withDimnames = FALSE, "counts")
     }
     else{
-      out <- SummarizedExperiment::assay(x, i)
+      out <- SummarizedExperiment::assay(x, withDimnames = FALSE, i)
       out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
     }
   }
@@ -904,7 +904,7 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnam
   else{
     for(j in seq(length(x@subsets))){
       if(i %in% SummarizedExperiment::assayNames(x@subsets[[j]]@internalAssay)){
-        out <- assay(x@subsets[[j]]@internalAssay, i)
+        out <- SummarizedExperiment::assay(x@subsets[[j]]@internalAssay, withDimnames = FALSE,  i)
       }
     }
   }
@@ -916,7 +916,7 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnam
 #' @description Method to set an \code{assay} to an \code{ExperimentSubset} object or a subset from an \code{ExperimentSubset} object or any object supported by \code{assay<-} from \code{SummarizedExperiment}.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.
 #' @param i Name of an \code{assay} or name of the subset if storing to an \code{ExperimentSubset} object.
-#' @param withDimnames Set whether dimnames should be applied to \code{assay}. Default \code{TRUE}.
+#' @param withDimnames Set whether dimnames should be applied to \code{assay}. Default \code{FALSE}.
 #' @param subsetAssayName Name of the assay to store if storing to an \code{ExperimentSubset} object.
 #' @param ... Additional parameters.
 #' @param value The \code{assay} to store.
@@ -1068,7 +1068,7 @@ setMethod(f = "storeSubset",
 
             }
             else{
-              assay(object@subsets[[subsetName]]@internalAssay, withDimnames = FALSE, subsetAssayName) <- inputMatrix
+              SummarizedExperiment::assay(object@subsets[[subsetName]]@internalAssay, withDimnames = FALSE, subsetAssayName) <- inputMatrix
               rownames(object@subsets[[subsetName]]@internalAssay) <- rownames(inputMatrix)
               colnames(object@subsets[[subsetName]]@internalAssay) <- colnames(inputMatrix)
             }

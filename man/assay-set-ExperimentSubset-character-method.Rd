@@ -11,7 +11,7 @@
 
 \item{i}{Name of an \code{assay} or name of the subset if storing to an \code{ExperimentSubset} object.}
 
-\item{withDimnames}{Set whether dimnames should be applied to \code{assay}. Default \code{TRUE}.}
+\item{withDimnames}{Set whether dimnames should be applied to \code{assay}. Default \code{FALSE}.}
 
 \item{subsetAssayName}{Name of the assay to store if storing to an \code{ExperimentSubset} object.}
 
