@@ -23,6 +23,9 @@ SingleCellSubset(
 
 \item{internalAssay}{An internal \code{SingleCellExperiment} object to store additional subset data.}
 }
+\value{
+A \code{SingleCellSubset} object.
+}
 \description{
 Constructor for creating a \code{SingleCellSubset} object internally by the \code{ExperimentSubset} object.
 }

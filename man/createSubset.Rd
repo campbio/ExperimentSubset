@@ -26,3 +26,9 @@ An \code{ExperimentSubset} object that now contains the newly created subset.
 \description{
 Create a subset from an already available \code{assay} in the input \code{ExperimentSubset} object by specifying the rows and columns to include in the subset.
 }
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+es
+}

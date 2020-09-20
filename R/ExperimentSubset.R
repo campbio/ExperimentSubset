@@ -30,6 +30,7 @@ setClassUnion("NullOrMissingOrNumericOrCharacter", c("NULL", "missing", "numeric
 #' @param colIndices Indices of the columns to include in the subset.
 #' @param parentAssay Name of the parent of this subset.
 #' @param internalAssay An internal \code{SingleCellExperiment} object to store additional subset data.
+#' @return A \code{SingleCellSubset} object.
 #' @export
 #' @importFrom SingleCellExperiment SingleCellExperiment
 SingleCellSubset <- function(
@@ -76,6 +77,10 @@ SingleCellSubset <- function(
 #' @import BiocStyle
 #' @import Matrix
 #' @importFrom SingleCellExperiment SingleCellExperiment
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es
 ExperimentSubset <- function(
   object,
   ...,
@@ -111,6 +116,12 @@ ExperimentSubset <- function(
 #' @return An \code{ExperimentSubset} object that now contains the newly created subset.
 #' @rdname createSubset
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' es
+
 setGeneric(name = "createSubset",
            def = function(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
            {
@@ -196,6 +207,11 @@ setMethod(f = "createSubset",
 #' @return A \code{vector} of subset names.
 #' @rdname subsetNames
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' subsetNames(es)
 setGeneric(name = "subsetNames",
            def = function(object)
            {
@@ -501,6 +517,12 @@ setReplaceMethod(f = "altExps",
 #' @return A \code{list} of \code{metadata} elements.
 #' @rdname metadata
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' metadata(es, subsetName = "subset1") <- list(meta1 = "This is an example for metadata in subset1")
+#' metadata(es, subsetName = "subset1")
 setGeneric(name = "metadata",
            def = function(object, subsetName)
            {
@@ -532,6 +554,11 @@ setMethod(f = "metadata",
 #' @return A \code{vector} containing the dimensions of the specified subset i.e. the number of rows and the number of columns in the subset.
 #' @rdname subsetDim
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' subsetDim(es, "subset1")
 setGeneric(name = "subsetDim",
            def = function(object, subsetName)
            {
@@ -555,6 +582,11 @@ setMethod(f = "subsetDim",
 #' @param value A \code{list} to set to the \code{metadata} slot.
 #' @return Input object with \code{metadata} set.
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' metadata(es, subsetName = "subset1") <- list(meta1 = "This is an example for metadata in subset1")
 setGeneric(name = "metadata<-",
            def = function(object, subsetName, value)
            {
@@ -592,6 +624,11 @@ setReplaceMethod(f = "metadata",
 #' @return A \code{numeric} value representing the total count of the subsets.
 #' @rdname subsetCount
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' subsetCount(es)
 setGeneric(name = "subsetCount",
            def = function(object)
            {
@@ -614,6 +651,12 @@ setMethod(f = "subsetCount",
 #' @return A \code{numeric} value representing the sum of the subset count and subset assay count.
 #' @rdname subsetAssayCount
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' assay(es, "subset1", subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+#' subsetAssayCount(es)
 setGeneric(name = "subsetAssayCount",
            def = function(object)
            {
@@ -637,6 +680,12 @@ setMethod(f = "subsetAssayCount",
 #' @return Prints all the available subset information against the input \code{ExperimentSubset} object.
 #' @rdname showSubsetLink
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' assay(es, "subset1", subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+#' showSubsetLink(es)
 setGeneric(name = "showSubsetLink",
            def = function(object)
            {
@@ -675,10 +724,6 @@ setMethod(f = "showSubsetLink",
                 AltExperiments[[i]] <- paste(unlist(altExpNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
               }
 
-              # Assays[lengths(Assays) == 0] <- ""
-              # ReducedDims[lengths(ReducedDims) == 0] <- ""
-              # AltExperiments[lengths(AltExperiments) == 0] <- ""
-
               df <- data.frame(
                 Name = as.character(Name),
                 Dim = as.character(Dimensions),
@@ -712,6 +757,12 @@ setMethod(f = "showSubsetLink",
 #' @return A \code{list} containing the parent link of the subset.
 #' @rdname subsetParent
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' assay(es, "subset1", subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+#' subsetParent(es, "subset1pAssay")
 setGeneric(name = "subsetParent",
            def = function(object, subsetName)
            {
@@ -759,6 +810,11 @@ setMethod(f = "subsetParent",
 #' @return A \code{vector} of \code{rownames}.
 #' @rdname rownames
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' rownames(es, subsetName = "subset1")
 setGeneric(name = "rownames",
            def = function(object, ...)
            {
@@ -794,6 +850,11 @@ setMethod(f = "rownames",
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname colnames
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' colnames(es, subsetName = "subset1")
 setGeneric(name = "colnames",
            def = function(object, ...)
            {
@@ -827,6 +888,12 @@ setMethod(f = "colnames",
 #' @return A \code{vector} containing the names of the subsets and the subset assays available in the input \code{ExperimentSubset} object.
 #' @rdname subsetAssayNames
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' assay(es, "subset1", subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+#' subsetAssayNames(es)
 setGeneric(name = "subsetAssayNames",
            def = function(object)
            {
@@ -853,9 +920,14 @@ setMethod(f = "subsetAssayNames",
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
 #' @param object Input \code{ExperimentSubset} object.
+#' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
 #' @importMethodsFrom SingleCellExperiment show
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es
 setMethod(f = "show",
           signature = "ExperimentSubset",
           definition = function(object)
@@ -888,6 +960,12 @@ setMethod(f = "show",
 #' @return The \code{assay} from the input object.
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' assay(es, "subset1", subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+#' es
 setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnames = FALSE, ...) {
   #look at main assays
   if(i %in% SummarizedExperiment::assayNames(x)){
@@ -928,6 +1006,12 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnam
 #' @return Input object with \code{assay} stored.
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay<-
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' assay(es, "subset1", subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+#' es
 setReplaceMethod("assay",
                  c("ExperimentSubset", "character"),
                  function(x, i, withDimnames = FALSE, subsetAssayName = NULL, ..., value) {
@@ -1040,6 +1124,14 @@ setMethod(f = "subsetColData",
 #' @return Updated \code{ExperimentSubset} object with the new \code{assay} stored inside the specified subset.
 #' @rdname storeSubset
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' counts1p <- assay(es, "subset1")
+#' counts1p[,] <- counts1p[,] + 1
+#' es <- storeSubset(es, "subset1", counts1p, "scaledSubset1")
+#' es
 setGeneric(name = "storeSubset",
            def = function(object, subsetName, inputMatrix, subsetAssayName)
            {

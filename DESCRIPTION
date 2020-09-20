@@ -22,10 +22,10 @@ Imports:
   methods,
   Matrix,
   BiocStyle,
-  scds,
-  TENxPBMCData,
+  scran,
   scater,
-  scran
+  scds,
+  TENxPBMCData
 Suggests: 
     knitr,
     rmarkdown,

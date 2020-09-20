@@ -2,6 +2,10 @@ library(testthat)
 library(SingleCellExperiment)
 library(SummarizedExperiment)
 library(ExperimentSubset)
+library(scds)
+library(TENxPBMCData)
+library(scater)
+library(scran)
 
 
 context("Testing ExperimentSubset functions")

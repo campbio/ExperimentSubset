@@ -23,3 +23,8 @@ A \code{ExperimentSubset} object.
 \description{
 This constructor function is used to setup the \code{ExperimentSubset} object, either through manually specifying the \code{assays}, \code{rowData}, \code{colData} or directly by passing either a \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or objects inherited by these classes. A subset can also be directly created by pasing a named \code{list} to the \code{subset} parameter. This named \code{list} should have parameter values named as \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
 }
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es
+}

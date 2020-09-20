@@ -20,3 +20,9 @@ A \code{vector} containing the dimensions of the specified subset i.e. the numbe
 \description{
 Retrieves the dimensions of the specified subset in an \code{ExperimentSubset} object.
 }
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+subsetDim(es, "subset1")
+}

@@ -19,3 +19,9 @@ Input object with \code{metadata} set.
 \description{
 Set \code{metadata} to an \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
 }
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+metadata(es, subsetName = "subset1") <- list(meta1 = "This is an example for metadata in subset1")
+}

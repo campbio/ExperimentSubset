@@ -18,3 +18,10 @@ Prints all the available subset information against the input \code{ExperimentSu
 \description{
 The function displays the content of an \code{ExperimentSubset} object including all available main assays, all subsets and the subset assays inside these subsets. This function also depicts how and in what order the subsets in the object are linked with their parents. Moreover, all supplementary data inside the subsets such as \code{reducedDims} and \code{altExps} are also displayed against each subset entry.
 }
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+assay(es, "subset1", subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+showSubsetLink(es)
+}

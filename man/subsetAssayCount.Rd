@@ -18,3 +18,10 @@ A \code{numeric} value representing the sum of the subset count and subset assay
 \description{
 Get the count of the total available subsets and the subset assays inside these subsets in an \code{ExperimentSubset} object.
 }
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+assay(es, "subset1", subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+subsetAssayCount(es)
+}

@@ -9,6 +9,14 @@
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}
 }
+\value{
+Displays the overall contents of the \code{ExperimentSubset} object.
+}
 \description{
 Show the \code{ExperimentSubset} object
+}
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es
 }
