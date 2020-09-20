@@ -664,15 +664,20 @@ setMethod(f = "showSubsetLink",
                 parent <- subsetParent(object, subsetAssayNames(object)[i])
                 Name[[i]] <- subsetNames(object)[i]
                 Parent[[i]] <- paste(unlist(parent), collapse = ' -> ')
-                Assays[[i]] <- SummarizedExperiment::assayNames(object@subsets[[i]]@internalAssay)
+                if(is.null(SummarizedExperiment::assayNames(object@subsets[[i]]@internalAssay))){
+                  Assays[[i]] <- ""
+                }
+                else{
+                  Assays[[i]] <- SummarizedExperiment::assayNames(object@subsets[[i]]@internalAssay)
+                }
                 Dimensions[[i]] <- paste(unlist(subsetDim(object, subsetNames(object)[i])), collapse = ', ')
                 ReducedDims[[i]] <- paste(unlist(reducedDimNames(object, subsetNames(object)[i])), collapse = ", ")
                 AltExperiments[[i]] <- paste(unlist(altExpNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
               }
 
-              Assays[lengths(Assays) == 0] <- ""
-              ReducedDims[lengths(ReducedDims) == 0] <- ""
-              AltExperiments[lengths(AltExperiments) == 0] <- ""
+              # Assays[lengths(Assays) == 0] <- ""
+              # ReducedDims[lengths(ReducedDims) == 0] <- ""
+              # AltExperiments[lengths(AltExperiments) == 0] <- ""
 
               df <- data.frame(
                 Name = as.character(Name),
