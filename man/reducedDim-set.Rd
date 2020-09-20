@@ -21,3 +21,9 @@ Updated input object with \code{reducedDim} set.
 \description{
 A wrapper to the \code{reducedDim<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 }
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es <- createSubset(es, "subset1", rows = c(1:1500), cols = c(1:1500), parentAssay = "counts")
+reducedDim(es, type = "PCA", subsetName = "subset1") <- scater::calculatePCA(assay(es, "subset1"))
+}

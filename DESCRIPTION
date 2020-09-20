@@ -21,16 +21,16 @@ biocViews: Infrastructure, Software, DataImport, DataRepresentation
 Imports: 
   methods,
   Matrix,
-  BiocStyle,
-  scran,
-  scater,
-  scds,
-  TENxPBMCData
+  BiocStyle
 Suggests: 
     knitr,
     rmarkdown,
     testthat,
     covr,
     S4Vectors,
-    stats
+    stats,
+    scran,
+    scater,
+    scds,
+    TENxPBMCData
 VignetteBuilder: knitr

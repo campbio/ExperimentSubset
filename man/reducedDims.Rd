@@ -22,3 +22,11 @@ The \code{reducedDims} from the specified subset or same as link[SingleCellExper
 \description{
 A wrapper to the \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 }
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es <- createSubset(es, "subset1", rows = c(1:1500), cols = c(1:1500), parentAssay = "counts")
+reducedDim(es, type = "PCA_1", subsetName = "subset1") <- scater::calculatePCA(assay(es, "subset1"))
+reducedDim(es, type = "PCA_2", subsetName = "subset1") <- scater::calculatePCA(assay(es, "subset1"))
+reducedDims(es, subsetName = "subset1")
+}

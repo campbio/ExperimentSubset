@@ -22,3 +22,10 @@ Input object with \code{altExps<-} set.
 \description{
 A wrapper to the \code{altExps<-} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
 }
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+altExps(es, subsetName = "subset1") <- list(alt1 = SingleCellExperiment(assays = list(counts = assay(es, "subset1"))), alt2 = SingleCellExperiment(assays = list(counts = assay(es, "subset1"))))
+altExpNames(es, subsetName = "subset1")
+}

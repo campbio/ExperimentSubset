@@ -236,6 +236,12 @@ setMethod(f = "subsetNames",
 #' @return \code{altExps} from the specified subset or same as \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
 #' @rdname altExps
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' altExps(es, subsetName = "subset1") <- list(alt1 = SingleCellExperiment(assays = list(counts = assay(es, "subset1"))), alt2 = SingleCellExperiment(assays = list(counts = assay(es, "subset1"))))
+#' altExps(es, subsetName = "subset1")
 setGeneric(name = "altExps",
            def = function(x, withColData = FALSE, subsetName)
            {
@@ -269,6 +275,12 @@ setMethod(f = "altExps",
 #' @return The \code{altExp} from the specified subset or same as \code{altExp} from \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
 #' @rdname altExp
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' altExp(es, e = "altExample", subsetName = "subset1") <- SingleCellExperiment(assays = list(counts = assay(es, "subset1")))
+#' altExp(es, subsetName = "subset1")
 setGeneric(name = "altExp",
            def = function(x, e, withColData = FALSE, subsetName)
            {
@@ -310,6 +322,12 @@ setMethod(f = "altExp",
 #' @return The \code{altExpNames} from the specified subset or same as \code{altExpNames} from \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
 #' @rdname altExpNames
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' altExp(es, e = "altExample", subsetName = "subset1") <- SingleCellExperiment(assays = list(counts = assay(es, "subset1")))
+#' altExpNames(es, subsetName = "subset1")
 setGeneric(name = "altExpNames",
            def = function(x, subsetName)
            {
@@ -373,6 +391,12 @@ setMethod(f = "reducedDimNames",
 #' @return Input object with \code{altExpNames} set.
 #' @rdname altExpNames-set
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' altExp(es, e = "altExample", subsetName = "subset1") <- SingleCellExperiment(assays = list(counts = assay(es, "subset1")))
+#' altExpNames(es, subsetName = "subset1") <- c("altExpSubset1")
 setGeneric(name = "altExpNames<-",
            def = function(x, subsetName, value)
            {
@@ -441,6 +465,11 @@ setReplaceMethod(f = "reducedDimNames",
 #' @return Input object with \code{altExp<-} set.
 #' @rdname altExp-set
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' altExp(es, e = "altExample", subsetName = "subset1") <- SingleCellExperiment(assays = list(counts = assay(es, "subset1")))
 setGeneric(name = "altExp<-",
            def = function(x, e, withColData = FALSE, subsetName, value)
            {
@@ -484,6 +513,12 @@ setReplaceMethod(f = "altExp",
 #' @return Input object with \code{altExps<-} set.
 #' @rdname altExps-set
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+#' altExps(es, subsetName = "subset1") <- list(alt1 = SingleCellExperiment(assays = list(counts = assay(es, "subset1"))), alt2 = SingleCellExperiment(assays = list(counts = assay(es, "subset1"))))
+#' altExpNames(es, subsetName = "subset1")
 setGeneric(name = "altExps<-",
            def = function(x, subsetName, value)
            {
@@ -1183,6 +1218,12 @@ setMethod(f = "storeSubset",
 #' @return The \code{reducedDim} from the specified subset or same as \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
 #' @rdname reducedDim
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(1:1500), cols = c(1:1500), parentAssay = "counts")
+#' reducedDim(es, type = "PCA", subsetName = "subset1") <- scater::calculatePCA(assay(es, "subset1"))
+#' reducedDim(es, type = "PCA", subsetName = "subset1")
 setGeneric(name = "reducedDim",
            def = function(object, type, withDimnames, subsetName)
            {
@@ -1212,6 +1253,13 @@ setMethod("reducedDim", "ANY", function(object, type, withDimnames, subsetName) 
 #' @return The \code{reducedDims} from the specified subset or same as link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
 #' @rdname reducedDims
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(1:1500), cols = c(1:1500), parentAssay = "counts")
+#' reducedDim(es, type = "PCA_1", subsetName = "subset1") <- scater::calculatePCA(assay(es, "subset1"))
+#' reducedDim(es, type = "PCA_2", subsetName = "subset1") <- scater::calculatePCA(assay(es, "subset1"))
+#' reducedDims(es, subsetName = "subset1")
 setGeneric(name = "reducedDims",
            def = function(object, withDimnames, subsetName)
            {
@@ -1241,6 +1289,11 @@ setMethod("reducedDims", "ANY", function(object, withDimnames, subsetName) {
 #' @param value Value to set to \code{reducedDim}.
 #' @return Updated input object with \code{reducedDim} set.
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(1:1500), cols = c(1:1500), parentAssay = "counts")
+#' reducedDim(es, type = "PCA", subsetName = "subset1") <- scater::calculatePCA(assay(es, "subset1"))
 setGeneric(name = "reducedDim<-",
            def = function(object, type, subsetName, value)
            {
@@ -1273,6 +1326,12 @@ setReplaceMethod("reducedDim", "ANY", function(object, type, subsetName, value) 
 #' @param value A \code{list} of values to set to \code{reducedDims}.
 #' @return Updated input object with \code{reducedDims} set.
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = c(1:1500), cols = c(1:1500), parentAssay = "counts")
+#' reducedDims(es, subsetName = "subset1") <- list(PCA_1 = scater::calculatePCA(assay(es, "subset1")), PCA_2 = scater::calculatePCA(assay(es, "subset1")))
+#' reducedDims(es, subsetName = "subset1")
 setGeneric(name = "reducedDims<-",
            def = function(object, subsetName, value)
            {
