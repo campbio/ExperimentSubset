@@ -1179,15 +1179,22 @@ setMethod(f = "storeSubset",
           signature = "ExperimentSubset",
           definition = function(object, subsetName, inputMatrix, subsetAssayName = NULL)
           {
-            if(is.null(object@subsets[[subsetName]])){
+            if(is.null(object@subsets[[subsetName]]) && !is.null(subsetAssayName)){
               stop(paste(subsetName, "does not exist in the subsets slot of the object."))
             }
 
-            if(!all(dim(object@subsets[[subsetName]]@internalAssay) == dim(inputMatrix))){
-              stop("Dimensions of the inputMatrix not equal to the subset. You need to create a new subset with createSubset() function.")
+            if(!is.null(object@subsets[[subsetName]])){
+              if(!all(dim(object@subsets[[subsetName]]@internalAssay) == dim(inputMatrix))
+                 && is.null(subsetAssayName)){
+                stop("Dimensions of the inputMatrix not equal to the subset. You need to create a new subset with createSubset() function.")
+              }
             }
 
             if(is.null(subsetAssayName)){
+              if(subsetName %in% subsetNames(object)){
+                stop(paste(subsetName, "already exists. Please choose a different subsetName parameter."))
+              }
+
               object <- createSubset(
                 object,
                 subsetName,
