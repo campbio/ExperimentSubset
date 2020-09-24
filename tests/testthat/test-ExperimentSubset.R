@@ -111,6 +111,12 @@ testthat::test_that("Testing createSubset and storeSubset",{
   expect_equal(colnames(counts1p), colnames(es, "subset4"))
 })
 
+testthat::test_that("Testing supplementary functions",{
+  data(sce_chcl, package = "scds")
+  es <- ExperimentSubset::ExperimentSubset(sce_chcl)
+
+})
+
 # testthat::test_that("Testing createSubset and storeSubset",{
 #   data(sce_chcl, package = "scds")
 #

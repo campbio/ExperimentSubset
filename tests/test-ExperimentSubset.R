@@ -72,14 +72,49 @@ testthat::test_that("Testing SingleCellSubset constructor",{
 testthat::test_that("Testing createSubset and storeSubset",{
   data(sce_chcl, package = "scds")
   es <- ExperimentSubset::ExperimentSubset(sce_chcl)
+
+  #createSubset
   es <- ExperimentSubset::createSubset(es, "subset1",
                                        rows = c(10,11,50,56,98,99,102,105,109,200),
                                        cols = c(20,21,40,45,90,99,100,123,166,299),
                                        parentAssay = "counts")
   testthat::expect_equal(es@subsets$subset1@subsetName, "subset1")
   testthat::expect_equal(es@subsets$subset1@rowIndices, c(10,11,50,56,98,99,102,105,109,200))
-  testthat::expect_equal(es@subsets$subset1@rowIndices, c(20,21,40,45,90,99,100,123,166,299))
+  testthat::expect_equal(es@subsets$subset1@colIndices, c(20,21,40,45,90,99,100,123,166,299))
   testthat::expect_equal(es@subsets$subset1@parentAssay, "counts")
+
+  es <- ExperimentSubset::createSubset(es, "subset2",
+                                       rows = c("OPCML", "RP11-338K17.8", "RP11-770J1.3", "NPSR1", "AC060835.1", "GABRA2", "PRDM16", "CAB39", "LYRM1", "RP1-178F10.3"),
+                                       cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC", "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG", "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC", "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC", "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
+                                       parentAssay = "counts")
+  testthat::expect_equal(es@subsets$subset2@subsetName, "subset2")
+  testthat::expect_equal(es@subsets$subset2@rowIndices, c(10,11,50,56,98,99,102,105,109,200))
+  testthat::expect_equal(es@subsets$subset2@colIndices, c(20,21,40,45,90,99,100,123,166,299))
+  testthat::expect_equal(es@subsets$subset2@parentAssay, "counts")
+
+  expect_error(es <- ExperimentSubset::createSubset(es, "subset3",
+                                                    rows = c("OPCML", "RP11-338K17.8", 50,56,98,99,102,105,109,200),
+                                                    cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC", "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG", "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC", "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC", "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
+                                                    parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
+
+  #storeSubset
+  counts1p <- ExperimentSubset::assay(es, "subset1")
+  counts1p[,] <- counts1p[,] + 1
+  expect_error(es <- ExperimentSubset::storeSubset(es, "subset4", counts1p, "scaledSubset1"),
+               "subset4 does not exist in the subsets slot of the object.")
+  es <- ExperimentSubset::storeSubset(es, "subset1", counts1p, "scaledSubset1")
+  expect_true("scaledSubset1" %in% assayNames(es@subsets$subset1@internalAssay))
+  expect_error(es <- ExperimentSubset::storeSubset(es, "subset1", counts1p, subsetAssayName = NULL),
+               "subset1 already exists. Please choose a different subsetName parameter.")
+  es <- ExperimentSubset::storeSubset(es, "subset4", counts1p, subsetAssayName = NULL)
+  expect_equal(rownames(counts1p), rownames(es, "subset4"))
+  expect_equal(colnames(counts1p), colnames(es, "subset4"))
+})
+
+testthat::test_that("Testing supplementary functions",{
+  data(sce_chcl, package = "scds")
+  es <- ExperimentSubset::ExperimentSubset(sce_chcl)
+
 })
 
 # testthat::test_that("Testing createSubset and storeSubset",{
@@ -90,20 +125,13 @@ testthat::test_that("Testing createSubset and storeSubset",{
 #
 #   testthat::expect_true(validObject(es))
 #
-#   scaledCounts <- ExperimentSubset::assay(es, "subset1")
-#   scaledCounts[,] <- scaledCounts[,] + 1
 #
-#   es <- ExperimentSubset::storeSubset(es, "subset1", scaledCounts, "scaledSubset1")
 #
 #   ExperimentSubset::rowData(es, subsetName = "scaledSubset1")
 #   ExperimentSubset::colData(es, subsetName = "scaledSubset1")
 #   ExperimentSubset::rownames(es, subsetName = "scaledSubset1")
 #   ExperimentSubset::colnames(es, subsetName = "scaledSubset1")
 #
-#   es <- ExperimentSubset::storeSubset(es, "subset1", scaledCounts, subsetAssay = NULL)
-#
-#   testthat::expect_error(es <- ExperimentSubset::storeSubset(es, "subset0", scaledCounts, "scaledSubset2"),
-#                          "subset0 does not exist in the subsets slot of the object.")
 #
 #
 #   ExperimentSubset::subsetCount(es)
@@ -309,3 +337,4 @@ testthat::test_that("Testing createSubset and storeSubset",{
 #
 #
 # })
+
