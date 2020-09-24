@@ -3,3 +3,5 @@ r: bioc-release
 bioc_packages:
   - SingleCellExperiment
   - TENxPBMCData
+after_success:
+  - Rscript -e 'covr::codecov()'

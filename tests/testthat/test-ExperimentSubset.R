@@ -93,9 +93,9 @@ testthat::test_that("Testing createSubset and storeSubset",{
   testthat::expect_equal(es@subsets$subset2@parentAssay, "counts")
 
   expect_error(es <- ExperimentSubset::createSubset(es, "subset3",
-                                       rows = c("OPCML", "RP11-338K17.8", 50,56,98,99,102,105,109,200),
-                                       cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC", "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG", "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC", "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC", "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
-                                       parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
+                                                    rows = c("OPCML", "RP11-338K17.8", 50,56,98,99,102,105,109,200),
+                                                    cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC", "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG", "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC", "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC", "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
+                                                    parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
 
   #storeSubset
   counts1p <- ExperimentSubset::assay(es, "subset1")
@@ -111,7 +111,24 @@ testthat::test_that("Testing createSubset and storeSubset",{
   expect_equal(colnames(counts1p), colnames(es, "subset4"))
 })
 
-testthat::test_that("Testing supplementary functions",{
+testthat::test_that("Testing ExperimentSubset constructor with subset & createSubset without parentAssay",{
+
+  data(sce_chcl, package = "scds")
+  es <- ExperimentSubset::ExperimentSubset(sce_chcl, subset = list(subsetName = "subset10", rows = c(1:10), cols = c(1:2), parentAssay = "counts"))
+  testthat::expect_equal(es@subsets$subset1@subsetName, "subset10")
+  testthat::expect_equal(es@subsets$subset1@rowIndices, c(1:10))
+  testthat::expect_equal(es@subsets$subset1@colIndices, c(1:2))
+  testthat::expect_equal(es@subsets$subset1@parentAssay, "counts")
+
+  es <- ExperimentSubset::createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299))
+  testthat::expect_equal(es@subsets$subset1@subsetName, "subset1")
+  testthat::expect_equal(es@subsets$subset1@rowIndices, c(10,11,50,56,98,99,102,105,109, 200))
+  testthat::expect_equal(es@subsets$subset1@colIndices, c(20,21,40,45,90,99,100,123,166,299))
+  testthat::expect_equal(es@subsets$subset1@parentAssay, "counts")
+
+})
+
+testthat::test_that("Testing supplementary functions #1",{
   data(sce_chcl, package = "scds")
   es <- ExperimentSubset::ExperimentSubset(sce_chcl)
   es <- ExperimentSubset::createSubset(es, "subset1",
@@ -134,10 +151,10 @@ testthat::test_that("Testing supplementary functions",{
   expect_equal(ExperimentSubset::rownames(es, subsetName = "subset1"), rownames(es)[c(10,11,50,56,98,99,102,105,109,200)])
   expect_equal(ExperimentSubset::colnames(es, subsetName = "subset1"), colnames(es)[c(20,21,40,45,90,99,100,123,166,299)])
   testthat::expect_error(ExperimentSubset::colData(es, subsetName = "subset1Internal"),
-                           "Neither a subset nor a subsetAssay.")
+                         "Neither a subset nor a subsetAssay.")
 
   testthat::expect_error(ExperimentSubset::rowData(es, subsetName = "subset1Internal"),
-                           "Neither a subset nor a subsetAssay.")
+                         "Neither a subset nor a subsetAssay.")
   ExperimentSubset::rowData(es, subsetName = "subset1") <- DataFrame(col1 = c(seq(ExperimentSubset::subsetDim(es, subsetName = "subset1")[1])))
   ExperimentSubset::colData(es, subsetName = "subset1") <- DataFrame(col1 = c(seq(ExperimentSubset::subsetDim(es, subsetName = "subset1")[2])))
   expect_equal(ncol(ExperimentSubset::rowData(es, subsetName = "subset1")), 2)
@@ -154,7 +171,7 @@ testthat::test_that("Testing supplementary functions",{
   ExperimentSubset::assay(es, "counts2") <- ExperimentSubset::assay(es, "counts")
   expect_true(all.equal(ExperimentSubset::assay(es, "counts"), ExperimentSubset::assay(es, "counts2")))
 
-  })
+})
 
 # testthat::test_that("Testing createSubset and storeSubset",{
 #   data(sce_chcl, package = "scds")
@@ -166,172 +183,173 @@ testthat::test_that("Testing supplementary functions",{
 #   ExperimentSubset::rownames(es, subsetName = "subset1Internal")
 #   ExperimentSubset::colnames(es, subsetName = "subset1Internal")
 # })
-#
-# testthat::test_that("Testing 2",{
-#   #1 = get pbmc4k dataset and setup es object
-#   library(TENxPBMCData)
-#   library(ExperimentSubset)
-#   tenx_pbmc4k <- TENxPBMCData(dataset = "pbmc4k")
-#   es <- ExperimentSubset::ExperimentSubset(assays = list(counts = assay(tenx_pbmc4k, "counts")), colData = colData(tenx_pbmc4k), rowData = rowData(tenx_pbmc4k))
-#
-#   #2 = perform colsums on counts matrix (4340 cells)
-#   ExperimentSubset::colData(es) <- cbind(ExperimentSubset::colData(es), colSums = colSums(assay(es, "counts")))
-#   ExperimentSubset::rowData(es) <- cbind(ExperimentSubset::rowData(es), rowSums = rowSums(assay(es, "counts")))
-#
-#   #3 = filter columns with low colsums and create new subset
-#   es <- ExperimentSubset::createSubset(es, "filteredAssay", rows = rownames(es), cols = which(colData(es)$colSums > mean(colData(es)$colSums)), parentAssay = "counts")
-#
-#   #4 = create normalized assay from subset in #3 using scater function
-#   ExperimentSubset::assay(es, "filteredAssay", withDimnames = FALSE, subsetAssay = "filteredAssayNormalized") <- scater::normalizeCounts(assay(es, "filteredAssay"))
-#
-#   #5 = find variable genes and create subset
-#   es <- ExperimentSubset::createSubset(es, "hvg10", rows = scran::getTopHVGs(scran::modelGeneVar(assay(es, "filteredAssayNormalized")), n = 10), cols = seq(1:1622), parentAssay = "filteredAssayNormalized")
-#   es <- ExperimentSubset::createSubset(es, "hvg1000", rows = scran::getTopHVGs(scran::modelGeneVar(assay(es, "filteredAssayNormalized")), n = 1000), cols = seq(1:1622), parentAssay = "filteredAssayNormalized")
-#
-#   #6 = run pca on hvg, run clustering and store back cluster labels into subset colData
-#   #pca
-#   ExperimentSubset::reducedDim(es, type = "PCA", subsetName = "hvg1000") <- scater::calculatePCA(assay(es, "hvg1000"))
-#
-#   ExperimentSubset::reducedDims(es, subsetName = "hvg1000") <- list(a = scater::calculatePCA(assay(es, "hvg1000")), b = scater::calculatePCA(assay(es, "hvg1000")))
-#
-#   print(ExperimentSubset::reducedDims(es, subsetName = "hvg1000"))
-#
-#   #clustering
-#   set.seed(20)
-#   ExperimentSubset::colData(es, subsetName = "hvg1000") <- cbind(colData(es, subsetName = "hvg1000"), cluster = kmeans(t(assay(es, "hvg1000")), 5)$cluster)
-#   ExperimentSubset::reducedDim(es, type = "a", subsetName = "hvg1000")
-#   ExperimentSubset::metadata(es, subsetName = "hvg1000") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
-#   ExperimentSubset::metadata(es, subsetName = "hvg1000")
-#
-#   testthat::expect_error(ExperimentSubset::metadata(es, subsetName = "hvg") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2"),
-#                          "hvg does not exist in the subsets slot of the object.")
-#
-#   testthat::expect_error(ExperimentSubset::metadata(es, subsetName = "hvg"),
-#                          "hvg does not exist in the subsets slot of the object.")
-#
-#   ExperimentSubset::metadata(es) <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
-#   ExperimentSubset::metadata(es)
-#
-#   ExperimentSubset::altExp(es, "alt1", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
-#   ExperimentSubset::altExp(es, "alt2", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
-#   ExperimentSubset::altExp(es, "alt1", subsetName = "hvg1000")
-#
-#   ExperimentSubset::showSubsetLink(es)
-#
-#   testthat::expect_error(ExperimentSubset::altExp(es, "alt1", subsetName = "hvg") <- es@subsets$hvg1000@internalAssay,
-#                          "hvg does not exist in the subsets slot of the object.")
-#
-#   ExperimentSubset::altExp(es, subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
-#
-#   ExperimentSubset::altExp(es, subsetName = "hvg1000")
-#
-#   ExperimentSubset::altExp(es) <- tenx_pbmc4k
-#
-#   ExperimentSubset::altExp(es)
-#
-#   ExperimentSubset::altExp(es, "a1") <- tenx_pbmc4k
-#
-#   ExperimentSubset::altExp(es, "a1")
-#
-#   testthat::expect_error(ExperimentSubset::altExpNames(es, subsetName = "s12121"),
-#                          "s12121 does not exist in the subsets slot of the object.")
-#
-#   testthat::expect_error(ExperimentSubset::altExpNames(es, subsetName = "s12121") <- c("a123"),
-#                          "s12121 does not exist in the subsets slot of the object.")
-#
-#   ExperimentSubset::altExpNames(es)
-#
-#   ExperimentSubset::altExpNames(es) <- c("a2")
-#
-#   testthat::expect_error(ExperimentSubset::altExp(es, "alt1", subsetName = "hvg10002"),
-#                          "hvg10002 does not exist in the subsets slot of the object.")
-#
-#   ExperimentSubset::altExpNames(es, subsetName = "hvg1000") <- c("a1", "a2")
-#   ExperimentSubset::altExpNames(es, subsetName = "hvg1000")
-#
-#   testthat::expect_error(ExperimentSubset::altExpNames(es, subsetName = "hvg1000x"),
-#                          "hvg1000x does not exist in the subsets slot of the object.")
-#
-#   ExperimentSubset::altExps(es, subsetName = "hvg1000") <- list(a = es@subsets$hvg1000@internalAssay, b = es@subsets$hvg1000@internalAssay)
-#   ExperimentSubset::altExps(es, subsetName = "hvg1000")
-#
-#   testthat::expect_error(ExperimentSubset::altExps(es, subsetName = "hvg") <- list(a = es@subsets$hvg1000@internalAssay, b = es@subsets$hvg1000@internalAssay),
-#                          "hvg does not exist in the subsets slot of the object.")
-#
-#   testthat::expect_error(ExperimentSubset::altExps(es, subsetName = "hvg10002"),
-#                          "hvg10002 does not exist in the subsets slot of the object.")
-#
-#   ExperimentSubset::altExps(es) <- list(a = tenx_pbmc4k, b = tenx_pbmc4k)
-#
-#   ExperimentSubset::altExps(es)
-#
-#   ExperimentSubset::subsetDim(es, "hvg1000")
-#   ExperimentSubset::reducedDimNames(es, subsetName = "hvg1000") <- c("PCA_1")
-#   ExperimentSubset::reducedDimNames(es, subsetName = "hvg1000")
-#
-#   ExperimentSubset::showSubsetLink(es)
-#
-#   testthat::expect_error(ExperimentSubset::reducedDimNames(es, subsetName = "hvg123"),
-#                          "hvg123 does not exist in the subsets slot of the object.")
-#
-#   testthat::expect_error(ExperimentSubset::reducedDimNames(es, subsetName = "hvg123") <- c("PCA_1"),
-#                          "hvg123 does not exist in the subsets slot of the object.")
-#
-#   ExperimentSubset::reducedDim(es, type = "PCA") <- scater::calculatePCA(assay(es, "counts"))
-#   ExperimentSubset::reducedDim(es, type = "PCA")
-#
-#   ExperimentSubset::reducedDims(es) <- list(a = scater::calculatePCA(assay(es, "counts")), b = scater::calculatePCA(assay(es, "counts")))
-#   ExperimentSubset::reducedDims(es)
-#
-#   ExperimentSubset::reducedDimNames(es)
-#   ExperimentSubset::reducedDimNames(es) <- c("PCA_Counts")
-#
-#   ExperimentSubset::assay(es, "counts")
-#
-#   testthat::expect_true(validObject(es))
-# })
-#
-# testthat::test_that("Testint 3",{
-#
-#   data(sce_chcl, package = "scds")
-#
-#   #constructor subset
-#   es <- ExperimentSubset::ExperimentSubset(sce_chcl, subset = list(subsetName = "subset10", rows = c(1:10), cols = c(1:2), parentAssay = "counts"))
-#
-#   #no parent assay
-#   es <- ExperimentSubset::createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299))
-#
-#   testthat::expect_true(validObject(es))
-#
-# })
-#
-#
-# testthat::test_that("Testint 4",{
-#
-#   data(sce_chcl, package = "scds")
-#
-#   es <- ExperimentSubset::ExperimentSubset(sce_chcl)
-#
-#   #wrong parent assay
-#   testthat::expect_error(es <- ExperimentSubset::createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "none"), "Input parentAssay does not exist.")
-#
-#
-#   #colnames
-#   es <- ExperimentSubset::createSubset(es, "subset22", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts")
-#   testthat::expect_true(validObject(es))
-#
-#   #null rows and null cols
-#   es <- ExperimentSubset::createSubset(es, "subset223", parentAssay = "counts")
-#   testthat::expect_true(validObject(es))
-#
-#   #nas introduced in rows or cols
-#   testthat::expect_error(  es <- ExperimentSubset::createSubset(es, "subset22", rows = c("as", "asd", "asd"), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
-#
-#
-#   testthat::expect_error(es <- ExperimentSubset::createSubset(es, "subset22", cols = c("CTGTG", "CAGTCC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
-#
-#
-#
-#
-#
-# })
+
+
+testthat::test_that("Testing supplementary functions #2",{
+  tenx_pbmc4k <- TENxPBMCData(dataset = "pbmc4k")
+  es <- ExperimentSubset::ExperimentSubset(assays = list(counts = assay(tenx_pbmc4k, "counts")), colData = colData(tenx_pbmc4k), rowData = rowData(tenx_pbmc4k))
+
+  ExperimentSubset::colData(es) <- cbind(ExperimentSubset::colData(es), colSums = colSums(assay(es, "counts")))
+  ExperimentSubset::rowData(es) <- cbind(ExperimentSubset::rowData(es), rowSums = rowSums(assay(es, "counts")))
+  expect_equal(ncol(ExperimentSubset::rowData(es)), 4)
+  expect_equal(nrow(ExperimentSubset::rowData(es)), dim(es)[1])
+  expect_equal(ncol(ExperimentSubset::colData(es)), 12)
+  expect_equal(nrow(ExperimentSubset::colData(es)), dim(es)[2])
+
+  es <- ExperimentSubset::createSubset(es, "filteredAssay", rows = rownames(es), cols = which(colData(es)$colSums > mean(colData(es)$colSums)), parentAssay = "counts")
+  ExperimentSubset::assay(es, "filteredAssay", withDimnames = FALSE, subsetAssay = "filteredAssayNormalized") <- scater::normalizeCounts(assay(es, "filteredAssay"))
+  es <- ExperimentSubset::createSubset(es, "hvg1000", rows = scran::getTopHVGs(scran::modelGeneVar(assay(es, "filteredAssayNormalized")), n = 1000), cols = seq(1:1622), parentAssay = "filteredAssayNormalized")
+  ExperimentSubset::reducedDim(es, type = "PCA", subsetName = "hvg1000") <- scater::calculatePCA(assay(es, "hvg1000"))
+  expect_true("PCA" %in% ExperimentSubset::reducedDimNames(es, "hvg1000"))
+  ExperimentSubset::reducedDims(es, subsetName = "hvg1000") <- list(a = scater::calculatePCA(assay(es, "hvg1000")), b = scater::calculatePCA(assay(es, "hvg1000")))
+  expect_true(all.equal(ExperimentSubset::reducedDimNames(es, "hvg1000"), c("a","b")))
+  # print(ExperimentSubset::reducedDims(es, subsetName = "hvg1000"))
+  #
+
+  set.seed(20)
+  ExperimentSubset::colData(es, subsetName = "hvg1000") <- cbind(colData(es, subsetName = "hvg1000"), cluster = kmeans(t(assay(es, "hvg1000")), 5)$cluster)
+  expect_true("cluster" %in% colnames(ExperimentSubset::colData(es, subsetName = "hvg1000")))
+  # ExperimentSubset::reducedDim(es, type = "a", subsetName = "hvg1000")
+
+  ExperimentSubset::metadata(es, subsetName = "hvg1000") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
+  expect_equal(ExperimentSubset::metadata(es, subsetName = "hvg1000")$meta1, "This is testing meta1")
+  expect_equal(ExperimentSubset::metadata(es, subsetName = "hvg1000")$meta2, "This is testing meta2")
+  # ExperimentSubset::metadata(es, subsetName = "hvg1000")
+  #
+  testthat::expect_error(ExperimentSubset::metadata(es, subsetName = "hvg") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2"),
+                          "hvg does not exist in the subsets slot of the object.")
+
+  testthat::expect_error(ExperimentSubset::metadata(es, subsetName = "hvg"),
+                          "hvg does not exist in the subsets slot of the object.")
+
+  ExperimentSubset::metadata(es) <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
+  expect_equal(ExperimentSubset::metadata(es)$meta1, "This is testing meta1")
+  expect_equal(ExperimentSubset::metadata(es)$meta2, "This is testing meta2")
+  # ExperimentSubset::metadata(es)
+  #
+  ExperimentSubset::altExp(es, "alt1", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
+  ExperimentSubset::altExp(es, "alt2", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
+  expect_true(all.equal(ExperimentSubset::altExpNames(es, "hvg1000"), c("alt1", "alt2")))
+  # ExperimentSubset::altExp(es, "alt1", subsetName = "hvg1000")
+  #
+  # ExperimentSubset::showSubsetLink(es)
+  #
+  testthat::expect_error(ExperimentSubset::altExp(es, "alt1", subsetName = "hvg") <- es@subsets$hvg1000@internalAssay,
+                          "hvg does not exist in the subsets slot of the object.")
+
+  ExperimentSubset::altExp(es, subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
+  expect_equal(length(ExperimentSubset::altExpNames(es, "hvg1000")), 2)
+
+  expect_true(!is.null(ExperimentSubset::altExp(es, subsetName = "hvg1000")))
+
+  ExperimentSubset::altExp(es) <- tenx_pbmc4k
+  expect_true(!is.null(ExperimentSubset::altExp(es)))
+  # ExperimentSubset::altExp(es)
+
+   ExperimentSubset::altExp(es, "a1") <- tenx_pbmc4k
+   expect_true("a1" %in% ExperimentSubset::altExpNames(es))
+   expect_true(!is.null(ExperimentSubset::altExp(es, "a1")))
+
+   testthat::expect_error(ExperimentSubset::altExpNames(es, subsetName = "na"),
+                          "na does not exist in the subsets slot of the object.")
+
+   testthat::expect_error(ExperimentSubset::altExpNames(es, subsetName = "na") <- c("na2"),
+                          "na does not exist in the subsets slot of the object.")
+
+  # ExperimentSubset::altExpNames(es)
+
+  ExperimentSubset::altExpNames(es) <- c("a1", "a2")
+  expect_true(all.equal(ExperimentSubset::altExpNames(es), c("a1", "a2")))
+
+   testthat::expect_error(ExperimentSubset::altExp(es, "alt1", subsetName = "hvg10002"),
+                          "hvg10002 does not exist in the subsets slot of the object.")
+
+   ExperimentSubset::altExpNames(es, subsetName = "hvg1000") <- c("a1", "a2")
+   expect_true(all.equal(ExperimentSubset::altExpNames(es, subsetName = "hvg1000"), c("a1", "a2")))
+  # ExperimentSubset::altExpNames(es, subsetName = "hvg1000")
+  #
+  testthat::expect_error(ExperimentSubset::altExpNames(es, subsetName = "hvg1000x"),
+                          "hvg1000x does not exist in the subsets slot of the object.")
+
+  ExperimentSubset::altExps(es, subsetName = "hvg1000") <- list(a = es@subsets$hvg1000@internalAssay, b = es@subsets$hvg1000@internalAssay)
+  expect_true(all.equal(ExperimentSubset::altExpNames(es, "hvg1000"), c("a","b")))
+  # ExperimentSubset::altExps(es, subsetName = "hvg1000")
+  #
+   testthat::expect_error(ExperimentSubset::altExps(es, subsetName = "hvg") <- list(a = es@subsets$hvg1000@internalAssay, b = es@subsets$hvg1000@internalAssay),
+                          "hvg does not exist in the subsets slot of the object.")
+
+   testthat::expect_error(ExperimentSubset::altExps(es, subsetName = "hvg10002"),
+                          "hvg10002 does not exist in the subsets slot of the object.")
+
+  ExperimentSubset::altExps(es) <- list(a = tenx_pbmc4k, b = tenx_pbmc4k)
+  expect_true(all.equal(ExperimentSubset::altExpNames(es), c("a", "b")))
+  # ExperimentSubset::altExps(es)
+  #
+  # ExperimentSubset::subsetDim(es, "hvg1000")
+
+  ExperimentSubset::reducedDimNames(es, subsetName = "hvg1000") <- c("PCA_1", "PCA_2")
+  expect_true(all.equal(ExperimentSubset::reducedDimNames(es, subsetName = "hvg1000"), c("PCA_1", "PCA_2")))
+  # ExperimentSubset::reducedDimNames(es, subsetName = "hvg1000")
+  #
+  # ExperimentSubset::showSubsetLink(es)
+  #
+  testthat::expect_error(ExperimentSubset::reducedDimNames(es, subsetName = "hvg123"),
+                          "hvg123 does not exist in the subsets slot of the object.")
+
+   testthat::expect_error(ExperimentSubset::reducedDimNames(es, subsetName = "hvg123") <- c("PCA_1"),
+                          "hvg123 does not exist in the subsets slot of the object.")
+
+   ExperimentSubset::reducedDim(es, type = "PCA") <- scater::calculatePCA(assay(es, "counts"))
+   expect_true(!is.null(ExperimentSubset::reducedDim(es, type = "PCA")))
+  # ExperimentSubset::reducedDim(es, type = "PCA")
+  #
+  ExperimentSubset::reducedDims(es) <- list(a = scater::calculatePCA(assay(es, "counts")), b = scater::calculatePCA(assay(es, "counts")))
+  expect_true(!is.null(ExperimentSubset::reducedDims(es)))
+  expect_true(all.equal(ExperimentSubset::reducedDimNames(es), c("a", "b")))
+  # ExperimentSubset::reducedDims(es)
+  #
+  # ExperimentSubset::reducedDimNames(es)
+  ExperimentSubset::reducedDimNames(es) <- c("PCA_Counts_1", "PCA_Counts_2")
+  expect_true(all.equal(ExperimentSubset::reducedDimNames(es), c("PCA_Counts_1", "PCA_Counts_2")))
+  #
+  # ExperimentSubset::assay(es, "counts")
+  #
+  # testthat::expect_true(validObject(es))
+})
+#
+
+#
+#
+testthat::test_that("Testing createSubset with more options",{
+
+  data(sce_chcl, package = "scds")
+
+  es <- ExperimentSubset::ExperimentSubset(sce_chcl)
+
+  testthat::expect_error(es <- ExperimentSubset::createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "none"), "Input parentAssay does not exist.")
+
+
+  #colnames
+  es <- ExperimentSubset::createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts")
+  testthat::expect_equal(es@subsets$subset1@subsetName, "subset1")
+  testthat::expect_equal(es@subsets$subset1@rowIndices, c(10,11,50,56,98,99,102,105,109, 200))
+  testthat::expect_equal(es@subsets$subset1@colIndices, match(c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), ExperimentSubset::colnames(es, subsetName = "subset1")))
+  testthat::expect_equal(es@subsets$subset1@parentAssay, "counts")
+
+  #null rows and null cols
+  es <- ExperimentSubset::createSubset(es, "subset2", parentAssay = "counts")
+  testthat::expect_equal(es@subsets$subset2@subsetName, "subset2")
+  testthat::expect_equal(es@subsets$subset2@rowIndices, c(1:subsetDim(es, "subset2")[1]))
+  testthat::expect_equal(es@subsets$subset2@colIndices, c(1:subsetDim(es, "subset2")[2]))
+  testthat::expect_equal(es@subsets$subset2@parentAssay, "counts")
+
+  #nas introduced in rows or cols
+  testthat::expect_error(es <- ExperimentSubset::createSubset(es, "subset22", rows = c("as", "asd", "asd"), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
+
+  testthat::expect_error(es <- ExperimentSubset::createSubset(es, "subset22", cols = c("CTGTG", "CAGTCC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
+
+
+
+
+
+})
