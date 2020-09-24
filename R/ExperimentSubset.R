@@ -811,6 +811,12 @@ setMethod(f = "subsetParent",
           definition = function(object, subsetName)
           {
             parentList <- list()
+            if(!subsetName %in% subsetAssayNames(object)){
+              stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+            }
+            if(!is.null(object@subsets[[subsetName]]) && is.null(object@subsets[[subsetName]]@parentAssay)){
+              return(NULL)
+            }
             parent <- subsetName
             while(TRUE){
               parentList <- c(parentList, parent)
