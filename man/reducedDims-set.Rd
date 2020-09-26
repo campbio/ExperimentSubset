@@ -22,7 +22,11 @@ A wrapper to the \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDi
 \examples{
 data(sce_chcl, package = "scds")
 es <- ExperimentSubset(sce_chcl)
-es <- createSubset(es, "subset1", rows = c(1:1500), cols = c(1:1500), parentAssay = "counts")
-reducedDims(es, subsetName = "subset1") <- list(PCA_1 = scater::calculatePCA(assay(es, "subset1")), PCA_2 = scater::calculatePCA(assay(es, "subset1")))
+es <- createSubset(es, "subset1",
+rows = c(1:1500), cols = c(1:1500),
+parentAssay = "counts")
+reducedDims(es, subsetName = "subset1") <- list(
+PCA_1 = scater::calculatePCA(assay(es, "subset1")),
+PCA_2 = scater::calculatePCA(assay(es, "subset1")))
 reducedDims(es, subsetName = "subset1")
 }

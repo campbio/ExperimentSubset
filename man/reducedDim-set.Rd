@@ -24,6 +24,10 @@ A wrapper to the \code{reducedDim<-} from \link[SingleCellExperiment]{reducedDim
 \examples{
 data(sce_chcl, package = "scds")
 es <- ExperimentSubset(sce_chcl)
-es <- createSubset(es, "subset1", rows = c(1:1500), cols = c(1:1500), parentAssay = "counts")
-reducedDim(es, type = "PCA", subsetName = "subset1") <- scater::calculatePCA(assay(es, "subset1"))
+es <- createSubset(es, "subset1",
+rows = c(1:1500), cols = c(1:1500),
+parentAssay = "counts")
+reducedDim(es, type = "PCA",
+subsetName = "subset1") <- scater::calculatePCA(
+assay(es, "subset1"))
 }

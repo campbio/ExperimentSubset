@@ -27,7 +27,10 @@ Store a new subset \code{assay} inside a specified subset in the input \code{Exp
 \examples{
 data(sce_chcl, package = "scds")
 es <- ExperimentSubset(sce_chcl)
-es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "counts")
+es <- createSubset(es, "subset1",
+rows = c(10,11,50,56,98,99,102,105,109, 200),
+cols = c(20,21,40,45,90,99,100,123,166,299),
+parentAssay = "counts")
 counts1p <- assay(es, "subset1")
 counts1p[,] <- counts1p[,] + 1
 es <- storeSubset(es, "subset1", counts1p, "scaledSubset1")
