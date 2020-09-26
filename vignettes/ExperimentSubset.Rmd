@@ -20,9 +20,7 @@ vignette: |
 ---
 # Installation
 ```{r, eval = FALSE}
-if (!require("BiocManager"))
-    install.packages("BiocManager")
-BiocManager::install("ExperimentSubset")
+devtools::install_github("https://github.com/campbio/ExperimentSubset")
 ```
 
 Loading the packages and sample data:
