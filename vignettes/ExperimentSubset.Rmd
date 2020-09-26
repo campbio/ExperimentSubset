@@ -19,16 +19,9 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 ---
 # Installation
-```{r, eval = TRUE}
-devtools::install_github("https://github.com/campbio/ExperimentSubset")
-```
 
 Loading the packages and sample data:
 
-```{r,include=TRUE,results="hide",message=FALSE,warning=FALSE}
-library(ExperimentSubset)
-library(TENxPBMCData)
-```
 
 # A Brief Description
 `ExperimentSubset` package enables users to perform efficient subsetting
@@ -50,21 +43,14 @@ As `ExperimentSubset` class inherits from `SingleCellExperiment` and
 `SummarizedExperiment` classes, it follows the same structure as the
 latter two. A more obvious structure of the `ExperimentSubset` class
 is given below:
-```{r}
-es <- ExperimentSubset()
-es
-slotNames(es)
-```
+
 Each subset inside the `ExperimentSubset` object is stored as `SingleCellSubset`
 instance. This `SingleCellSubset` instance creates reference to the row and
 column indices for this particular subset against a stored assay. In case
 a new subset assay data is to be stored, it is stored as a separate
 `SingleCellExperiment` object inside the subset. The overall internal structure
 of a subset is as follows:
-```{r}
-scs <- SingleCellSubset()
-scs
-```
+
 The `subsetName` slot stores the user-defined name of a particular subset, while the
 `rowIndices` and `colIndices` slots store the corresponding indices of the subset
 rows and columns in the original assay. If a subset is created against an assay
