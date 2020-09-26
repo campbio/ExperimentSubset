@@ -14,110 +14,96 @@ output:
 abstract: |
   Description of your vignette
 vignette: |
-  %\VignetteIndexEntry{Tutorial & Examples}
+  %\VignetteIndexEntry{Description & Example}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 # Installation
-
 Loading the packages and sample data:
 
 
 # A Brief Description
-`ExperimentSubset` package enables users to perform efficient subsetting
-and storage of Single-Cell data that comes from the same experiment.
-In general, it offers the same interface to the users as the `SingleCellExperiment`
-container which is one the most widely used containers for Single-Cell data.
-However, in addition to the features offered by `SingleCellExperiment` container,
-`ExperimentSubset` offers efficient subsetting features while hiding the
-implementation details from the users. It does so by creating references to the
-subset `rows` and `columns` instead of storing a new assay whenever possible.
-Functions from `SingleCellExperiment` such as `assay`, `rowData` and `colData`
-can be used for regular assays as one would normally do, as well as with subsets
-of the data. This allows the users to use the `ExperimentSubset` container 
-simply as if they were using `SingleCellExperiment` container with no change 
-required to the existing code, yet imparts the features of subsetting.
+`ExperimentSubset` package makes it possible for the users to create subsets of
+single cell experiment data and the consequent storage of this subset data back 
+into a single comprehensive object. In addition, the methods available with the
+package offer a convenient way to perform necessary operations on the subsets
+of data by overriding the common methods of the `SingleCellExperiment` and
+`SummarizedExperiment` packages adding support for subsets.
+
+The `ExperimentSubset` class offers the same interface to the users as the 
+`SingleCellExperiment` and `SummarizedExperiment` classes, except for the 
+additional parameters to support for subsets of data. This is accomplished by
+only storing the references to the indices of `rows` and `columns` of the 
+subsets in the parent `assay` to conserve memory. However, additional data can
+still be stored inside a particular subset which may include additional 
+`assays` and `rowData`/`colData` against a subset.
 
 # Overview of the `ExperimentSubset` class
 As `ExperimentSubset` class inherits from `SingleCellExperiment` and 
-`SummarizedExperiment` classes, it follows the same structure as the
-latter two. A more obvious structure of the `ExperimentSubset` class
-is given below:
+`SummarizedExperiment` classes, it follows the same internal structure as the
+latter two except the addition of subsets slot. A more obvious structure of the 
+`ExperimentSubset` class object is described below.
 
-Each subset inside the `ExperimentSubset` object is stored as `SingleCellSubset`
-instance. This `SingleCellSubset` instance creates reference to the row and
-column indices for this particular subset against a stored assay. In case
-a new subset assay data is to be stored, it is stored as a separate
-`SingleCellExperiment` object inside the subset. The overall internal structure
-of a subset is as follows:
+Apart from the inherited slots from `SingleCellExperiment` (which work exactly
+as they should normally do), there is an addition of a `subsets` slot that
+stores a `list` of all subsets in the object. Each of these subsets inside the 
+`ExperimentSubset` object is stored as `SingleCellSubset` instance. This 
+`SingleCellSubset` instance creates reference to the row and column indices for 
+this particular subset against a stored parent assay. In case additional data
+needs to be stored against a subset i.e. additional `assays`, `rowData`, 
+`colData`, `altExp`, `reducedDims` and `metadata`, can be stored inside this
+subset in an internal `SingleCellExperiment` object which has dimensions equal
+to the subset. The overall internal structure of a subset contains the following
+components:
 
-The `subsetName` slot stores the user-defined name of a particular subset, while the
-`rowIndices` and `colIndices` slots store the corresponding indices of the subset
-rows and columns in the original assay. If a subset is created against an assay
-already stored in the `assays` slot of the `ExperimentSubset` object, then the
-`useAssay` slot refers to this assay. However, if a new subset assay is to be stored,
-then `useAssay` is set to `NULL` and `internalAssay` slot stores this subset assay
-as a `SingleCellExperiment` object.
+[Add figure here]
 
-## Components of `ExperimentSubset` class
-### `assays`: assay data
-The `assays` slot of ExperimentSubset inherited from `SummarizedExperiment` contains
-the assay data which can be set and extracted by using the `assay` function. The
-`ExperimentSubset` class overrides the functionality of `assay` function to support
-the storage and extraction of subsets of assay data apart from the assay data itself.
+## subsetName
+A `character` string that represents the name of the subset. This 
+`subsetName` field is used to access and manipulate the contents of the subset.
 
-#### `assay()`: function to access assay data (subsets)
-The `assay` function can take an additional input parameter `subsetName` to access
-subset data of an assay by providing the name of the subset.
+## rowIndices
+A `numeric` `vector` that represents the indices of the rows in the 
+parent `assay` which are included in the subset.
 
-#### `assay()<-`: function to store assay data (subsets)
-The `assay<-` function allows the storage of a subset assay into the `ExperimentSubset`
-object. If the subset assay contains the same data values as one of the originally
-stored assay data, the `useAssay` parameter can be used to specify this assay. The
-result of this statement is the creation of a new subset that simply refers to this assay.
-However, in the case of different data values of the input subset assay, the `useAssay`
-parameter can be ignored and the result of this statement is the creation of a subset
-that stores this assay inside `internalAssay` slot of this `ExperimentSubset` object
-as a separate `SingleCellExperiment` object for easier manipulation.
+## colIndices
+A `numeric` `vector` that represents the indices of the columns in the 
+parent `assay` which are included in the subset.
 
-#### `subsetAssay()` and `saveSubset`: functions to explicitly store subsets
-In addition to the use of `assay()<-` function to store or create a subset implicitly,
-explicit functions `subsetAssay()` and `saveSubset()` can also be used for the same
-purpose. `subsetAssay()` function lets us create a subset from an originally stored
-assay and `saveSubset()` function allows the storage of a subset with new data values,
-similar to the two `assay()<-` conditions discussed previously.
+## parentAssay
+A `character` string that indicates the name of the `assay` which is the parent 
+of this subset.
 
-### `colData`: metadata for cells
-The `colData` inherited from `SummarizedExperiment` class stores the column metadata
-or information about the cells in the assay. The `ExperimentSubset` class overrides
-`colData` so that the subsets of `colData` can be accessed and stored.
+## internalAssay
+A `SingleCellExperiment` object which is initially empty but can be used to 
+store additional subset data i.e. additional `assays`, `rowData`, `colData`, 
+`altExp`, `reducedDims` and `metadata` against this subset.
 
-#### `colData()`: function to access subset `colData`
-The `colData()` function can be used to access the subset `colData` by providing the
-name of the subset assay through the `subsetName` parameter. Additionally,
-`subsetColData()` function can also be used for the same purpose if an explicit call
-is needed.
+# Main methods of `ExperimentSubset` class
+## `ExperimentSubset()` constructor
+The constructor is used to initialize an `ExperimentSubset` object either by
+passing a `SingleCellExperiment` or `SummarizedExperiment` object for implicit
+conversion or explicitly by passing the same parameters to the
+`ExperimentSubset` object as one would to the `SingleCellExperiment` 
+constructor. The optional `subset` parameter which is a named `list` (list
+parameters must be specified against `subsetName`, `rowIndices`, `colIndices`
+and `parentAssay`) allows the creation of a subset directly from the 
+constructor.
 
-#### `colData()<-`: function to store subset `colData`
-The `colData()<-` function can be used to store subset `colData` by using the `subsetName`
-parameter. The input to `colData()<-` function is a `DataFrame` object containing rows
-equal to the number of columns of the subset assay.
+## `createSubset`: Create a subset
+The `createSubset` function allows the explicit creation of a subset in an
+`ExperimentSubset` object from a parent by specifying the `subsetName`, 
+`rowIndices`, `colIndices` and `parentAssay`. The parent can be a main `assay` 
+from the object, an another subset or a subset `assay`.
 
-### `rowData`: metadata for genes
-The `rowData` inherited from `SummarizedExperiment` class stores the row metadata
-or information about the genes in the assay. The `ExperimentSubset` class overrides
-`rowData` so that the subsets of `rowData` can be accessed and stored.
+## `storeSubset`: Store a subset `assay`
+The `storeSubset` function differs from the `createSubset` function in the sense
+that it allows the storage of subset `assays` in an already created subset or
+it can directly create a new subset and store the `assay` inside this subset.
+It takes input a `matrix` style assay, more specifically a `sparse` `matrix`
+which is then stored in the `internalAssay` slot of the subset.
 
-#### `rowData()`: function to access subset `rowData`
-The `rowData()` function can be used to access the subset `rowData` by providing the
-name of the subset assay through the `subsetName` parameter. Additionally,
-`subsetRowData()` function can also be used for the same purpose if an explicit call
-is needed.
-
-#### `rowData()<-`: function to store subset `rowData`
-The `rowData()<-` function can be used to store subset `rowData` by using the `subsetName`
-parameter. The input to `rowData()<-` function is a `DataFrame` object containing rows
-equal to the number of rows of the subset assay.
+## 
 
 # Creating and using an `ExperimentSubset` object: A complete example
 
