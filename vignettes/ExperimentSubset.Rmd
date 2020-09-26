@@ -19,7 +19,7 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 ---
 # Installation
-```{r, eval = FALSE}
+```{r, eval = TRUE}
 devtools::install_github("https://github.com/campbio/ExperimentSubset")
 ```
 
