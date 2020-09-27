@@ -232,3 +232,173 @@ setMethod(
     return(object)
   }
 )
+
+#' @title storeSubset
+#' @description Store a new subset \code{assay} inside a specified subset in the input \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object
+#' @param subsetName Specify the name of the existing subset inside which the new subset \code{assay} should be stored.
+#' @param inputMatrix The input subset \code{assay}.
+#' @param subsetAssayName Specify the name of the new \code{assay} against the \code{inputMatrix} parameter. If \code{NULL}, a new subset is created internally using the \code{createSubset} function. Default \code{NULL}.
+#' @return Updated \code{ExperimentSubset} object with the new \code{assay} stored inside the specified subset.
+#' @rdname storeSubset
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' counts1p <- assay(es, "subset1")
+#' counts1p[,] <- counts1p[,] + 1
+#' es <- storeSubset(es, "subset1", counts1p, "scaledSubset1")
+#' es
+setGeneric(
+  name = "storeSubset",
+  def = function(object,
+                 subsetName,
+                 inputMatrix,
+                 subsetAssayName)
+  {
+    standardGeneric("storeSubset")
+  }
+)
+
+#' @rdname storeSubset
+setMethod(
+  f = "storeSubset",
+  signature = "ExperimentSubset",
+  definition = function(object,
+                        subsetName,
+                        inputMatrix,
+                        subsetAssayName = NULL)
+  {
+    if (is.null(object@subsets[[subsetName]]) &&
+        !is.null(subsetAssayName)) {
+      stop(paste(subsetName, "does not exist in the subsets slot of the object."))
+    }
+
+    if (!is.null(object@subsets[[subsetName]])) {
+      if (!all(dim(object@subsets[[subsetName]]@internalAssay) == dim(inputMatrix))
+          && is.null(subsetAssayName)) {
+        stop(
+          "Dimensions of the inputMatrix not equal to the subset. You need to create a new subset with createSubset() function."
+        )
+      }
+    }
+
+    if (is.null(subsetAssayName)) {
+      if (subsetName %in% subsetNames(object)) {
+        stop(
+          paste(
+            subsetName,
+            "already exists. Please choose a different subsetName parameter."
+          )
+        )
+      }
+
+      object <- createSubset(object,
+                             subsetName,
+                             rownames(inputMatrix),
+                             colnames(inputMatrix),
+                             parentAssay = NULL)
+
+      object@subsets[[subsetName]]@internalAssay <-
+        SingleCellExperiment::SingleCellExperiment(list(counts = inputMatrix))
+
+    }
+    else{
+      SummarizedExperiment::assay(object@subsets[[subsetName]]@internalAssay,
+                                  withDimnames = FALSE,
+                                  subsetAssayName) <- inputMatrix
+      rownames(object@subsets[[subsetName]]@internalAssay) <-
+        rownames(inputMatrix)
+      colnames(object@subsets[[subsetName]]@internalAssay) <-
+        colnames(inputMatrix)
+    }
+
+    return(object)
+  }
+)
+
+#' @title assay
+#' @description Method to get an \code{assay} from an \code{ExperimentSubset} object or a subset from an \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.
+#' @param i Name of an \code{assay} or name of a subset or name of a subset \code{assay}.
+#' @param withDimnames Set whether dimnames should be applied to \code{assay}. Default \code{FALSE}.
+#' @param ... Additional parameters.
+#' @return The \code{assay} from the input object.
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' assay(es, "subset1",
+#' subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+#' es
+setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnames = FALSE, ...) {
+  #look at main assays
+  if (i %in% SummarizedExperiment::assayNames(x@root)) {
+    out <- SummarizedExperiment::assay(x@root, i, withDimnames = withDimnames, ... = ...)
+  }
+  #look at subsets
+  else if (i %in% subsetNames(x)) {
+    subsetName <- i
+    i <- x@subsets[[subsetName]]@parentAssay
+    if (is.null(i)) {
+      out <-
+        SummarizedExperiment::assay(x@subsets[[subsetName]]@internalAssay, withDimnames = FALSE, "counts")
+    }
+    else{
+      out <- SummarizedExperiment::assay(x@root, withDimnames = FALSE, i)
+      out <-
+        out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
+    }
+  }
+  #look inside subsets
+  else{
+    for (j in seq(length(x@subsets))) {
+      if (i %in% SummarizedExperiment::assayNames(x@subsets[[j]]@internalAssay)) {
+        out <-
+          SummarizedExperiment::assay(x@subsets[[j]]@internalAssay, withDimnames = FALSE,  i)
+      }
+    }
+  }
+  out
+})
+
+#' @title subsetNames
+#' @description Retrieves the names of the available subsets in an \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
+#' @return A \code{vector} of subset names.
+#' @rdname subsetNames
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es,
+#' "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' subsetNames(es)
+setGeneric(
+  name = "subsetNames",
+  def = function(object)
+  {
+    standardGeneric("subsetNames")
+  }
+)
+
+#' @rdname subsetNames
+setMethod(
+  f = "subsetNames",
+  signature = "ExperimentSubset",
+  definition = function(object)
+  {
+    return(names(object@subsets))
+  }
+)
