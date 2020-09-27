@@ -15,10 +15,10 @@ LazyData: true
 RoxygenNote: 7.1.1
 Depends:
   R (>= 4.0.0),
-  SingleCellExperiment
+  SingleCellExperiment,
+  SummarizedExperiment
 biocViews: Infrastructure, Software, DataImport, DataRepresentation
 Imports:
-  SummarizedExperiment,
   methods,
   Matrix,
   BiocStyle,
