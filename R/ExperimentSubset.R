@@ -93,8 +93,7 @@ ExperimentSubset <- function(object,
                              ))
 {
   if (!missing(object)) {
-    if (inherits(object, "SummarizedExperiment")) {
-      object <- as(object, "SingleCellExperiment")
+    if (inherits(object, class(object)[1])) {
       es <- .ExperimentSubset(root = object)
     }
   }
