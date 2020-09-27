@@ -16,13 +16,13 @@ RoxygenNote: 7.1.1
 Depends:
   R (>= 4.0.0),
   SingleCellExperiment,
-  SummarizedExperiment
+  SummarizedExperiment,
+  BiocGenerics
 biocViews: Infrastructure, Software, DataImport, DataRepresentation
 Imports:
   methods,
   Matrix,
-  BiocStyle,
-  BiocGenerics
+  BiocStyle
 Suggests: 
     knitr,
     rmarkdown,

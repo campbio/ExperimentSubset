@@ -1260,6 +1260,7 @@ setMethod(
   }
 )
 
+
 #' @title subsetAssayNames
 #' @description Retrieves the names of all the subsets as well as the subset assays.
 #' @param object Input \code{ExperimentSubset} object.
