@@ -207,6 +207,13 @@ setMethod(
           ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay)
         )[2])
     }
+
+    #Check if count of stored row/column indices greater than the subset
+    if(length(rows) > dim(ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay))[1]
+       || length(cols) > dim(ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay))[2]){
+      stop("More rows or columns selected than available in the parentAssay.")
+    }
+
     scs <- SingleCellSubset(
       subsetName = subsetName,
       rowIndices = rows,
@@ -221,6 +228,7 @@ setMethod(
         )
       ))
     )
+
     #Check if NAs introduced in the subset
     tryCatch({
       stats::na.fail(scs@rowIndices)
@@ -348,6 +356,7 @@ setMethod(
 #' subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
 #' es
 setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnames = FALSE, ...) {
+  out <- NULL
   #look at main assays
   if (i %in% SummarizedExperiment::assayNames(x@root)) {
     out <- SummarizedExperiment::assay(x@root, i, withDimnames = withDimnames, ... = ...)
@@ -374,6 +383,9 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnam
           SummarizedExperiment::assay(x@subsets[[j]]@internalAssay, withDimnames = FALSE,  i)
       }
     }
+  }
+  if(is.null(out)){
+    stop("requested assay not found")
   }
   out
 })
@@ -1174,7 +1186,7 @@ setMethod(
 #' @title rownames
 #' @description Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{base} package.
 #' @param object Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{base} package.
-#' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.
+#' @param ... Additional parameters and \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.
 #' @param subsetName Name of the subset to get \code{rownames} from. If \code{missing}, \code{rownames} from main object are returned.
 #' @return A \code{vector} of \code{rownames}.
 #' @rdname rownames
@@ -1199,31 +1211,102 @@ setGeneric(
 setMethod(
   f = "rownames",
   signature = "ANY",
-  definition = function(object, subsetName)
+  definition = function(object, subsetName, ...)
   {
     if(!inherits(object, "ExperimentSubset")){
-      base::rownames(object)
+      base::rownames(object, ...)
     }
     else if (missing(subsetName)) {
-      base::rownames(object@root)
+      base::rownames(object@root, ...)
     }
     else{
       if (subsetName %in% subsetNames(object)) {
-        base::rownames(object@root)[object@subsets[[subsetName]]@rowIndices]
+        esRownames <- base::rownames(object@root, ...)[object@subsets[[subsetName]]@rowIndices]
+        subsetRownames <- base::rownames(object@subsets[[subsetName]]@internalAssay, ...)
+        if(is.null(subsetRownames)){
+          subsetRownames <- esRownames
+        }
+        if(all.equal(esRownames, subsetRownames) == TRUE){
+          esRownames
+        }
+        else{
+          subsetRownames
+        }
       }
       else if (subsetName %in% subsetAssayNames(object)) {
         subsetName <- .getParentAssayName(object, subsetName)
-        base::rownames(object@root)[object@subsets[[subsetName]]@rowIndices]
+        esRownames <- base::rownames(object@root, ...)[object@subsets[[subsetName]]@rowIndices]
+        subsetRownames <- base::rownames(object@subsets[[subsetName]]@internalAssay, ...)
+        if(all.equal(esRownames, subsetRownames) == TRUE){
+          esRownames
+        }
+        else{
+          subsetRownames
+        }
+      }
+      else{
+        NULL
       }
     }
+  }
+)
+
+#' @title rownames<-
+#' @description Set \code{rownames} to an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{base} package.
+#' @param object Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{base} package.
+#' @param subsetName Name of the subset to get \code{rownames} from. If \code{missing}, \code{rownames} from main object are returned.
+#' @param ... Additional parameters and \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.
+#' @param value A \code{list} of \code{rownames} to set to the input object.
+#' @return Input object with \code{rownames} set.
+#' @rdname rownames-set
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' rownames(es, subsetName = "subset1") <-
+#' paste0("row", seq(subsetDim(es, subsetName = "subset1")[1]))
+setGeneric(
+  name = "rownames<-",
+  def = function(object, ..., value)
+  {
+    standardGeneric("rownames<-")
+  }
+)
+
+#' @rdname rownames-set
+setReplaceMethod(
+  f = "rownames",
+  signature = "ANY",
+  definition = function(object, subsetName, ..., value)
+  {
+    if(!inherits(object, "ExperimentSubset")){
+      base::rownames(object, ...) <- value
+    }
+    else if (missing(subsetName)) {
+      base::rownames(object@root, ...) <- value
+    }
+    else{
+      if (subsetName %in% subsetNames(object)) {
+        base::rownames(object@subsets[[subsetName]]@internalAssay, ...) <- value
+      }
+      else if (subsetName %in% subsetAssayNames(object)) {
+        subsetName <- .getParentAssayName(object, subsetName)
+        base::rownames(object@subsets[[subsetName]]@internalAssay, ...) <- value
+      }
+    }
+    object
   }
 )
 
 #' @title colnames
 #' @description Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.
 #' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.
-#' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.
 #' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
+#' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname colnames
 #' @export
@@ -1247,26 +1330,99 @@ setGeneric(
 setMethod(
   f = "colnames",
   signature = "ANY",
-  definition = function(object, subsetName)
+  definition = function(object, subsetName, ...)
   {
     if(!inherits(object, "ExperimentSubset")){
-      base::colnames(object)
+      base::colnames(object, ...)
     }
     else if (missing(subsetName)) {
-      base::colnames(object@root)
+      base::colnames(object@root, ...)
     }
     else{
       if (subsetName %in% subsetNames(object)) {
-        base::colnames(object@root)[object@subsets[[subsetName]]@colIndices]
+        esColnames <- base::colnames(object@root, ...)[object@subsets[[subsetName]]@colIndices]
+        subsetColnames <- base::colnames(object@subsets[[subsetName]]@internalAssay, ...)
+        if(is.null(subsetColnames)){
+          subsetColnames <- esColnames
+        }
+        if(all.equal(esColnames, subsetColnames) == TRUE){
+          esColnames
+        }
+        else{
+          subsetColnames
+        }
       }
       else if (subsetName %in% subsetAssayNames(object)) {
         subsetName <- .getParentAssayName(object, subsetName)
-        base::colnames(object@root)[object@subsets[[subsetName]]@colIndices]
+        esColnames <- base::colnames(object@root, ...)[object@subsets[[subsetName]]@colIndices]
+        subsetColnames <- base::colnames(object@subsets[[subsetName]]@internalAssay, ...)
+        if(is.null(subsetColnames)){
+          subsetColnames <- esColnames
+        }
+        if(all.equal(esColnames, subsetColnames) == TRUE){
+          esColnames
+        }
+        else{
+          subsetColnames
+        }
+      }
+      else{
+        NULL
       }
     }
   }
 )
 
+#' @title colnames<-
+#' @description Set \code{colnames} to an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.
+#' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.
+#' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
+#' @param ... Additional parameters and \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.
+#' @param value A \code{list} of \code{colnames} to set to the input object.
+#' @return Input object with \code{colnames} set.
+#' @rdname colnames-set
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' colnames(es, subsetName = "subset1") <-
+#' paste0("col", seq(subsetDim(es, subsetName = "subset1")[2]))
+setGeneric(
+  name = "colnames<-",
+  def = function(object, ..., value)
+  {
+    standardGeneric("colnames<-")
+  }
+)
+
+#' @rdname colnames-set
+setReplaceMethod(
+  f = "colnames",
+  signature = "ANY",
+  definition = function(object, subsetName, ..., value)
+  {
+    if(!inherits(object, "ExperimentSubset")){
+      base::colnames(object, ...) <- value
+    }
+    else if (missing(subsetName)) {
+      base::colnames(object@root, ...) <- value
+    }
+    else{
+      if (subsetName %in% subsetNames(object)) {
+        base::colnames(object@subsets[[subsetName]]@internalAssay, ...) <- value
+      }
+      else if (subsetName %in% subsetAssayNames(object)) {
+        subsetName <- .getParentAssayName(object, subsetName)
+        base::colnames(object@subsets[[subsetName]]@internalAssay, ...) <- value
+      }
+    }
+    object
+  }
+)
 
 #' @title subsetAssayNames
 #' @description Retrieves the names of all the subsets as well as the subset assays.
@@ -1328,6 +1484,8 @@ setMethod(
   signature = "ExperimentSubset",
   definition = function(object)
   {
+    cat("class: ExperimentSubset\n")
+    cat("root ")
     cat(SingleCellExperiment::show(object@root))
     cat("subsets(", length(subsetNames(object)), "): ",
         sep = "")

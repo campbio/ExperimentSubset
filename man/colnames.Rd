@@ -7,7 +7,7 @@
 \usage{
 colnames(object, ...)
 
-\S4method{colnames}{ANY}(object, subsetName)
+\S4method{colnames}{ANY}(object, subsetName, ...)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.}
