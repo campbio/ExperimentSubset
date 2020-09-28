@@ -56,17 +56,27 @@ SingleCellSubset <- function(subsetName = "subset",
 
 #' An S4 class to create an \code{ExperimentSubset} object with support for subsets.
 #'
-#' @slot root The root \code{SummarizedExperiment} object from which all consequent subsets will be created.
+#' @slot root The root object from which all consequent subsets will be created. This can be any object that is inherited from \code{SummarizedExperiment}.
 #' @slot subsets A \code{list} of \code{SingleCellSubset} objects.
 #' @export
 #' @import methods
 .ExperimentSubset <- setClass(
   "ExperimentSubset",
   slots = representation(
-    root = "SummarizedExperiment",
+    root = "ANY",
     subsets = "list"),
   prototype = list(
-    subsets = list())
+    subsets = list()),
+  validity = function(object){
+    if(!is.null(object@root)){
+      if(inherits(object@root, "SummarizedExperiment")){
+        return(TRUE)
+      }
+      else{
+        return("The root slot of an 'ExperimentSubset' object can only contain an object which is inherited from 'SummarizedExperiment'.")
+      }
+    }
+  }
 )
 
 #' @title ExperimentSubset constructor
@@ -93,9 +103,7 @@ ExperimentSubset <- function(object,
                              ))
 {
   if (!missing(object)) {
-    if (inherits(object, class(object)[1])) {
-      es <- .ExperimentSubset(root = object)
-    }
+    es <- .ExperimentSubset(root = object)
   }
   else{
     se <- SingleCellExperiment::SingleCellExperiment(...)
