@@ -185,13 +185,13 @@ setMethod(
     }
     if (is.character(rows)) {
       rows <-
-        match(rows, BiocGenerics::rownames(
+        match(rows, base::rownames(
           ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay)
         ))
     }
     if (is.character(cols)) {
       cols <-
-        match(cols, BiocGenerics::colnames(
+        match(cols, base::colnames(
           ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay)
         ))
     }
@@ -306,8 +306,8 @@ setMethod(
 
       object <- createSubset(object,
                              subsetName,
-                             BiocGenerics::rownames(inputMatrix),
-                             BiocGenerics::colnames(inputMatrix),
+                             base::rownames(inputMatrix),
+                             base::colnames(inputMatrix),
                              parentAssay = NULL)
 
       object@subsets[[subsetName]]@internalAssay <-
@@ -318,10 +318,10 @@ setMethod(
       SummarizedExperiment::assay(object@subsets[[subsetName]]@internalAssay,
                                   withDimnames = FALSE,
                                   subsetAssayName) <- inputMatrix
-      BiocGenerics::rownames(object@subsets[[subsetName]]@internalAssay) <-
-        BiocGenerics::rownames(inputMatrix)
-      BiocGenerics::colnames(object@subsets[[subsetName]]@internalAssay) <-
-        BiocGenerics::colnames(inputMatrix)
+      base::rownames(object@subsets[[subsetName]]@internalAssay) <-
+        base::rownames(inputMatrix)
+      base::colnames(object@subsets[[subsetName]]@internalAssay) <-
+        base::colnames(inputMatrix)
     }
 
     return(object)
@@ -1172,8 +1172,8 @@ setMethod(
 )
 
 #' @title rownames
-#' @description Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
+#' @description Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{base} package.
+#' @param object Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{base} package.
 #' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.
 #' @param subsetName Name of the subset to get \code{rownames} from. If \code{missing}, \code{rownames} from main object are returned.
 #' @return A \code{vector} of \code{rownames}.
@@ -1202,26 +1202,26 @@ setMethod(
   definition = function(object, subsetName)
   {
     if(!inherits(object, "ExperimentSubset")){
-      BiocGenerics::rownames(object)
+      base::rownames(object)
     }
     else if (missing(subsetName)) {
-      BiocGenerics::rownames(object@root)
+      base::rownames(object@root)
     }
     else{
       if (subsetName %in% subsetNames(object)) {
-        BiocGenerics::rownames(object@root)[object@subsets[[subsetName]]@rowIndices]
+        base::rownames(object@root)[object@subsets[[subsetName]]@rowIndices]
       }
       else if (subsetName %in% subsetAssayNames(object)) {
         subsetName <- .getParentAssayName(object, subsetName)
-        BiocGenerics::rownames(object@root)[object@subsets[[subsetName]]@rowIndices]
+        base::rownames(object@root)[object@subsets[[subsetName]]@rowIndices]
       }
     }
   }
 )
 
 #' @title colnames
-#' @description Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
+#' @description Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.
+#' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.
 #' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.
 #' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
 #' @return A \code{vector} of \code{colnames}.
@@ -1250,18 +1250,18 @@ setMethod(
   definition = function(object, subsetName)
   {
     if(!inherits(object, "ExperimentSubset")){
-      BiocGenerics::colnames(object)
+      base::colnames(object)
     }
     else if (missing(subsetName)) {
-      BiocGenerics::colnames(object@root)
+      base::colnames(object@root)
     }
     else{
       if (subsetName %in% subsetNames(object)) {
-        BiocGenerics::colnames(object@root)[object@subsets[[subsetName]]@colIndices]
+        base::colnames(object@root)[object@subsets[[subsetName]]@colIndices]
       }
       else if (subsetName %in% subsetAssayNames(object)) {
         subsetName <- .getParentAssayName(object, subsetName)
-        BiocGenerics::colnames(object@root)[object@subsets[[subsetName]]@colIndices]
+        base::colnames(object@root)[object@subsets[[subsetName]]@colIndices]
       }
     }
   }

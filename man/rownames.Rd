@@ -10,7 +10,7 @@ rownames(object, ...)
 \S4method{rownames}{ANY}(object, subsetName)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.}
+\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{base} package.}
 
 \item{...}{Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.}
 
@@ -20,7 +20,7 @@ rownames(object, ...)
 A \code{vector} of \code{rownames}.
 }
 \description{
-Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
+Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{base} package.
 }
 \examples{
 data(sce_chcl, package = "scds")
