@@ -1226,23 +1226,11 @@ setMethod(
         if(is.null(subsetRownames)){
           subsetRownames <- esRownames
         }
-        if(all.equal(esRownames, subsetRownames) == TRUE){
-          esRownames
-        }
-        else{
-          subsetRownames
-        }
+        subsetRownames
       }
       else if (subsetName %in% subsetAssayNames(object)) {
         subsetName <- .getParentAssayName(object, subsetName)
-        esRownames <- base::rownames(object@root, ...)[object@subsets[[subsetName]]@rowIndices]
-        subsetRownames <- base::rownames(object@subsets[[subsetName]]@internalAssay, ...)
-        if(all.equal(esRownames, subsetRownames) == TRUE){
-          esRownames
-        }
-        else{
-          subsetRownames
-        }
+        base::rownames(object@subsets[[subsetName]]@internalAssay, ...)
       }
       else{
         NULL
@@ -1306,7 +1294,7 @@ setReplaceMethod(
 #' @description Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.
 #' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.
 #' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
-#' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.
+#' @param ... Additional parameters and \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname colnames
 #' @export
@@ -1345,26 +1333,11 @@ setMethod(
         if(is.null(subsetColnames)){
           subsetColnames <- esColnames
         }
-        if(all.equal(esColnames, subsetColnames) == TRUE){
-          esColnames
-        }
-        else{
-          subsetColnames
-        }
+        subsetColnames
       }
       else if (subsetName %in% subsetAssayNames(object)) {
         subsetName <- .getParentAssayName(object, subsetName)
-        esColnames <- base::colnames(object@root, ...)[object@subsets[[subsetName]]@colIndices]
-        subsetColnames <- base::colnames(object@subsets[[subsetName]]@internalAssay, ...)
-        if(is.null(subsetColnames)){
-          subsetColnames <- esColnames
-        }
-        if(all.equal(esColnames, subsetColnames) == TRUE){
-          esColnames
-        }
-        else{
-          subsetColnames
-        }
+        base::colnames(object@subsets[[subsetName]]@internalAssay, ...)
       }
       else{
         NULL
