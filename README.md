@@ -4,3 +4,10 @@
 
 ## Introduction
 Manages subsets of data with Bioconductor Experiment objects
+
+## Installation
+To install the development version of `ExperimentSubset` from GitHub using `devtools`:
+```
+library(devtools)
+install_github("campbio/ExperimentSubset")
+```
