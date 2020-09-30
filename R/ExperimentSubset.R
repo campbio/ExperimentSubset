@@ -10,8 +10,7 @@ setClassUnion("NullOrMissingOrNumericOrCharacter",
 #' @slot rowIndices Indices of the rows to include in the subset.
 #' @slot colIndices Indices of the columns to include in the subset.
 #' @slot parentAssay Name of the parent of this subset.
-#' @slot internalAssay An internal \code{SingleCellExperiment} object to store additional subset data.
-#' @export
+#' @slot internalAssay An internal experiment object to store additional subset data.
 #' @import methods
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
 .SingleCellSubset <- setClass(
@@ -21,19 +20,18 @@ setClassUnion("NullOrMissingOrNumericOrCharacter",
     rowIndices = "NullOrNumeric",
     colIndices = "NullOrNumeric",
     parentAssay = "NullOrCharacter",
-    internalAssay = "SingleCellExperiment"
+    internalAssay = "SummarizedExperiment"
   )
 )
 
 #' @title SingleCellSubset Constructor
-#' @description Constructor for creating a \code{SingleCellSubset} object internally by the \code{ExperimentSubset} object.
+#' @description Constructor for creating a experiment object internally by the \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset.
 #' @param rowIndices Indices of the rows to include in the subset.
 #' @param colIndices Indices of the columns to include in the subset.
 #' @param parentAssay Name of the parent of this subset.
-#' @param internalAssay An internal \code{SingleCellExperiment} object to store additional subset data.
+#' @param internalAssay An internal object to store additional subset data.
 #' @return A \code{SingleCellSubset} object.
-#' @export
 #' @importFrom SingleCellExperiment SingleCellExperiment
 SingleCellSubset <- function(subsetName = "subset",
                              rowIndices = NULL,
@@ -80,13 +78,11 @@ SingleCellSubset <- function(subsetName = "subset",
 )
 
 #' @title ExperimentSubset constructor
-#' @description This constructor function is used to setup the \code{ExperimentSubset} object, either through manually specifying the \code{assays}, \code{rowData}, \code{colData} or directly by passing either a \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or objects inherited by these classes. A subset can also be directly created by pasing a named \code{list} to the \code{subset} parameter. This named \code{list} should have parameter values named as \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
-#' @param object A \code{SingleCellExperiment} or \code{SummarizedExperiment} object if direct conversion is required.
-#' @param ... Additional paramters passed to \code{SingleCellExperiment} constructor.
+#' @description This constructor function is used to setup the \code{ExperimentSubset} object by passing either a \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or objects inherited by these classes. A subset can also be directly created by passing a named \code{list} to the \code{subset} parameter. This named \code{list} should have parameter values named as \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
+#' @param object A \code{SingleCellExperiment} or \code{SummarizedExperiment} object as the root.
 #' @param subset A named \code{list} if a subset should be created from within the constructor. Named parameters in this list should be \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
 #' @return A \code{ExperimentSubset} object.
 #' @export
-#' @import BiocStyle
 #' @import Matrix
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @examples
@@ -94,7 +90,6 @@ SingleCellSubset <- function(subsetName = "subset",
 #' es <- ExperimentSubset(sce_chcl)
 #' es
 ExperimentSubset <- function(object,
-                             ...,
                              subset = list(
                                subsetName = NA,
                                rows = NA,
@@ -106,8 +101,7 @@ ExperimentSubset <- function(object,
     es <- .ExperimentSubset(root = object)
   }
   else{
-    se <- SingleCellExperiment::SingleCellExperiment(...)
-    es <- .ExperimentSubset(root = se)
+    stop("root object cannot be empty.")
   }
   if (!anyNA(subset)) {
     es <- ExperimentSubset::createSubset(
@@ -186,13 +180,13 @@ setMethod(
     if (is.character(rows)) {
       rows <-
         match(rows, base::rownames(
-          ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay)
+          ExperimentSubset::assay(object, withDimnames = TRUE, tempAssay)
         ))
     }
     if (is.character(cols)) {
       cols <-
         match(cols, base::colnames(
-          ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay)
+          ExperimentSubset::assay(object, withDimnames = TRUE, tempAssay)
         ))
     }
     if (is.null(rows)) {
@@ -214,20 +208,38 @@ setMethod(
       stop("More rows or columns selected than available in the parentAssay.")
     }
 
-    scs <- SingleCellSubset(
-      subsetName = subsetName,
-      rowIndices = rows,
-      colIndices = cols,
-      parentAssay = parentAssay,
-      internalAssay = SingleCellExperiment::SingleCellExperiment(list(
-        counts = Matrix::Matrix(
-          nrow = length(rows),
-          ncol = length(cols),
-          data = 0,
-          sparse = TRUE
-        )
-      ))
-    )
+    if(inherits(object@root, "SingleCellExperiment")){
+      scs <- SingleCellSubset(
+        subsetName = subsetName,
+        rowIndices = rows,
+        colIndices = cols,
+        parentAssay = parentAssay,
+        internalAssay = SingleCellExperiment::SingleCellExperiment(list(
+          counts = Matrix::Matrix(
+            nrow = length(rows),
+            ncol = length(cols),
+            data = 0,
+            sparse = TRUE
+          )
+        ))
+      )
+    }
+    else if(inherits(object@root, "SummarizedExperiment")){
+      scs <- SingleCellSubset(
+        subsetName = subsetName,
+        rowIndices = rows,
+        colIndices = cols,
+        parentAssay = parentAssay,
+        internalAssay = SummarizedExperiment::SummarizedExperiment(list(
+          counts = Matrix::Matrix(
+            nrow = length(rows),
+            ncol = length(cols),
+            data = 0,
+            sparse = TRUE
+          )
+        ))
+      )
+    }
 
     #Check if NAs introduced in the subset
     tryCatch({
@@ -469,7 +481,12 @@ setMethod(
       SingleCellExperiment::altExps(x@subsets[[subsetName]]@internalAssay, withColData = withColData)
     }
     else{
-      SingleCellExperiment::altExps(x@root, withColData = withColData)
+      if(!inherits(x, "ExperimentSubset")){
+        SingleCellExperiment::altExps(x, withColData = withColData)
+      }
+      else{
+        SingleCellExperiment::altExps(x@root, withColData = withColData)
+      }
     }
   }
 )
@@ -524,11 +541,20 @@ setMethod(
       }
     }
     else{
-      if (missing(e)) {
-        SingleCellExperiment::altExp(x@root, withColData = withColData)
-      }
-      else{
-        SingleCellExperiment::altExp(x@root, e, withColData = withColData)
+      if(!inherits(x, "ExperimentSubset")){
+        if (missing(e)) {
+          SingleCellExperiment::altExp(x, withColData = withColData)
+        }
+        else{
+          SingleCellExperiment::altExp(x, e, withColData = withColData)
+        }
+      }else{
+        if (missing(e)) {
+          SingleCellExperiment::altExp(x@root, withColData = withColData)
+        }
+        else{
+          SingleCellExperiment::altExp(x@root, e, withColData = withColData)
+        }
       }
     }
   }
@@ -577,7 +603,12 @@ setMethod(
       SingleCellExperiment::altExpNames(x@subsets[[subsetName]]@internalAssay)
     }
     else{
-      SingleCellExperiment::altExpNames(x@root)
+      if(!inherits(x, "ExperimentSubset")){
+        SingleCellExperiment::altExpNames(x)
+      }
+      else{
+        SingleCellExperiment::altExpNames(x@root)
+      }
     }
   }
 )
@@ -613,7 +644,12 @@ setMethod(
       SingleCellExperiment::reducedDimNames(x@subsets[[subsetName]]@internalAssay)
     }
     else{
-      SingleCellExperiment::reducedDimNames(x@root)
+      if(!inherits(x, "ExperimentSubset")){
+        SingleCellExperiment::reducedDimNames(x)
+      }
+      else{
+        SingleCellExperiment::reducedDimNames(x@root)
+      }
     }
   }
 )
@@ -663,7 +699,12 @@ setReplaceMethod(
         value
     }
     else{
-      SingleCellExperiment::altExpNames(x@root) <- value
+      if(!inherits(x, "ExperimentSubset")){
+        SingleCellExperiment::altExpNames(x) <- value
+      }
+      else{
+        SingleCellExperiment::altExpNames(x@root) <- value
+      }
     }
     x
   }
@@ -702,7 +743,12 @@ setReplaceMethod(
         value
     }
     else{
-      SingleCellExperiment::reducedDimNames(x@root) <- value
+      if(!inherits(x, "ExperimentSubset")){
+        SingleCellExperiment::reducedDimNames(x) <- value
+      }
+      else{
+        SingleCellExperiment::reducedDimNames(x@root) <- value
+      }
     }
     x
   }
@@ -760,12 +806,21 @@ setReplaceMethod(
       }
     }
     else{
-      if (missing(e)) {
-        SingleCellExperiment::altExp(x@root, withColData = withColData) <- value
+      if(!inherits(x, "ExperimentSubset")){
+        if (missing(e)) {
+          SingleCellExperiment::altExp(x, withColData = withColData) <- value
+        }
+        else{
+          SingleCellExperiment::altExp(x, e, withColData = withColData) <- value
+        }
       }
       else{
-        SingleCellExperiment::altExp(x@root, e, withColData = withColData) <-
-          value
+        if (missing(e)) {
+          SingleCellExperiment::altExp(x@root, withColData = withColData) <- value
+        }
+        else{
+          SingleCellExperiment::altExp(x@root, e, withColData = withColData) <- value
+        }
       }
     }
     x
@@ -819,7 +874,12 @@ setReplaceMethod(
         value
     }
     else{
-      SingleCellExperiment::altExps(x@root) <- value
+      if(!inherits(x, "ExperimentSubset")){
+        SingleCellExperiment::altExps(x) <- value
+      }
+      else{
+        SingleCellExperiment::altExps(x@root) <- value
+      }
     }
     x
   }
@@ -867,7 +927,12 @@ setMethod(
       S4Vectors::metadata(object@subsets[[subsetName]]@internalAssay)
     }
     else{
-      S4Vectors::metadata(object@root)
+      if(!inherits(object, "ExperimentSubset")){
+        S4Vectors::metadata(object)
+      }
+      else{
+        S4Vectors::metadata(object@root)
+      }
     }
   }
 )
@@ -954,7 +1019,12 @@ setReplaceMethod(
         value
     }
     else{
-      S4Vectors::metadata(object@root) <- value
+      if(!inherits(object, "ExperimentSubset")){
+        S4Vectors::metadata(object) <- value
+      }
+      else{
+        S4Vectors::metadata(object@root) <- value
+      }
     }
     object
   }
@@ -1643,14 +1713,19 @@ setGeneric(
 #' @rdname reducedDim
 setMethod("reducedDim", "ANY", function(object, type, withDimnames, subsetName) {
   if (missing(withDimnames)) {
-    withDimnames = TRUE
+    withDimnames = FALSE
   }
   if (!missing(subsetName)) {
     out <-
       SingleCellExperiment::reducedDim(object@subsets[[subsetName]]@internalAssay, type, withDimnames)
   }
   else{
-    out <- SingleCellExperiment::reducedDim(object@root, type, withDimnames)
+    if(!inherits(object, "ExperimentSubset")){
+      out <- SingleCellExperiment::reducedDim(object, type, withDimnames)
+    }
+    else{
+      out <- SingleCellExperiment::reducedDim(object@root, type, withDimnames)
+    }
   }
   out
 })
@@ -1687,14 +1762,19 @@ setGeneric(
 #' @rdname reducedDims
 setMethod("reducedDims", "ANY", function(object, withDimnames, subsetName) {
   if (missing(withDimnames)) {
-    withDimnames = TRUE
+    withDimnames = FALSE
   }
   if (!missing(subsetName)) {
     out <-
       SingleCellExperiment::reducedDims(object@subsets[[subsetName]]@internalAssay, withDimnames)
   }
   else{
-    out <- SingleCellExperiment::reducedDims(object@root, withDimnames)
+    if(!inherits(object, "ExperimentSubset")){
+      out <- SingleCellExperiment::reducedDims(object, withDimnames)
+    }
+    else{
+      out <- SingleCellExperiment::reducedDims(object@root, withDimnames)
+    }
   }
   out
 })
@@ -1738,7 +1818,12 @@ setReplaceMethod("reducedDim", "ANY", function(object, type, subsetName, value) 
       value
   }
   else{
-    SingleCellExperiment::reducedDim(object@root, type) <- value
+    if(!inherits(object, "ExperimentSubset")){
+      SingleCellExperiment::reducedDim(object, type) <- value
+    }
+    else{
+      SingleCellExperiment::reducedDim(object@root, type) <- value
+    }
   }
   return(object)
 })
@@ -1781,7 +1866,12 @@ setReplaceMethod("reducedDims", "ANY", function(object, subsetName, value) {
       value
   }
   else{
-    SingleCellExperiment::reducedDims(object@root) <- value
+    if(!inherits(object, "ExperimentSubset")){
+      SingleCellExperiment::reducedDims(object) <- value
+    }
+    else{
+      SingleCellExperiment::reducedDims(object@root) <- value
+    }
   }
   return(object)
 })

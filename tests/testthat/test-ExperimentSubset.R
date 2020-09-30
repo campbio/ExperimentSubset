@@ -10,19 +10,6 @@ library(scran)
 
 context("Testing ExperimentSubset functions")
 
-testthat::test_that("Testing ExperimentSubset constructor by manually specifying the data slots",{
-  data(sce_chcl, package = "scds")
-
-  es <- ExperimentSubset::ExperimentSubset(
-    assays = list(counts = assay(sce_chcl, "counts"),
-                  logcounts = assay(sce_chcl, "logcounts")),
-    colData=colData(sce_chcl),
-    rowData= rowData(sce_chcl))
-
-  testthat::expect_true(validObject(es))
-  testthat::expect_equal(class(es)[1], "ExperimentSubset")
-})
-
 testthat::test_that("Testing ExperimentSubset constructor by implicitly providing a SingleCellExperiment object",{
   data(sce_chcl, package = "scds")
 
@@ -35,10 +22,7 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
 testthat::test_that("Testing ExperimentSubset constructor by implicitly providing a SummarizedExperiment object",{
   data(sce_chcl, package = "scds")
 
-  se <- SummarizedExperiment::SummarizedExperiment(assays = list(counts = assay(sce_chcl, "counts"),
-                                                                 logcounts = assay(sce_chcl, "logcounts")),
-                                                   colData=colData(sce_chcl),
-                                                   rowData= rowData(sce_chcl))
+  se <- SummarizedExperiment::SummarizedExperiment(sce_chcl)
 
   es <- ExperimentSubset::ExperimentSubset(se)
 
@@ -46,28 +30,6 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
   testthat::expect_equal(class(es)[1], "ExperimentSubset")
 })
 
-testthat::test_that("Testing SingleCellSubset constructor",{
-
-  testthat::expect_warning(scs <- ExperimentSubset::SingleCellSubset(
-    subsetName = "subset 1",
-    rowIndices = c(1:10),
-    colIndices = c(1:10),
-    parentAssay = "counts"
-  ), "Removing spaces from subsetName argument.")
-
-  scs <- ExperimentSubset::SingleCellSubset(
-    subsetName = "subset1",
-    rowIndices = c(1:10),
-    colIndices = c(1:10),
-    parentAssay = "counts"
-  )
-
-  testthat::expect_true(is.character(scs@subsetName))
-  testthat::expect_true(is.character(scs@parentAssay))
-  testthat::expect_true(is.numeric(scs@rowIndices))
-  testthat::expect_true(is.numeric(scs@colIndices))
-
-})
 
 testthat::test_that("Testing createSubset and storeSubset",{
   data(sce_chcl, package = "scds")
@@ -187,7 +149,7 @@ testthat::test_that("Testing supplementary functions #1",{
 
 testthat::test_that("Testing supplementary functions #2",{
   tenx_pbmc4k <- TENxPBMCData(dataset = "pbmc4k")
-  es <- ExperimentSubset::ExperimentSubset(assays = list(counts = assay(tenx_pbmc4k, "counts")), colData = colData(tenx_pbmc4k), rowData = rowData(tenx_pbmc4k))
+  es <- ExperimentSubset::ExperimentSubset(tenx_pbmc4k)
 
   ExperimentSubset::colData(es) <- cbind(ExperimentSubset::colData(es), colSums = colSums(assay(es, "counts")))
   ExperimentSubset::rowData(es) <- cbind(ExperimentSubset::rowData(es), rowSums = rowSums(assay(es, "counts")))
@@ -347,9 +309,5 @@ testthat::test_that("Testing createSubset with more options",{
   testthat::expect_error(es <- ExperimentSubset::createSubset(es, "subset22", rows = c("as", "asd", "asd"), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
 
   testthat::expect_error(es <- ExperimentSubset::createSubset(es, "subset22", cols = c("CTGTG", "CAGTCC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
-
-
-
-
 
 })

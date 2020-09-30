@@ -21,11 +21,11 @@ SingleCellSubset(
 
 \item{parentAssay}{Name of the parent of this subset.}
 
-\item{internalAssay}{An internal \code{SingleCellExperiment} object to store additional subset data.}
+\item{internalAssay}{An internal object to store additional subset data.}
 }
 \value{
 A \code{SingleCellSubset} object.
 }
 \description{
-Constructor for creating a \code{SingleCellSubset} object internally by the \code{ExperimentSubset} object.
+Constructor for creating a experiment object internally by the \code{ExperimentSubset} object.
 }

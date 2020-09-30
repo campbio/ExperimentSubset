@@ -19,6 +19,6 @@ An S4 class to create subset objects to store inside an \code{ExperimentSubset} 
 
 \item{\code{parentAssay}}{Name of the parent of this subset.}
 
-\item{\code{internalAssay}}{An internal \code{SingleCellExperiment} object to store additional subset data.}
+\item{\code{internalAssay}}{An internal experiment object to store additional subset data.}
 }}
 
