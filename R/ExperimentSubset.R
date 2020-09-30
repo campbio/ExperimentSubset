@@ -86,7 +86,6 @@ SingleCellSubset <- function(subsetName = "subset",
 #' @param subset A named \code{list} if a subset should be created from within the constructor. Named parameters in this list should be \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
 #' @return A \code{ExperimentSubset} object.
 #' @export
-#' @import BiocStyle
 #' @import Matrix
 #' @importFrom SingleCellExperiment SingleCellExperiment
 #' @examples
@@ -456,7 +455,7 @@ setGeneric(
 #' @rdname altExps
 setMethod(
   f = "altExps",
-  signature = "ANY",
+  signature = "ExperimentSubset",
   definition = function(x, withColData, subsetName)
   {
     if (!missing(subsetName)) {
@@ -471,6 +470,16 @@ setMethod(
     else{
       SingleCellExperiment::altExps(x@root, withColData = withColData)
     }
+  }
+)
+
+#' @rdname altExps
+setMethod(
+  f = "altExps",
+  signature = "SingleCellExperiment",
+  definition = function(x, withColData)
+  {
+    SingleCellExperiment::altExps(x, withColData = withColData)
   }
 )
 
@@ -506,7 +515,7 @@ setGeneric(
 #' @rdname altExp
 setMethod(
   f = "altExp",
-  signature = "ANY",
+  signature = "ExperimentSubset",
   definition = function(x, e, withColData, subsetName)
   {
     if (!missing(subsetName)) {
@@ -531,6 +540,16 @@ setMethod(
         SingleCellExperiment::altExp(x@root, e, withColData = withColData)
       }
     }
+  }
+)
+
+#' @rdname altExp
+setMethod(
+  f = "altExp",
+  signature = "SingleCellExperiment",
+  definition = function(x, e, withColData)
+  {
+    SingleCellExperiment::altExp(x, e, withColData = withColData)
   }
 )
 
@@ -740,7 +759,7 @@ setGeneric(
 #' @rdname altExp-set
 setReplaceMethod(
   f = "altExp",
-  signature = "ANY",
+  signature = "ExperimentSubset",
   definition = function(x, e, withColData, subsetName, value)
   {
     if (!missing(subsetName)) {
@@ -767,6 +786,23 @@ setReplaceMethod(
         SingleCellExperiment::altExp(x@root, e, withColData = withColData) <-
           value
       }
+    }
+    x
+  }
+)
+
+#' @rdname altExp-set
+setReplaceMethod(
+  f = "altExp",
+  signature = "SingleCellExperiment",
+  definition = function(x, e, withColData, value)
+  {
+    if (missing(e)) {
+      SingleCellExperiment::altExp(x, withColData = withColData) <- value
+    }
+    else{
+      SingleCellExperiment::altExp(x, e, withColData = withColData) <-
+          value
     }
     x
   }
@@ -805,7 +841,7 @@ setGeneric(
 #' @rdname altExps-set
 setReplaceMethod(
   f = "altExps",
-  signature = "ANY",
+  signature = "ExperimentSubset",
   definition = function(x, subsetName, value)
   {
     if (!missing(subsetName)) {
@@ -821,6 +857,17 @@ setReplaceMethod(
     else{
       SingleCellExperiment::altExps(x@root) <- value
     }
+    x
+  }
+)
+
+#' @rdname altExps-set
+setReplaceMethod(
+  f = "altExps",
+  signature = "SingleCellExperiment",
+  definition = function(x, value)
+  {
+    SingleCellExperiment::altExps(x) <- value
     x
   }
 )

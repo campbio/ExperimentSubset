@@ -2,12 +2,15 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{altExp<-}
 \alias{altExp<-}
-\alias{altExp<-,ANY-method}
+\alias{altExp<-,ExperimentSubset-method}
+\alias{altExp<-,SingleCellExperiment-method}
 \title{altExp<-}
 \usage{
 altExp(x, e, withColData = FALSE, subsetName) <- value
 
-\S4method{altExp}{ANY}(x, e, withColData = FALSE, subsetName) <- value
+\S4method{altExp}{ExperimentSubset}(x, e, withColData = FALSE, subsetName) <- value
+
+\S4method{altExp}{SingleCellExperiment}(x, e, withColData) <- value
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object or any object supported by \code{altExp<-} from \link[SingleCellExperiment]{altExps} method.}
@@ -27,6 +30,7 @@ Input object with \code{altExp<-} set.
 A wrapper to the \code{altExp<-} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
 }
 \examples{
+library(SingleCellExperiment)
 data(sce_chcl, package = "scds")
 es <- ExperimentSubset(sce_chcl)
 es <- createSubset(es,

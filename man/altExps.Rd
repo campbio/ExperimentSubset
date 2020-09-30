@@ -2,12 +2,15 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{altExps}
 \alias{altExps}
-\alias{altExps,ANY-method}
+\alias{altExps,ExperimentSubset-method}
+\alias{altExps,SingleCellExperiment-method}
 \title{altExps}
 \usage{
 altExps(x, withColData = FALSE, subsetName)
 
-\S4method{altExps}{ANY}(x, withColData = FALSE, subsetName)
+\S4method{altExps}{ExperimentSubset}(x, withColData = FALSE, subsetName)
+
+\S4method{altExps}{SingleCellExperiment}(x, withColData)
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object or any object supported by \link[SingleCellExperiment]{altExps} method.}

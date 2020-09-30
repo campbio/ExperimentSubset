@@ -21,6 +21,7 @@ The \code{altExpNames} from the specified subset or same as \code{altExpNames} f
 A wrapper to the \code{altExpNames} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
 }
 \examples{
+library(SingleCellExperiment)
 data(sce_chcl, package = "scds")
 es <- ExperimentSubset(sce_chcl)
 es <- createSubset(es,

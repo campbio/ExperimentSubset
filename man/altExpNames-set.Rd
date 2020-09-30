@@ -23,6 +23,7 @@ Input object with \code{altExpNames} set.
 A wrapper to the \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
 }
 \examples{
+library(SingleCellExperiment)
 data(sce_chcl, package = "scds")
 es <- ExperimentSubset(sce_chcl)
 es <- createSubset(es,
