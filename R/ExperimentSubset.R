@@ -20,7 +20,7 @@ setClassUnion("NullOrMissingOrNumericOrCharacter",
     rowIndices = "NullOrNumeric",
     colIndices = "NullOrNumeric",
     parentAssay = "NullOrCharacter",
-    internalAssay = "SummarizedExperiment"
+    internalAssay = "ANY"
   )
 )
 
@@ -216,12 +216,19 @@ setMethod(
         sparse = TRUE
       )
     ))
+
+    internalAssay <- as(internalAssay, class(object@root)[1])
+
+    if(!inherits(internalAssay, "SummarizedExperiment")){
+      stop("Only experiment objects inherited from SummarizedExperiment are allowed.")
+    }
+
     scs <- SingleCellSubset(
       subsetName = subsetName,
       rowIndices = rows,
       colIndices = cols,
       parentAssay = parentAssay,
-      internalAssay = as(internalAssay, class(object@root)[1])
+      internalAssay = internalAssay
     )
 
     #Check if NAs introduced in the subset
