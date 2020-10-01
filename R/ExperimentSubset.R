@@ -208,38 +208,21 @@ setMethod(
       stop("More rows or columns selected than available in the parentAssay.")
     }
 
-    if(inherits(object@root, "SingleCellExperiment")){
-      scs <- SingleCellSubset(
-        subsetName = subsetName,
-        rowIndices = rows,
-        colIndices = cols,
-        parentAssay = parentAssay,
-        internalAssay = SingleCellExperiment::SingleCellExperiment(list(
-          counts = Matrix::Matrix(
-            nrow = length(rows),
-            ncol = length(cols),
-            data = 0,
-            sparse = TRUE
-          )
-        ))
+    internalAssay <- SingleCellExperiment::SingleCellExperiment(list(
+      counts = Matrix::Matrix(
+        nrow = length(rows),
+        ncol = length(cols),
+        data = 0,
+        sparse = TRUE
       )
-    }
-    else if(inherits(object@root, "SummarizedExperiment")){
-      scs <- SingleCellSubset(
-        subsetName = subsetName,
-        rowIndices = rows,
-        colIndices = cols,
-        parentAssay = parentAssay,
-        internalAssay = SummarizedExperiment::SummarizedExperiment(list(
-          counts = Matrix::Matrix(
-            nrow = length(rows),
-            ncol = length(cols),
-            data = 0,
-            sparse = TRUE
-          )
-        ))
-      )
-    }
+    ))
+    scs <- SingleCellSubset(
+      subsetName = subsetName,
+      rowIndices = rows,
+      colIndices = cols,
+      parentAssay = parentAssay,
+      internalAssay = as(internalAssay, class(object@root)[1])
+    )
 
     #Check if NAs introduced in the subset
     tryCatch({
