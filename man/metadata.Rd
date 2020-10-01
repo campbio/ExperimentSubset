@@ -10,7 +10,7 @@ metadata(object, subsetName)
 \S4method{metadata}{ANY}(object, subsetName)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.}
+\item{object}{Input \code{ExperimentSubset} object.}
 
 \item{subsetName}{Name of the subset to get the \code{metadata} from. If \code{missing}, \code{metadata} is fetched from the main input object.}
 }
@@ -18,7 +18,7 @@ metadata(object, subsetName)
 A \code{list} of \code{metadata} elements.
 }
 \description{
-Get \code{metadata} from an \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
+Get \code{metadata} from an \code{ExperimentSubset} object.
 }
 \examples{
 data(sce_chcl, package = "scds")

@@ -7,7 +7,7 @@
 \S4method{metadata}{ANY}(object, subsetName) <- value
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.}
+\item{object}{Input \code{ExperimentSubset} object.}
 
 \item{subsetName}{Name of the subset to set the \code{metadata} to. If \code{missing}, \code{metadata} is set to the main input object.}
 
@@ -17,5 +17,5 @@
 Input object with \code{metadata} set.
 }
 \description{
-Set \code{metadata} to an \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
+Set \code{metadata} to an \code{ExperimentSubset} object.
 }

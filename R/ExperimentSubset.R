@@ -219,10 +219,6 @@ setMethod(
 
     internalAssay <- as(internalAssay, class(object@root)[1])
 
-    if(!inherits(internalAssay, "SummarizedExperiment")){
-      stop("Only experiment objects inherited from SummarizedExperiment are allowed.")
-    }
-
     scs <- SingleCellSubset(
       subsetName = subsetName,
       rowIndices = rows,
@@ -876,8 +872,8 @@ setReplaceMethod(
 )
 
 #' @title metadata
-#' @description Get \code{metadata} from an \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
+#' @description Get \code{metadata} from an \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to get the \code{metadata} from. If \code{missing}, \code{metadata} is fetched from the main input object.
 #' @return A \code{list} of \code{metadata} elements.
 #' @rdname metadata
@@ -914,14 +910,14 @@ setMethod(
           "does not exist in the subsets slot of the object."
         ))
       }
-      S4Vectors::metadata(object@subsets[[subsetName]]@internalAssay)
+      object@subsets[[subsetName]]@internalAssay@metadata
     }
     else{
       if(!inherits(object, "ExperimentSubset")){
-        S4Vectors::metadata(object)
+        object@metadata
       }
       else{
-        S4Vectors::metadata(object@root)
+        object@root@metadata
       }
     }
   }
@@ -962,8 +958,8 @@ setMethod(
 )
 
 #' @title metadata<-
-#' @description Set \code{metadata} to an \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
+#' @description Set \code{metadata} to an \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to set the \code{metadata} to. If \code{missing}, \code{metadata} is set to the main input object.
 #' @param value A \code{list} to set to the \code{metadata} slot.
 #' @return Input object with \code{metadata} set.
@@ -987,8 +983,8 @@ setGeneric(
 )
 
 #' @title metadata<-
-#' @description Set \code{metadata} to an \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{S4Vectors}.
+#' @description Set \code{metadata} to an \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to set the \code{metadata} to. If \code{missing}, \code{metadata} is set to the main input object.
 #' @param value A \code{list} to set to the \code{metadata} slot.
 #' @return Input object with \code{metadata} set.
@@ -1005,15 +1001,14 @@ setReplaceMethod(
           "does not exist in the subsets slot of the object."
         ))
       }
-      S4Vectors::metadata(object@subsets[[subsetName]]@internalAssay) <-
-        value
+      object@subsets[[subsetName]]@internalAssay@metadata <- value
     }
     else{
       if(!inherits(object, "ExperimentSubset")){
-        S4Vectors::metadata(object) <- value
+        object@metadata <- value
       }
       else{
-        S4Vectors::metadata(object@root) <- value
+        object@root@metadata <- value
       }
     }
     object
