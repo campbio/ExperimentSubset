@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{metadata<-,ANY-method}
 \alias{metadata<-,ANY-method}
-\title{metadata<-}
+\title{Metadata setter method for ExperimentSubset objects}
 \usage{
 \S4method{metadata}{ANY}(object, subsetName) <- value
 }

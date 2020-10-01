@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{assay<-,ExperimentSubset,character-method}
 \alias{assay<-,ExperimentSubset,character-method}
-\title{assay<-}
+\title{Setter method for assays in ExperimentSubset objects}
 \usage{
 \S4method{assay}{ExperimentSubset,character}(x, i, withDimnames = FALSE, subsetAssayName = NULL, ...) <- value
 }

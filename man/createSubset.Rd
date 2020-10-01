@@ -3,7 +3,7 @@
 \name{createSubset}
 \alias{createSubset}
 \alias{createSubset,ExperimentSubset,character,NullOrMissingOrNumericOrCharacter,NullOrMissingOrNumericOrCharacter,MissingOrNullOrCharacter-method}
-\title{createSubset}
+\title{Subset creation method in ExperimentSubset objects}
 \usage{
 createSubset(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 

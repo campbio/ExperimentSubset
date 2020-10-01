@@ -3,7 +3,7 @@
 \name{subsetDim}
 \alias{subsetDim}
 \alias{subsetDim,ExperimentSubset,character-method}
-\title{subsetDim}
+\title{Get dimensions of subsets in ExperimentSubset objects}
 \usage{
 subsetDim(object, subsetName)
 

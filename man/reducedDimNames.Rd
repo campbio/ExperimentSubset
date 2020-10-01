@@ -3,7 +3,7 @@
 \name{reducedDimNames}
 \alias{reducedDimNames}
 \alias{reducedDimNames,ANY-method}
-\title{reducedDimNames}
+\title{Methods for Reduced Dimensions in ExperimentSubset objects}
 \usage{
 reducedDimNames(x, subsetName)
 

@@ -3,7 +3,7 @@
 \name{subsetCount}
 \alias{subsetCount}
 \alias{subsetCount,ExperimentSubset-method}
-\title{subsetCount}
+\title{Subset count method for ExperimentSubset objects}
 \usage{
 subsetCount(object)
 

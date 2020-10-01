@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{dim,ExperimentSubset-method}
 \alias{dim,ExperimentSubset-method}
-\title{dim}
+\title{Dimensions retrieval method for ExperimentSubset objects}
 \usage{
 \S4method{dim}{ExperimentSubset}(x)
 }

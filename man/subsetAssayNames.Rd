@@ -3,7 +3,8 @@
 \name{subsetAssayNames}
 \alias{subsetAssayNames}
 \alias{subsetAssayNames,ExperimentSubset-method}
-\title{subsetAssayNames}
+\title{Name retrieval method for all subset assays in ExperimentSubset
+  objects}
 \usage{
 subsetAssayNames(object)
 

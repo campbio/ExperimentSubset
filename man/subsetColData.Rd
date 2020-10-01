@@ -3,7 +3,7 @@
 \name{subsetColData}
 \alias{subsetColData}
 \alias{subsetColData,ExperimentSubset,character-method}
-\title{subsetColData}
+\title{Accessor method for colData from subsets in ExperimentSubset objects}
 \usage{
 subsetColData(object, subsetName)
 

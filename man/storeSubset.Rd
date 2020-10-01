@@ -3,7 +3,7 @@
 \name{storeSubset}
 \alias{storeSubset}
 \alias{storeSubset,ExperimentSubset-method}
-\title{storeSubset}
+\title{Method for storing new assays in ExperimentSubset objects}
 \usage{
 storeSubset(object, subsetName, inputMatrix, subsetAssayName)
 

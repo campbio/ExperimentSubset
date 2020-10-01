@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{reducedDims<-,ANY-method}
 \alias{reducedDims<-,ANY-method}
-\title{reducedDims<-}
+\title{Methods for Reduced Dimensions in ExperimentSubset objects}
 \usage{
 \S4method{reducedDims}{ANY}(object, subsetName) <- value
 }

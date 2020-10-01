@@ -3,7 +3,7 @@
 \name{subsetNames}
 \alias{subsetNames}
 \alias{subsetNames,ExperimentSubset-method}
-\title{subsetNames}
+\title{Get names of subsets in ExperimentSubset objects}
 \usage{
 subsetNames(object)
 

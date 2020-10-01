@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{show,ExperimentSubset-method}
 \alias{show,ExperimentSubset-method}
-\title{show}
+\title{Display method for ExperimentSubset objects}
 \usage{
 \S4method{show}{ExperimentSubset}(object)
 }

@@ -3,7 +3,7 @@
 \name{colnames<-}
 \alias{colnames<-}
 \alias{colnames<-,ANY-method}
-\title{colnames<-}
+\title{Setter method for colnames in ExperimentSubset objects}
 \usage{
 colnames(object, ...) <- value
 

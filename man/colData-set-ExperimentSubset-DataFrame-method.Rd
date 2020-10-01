@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{colData<-,ExperimentSubset,DataFrame-method}
 \alias{colData<-,ExperimentSubset,DataFrame-method}
-\title{colData<-}
+\title{Setter method for colData in ExperimentSubset objects}
 \usage{
 \S4method{colData}{ExperimentSubset,DataFrame}(x, ..., subsetName) <- value
 }

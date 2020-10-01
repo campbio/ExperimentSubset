@@ -3,7 +3,7 @@
 \name{altExp}
 \alias{altExp}
 \alias{altExp,ANY-method}
-\title{altExp}
+\title{Alternative Experiment methods for ExperimentSubset objects}
 \usage{
 altExp(x, e, withColData = FALSE, subsetName)
 

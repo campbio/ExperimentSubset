@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{rowData,ExperimentSubset-method}
 \alias{rowData,ExperimentSubset-method}
-\title{rowData}
+\title{Accessor method for rowData in ExperimentSubset objects}
 \usage{
 \S4method{rowData}{ExperimentSubset}(x, subsetName = NULL, ...)
 }

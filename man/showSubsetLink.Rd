@@ -3,7 +3,8 @@
 \name{showSubsetLink}
 \alias{showSubsetLink}
 \alias{showSubsetLink,ExperimentSubset-method}
-\title{showSubsetLink}
+\title{Method for displaying child-parent link structure of subsets in
+  ExperimentSubset objects}
 \usage{
 showSubsetLink(object)
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{metadata<-}
 \alias{metadata<-}
-\title{metadata<-}
+\title{Metadata setter method for ExperimentSubset objects}
 \usage{
 metadata(object, subsetName) <- value
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{AssaySubset}
 \alias{AssaySubset}
-\title{AssaySubset Constructor}
+\title{AssaySubset constructor}
 \usage{
 AssaySubset(
   subsetName = "subset",

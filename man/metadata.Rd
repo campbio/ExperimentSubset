@@ -3,7 +3,7 @@
 \name{metadata}
 \alias{metadata}
 \alias{metadata,ANY-method}
-\title{metadata}
+\title{Metadata accessor method for ExperimentSubset objects}
 \usage{
 metadata(object, subsetName)
 

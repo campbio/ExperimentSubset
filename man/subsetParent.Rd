@@ -3,7 +3,7 @@
 \name{subsetParent}
 \alias{subsetParent}
 \alias{subsetParent,ANY-method}
-\title{subsetParent}
+\title{Subset parent hierarchy retrieval method for ExperimentSubset objects}
 \usage{
 subsetParent(object, subsetName)
 

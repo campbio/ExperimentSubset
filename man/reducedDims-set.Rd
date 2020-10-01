@@ -2,7 +2,7 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{reducedDims<-}
 \alias{reducedDims<-}
-\title{reducedDims<-}
+\title{Methods for Reduced Dimensions in ExperimentSubset objects}
 \usage{
 reducedDims(object, subsetName) <- value
 }

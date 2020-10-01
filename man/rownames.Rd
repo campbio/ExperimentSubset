@@ -3,7 +3,7 @@
 \name{rownames}
 \alias{rownames}
 \alias{rownames,ANY-method}
-\title{rownames}
+\title{Accessor method for rownames in ExperimentSubset objects}
 \usage{
 rownames(object, ...)
 

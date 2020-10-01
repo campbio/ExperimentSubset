@@ -23,7 +23,7 @@ setClassUnion("NullOrMissingOrNumericOrCharacter",
   )
 )
 
-#' @title AssaySubset Constructor
+#' @title AssaySubset constructor
 #' @description Constructor for creating a experiment object internally by the
 #'   \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset.
@@ -124,7 +124,7 @@ ExperimentSubset <- function(object,
   es
 }
 
-#' @title createSubset
+#' @title Subset creation method in ExperimentSubset objects
 #' @description Create a subset from an already available \code{assay} in the
 #'   input \code{ExperimentSubset} object by specifying the rows and columns to
 #'   include in the subset.
@@ -264,7 +264,7 @@ setMethod(
   }
 )
 
-#' @title storeSubset
+#' @title Method for storing new assays in ExperimentSubset objects
 #' @description Store a new subset \code{assay} inside a specified subset in the
 #'   input \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object
@@ -359,7 +359,7 @@ setMethod(
   }
 )
 
-#' @title assay
+#' @title Accessor method for assays in ExperimentSubset objects
 #' @description Method to get an \code{assay} from an \code{ExperimentSubset}
 #'   object or a subset from an \code{ExperimentSubset} object or any object
 #'   supported by \code{assay} from \code{SummarizedExperiment}.
@@ -419,7 +419,7 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnam
   out
 })
 
-#' @title subsetNames
+#' @title Get names of subsets in ExperimentSubset objects
 #' @description Retrieves the names of the available subsets in an
 #'   \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object.
@@ -453,7 +453,7 @@ setMethod(
   }
 )
 
-#' @title altExps
+#' @title Alternative Experiment methods for ExperimentSubset objects
 #' @description A wrapper to the \link[SingleCellExperiment]{altExps} method
 #'   with additional support for subsets.
 #' @param x Input \code{ExperimentSubset} object or any object supported by
@@ -516,7 +516,7 @@ setMethod(
   }
 )
 
-#' @title altExp
+#' @title Alternative Experiment methods for ExperimentSubset objects
 #' @description A wrapper to the \code{altExp} from
 #'   \link[SingleCellExperiment]{altExps} method with additional support for
 #'   subsets.
@@ -593,7 +593,7 @@ setMethod(
   }
 )
 
-#' @title altExpNames
+#' @title Alternative Experiment methods for ExperimentSubset objects
 #' @description A wrapper to the \code{altExpNames} from
 #'   \link[SingleCellExperiment]{altExps} method with additional support for
 #'   subsets.
@@ -654,7 +654,7 @@ setMethod(
   }
 )
 
-#' @title reducedDimNames
+#' @title Methods for Reduced Dimensions in ExperimentSubset objects
 #' @description A wrapper to the \code{reducedDimNames} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
@@ -704,7 +704,7 @@ setMethod(
   }
 )
 
-#' @title altExpNames<-
+#' @title Alternative Experiment methods for ExperimentSubset objects
 #' @description A wrapper to the \code{altExpNames<-} from
 #'   \link[SingleCellExperiment]{altExps} method with additional support for
 #'   subsets.
@@ -767,7 +767,7 @@ setReplaceMethod(
   }
 )
 
-#' @title reducedDimNames<-
+#' @title Methods for Reduced Dimensions in ExperimentSubset objects
 #' @description A wrapper to the \code{reducedDimNames<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
@@ -819,7 +819,7 @@ setReplaceMethod(
   }
 )
 
-#' @title altExp<-
+#' @title Alternative Experiment methods for ExperimentSubset objects
 #' @description A wrapper to the \code{altExp<-} from
 #'   \link[SingleCellExperiment]{altExps} method with additional support for
 #'   subsets.
@@ -903,7 +903,7 @@ setReplaceMethod(
   }
 )
 
-#' @title altExps<-
+#' @title Alternative Experiment methods for ExperimentSubset objects
 #' @description A wrapper to the \code{altExps<-} from
 #'   \link[SingleCellExperiment]{altExps} method with additional support for
 #'   subsets.
@@ -967,7 +967,7 @@ setReplaceMethod(
   }
 )
 
-#' @title metadata
+#' @title Metadata accessor method for ExperimentSubset objects
 #' @description Get \code{metadata} from an \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to get the \code{metadata} from. If
@@ -1020,7 +1020,7 @@ setMethod(
   }
 )
 
-#' @title subsetDim
+#' @title Get dimensions of subsets in ExperimentSubset objects
 #' @description Retrieves the dimensions of the specified subset in an
 #'   \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object.
@@ -1056,7 +1056,7 @@ setMethod(
   }
 )
 
-#' @title metadata<-
+#' @title Metadata setter method for ExperimentSubset objects
 #' @description Set \code{metadata} to an \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to set the \code{metadata} to. If
@@ -1082,7 +1082,7 @@ setGeneric(
   }
 )
 
-#' @title metadata<-
+#' @title Metadata setter method for ExperimentSubset objects
 #' @description Set \code{metadata} to an \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to set the \code{metadata} to. If \code{missing}, \code{metadata} is set to the main input object.
@@ -1115,7 +1115,7 @@ setReplaceMethod(
   }
 )
 
-#' @title subsetCount
+#' @title Subset count method for ExperimentSubset objects
 #' @description Get the total count of the available subsets in an
 #'   \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object.
@@ -1149,7 +1149,7 @@ setMethod(
   }
 )
 
-#' @title subsetAssayCount
+#' @title Count method for subset assays in ExperimentSubset objects
 #' @description Get the count of the total available subsets and the subset
 #'   assays inside these subsets in an \code{ExperimentSubset} object.
 #' @param object Input \code{ExperimentSubset} object.
@@ -1187,7 +1187,8 @@ setMethod(
   }
 )
 
-#' @title showSubsetLink
+#' @title Method for displaying child-parent link structure of subsets in
+#'   ExperimentSubset objects
 #' @description The function displays the content of an \code{ExperimentSubset}
 #'   object including all available main assays, all subsets and the subset
 #'   assays inside these subsets. This function also depicts how and in what
@@ -1283,7 +1284,7 @@ setMethod(
   }
 )
 
-#' @title subsetParent
+#' @title Subset parent hierarchy retrieval method for ExperimentSubset objects
 #' @description Retrieves a complete subset to parent link from a specified
 #'   subset.
 #' @param object Input \code{ExperimentSubset} object.
@@ -1349,7 +1350,7 @@ setMethod(
   }
 )
 
-#' @title rownames
+#' @title Accessor method for rownames in ExperimentSubset objects
 #' @description Get \code{rownames} from an \code{ExperimentSubset} object or a
 #'   subset in the \code{ExperimentSubset} object or any object supported by
 #'   \code{rownames} in \code{base} package.
@@ -1412,7 +1413,7 @@ setMethod(
   }
 )
 
-#' @title rownames<-
+#' @title Setter method for rownames in ExperimentSubset objects
 #' @description Set \code{rownames} to an \code{ExperimentSubset} object or a
 #'   subset in the \code{ExperimentSubset} object or any object supported by
 #'   \code{rownames} in \code{base} package.
@@ -1470,7 +1471,7 @@ setReplaceMethod(
   }
 )
 
-#' @title colnames
+#' @title Accessor method for colnames in ExperimentSubset objects
 #' @description Get \code{colnames} from an \code{ExperimentSubset} object or a
 #'   subset in the \code{ExperimentSubset} object or any object supported by
 #'   \code{colnames} in \code{base} package.
@@ -1533,7 +1534,7 @@ setMethod(
   }
 )
 
-#' @title colnames<-
+#' @title Setter method for colnames in ExperimentSubset objects
 #' @description Set \code{colnames} to an \code{ExperimentSubset} object or a
 #'   subset in the \code{ExperimentSubset} object or any object supported by
 #'   \code{colnames} in \code{base} package.
@@ -1591,7 +1592,8 @@ setReplaceMethod(
   }
 )
 
-#' @title subsetAssayNames
+#' @title Name retrieval method for all subset assays in ExperimentSubset
+#'   objects
 #' @description Retrieves the names of all the subsets as well as the subset
 #'   assays.
 #' @param object Input \code{ExperimentSubset} object.
@@ -1637,7 +1639,7 @@ setMethod(
   }
 )
 
-#' @title show
+#' @title Display method for ExperimentSubset objects
 #' @description Show the \code{ExperimentSubset} object
 #' @param object Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
@@ -1665,7 +1667,7 @@ setMethod(
   }
 )
 
-#' @title assay<-
+#' @title Setter method for assays in ExperimentSubset objects
 #' @description Method to set an \code{assay} to an \code{ExperimentSubset}
 #'   object or a subset from an \code{ExperimentSubset} object or any object
 #'   supported by \code{assay<-} from \code{SummarizedExperiment}.
@@ -1720,7 +1722,7 @@ setReplaceMethod("assay",
                    x
                  })
 
-#' @title subsetRowData
+#' @title Accessor method for rowData from subsets in ExperimentSubset objects
 #' @description Get \code{rowData} from a subset.
 #' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to get \code{rowData} from.
@@ -1772,7 +1774,7 @@ setMethod(
   }
 }
 
-#' @title subsetColData
+#' @title Accessor method for colData from subsets in ExperimentSubset objects
 #' @description Get \code{colData} from a subset.
 #' @param object Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to get \code{colData} from.
@@ -1816,7 +1818,7 @@ setMethod(
   }
 )
 
-#' @title reducedDim
+#' @title Methods for Reduced Dimensions in ExperimentSubset objects
 #' @description A wrapper to the \code{reducedDim} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
@@ -1874,7 +1876,7 @@ setMethod("reducedDim", "ANY", function(object, type, withDimnames, subsetName) 
   out
 })
 
-#' @title reducedDims
+#' @title Methods for Reduced Dimensions in ExperimentSubset objects
 #' @description A wrapper to the \link[SingleCellExperiment]{reducedDims} method
 #'   with additional support for subsets.
 #' @param object Input \code{ExperimentSubset} object or any object supported by
@@ -1931,7 +1933,7 @@ setMethod("reducedDims", "ANY", function(object, withDimnames, subsetName) {
   out
 })
 
-#' @title reducedDim<-
+#' @title Methods for Reduced Dimensions in ExperimentSubset objects
 #' @description A wrapper to the \code{reducedDim<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
@@ -1963,7 +1965,7 @@ setGeneric(
   }
 )
 
-#' @title reducedDim<-
+#' @title Methods for Reduced Dimensions in ExperimentSubset objects
 #' @description A wrapper to the \code{reducedDim<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
@@ -1994,7 +1996,7 @@ setReplaceMethod("reducedDim", "ANY", function(object, type, subsetName, value) 
   return(object)
 })
 
-#' @title reducedDims<-
+#' @title Methods for Reduced Dimensions in ExperimentSubset objects
 #' @description A wrapper to the \code{reducedDims<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
@@ -2025,7 +2027,7 @@ setGeneric(
   }
 )
 
-#' @title reducedDims<-
+#' @title Methods for Reduced Dimensions in ExperimentSubset objects
 #' @description A wrapper to the \code{reducedDims<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
@@ -2054,7 +2056,7 @@ setReplaceMethod("reducedDims", "ANY", function(object, subsetName, value) {
   return(object)
 })
 
-#' @title rowData
+#' @title Accessor method for rowData in ExperimentSubset objects
 #' @description Get \code{rowData} from a subset of an input object or the
 #'   object itself.
 #' @param x Input \code{ExperimentSubset} object or any object supported by
@@ -2078,7 +2080,7 @@ setMethod("rowData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) 
   out
 })
 
-#' @title colData
+#' @title Accessor method for colData in ExperimentSubset objects
 #' @description Get \code{colData} from a subset of an input object or the
 #'   object itself.
 #' @param x Input \code{ExperimentSubset} object or any object supported by
@@ -2102,7 +2104,7 @@ setMethod("colData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) 
   out
 })
 
-#' @title rowData<-
+#' @title Setter method for rowData in ExperimentSubset objects
 #' @description Set \code{rowData} to a subset of an input object or the object
 #'   itself.
 #' @param x Input \code{ExperimentSubset} object or any object supported by
@@ -2131,7 +2133,7 @@ setReplaceMethod("rowData", c("ExperimentSubset"), function(x, ..., subsetName, 
   x
 })
 
-#' @title colData<-
+#' @title Setter method for colData in ExperimentSubset objects
 #' @description Set \code{colData} to a subset of an input object or the object
 #'   itself.
 #' @param x Input \code{ExperimentSubset} object or any object supported by
@@ -2159,7 +2161,7 @@ setReplaceMethod("colData", c("ExperimentSubset" , "DataFrame"), function(x, ...
   x
 })
 
-#' @title dim
+#' @title Dimensions retrieval method for ExperimentSubset objects
 #' @description Get dimensions of the \code{ExperimentSubset} object.
 #' @param x Input \code{ExperimentSubset} object.
 #' @return A \code{list} containing number of rows and number of columns of the
