@@ -12,9 +12,8 @@ setClassUnion("NullOrMissingOrNumericOrCharacter",
 #' @slot parentAssay Name of the parent of this subset.
 #' @slot internalAssay An internal experiment object to store additional subset data.
 #' @import methods
-#' @importClassesFrom SingleCellExperiment SingleCellExperiment
-.SingleCellSubset <- setClass(
-  "SingleCellSubset",
+.AssaySubset <- setClass(
+  "AssaySubset",
   slots = representation(
     subsetName = "character",
     rowIndices = "NullOrNumeric",
@@ -24,7 +23,7 @@ setClassUnion("NullOrMissingOrNumericOrCharacter",
   )
 )
 
-#' @title SingleCellSubset Constructor
+#' @title AssaySubset Constructor
 #' @description Constructor for creating a experiment object internally by the
 #'   \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset.
@@ -32,19 +31,18 @@ setClassUnion("NullOrMissingOrNumericOrCharacter",
 #' @param colIndices Indices of the columns to include in the subset.
 #' @param parentAssay Name of the parent of this subset.
 #' @param internalAssay An internal object to store additional subset data.
-#' @return A \code{SingleCellSubset} object.
-#' @importFrom SingleCellExperiment SingleCellExperiment
-SingleCellSubset <- function(subsetName = "subset",
+#' @return A \code{AssaySubset} object.
+AssaySubset <- function(subsetName = "subset",
                              rowIndices = NULL,
                              colIndices = NULL,
                              parentAssay = "counts",
-                             internalAssay = SingleCellExperiment::SingleCellExperiment())
+                             internalAssay = NULL)
 {
   if (grepl("\\s+", subsetName)) {
     subsetName <- gsub("\\s", "", subsetName)
     warning("Removing spaces from subsetName argument.")
   }
-  .SingleCellSubset(
+  .AssaySubset(
     subsetName = subsetName,
     rowIndices = rowIndices,
     colIndices = colIndices,
@@ -58,14 +56,16 @@ SingleCellSubset <- function(subsetName = "subset",
 #'
 #' @slot root The root object from which all consequent subsets will be created.
 #'   This can be any object that is inherited from \code{SummarizedExperiment}.
-#' @slot subsets A \code{list} of \code{SingleCellSubset} objects.
+#' @slot subsets A \code{list} of \code{AssaySubset} objects.
 #' @export
 #' @import methods
 .ExperimentSubset <- setClass(
   "ExperimentSubset",
   slots = representation(root = "ANY",
                          subsets = "list"),
-  prototype = list(subsets = list()),
+  prototype = list(
+    root = SummarizedExperiment::SummarizedExperiment(),
+    subsets = list()),
   validity = function(object) {
     if (is.null(object@root)) {
       return("The root object cannot be 'NULL'.")
@@ -93,7 +93,6 @@ SingleCellSubset <- function(subsetName = "subset",
 #' @return A \code{ExperimentSubset} object.
 #' @export
 #' @import Matrix
-#' @importFrom SingleCellExperiment SingleCellExperiment
 #' @examples
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
@@ -121,6 +120,7 @@ ExperimentSubset <- function(object,
       parentAssay = subset$parentAssay
     )
   }
+  methods::validObject(es)
   es
 }
 
@@ -227,25 +227,27 @@ setMethod(
       stop("More rows or columns selected than available in the parentAssay.")
     }
 
-    internalAssay <-
-      SingleCellExperiment::SingleCellExperiment(list(
-        counts = Matrix::Matrix(
-          nrow = length(rows),
-          ncol = length(cols),
-          data = 0,
-          sparse = TRUE
-        )
-      ))
+    # Create an initial object for the internalAssay
+    a <- list(Matrix::Matrix(
+      nrow = length(rows),
+      ncol = length(cols),
+      data = 0,
+      sparse = TRUE))
+    names(a) <- "temp"
+    internalAssay <- SummarizedExperiment::SummarizedExperiment(assays = a)
 
+    # Convert to class of root object (e.g. SingleCellExperiment)
     internalAssay <- as(internalAssay, class(object@root)[1])
 
-    scs <- SingleCellSubset(
+    scs <- AssaySubset(
       subsetName = subsetName,
       rowIndices = rows,
       colIndices = cols,
       parentAssay = parentAssay,
       internalAssay = internalAssay
     )
+    SummarizedExperiment::assay(scs@internalAssay,
+                                withDimnames = FALSE, "temp") <- NULL
 
     #Check if NAs introduced in the subset
     tryCatch({
@@ -256,10 +258,6 @@ setMethod(
         "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent."
       )
     })
-
-    #Remove counts assay from internal SCE object of the subset to save memory
-    SummarizedExperiment::assay(scs@internalAssay, withDimnames = FALSE, "counts") <-
-      NULL
 
     object@subsets[[subsetName]] <- scs
     return(object)
