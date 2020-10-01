@@ -67,15 +67,12 @@ SingleCellSubset <- function(subsetName = "subset",
                          subsets = "list"),
   prototype = list(subsets = list()),
   validity = function(object) {
-    if (!is.null(object@root)) {
-      if (inherits(object@root, "SummarizedExperiment")) {
-        return(TRUE)
-      }
-      else{
-        return(
-          "The root slot of an 'ExperimentSubset' object can only contain an object which is inherited from 'SummarizedExperiment'."
-        )
-      }
+    if (is.null(object@root)) {
+      return("The root object cannot be 'NULL'.")
+    } else if (!inherits(object@root, "SummarizedExperiment")) {
+      return("The root slot of an 'ExperimentSubset' object can only contain an object which is inherited from 'SummarizedExperiment'.")
+    } else {
+      return(TRUE)
     }
   }
 )
