@@ -12,13 +12,15 @@ subsetParent(object, subsetName)
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Specify the name of the subset against which the subset to parent link should be retrieved.}
+\item{subsetName}{Specify the name of the subset against which the subset to
+parent link should be retrieved.}
 }
 \value{
 A \code{list} containing the parent link of the subset.
 }
 \description{
-Retrieves a complete subset to parent link from a specified subset.
+Retrieves a complete subset to parent link from a specified
+  subset.
 }
 \examples{
 data(sce_chcl, package = "scds")

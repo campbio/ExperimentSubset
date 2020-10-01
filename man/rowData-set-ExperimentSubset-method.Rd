@@ -7,11 +7,13 @@
 \S4method{rowData}{ExperimentSubset}(x, ..., subsetName) <- value
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{rowData<-} from \code{SummarizedExperiment}.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by
+\code{rowData<-} from \code{SummarizedExperiment}.}
 
 \item{...}{Additional parameters.}
 
-\item{subsetName}{Name of the subset to set \code{rowData} to. If \code{NULL} or \code{missing}, \code{rowData} to main input object is set.}
+\item{subsetName}{Name of the subset to set \code{rowData} to. If \code{NULL}
+or \code{missing}, \code{rowData} to main input object is set.}
 
 \item{value}{The \code{rowData} to store in an object or subset of an object.}
 }
@@ -19,5 +21,6 @@
 Object with \code{rowData} set.
 }
 \description{
-Set \code{rowData} to a subset of an input object or the object itself.
+Set \code{rowData} to a subset of an input object or the object
+  itself.
 }

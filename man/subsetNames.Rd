@@ -16,7 +16,8 @@ subsetNames(object)
 A \code{vector} of subset names.
 }
 \description{
-Retrieves the names of the available subsets in an \code{ExperimentSubset} object.
+Retrieves the names of the available subsets in an
+  \code{ExperimentSubset} object.
 }
 \examples{
 data(sce_chcl, package = "scds")

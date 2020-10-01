@@ -4,14 +4,17 @@
 \name{ExperimentSubset-class}
 \alias{ExperimentSubset-class}
 \alias{.ExperimentSubset}
-\title{An S4 class to create an \code{ExperimentSubset} object with support for subsets.}
+\title{An S4 class to create an \code{ExperimentSubset} object with support for
+subsets.}
 \description{
-An S4 class to create an \code{ExperimentSubset} object with support for subsets.
+An S4 class to create an \code{ExperimentSubset} object with support for
+subsets.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{root}}{The root object from which all consequent subsets will be created. This can be any object that is inherited from \code{SummarizedExperiment}.}
+\item{\code{root}}{The root object from which all consequent subsets will be created.
+This can be any object that is inherited from \code{SummarizedExperiment}.}
 
 \item{\code{subsets}}{A \code{list} of \code{SingleCellSubset} objects.}
 }}

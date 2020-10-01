@@ -10,17 +10,22 @@ colnames(object, ...)
 \S4method{colnames}{ANY}(object, subsetName, ...)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.}
+\item{object}{Input \code{ExperimentSubset} object or any object supported by
+\code{colnames} in \code{base} package.}
 
-\item{...}{Additional parameters and \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.}
+\item{...}{Additional parameters and \code{subsetName} parameter to pass the
+name of the subset to get \code{colnames} from.}
 
-\item{subsetName}{Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.}
+\item{subsetName}{Name of the subset to get \code{colnames} from. If
+\code{missing}, \code{colnames} from main object are returned.}
 }
 \value{
 A \code{vector} of \code{colnames}.
 }
 \description{
-Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{base} package.
+Get \code{colnames} from an \code{ExperimentSubset} object or a
+  subset in the \code{ExperimentSubset} object or any object supported by
+  \code{colnames} in \code{base} package.
 }
 \examples{
 data(sce_chcl, package = "scds")

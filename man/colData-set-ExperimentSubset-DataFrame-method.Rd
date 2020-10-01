@@ -7,11 +7,13 @@
 \S4method{colData}{ExperimentSubset,DataFrame}(x, ..., subsetName) <- value
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{colData<-} from \code{SummarizedExperiment}.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by
+\code{colData<-} from \code{SummarizedExperiment}.}
 
 \item{...}{Additional parameters.}
 
-\item{subsetName}{Name of the subset to set \code{colData} to. If \code{NULL} or \code{missing}, \code{colData} to main input object is set.}
+\item{subsetName}{Name of the subset to set \code{colData} to. If \code{NULL}
+or \code{missing}, \code{colData} to main input object is set.}
 
 \item{value}{The \code{colData} to store in an object or subset of an object.}
 }
@@ -19,5 +21,6 @@
 Object with \code{colData} set.
 }
 \description{
-Set \code{colData} to a subset of an input object or the object itself.
+Set \code{colData} to a subset of an input object or the object
+  itself.
 }

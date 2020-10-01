@@ -10,15 +10,23 @@ reducedDimNames(x, subsetName) <- value
 \S4method{reducedDimNames}{ANY}(x, subsetName) <- value
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by
+\code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims}
+method.}
 
-\item{subsetName}{Specify the name of the subset to which the \code{reducedDimNames<-} should be set to. If \code{missing}, \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.}
+\item{subsetName}{Specify the name of the subset to which the
+\code{reducedDimNames<-} should be set to. If \code{missing},
+\code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims}
+method is called on the main object.}
 
-\item{value}{Input value same as \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method.}
+\item{value}{Input value same as \code{reducedDimNames<-} from
+\link[SingleCellExperiment]{reducedDims} method.}
 }
 \value{
 Input object with \code{reducedDimNames<-} set.
 }
 \description{
-A wrapper to the \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
+A wrapper to the \code{reducedDimNames<-} from
+  \link[SingleCellExperiment]{reducedDims} method with additional support for
+  subsets.
 }

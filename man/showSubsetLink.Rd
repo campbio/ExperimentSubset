@@ -13,10 +13,16 @@ showSubsetLink(object)
 \item{object}{Input \code{ExperimentSubset} object.}
 }
 \value{
-Prints all the available subset information against the input \code{ExperimentSubset} object.
+Prints all the available subset information against the input
+  \code{ExperimentSubset} object.
 }
 \description{
-The function displays the content of an \code{ExperimentSubset} object including all available main assays, all subsets and the subset assays inside these subsets. This function also depicts how and in what order the subsets in the object are linked with their parents. Moreover, all supplementary data inside the subsets such as \code{reducedDims} and \code{altExps} are also displayed against each subset entry.
+The function displays the content of an \code{ExperimentSubset}
+  object including all available main assays, all subsets and the subset
+  assays inside these subsets. This function also depicts how and in what
+  order the subsets in the object are linked with their parents. Moreover,
+  all supplementary data inside the subsets such as \code{reducedDims} and
+  \code{altExps} are also displayed against each subset entry.
 }
 \examples{
 data(sce_chcl, package = "scds")

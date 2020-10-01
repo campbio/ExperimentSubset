@@ -16,7 +16,8 @@ subsetCount(object)
 A \code{numeric} value representing the total count of the subsets.
 }
 \description{
-Get the total count of the available subsets in an \code{ExperimentSubset} object.
+Get the total count of the available subsets in an
+  \code{ExperimentSubset} object.
 }
 \examples{
 data(sce_chcl, package = "scds")

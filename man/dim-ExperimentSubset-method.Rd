@@ -10,7 +10,8 @@
 \item{x}{Input \code{ExperimentSubset} object.}
 }
 \value{
-A \code{list} containing number of rows and number of columns of the object.
+A \code{list} containing number of rows and number of columns of the
+  object.
 }
 \description{
 Get dimensions of the \code{ExperimentSubset} object.

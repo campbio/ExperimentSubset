@@ -10,19 +10,24 @@ rownames(object, ...) <- value
 \S4method{rownames}{ANY}(object, subsetName, ...) <- value
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{base} package.}
+\item{object}{Input \code{ExperimentSubset} object or any object supported by
+\code{rownames} in \code{base} package.}
 
-\item{...}{Additional parameters and \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.}
+\item{...}{Additional parameters and \code{subsetName} parameter to pass the
+name of the subset to get \code{rownames} from.}
 
 \item{value}{A \code{list} of \code{rownames} to set to the input object.}
 
-\item{subsetName}{Name of the subset to get \code{rownames} from. If \code{missing}, \code{rownames} from main object are returned.}
+\item{subsetName}{Name of the subset to get \code{rownames} from. If
+\code{missing}, \code{rownames} from main object are returned.}
 }
 \value{
 Input object with \code{rownames} set.
 }
 \description{
-Set \code{rownames} to an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{base} package.
+Set \code{rownames} to an \code{ExperimentSubset} object or a
+  subset in the \code{ExperimentSubset} object or any object supported by
+  \code{rownames} in \code{base} package.
 }
 \examples{
 data(sce_chcl, package = "scds")

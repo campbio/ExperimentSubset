@@ -10,17 +10,24 @@ altExps(x, withColData = FALSE, subsetName)
 \S4method{altExps}{ANY}(x, withColData = FALSE, subsetName)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \link[SingleCellExperiment]{altExps} method.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by
+\link[SingleCellExperiment]{altExps} method.}
 
-\item{withColData}{Same as \link[SingleCellExperiment]{altExps}. Default \code{FALSE}.}
+\item{withColData}{Same as \link[SingleCellExperiment]{altExps}. Default
+\code{FALSE}.}
 
-\item{subsetName}{Specify the name of the subset from which the \code{altExps} should be fetched from. If \code{missing}, \link[SingleCellExperiment]{altExps} method is called on the main object.}
+\item{subsetName}{Specify the name of the subset from which the
+\code{altExps} should be fetched from. If \code{missing},
+\link[SingleCellExperiment]{altExps} method is called on the main object.}
 }
 \value{
-\code{altExps} from the specified subset or same as \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
+\code{altExps} from the specified subset or same as
+  \link[SingleCellExperiment]{altExps} when \code{subsetName} is
+  \code{missing}.
 }
 \description{
-A wrapper to the \link[SingleCellExperiment]{altExps} method with additional support for subsets.
+A wrapper to the \link[SingleCellExperiment]{altExps} method
+  with additional support for subsets.
 }
 \examples{
 data(sce_chcl, package = "scds")

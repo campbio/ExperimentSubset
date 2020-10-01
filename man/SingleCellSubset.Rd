@@ -27,5 +27,6 @@ SingleCellSubset(
 A \code{SingleCellSubset} object.
 }
 \description{
-Constructor for creating a experiment object internally by the \code{ExperimentSubset} object.
+Constructor for creating a experiment object internally by the
+  \code{ExperimentSubset} object.
 }

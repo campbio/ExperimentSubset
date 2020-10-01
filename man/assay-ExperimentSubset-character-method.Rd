@@ -7,11 +7,14 @@
 \S4method{assay}{ExperimentSubset,character}(x, i, withDimnames = FALSE, ...)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by
+\code{assay} from \code{SummarizedExperiment}.}
 
-\item{i}{Name of an \code{assay} or name of a subset or name of a subset \code{assay}.}
+\item{i}{Name of an \code{assay} or name of a subset or name of a subset
+\code{assay}.}
 
-\item{withDimnames}{Set whether dimnames should be applied to \code{assay}. Default \code{FALSE}.}
+\item{withDimnames}{Set whether dimnames should be applied to \code{assay}.
+Default \code{FALSE}.}
 
 \item{...}{Additional parameters.}
 }
@@ -19,7 +22,9 @@
 The \code{assay} from the input object.
 }
 \description{
-Method to get an \code{assay} from an \code{ExperimentSubset} object or a subset from an \code{ExperimentSubset} object or any object supported by \code{assay} from \code{SummarizedExperiment}.
+Method to get an \code{assay} from an \code{ExperimentSubset}
+  object or a subset from an \code{ExperimentSubset} object or any object
+  supported by \code{assay} from \code{SummarizedExperiment}.
 }
 \examples{
 data(sce_chcl, package = "scds")

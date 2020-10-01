@@ -7,9 +7,13 @@
 reducedDims(object, subsetName) <- value
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.}
+\item{object}{Input \code{ExperimentSubset} object or any object supported by
+\code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.}
 
-\item{subsetName}{Specify the name of the subset to which the \code{reducedDims} should be set to. If \code{missing}, \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.}
+\item{subsetName}{Specify the name of the subset to which the
+\code{reducedDims} should be set to. If \code{missing},
+\code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method
+is called on the main object.}
 
 \item{value}{A \code{list} of values to set to \code{reducedDims}.}
 }
@@ -17,7 +21,9 @@ reducedDims(object, subsetName) <- value
 Updated input object with \code{reducedDims} set.
 }
 \description{
-A wrapper to the \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
+A wrapper to the \code{reducedDims<-} from
+  \link[SingleCellExperiment]{reducedDims} method with additional support for
+  subsets.
 }
 \examples{
 data(sce_chcl, package = "scds")

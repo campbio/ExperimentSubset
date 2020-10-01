@@ -10,17 +10,24 @@ altExpNames(x, subsetName) <- value
 \S4method{altExpNames}{ANY}(x, subsetName) <- value
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by
+\code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method.}
 
-\item{subsetName}{Specify the name of the subset to which the \code{altExpNames<-} should be set to. If \code{missing}, \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method is called on the main object.}
+\item{subsetName}{Specify the name of the subset to which the
+\code{altExpNames<-} should be set to. If \code{missing},
+\code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method is
+called on the main object.}
 
-\item{value}{Input value same as \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method.}
+\item{value}{Input value same as \code{altExpNames<-} from
+\link[SingleCellExperiment]{altExps} method.}
 }
 \value{
 Input object with \code{altExpNames} set.
 }
 \description{
-A wrapper to the \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
+A wrapper to the \code{altExpNames<-} from
+  \link[SingleCellExperiment]{altExps} method with additional support for
+  subsets.
 }
 \examples{
 data(sce_chcl, package = "scds")
