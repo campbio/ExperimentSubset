@@ -2,11 +2,11 @@ Package: ExperimentSubset
 Type: Package
 Title: Manages subsets of data with Bioconductor Experiment objects
 Version: 0.99.0
-Authors@R: c(person(given="Irzam", family="Sarfraz", email="irzam9095@gmail.com", role=c("aut"),
+Authors@R: c(person(given="Irzam", family="Sarfraz", email="irzam9095@gmail.com", role=c("aut","cre"),
               comment = c(ORCID = "0000-0001-8121-792X")),
             person(given="Muhammad", family="Asif", email="asif@ntu.edu.pk", role=c("aut","ths"),
               comment = c(ORCID = "0000-0003-1839-2527")),
-            person(given=c("Joshua","D."), family="Campbell", email="camp@bu.edu", role=c("aut","cre"),
+            person(given=c("Joshua","D."), family="Campbell", email="camp@bu.edu", role=c("aut"),
                    comment = c(ORCID = "0000-0003-0780-8662")))
 Description: Experiment objects such as the SummarizedExperiment or SingleCellExperiment are data containers for one or more matrix-like assays along with the associated row and column data. Often only a subset of the original data is needed for down-stream analysis. For example, filtering out poor quality samples will require excluding some columns before analysis. The ExperimentSubset object is a container to efficiently manage different subsets of the same data without having to make separate objects for each new subset.
 License: MIT + file LICENSE
