@@ -35,7 +35,7 @@ install_github("campbio/ExperimentSubset")
 
 Loading the package:
 
-```{r}
+```{r, eval = FALSE}
 library(ExperimentSubset)
 ```
 
@@ -152,7 +152,7 @@ an input experiment object as long as it is inherited from
 created from within the constructor by providing input a named list to the 
 `subset` parameter.
 
-```{r}
+```{r, eval = FALSE}
 counts <- matrix(rpois(100, lambda = 10), ncol=10, nrow=10)
 sce <- SingleCellExperiment(list(counts = counts))
 es <- ExperimentSubset(sce)
@@ -176,7 +176,7 @@ The method accepts an `ExperimentSubset` object or any object inherited
 from `SummarizedExperiment` for immediate conversion and the creation of the
 subset through a single function call.
 
-```{r}
+```{r, eval = FALSE}
 es <- createSubset(es, 
                    subsetName = "subset1",
                    rows = c(1:2),
@@ -198,7 +198,7 @@ experiment object of the same class as the `root` object. Additionally, the
 `assay` inside this subset depending upon the parameters with which the method
 is called.
 
-```{r}
+```{r, eval = FALSE}
 subset1Assay <- assay(es, "subset1")
 subset1Assay[,] <- subset1Assay[,] + 1
 es <- storeSubset(es, 
@@ -226,7 +226,7 @@ current condition of the object. The most important piece of information
 displayed by this method is the hierarchical parent-subset link against each
 subset in the object.
 
-```{r}
+```{r, eval = FALSE}
 subsetSummary(es)
 ```
 
@@ -262,7 +262,7 @@ can be used with the subsets by providing the optional `subsetName` parameter.
 Creating the `ExperimentSubset` object is as simple as passing an experiment
 object to the `ExperimentSubset` constructor:
 
-```{r}
+```{r, eval = FALSE}
 counts <- matrix(rpois(100, lambda = 10), ncol=10, nrow=10)
 sce <- SingleCellExperiment(list(counts = counts))
 es <- ExperimentSubset(sce)
@@ -271,7 +271,7 @@ subsetSummary(es)
 
 Create a subset that includes the first 5 rows and columns only:
 
-```{r}
+```{r, eval = FALSE}
 es <- createSubset(es, 
                    subsetName = "subset1",
                    rows = c(1:5),
@@ -282,7 +282,7 @@ subsetSummary(es)
 
 Create another subset from `subset1` by only keeping the first two rows:
 
-```{r}
+```{r, eval = FALSE}
 es <- createSubset(es, 
                    subsetName = "subset2",
                    rows = c(1:2),
@@ -293,14 +293,14 @@ subsetSummary(es)
 
 Get `assay` from `subset2` and update values:
 
-```{r}
+```{r, eval = FALSE}
 subset2Assay <- assay(es, "subset2")
 subset2Assay[,] <- subset2Assay[,] + 1
 ```
 
 Store the updated `assay` back to `subset2` using one of the two approaches:
 
-```{r}
+```{r, eval = FALSE}
 #approach 1
 es <- storeSubset(es, 
                   subsetName = "subset2", 
@@ -314,7 +314,7 @@ subsetSummary(es)
 
 Store an experiment object in the `altExp` slot of `subset2`:
 
-```{r}
+```{r, eval = FALSE}
 altExp(x = es,
        e = "subset2_alt1",
        subsetName = "subset2") <- es@subsets$subset2@internalAssay
@@ -322,7 +322,7 @@ altExp(x = es,
 
 Show the current condition of `ExperimentSubset` object:
 
-```{r}
+```{r, eval = FALSE}
 subsetSummary(es)
 ```
 
@@ -330,13 +330,13 @@ subsetSummary(es)
 # Using the `ExperimentSubset` object: An example with real single cell RNA-seq data
 
 Installing and loading required packages:
-```{r results='hide'}
+```{r, eval = FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install(version = "3.11", ask = FALSE)
 BiocManager::install(c("TENxPBMCData", "scater", "scran"))
 ```
-```{r results='hide'}
+```{r, eval = FALSE}
 library(ExperimentSubset)
 library(TENxPBMCData)
 library(scater)
@@ -345,7 +345,7 @@ library(scran)
 
 Load PBMC4K dataset and create `ExperimentSubset` object:
 
-```{r}
+```{r, eval = FALSE}
 tenx_pbmc4k <- TENxPBMCData(dataset = "pbmc4k")
 es <- ExperimentSubset(tenx_pbmc4k)
 subsetSummary(es)
@@ -353,14 +353,14 @@ subsetSummary(es)
 
 Compute `perCellQCMetrics` on `counts` matrix:
 
-```{r}
+```{r, eval = FALSE}
 perCellQCMetrics <- perCellQCMetrics(assay(es, "counts"))
 colData(es) <- cbind(colData(es), perCellQCMetrics)
 ```
 
 Filter cells with low column sum and create a new subset called 'filteredCells':
 
-```{r}
+```{r, eval = FALSE}
 filteredCellsIndices <- which(colData(es)$sum > 1500)
 es <- createSubset(es, "filteredCells", cols = filteredCellsIndices, parentAssay = "counts")
 subsetSummary(es)
@@ -368,14 +368,14 @@ subsetSummary(es)
 
 Normalize 'filteredCells' subset using `scater` library and store it back:
 
-```{r}
+```{r, eval = FALSE}
 assay(es, "filteredCells", subsetAssayName = "filteredCellsNormalized") <- normalizeCounts(assay(es, "filteredCells"))
 subsetSummary(es)
 ```
 
 Find highly variable genes from the normalized assay in the previous step using `scran` library against the 'filteredCells' subset only:
 
-```{r}
+```{r, eval = FALSE}
 topHVG1000 <- getTopHVGs(modelGeneVar(assay(es, "filteredCellsNormalized")), n = 1000)
 es <- createSubset(es, "hvg1000", rows = topHVG1000, parentAssay = "filteredCellsNormalized")
 subsetSummary(es)
@@ -383,13 +383,13 @@ subsetSummary(es)
 
 Run 'PCA' on the highly variable genes computed in the last step using `scater` library against the 'filteredCells' subset only:
 
-```{r}
+```{r, eval = FALSE}
 reducedDim(es, type = "PCA", subsetName = "hvg1000") <- calculatePCA(assay(es, "hvg1000"))
 ```
 
 Show the current condition of the `ExperimentSubset` object:
 
-```{r}
+```{r, eval = FALSE}
 subsetSummary(es)
 ```
 
