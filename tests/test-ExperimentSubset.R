@@ -107,7 +107,7 @@ testthat::test_that("Testing supplementary functions #1",{
   expect_equal(ExperimentSubset::subsetAssayCount(es), 2)
   expect_equal(ExperimentSubset::subsetAssayNames(es), c("subset1", "scaledSubset1"))
   expect_equal(ExperimentSubset::subsetNames(es), "subset1")
-  ExperimentSubset::showSubsetLink(es)
+  ExperimentSubset::subsetSummary(es)
   expect_equal(ExperimentSubset::subsetParent(es, "scaledSubset1"), list("subset1", "counts"))
   ExperimentSubset::show(es)
   expect_equal(ExperimentSubset::rownames(es, subsetName = "subset1"), rownames(es)[c(10,11,50,56,98,99,102,105,109,200)])
@@ -138,7 +138,7 @@ testthat::test_that("Testing supplementary functions #1",{
 # testthat::test_that("Testing createSubset and storeSubset",{
 #   data(sce_chcl, package = "scds")
 #
-#   ExperimentSubset::showSubsetLink(es)
+#   ExperimentSubset::subsetSummary(es)
 #
 #   ExperimentSubset::rowData(es, subsetName = "scaledSubset1")
 #   ExperimentSubset::colData(es, subsetName = "scaledSubset1")
@@ -194,7 +194,7 @@ testthat::test_that("Testing supplementary functions #2",{
   expect_true(all.equal(ExperimentSubset::altExpNames(es, "hvg1000"), c("alt1", "alt2")))
   # ExperimentSubset::altExp(es, "alt1", subsetName = "hvg1000")
   #
-  # ExperimentSubset::showSubsetLink(es)
+  # ExperimentSubset::subsetSummary(es)
   #
   testthat::expect_error(ExperimentSubset::altExp(es, "alt1", subsetName = "hvg") <- es@subsets$hvg1000@internalAssay,
                          "hvg does not exist in the subsets slot of the object.")
@@ -253,7 +253,7 @@ testthat::test_that("Testing supplementary functions #2",{
   expect_true(all.equal(ExperimentSubset::reducedDimNames(es, subsetName = "hvg1000"), c("PCA_1", "PCA_2")))
   # ExperimentSubset::reducedDimNames(es, subsetName = "hvg1000")
   #
-  # ExperimentSubset::showSubsetLink(es)
+  # ExperimentSubset::subsetSummary(es)
   #
   testthat::expect_error(ExperimentSubset::reducedDimNames(es, subsetName = "hvg123"),
                          "hvg123 does not exist in the subsets slot of the object.")

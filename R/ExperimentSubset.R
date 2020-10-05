@@ -124,11 +124,12 @@ ExperimentSubset <- function(object,
   es
 }
 
-#' @title Subset creation method in ExperimentSubset objects
+#' @title Subset creation method for ExperimentSubset objects
 #' @description Create a subset from an already available \code{assay} in the
 #'   input \code{ExperimentSubset} object by specifying the rows and columns to
 #'   include in the subset.
-#' @param object Input \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object or any object inherited
+#'   from \code{SummarizedExperiment} for immediate conversion.
 #' @param subsetName Specify the name of the subset to create.
 #' @param rows Specify the rows to include in this subset. If \code{missing} or
 #'   \code{NULL}, all rows are included in the subset. Values can be
@@ -169,7 +170,7 @@ setGeneric(
 setMethod(
   f = "createSubset",
   signature = c(
-    "ExperimentSubset",
+    "ANY",
     "character",
     "NullOrMissingOrNumericOrCharacter",
     "NullOrMissingOrNumericOrCharacter",
@@ -181,6 +182,11 @@ setMethod(
                         cols,
                         parentAssay)
   {
+    #if input object is not ExperimentSubset, convert it before proceeding
+    if(!inherits(object, "ExperimentSubset")){
+      object <- ExperimentSubset(object)
+    }
+    
     tempAssay <- ""
     if (is.null(parentAssay)) {
       tempAssay <- SummarizedExperiment::assayNames(object@root)[1]
@@ -1198,7 +1204,7 @@ setMethod(
 #' @param object Input \code{ExperimentSubset} object.
 #' @return Prints all the available subset information against the input
 #'   \code{ExperimentSubset} object.
-#' @rdname showSubsetLink
+#' @rdname subsetSummary
 #' @export
 #' @examples
 #' data(sce_chcl, package = "scds")
@@ -1210,18 +1216,18 @@ setMethod(
 #' parentAssay = "counts")
 #' assay(es, "subset1",
 #' subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
-#' showSubsetLink(es)
+#' subsetSummary(es)
 setGeneric(
-  name = "showSubsetLink",
+  name = "subsetSummary",
   def = function(object)
   {
-    standardGeneric("showSubsetLink")
+    standardGeneric("subsetSummary")
   }
 )
 
-#' @rdname showSubsetLink
+#' @rdname subsetSummary
 setMethod(
-  f = "showSubsetLink",
+  f = "subsetSummary",
   signature = "ExperimentSubset",
   definition = function(object)
   {
