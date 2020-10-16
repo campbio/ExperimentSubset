@@ -7,18 +7,19 @@
 \S4method{reducedDim}{ANY}(object, type, subsetName) <- value
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by
-\code{reducedDim<-} from \link[SingleCellExperiment]{reducedDims} method.}
-
-\item{type}{Same as \code{type} in \code{reducedDim<-} from
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or
+any object supported by \code{reducedDim<-} from
 \link[SingleCellExperiment]{reducedDims} method.}
 
-\item{subsetName}{Specify the name of the subset to which the
-\code{reducedDim} should be set to. If \code{missing}, \code{reducedDim<-}
-from \link[SingleCellExperiment]{reducedDims} method is called on the main
-object.}
+\item{type}{\code{character(1)} Same as \code{type} in \code{reducedDim<-}
+from \link[SingleCellExperiment]{reducedDims} method.}
 
-\item{value}{Value to set to \code{reducedDim}.}
+\item{subsetName}{\code{character(1)} Specify the name of the subset to which
+the \code{reducedDim} should be set to. If \code{missing},
+\code{reducedDim<-} from \link[SingleCellExperiment]{reducedDims} method is
+called on the main object.}
+
+\item{value}{\code{matrix} Value to set to \code{reducedDim}.}
 }
 \value{
 Updated input object with \code{reducedDim} set.

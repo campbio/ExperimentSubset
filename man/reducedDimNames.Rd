@@ -10,12 +10,12 @@ reducedDimNames(x, subsetName)
 \S4method{reducedDimNames}{ANY}(x, subsetName)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by
-\code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims}
-method.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+object supported by \code{reducedDimNames} from
+\link[SingleCellExperiment]{reducedDims} method.}
 
-\item{subsetName}{Specify the name of the subset from which the
-\code{reducedDimNames} should be fetched from. If \code{missing},
+\item{subsetName}{\code{character(1)} Specify the name of the subset from
+which the \code{reducedDimNames} should be fetched from. If \code{missing},
 \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method
 is called on the main object.}
 }

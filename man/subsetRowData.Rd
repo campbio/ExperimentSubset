@@ -10,9 +10,10 @@ subsetRowData(object, subsetName)
 \S4method{subsetRowData}{ExperimentSubset,character}(object, subsetName)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Name of the subset to get \code{rowData} from.}
+\item{subsetName}{\code{character(1)} Name of the subset to get
+\code{rowData} from.}
 }
 \value{
 The \code{rowData} from input object.

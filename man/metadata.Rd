@@ -10,10 +10,11 @@ metadata(object, subsetName)
 \S4method{metadata}{ANY}(object, subsetName)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Name of the subset to get the \code{metadata} from. If
-\code{missing}, \code{metadata} is fetched from the main input object.}
+\item{subsetName}{\code{character(1)} Name of the subset to get the
+\code{metadata} from. If \code{missing}, \code{metadata} is fetched from
+the main input object.}
 }
 \value{
 A \code{list} of \code{metadata} elements.

@@ -11,7 +11,7 @@ subsetSummary(object)
 \S4method{subsetSummary}{ExperimentSubset}(object)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 }
 \value{
 Prints all the available subset information against the input

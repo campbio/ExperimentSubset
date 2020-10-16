@@ -7,14 +7,15 @@
 \S4method{assay}{ExperimentSubset,character}(x, i, withDimnames = FALSE, ...)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by
-\code{assay} from \code{SummarizedExperiment}.}
+\item{x}{\code{ExperimentSubset} Specify the input object which can be either
+\code{ExperimentSubset} or any object supported by \code{assay} from
+\code{SummarizedExperiment}.}
 
-\item{i}{Name of an \code{assay} or name of a subset or name of a subset
-\code{assay}.}
+\item{i}{\code{character(1)} Name of an \code{assay} or name of a subset or
+name of a subset \code{assay}.}
 
-\item{withDimnames}{Set whether dimnames should be applied to \code{assay}.
-Default \code{FALSE}.}
+\item{withDimnames}{\code{logical(1)} Set whether dimnames should be applied
+to \code{assay}. Default \code{FALSE}.}
 
 \item{...}{Additional parameters.}
 }

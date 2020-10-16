@@ -4,21 +4,26 @@
 \name{AssaySubset-class}
 \alias{AssaySubset-class}
 \alias{.AssaySubset}
-\title{An S4 class to create subset objects to store inside an \code{ExperimentSubset} object.}
+\title{An S4 class to create subset objects to store inside an
+\code{ExperimentSubset} object.}
 \description{
-An S4 class to create subset objects to store inside an \code{ExperimentSubset} object.
+An S4 class to create subset objects to store inside an
+\code{ExperimentSubset} object.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{subsetName}}{Name of the subset.}
+\item{\code{subsetName}}{\code{character(1)} Name of the subset.}
 
-\item{\code{rowIndices}}{Indices of the rows to include in the subset.}
+\item{\code{rowIndices}}{\code{vector("numeric")} Indices of the rows to include in
+the subset.}
 
-\item{\code{colIndices}}{Indices of the columns to include in the subset.}
+\item{\code{colIndices}}{\code{vector("numeric")} Indices of the columns to include
+in the subset.}
 
-\item{\code{parentAssay}}{Name of the parent of this subset.}
+\item{\code{parentAssay}}{\code{character(1)} Name of the parent of this subset.}
 
-\item{\code{internalAssay}}{An internal experiment object to store additional subset data.}
+\item{\code{internalAssay}}{\code{SummarizedExperiment} An internal experiment object
+to store additional subset data.}
 }}
 

@@ -124,8 +124,8 @@ testthat::test_that("Testing supplementary functions #1",{
   expect_equal(ncol(ExperimentSubset::colData(es, subsetName = "subset1")), 12)
   expect_equal(nrow(ExperimentSubset::rowData(es, subsetName = "subset1")), ExperimentSubset::subsetDim(es, subsetName = "subset1")[2])
   
-  es@subsets$subset1@parentAssay <- NULL
-  expect_equal(subsetParent(es, "subset1"), NULL)
+  # es@subsets$subset1@parentAssay <- NULL
+  # expect_equal(subsetParent(es, "subset1"), NULL)
   
   es@subsets$subset1@parentAssay <- "counts"
   subset1Assay <- ExperimentSubset::assay(es, "subset1")

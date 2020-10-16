@@ -10,16 +10,18 @@ colnames(object, ...) <- value
 \S4method{colnames}{ANY}(object, subsetName, ...) <- value
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by
-\code{colnames} in \code{base} package.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or
+any object supported by \code{colnames} in \code{base} package.}
 
 \item{...}{Additional parameters and \code{subsetName} parameter to pass the
 name of the subset to get \code{colnames} from.}
 
-\item{value}{A \code{list} of \code{colnames} to set to the input object.}
+\item{value}{\code{list()} A \code{list} of \code{colnames} to set to the
+input object.}
 
-\item{subsetName}{Name of the subset to get \code{colnames} from. If
-\code{missing}, \code{colnames} from main object are returned.}
+\item{subsetName}{\code{character(1)} Name of the subset to get
+\code{colnames} from. If \code{missing}, \code{colnames} from main object
+are returned.}
 }
 \value{
 Input object with \code{colnames} set.

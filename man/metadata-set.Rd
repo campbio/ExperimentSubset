@@ -7,10 +7,11 @@
 metadata(object, subsetName) <- value
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Name of the subset to set the \code{metadata} to. If
-\code{missing}, \code{metadata} is set to the main input object.}
+\item{subsetName}{\code{character(1)} Name of the subset to set the
+\code{metadata} to. If \code{missing}, \code{metadata} is set to the main
+input object.}
 
 \item{value}{A \code{list} to set to the \code{metadata} slot.}
 }

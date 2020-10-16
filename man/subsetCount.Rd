@@ -10,7 +10,7 @@ subsetCount(object)
 \S4method{subsetCount}{ExperimentSubset}(object)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 }
 \value{
 A \code{numeric} value representing the total count of the subsets.

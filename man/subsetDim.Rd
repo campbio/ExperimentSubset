@@ -10,9 +10,10 @@ subsetDim(object, subsetName)
 \S4method{subsetDim}{ExperimentSubset,character}(object, subsetName)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Name of the subset to retrieve the dimensions from.}
+\item{subsetName}{\code{character(1)} Name of the subset to retrieve the
+dimensions from.}
 }
 \value{
 A \code{vector} containing the dimensions of the specified subset

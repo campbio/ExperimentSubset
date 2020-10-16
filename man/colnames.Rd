@@ -10,14 +10,15 @@ colnames(object, ...)
 \S4method{colnames}{ANY}(object, subsetName, ...)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by
-\code{colnames} in \code{base} package.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or
+any object supported by \code{colnames} in \code{base} package.}
 
 \item{...}{Additional parameters and \code{subsetName} parameter to pass the
 name of the subset to get \code{colnames} from.}
 
-\item{subsetName}{Name of the subset to get \code{colnames} from. If
-\code{missing}, \code{colnames} from main object are returned.}
+\item{subsetName}{\code{character(1)} Name of the subset to get
+\code{colnames} from. If \code{missing}, \code{colnames} from main object
+are returned.}
 }
 \value{
 A \code{vector} of \code{colnames}.

@@ -10,17 +10,18 @@ reducedDim(object, type, withDimnames, subsetName)
 \S4method{reducedDim}{ANY}(object, type, withDimnames, subsetName)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or
+any object supported by \code{reducedDim} from
+\link[SingleCellExperiment]{reducedDims} method.}
+
+\item{type}{\code{character(1)} Same as \code{type} in \code{reducedDim} from
+\link[SingleCellExperiment]{reducedDims} method.}
+
+\item{withDimnames}{\code{logical(1)} Same as \code{withDimnames} in
 \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method.}
 
-\item{type}{Same as \code{type} in \code{reducedDim} from
-\link[SingleCellExperiment]{reducedDims} method.}
-
-\item{withDimnames}{Same as \code{withDimnames} in \code{reducedDim} from
-\link[SingleCellExperiment]{reducedDims} method.}
-
-\item{subsetName}{Specify the name of the subset from which the
-\code{reducedDim} should be fetched from. If \code{missing},
+\item{subsetName}{\code{character(1)} Specify the name of the subset from
+which the \code{reducedDim} should be fetched from. If \code{missing},
 \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method is
 called on the main object.}
 }

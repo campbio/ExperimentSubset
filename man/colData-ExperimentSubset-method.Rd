@@ -7,12 +7,12 @@
 \S4method{colData}{ExperimentSubset}(x, subsetName = NULL, ...)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by
-\code{colData} from \code{SummarizedExperiment}.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+object supported by \code{colData} from \code{SummarizedExperiment}.}
 
-\item{subsetName}{Name of the subset to get \code{colData} from. If
-\code{NULL} or \code{missing}, \code{colData} from main input object is
-fetched.}
+\item{subsetName}{\code{character(1)} Name of the subset to get
+\code{colData} from. If \code{NULL} or \code{missing}, \code{colData} from
+main input object is fetched.}
 
 \item{...}{Additional parameters.}
 }

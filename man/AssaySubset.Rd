@@ -13,15 +13,18 @@ AssaySubset(
 )
 }
 \arguments{
-\item{subsetName}{Name of the subset.}
+\item{subsetName}{\code{character(1)} Name of the subset.}
 
-\item{rowIndices}{Indices of the rows to include in the subset.}
+\item{rowIndices}{\code{vector("numeric")} Indices of the rows to include in
+the subset.}
 
-\item{colIndices}{Indices of the columns to include in the subset.}
+\item{colIndices}{\code{vector("numeric")} Indices of the columns to include
+in the subset.}
 
-\item{parentAssay}{Name of the parent of this subset.}
+\item{parentAssay}{\code{character(1)} Name of the parent of this subset.}
 
-\item{internalAssay}{An internal object to store additional subset data.}
+\item{internalAssay}{\code{SummarizedExperiment} An internal object to store
+additional subset data.}
 }
 \value{
 A \code{AssaySubset} object.

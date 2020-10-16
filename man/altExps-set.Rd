@@ -10,14 +10,16 @@ altExps(x, subsetName) <- value
 \S4method{altExps}{ANY}(x, subsetName) <- value
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by
-\code{altExps<-} from \link[SingleCellExperiment]{altExps} method.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+object supported by \code{altExps<-} from
+\link[SingleCellExperiment]{altExps} method.}
 
-\item{subsetName}{Specify the name of the subset to which the
-\code{altExps<-} should be set to. If \code{missing}, \code{altExps<-} from
-\link[SingleCellExperiment]{altExps} method is called on the main object.}
+\item{subsetName}{\code{character(1)} Specify the name of the subset to which
+the \code{altExps<-} should be set to. If \code{missing}, \code{altExps<-}
+from \link[SingleCellExperiment]{altExps} method is called on the main
+object.}
 
-\item{value}{Input value same as \code{altExps<-} from
+\item{value}{\code{list()} Input value same as \code{altExps<-} from
 \link[SingleCellExperiment]{altExps} method.}
 }
 \value{

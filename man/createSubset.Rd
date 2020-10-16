@@ -10,23 +10,27 @@ createSubset(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 \S4method{createSubset}{ANY,character,NullOrMissingOrNumericOrCharacter,NullOrMissingOrNumericOrCharacter,MissingOrNullOrCharacter}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object inherited
-from \code{SummarizedExperiment} for immediate conversion.}
+\item{object}{\code{ExperimentSubset} Specify the object from which a subset
+should be created. Input can also be any object inherited from
+\code{SummarizedExperiment} for immediate conversion and subset formation.}
 
-\item{subsetName}{Specify the name of the subset to create.}
+\item{subsetName}{\code{character(1)} Specify the name of the subset to
+create.}
 
-\item{rows}{Specify the rows to include in this subset. If \code{missing} or
-\code{NULL}, all rows are included in the subset. Values can be
-\code{numeric} or \code{character}. Default \code{NULL}.}
+\item{rows}{\code{vector("numeric")} Specify the rows to include in this
+subset. If \code{missing} or \code{NULL}, all rows are included in the
+subset. Values can be \code{numeric} or \code{character}. Default
+\code{NULL}.}
 
-\item{cols}{Specify the columns to include in this subset. If \code{missing}
-or \code{NULL}, all columns are included in the subset. Values can be
-\code{numeric} or \code{character}. Default \code{NULL}.}
+\item{cols}{\code{vector("numeric")} Specify the columns to include in this
+subset. If \code{missing} or \code{NULL}, all columns are included in the
+subset. Values can be \code{numeric} or \code{character}. Default
+\code{NULL}.}
 
-\item{parentAssay}{Specify the parent \code{assay} of the subset. This parent
-\code{assay} must already be available in the \code{ExperimentSubset}
-object. If \code{NULL}, the first available main \code{assay} will be
-marked as parent. Default \code{NULL}.}
+\item{parentAssay}{\code{character(1)} Specify the parent \code{assay} of the
+subset. This parent \code{assay} must already be available in the
+\code{ExperimentSubset} object. If \code{NULL}, the first available main
+\code{assay} will be marked as parent. Default \code{NULL}.}
 }
 \value{
 An \code{ExperimentSubset} object that now contains the newly created

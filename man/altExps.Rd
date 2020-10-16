@@ -10,14 +10,14 @@ altExps(x, withColData = FALSE, subsetName)
 \S4method{altExps}{ANY}(x, withColData = FALSE, subsetName)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by
-\link[SingleCellExperiment]{altExps} method.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+object supported by \link[SingleCellExperiment]{altExps} method.}
 
-\item{withColData}{Same as \link[SingleCellExperiment]{altExps}. Default
-\code{FALSE}.}
+\item{withColData}{\code{logical(1)} Same as
+\link[SingleCellExperiment]{altExps}. Default \code{FALSE}.}
 
-\item{subsetName}{Specify the name of the subset from which the
-\code{altExps} should be fetched from. If \code{missing},
+\item{subsetName}{\code{character(1)} Specify the name of the subset from
+which the \code{altExps} should be fetched from. If \code{missing},
 \link[SingleCellExperiment]{altExps} method is called on the main object.}
 }
 \value{

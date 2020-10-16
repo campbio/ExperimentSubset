@@ -10,11 +10,12 @@ altExpNames(x, subsetName)
 \S4method{altExpNames}{ANY}(x, subsetName)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by
-\code{altExpNames} from \link[SingleCellExperiment]{altExps} method.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+object supported by \code{altExpNames} from
+\link[SingleCellExperiment]{altExps} method.}
 
-\item{subsetName}{Specify the name of the subset from which the
-\code{altExpNames} should be fetched from. If \code{missing},
+\item{subsetName}{\code{character(1)} Specify the name of the subset from
+which the \code{altExpNames} should be fetched from. If \code{missing},
 \code{altExpNames} from \link[SingleCellExperiment]{altExps} method is
 called on the main object.}
 }

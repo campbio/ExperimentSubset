@@ -7,21 +7,21 @@
 \S4method{assay}{ExperimentSubset,character}(x, i, withDimnames = FALSE, subsetAssayName = NULL, ...) <- value
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by
-\code{assay} from \code{SummarizedExperiment}.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+object supported by \code{assay} from \code{SummarizedExperiment}.}
 
-\item{i}{Name of an \code{assay} or name of the subset if storing to an
-\code{ExperimentSubset} object.}
+\item{i}{\code{character(1)} Name of an \code{assay} or name of the subset if
+storing to an \code{ExperimentSubset} object.}
 
-\item{withDimnames}{Set whether dimnames should be applied to \code{assay}.
-Default \code{FALSE}.}
+\item{withDimnames}{\code{logical(1)} Set whether dimnames should be applied
+to \code{assay}. Default \code{FALSE}.}
 
-\item{subsetAssayName}{Name of the assay to store if storing to an
-\code{ExperimentSubset} object.}
+\item{subsetAssayName}{\code{character(1)} Name of the assay to store if
+storing to an \code{ExperimentSubset} object.}
 
 \item{...}{Additional parameters.}
 
-\item{value}{The \code{assay} to store.}
+\item{value}{\code{dgCMatrix} The \code{assay} to store.}
 }
 \value{
 Input object with \code{assay} stored.

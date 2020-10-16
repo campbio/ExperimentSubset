@@ -10,7 +10,7 @@ subsetNames(object)
 \S4method{subsetNames}{ExperimentSubset}(object)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object.}
+\item{object}{\code{ExperimentSubset} Specify the input object.}
 }
 \value{
 A \code{vector} of subset names.

@@ -10,14 +10,15 @@ rownames(object, ...)
 \S4method{rownames}{ANY}(object, subsetName, ...)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by
-\code{rownames} in \code{base} package.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or
+any object supported by \code{rownames} in \code{base} package.}
 
 \item{...}{Additional parameters and \code{subsetName} parameter to pass the
 name of the subset to get \code{rownames} from.}
 
-\item{subsetName}{Name of the subset to get \code{rownames} from. If
-\code{missing}, \code{rownames} from main object are returned.}
+\item{subsetName}{\code{character(1)} Name of the subset to get
+\code{rownames} from. If \code{missing}, \code{rownames} from main object
+are returned.}
 }
 \value{
 A \code{vector} of \code{rownames}.

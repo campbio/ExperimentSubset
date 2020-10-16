@@ -10,17 +10,20 @@ altExp(x, e, withColData = FALSE, subsetName)
 \S4method{altExp}{ANY}(x, e, withColData = FALSE, subsetName)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by
-\code{altExp} from \link[SingleCellExperiment]{altExps} method.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+object supported by \code{altExp} from \link[SingleCellExperiment]{altExps}
+method.}
 
-\item{e}{Same as \code{altExp} from \link[SingleCellExperiment]{altExps}.}
+\item{e}{\code{character(1)} Same as \code{altExp} from
+\link[SingleCellExperiment]{altExps}.}
 
-\item{withColData}{Same as \code{altExp} from
+\item{withColData}{\code{logical(1)} Same as \code{altExp} from
 \link[SingleCellExperiment]{altExps}. Default \code{FALSE}.}
 
-\item{subsetName}{Specify the name of the subset from which the \code{altExp}
-should be fetched from. If \code{missing}, \code{altExp} from
-\link[SingleCellExperiment]{altExps} method is called on the main object.}
+\item{subsetName}{\code{character(1)} Specify the name of the subset from
+which the \code{altExp} should be fetched from. If \code{missing},
+\code{altExp} from \link[SingleCellExperiment]{altExps} method is called on
+the main object.}
 }
 \value{
 The \code{altExp} from the specified subset or same as \code{altExp}

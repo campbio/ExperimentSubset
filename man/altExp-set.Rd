@@ -10,21 +10,23 @@ altExp(x, e, withColData = FALSE, subsetName) <- value
 \S4method{altExp}{ANY}(x, e, withColData = FALSE, subsetName) <- value
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by
-\code{altExp<-} from \link[SingleCellExperiment]{altExps} method.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+object supported by \code{altExp<-} from
+\link[SingleCellExperiment]{altExps} method.}
 
-\item{e}{Same as \code{altExp<-} from \link[SingleCellExperiment]{altExps}
-method.}
+\item{e}{\code{character(1)} Same as \code{altExp<-} from
+\link[SingleCellExperiment]{altExps} method.}
 
-\item{withColData}{Same as \code{altExp<-} from
+\item{withColData}{\code{logical(1)} Same as \code{altExp<-} from
 \link[SingleCellExperiment]{altExps} method. Default \code{FALSE}.}
 
-\item{subsetName}{Specify the name of the subset to which the \code{altExp<-}
-should be set to. If \code{missing}, \code{altExp<-} from
-\link[SingleCellExperiment]{altExps} method is called on the main object.}
+\item{subsetName}{\code{character(1)} Specify the name of the subset to which
+the \code{altExp<-} should be set to. If \code{missing}, \code{altExp<-}
+from \link[SingleCellExperiment]{altExps} method is called on the main
+object.}
 
-\item{value}{Input value same as \code{altExp<-} from
-\link[SingleCellExperiment]{altExps} method.}
+\item{value}{\code{SingleCellExperiment} Input value same as \code{altExp<-}
+from \link[SingleCellExperiment]{altExps} method.}
 }
 \value{
 Input object with \code{altExp<-} set.

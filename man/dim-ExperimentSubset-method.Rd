@@ -7,7 +7,7 @@
 \S4method{dim}{ExperimentSubset}(x)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object.}
+\item{x}{code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 }
 \value{
 A \code{list} containing number of rows and number of columns of the

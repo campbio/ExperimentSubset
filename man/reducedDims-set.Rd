@@ -7,15 +7,17 @@
 reducedDims(object, subsetName) <- value
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by
-\code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or
+any object supported by \code{reducedDims<-} from
+\link[SingleCellExperiment]{reducedDims} method.}
 
-\item{subsetName}{Specify the name of the subset to which the
-\code{reducedDims} should be set to. If \code{missing},
+\item{subsetName}{\code{character(1)} Specify the name of the subset to which
+the \code{reducedDims} should be set to. If \code{missing},
 \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method
 is called on the main object.}
 
-\item{value}{A \code{list} of values to set to \code{reducedDims}.}
+\item{value}{\code{list()} A \code{list} of values to set to
+\code{reducedDims}.}
 }
 \value{
 Updated input object with \code{reducedDims} set.

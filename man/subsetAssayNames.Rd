@@ -11,7 +11,7 @@ subsetAssayNames(object)
 \S4method{subsetAssayNames}{ExperimentSubset}(object)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object.}
+\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 }
 \value{
 A \code{vector} containing the names of the subsets and the subset

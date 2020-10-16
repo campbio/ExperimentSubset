@@ -10,16 +10,17 @@ storeSubset(object, subsetName, inputMatrix, subsetAssayName)
 \S4method{storeSubset}{ExperimentSubset}(object, subsetName, inputMatrix, subsetAssayName = NULL)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object}
+\item{object}{\code{ExperimentSubset} Specify the input object.}
 
-\item{subsetName}{Specify the name of the existing subset inside which the
-new subset \code{assay} should be stored.}
+\item{subsetName}{\code{character(1)} Specify the name of the existing subset
+inside which the new subset \code{assay} should be stored.}
 
-\item{inputMatrix}{The input subset \code{assay}.}
+\item{inputMatrix}{\code{dgCMatrix} The input subset \code{assay}.}
 
-\item{subsetAssayName}{Specify the name of the new \code{assay} against the
-\code{inputMatrix} parameter. If \code{NULL}, a new subset is created
-internally using the \code{createSubset} function. Default \code{NULL}.}
+\item{subsetAssayName}{\code{character(1)} Specify the name of the new
+\code{assay} against the \code{inputMatrix} parameter. If \code{NULL}, a
+new subset is created internally using the \code{createSubset} function.
+Default \code{NULL}.}
 }
 \value{
 Updated \code{ExperimentSubset} object with the new \code{assay}

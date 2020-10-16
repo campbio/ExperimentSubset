@@ -10,10 +10,10 @@ ExperimentSubset(
 )
 }
 \arguments{
-\item{object}{A \code{SingleCellExperiment} or \code{SummarizedExperiment}
-object as the root.}
+\item{object}{\code{SingleCellExperiment} or \code{SummarizedExperiment}
+Specify the root object.}
 
-\item{subset}{A named \code{list} if a subset should be created from within
+\item{subset}{\code{list} Specify if a subset should be created from within
 the constructor. Named parameters in this list should be \code{subsetName},
 \code{rows}, \code{cols} and \code{parentAssay}.}
 }

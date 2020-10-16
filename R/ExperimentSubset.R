@@ -4,13 +4,17 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 setClassUnion("NullOrMissingOrNumericOrCharacter",
               c("NULL", "missing", "numeric", "character"))
 
-#' An S4 class to create subset objects to store inside an \code{ExperimentSubset} object.
+#' An S4 class to create subset objects to store inside an
+#' \code{ExperimentSubset} object.
 #'
-#' @slot subsetName character(1) Specify name of the subset.
-#' @slot rowIndices numeric vector or NULL Indices of the rows to include in the subset.
-#' @slot colIndices Indices of the columns to include in the subset.
-#' @slot parentAssay Name of the parent of this subset.
-#' @slot internalAssay An internal experiment object to store additional subset data.
+#' @slot subsetName \code{character(1)} Name of the subset.
+#' @slot rowIndices \code{vector("numeric")} Indices of the rows to include in
+#'   the subset.
+#' @slot colIndices \code{vector("numeric")} Indices of the columns to include
+#'   in the subset.
+#' @slot parentAssay \code{character(1)} Name of the parent of this subset.
+#' @slot internalAssay \code{SummarizedExperiment} An internal experiment object
+#'   to store additional subset data.
 #' @import methods
 .AssaySubset <- setClass(
   "AssaySubset",
@@ -26,11 +30,14 @@ setClassUnion("NullOrMissingOrNumericOrCharacter",
 #' @title AssaySubset constructor
 #' @description Constructor for creating a experiment object internally by the
 #'   \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset.
-#' @param rowIndices Indices of the rows to include in the subset.
-#' @param colIndices Indices of the columns to include in the subset.
-#' @param parentAssay Name of the parent of this subset.
-#' @param internalAssay An internal object to store additional subset data.
+#' @param subsetName \code{character(1)} Name of the subset.
+#' @param rowIndices \code{vector("numeric")} Indices of the rows to include in
+#'   the subset.
+#' @param colIndices \code{vector("numeric")} Indices of the columns to include
+#'   in the subset.
+#' @param parentAssay \code{character(1)} Name of the parent of this subset.
+#' @param internalAssay \code{SummarizedExperiment} An internal object to store
+#'   additional subset data.
 #' @return A \code{AssaySubset} object.
 AssaySubset <- function(subsetName = "subset",
                              rowIndices = NULL,
@@ -133,9 +140,9 @@ AssaySubset <- function(subsetName = "subset",
 #'   by passing a named \code{list} to the \code{subset} parameter. This named
 #'   \code{list} should have parameter values named as \code{subsetName},
 #'   \code{rows}, \code{cols} and \code{parentAssay}.
-#' @param object A \code{SingleCellExperiment} or \code{SummarizedExperiment}
-#'   object as the root.
-#' @param subset A named \code{list} if a subset should be created from within
+#' @param object \code{SingleCellExperiment} or \code{SummarizedExperiment}
+#'   Specify the root object.
+#' @param subset \code{list} Specify if a subset should be created from within
 #'   the constructor. Named parameters in this list should be \code{subsetName},
 #'   \code{rows}, \code{cols} and \code{parentAssay}.
 #' @return A \code{ExperimentSubset} object.
@@ -178,19 +185,23 @@ ExperimentSubset <- function(
 #' @description Create a subset from an already available \code{assay} in the
 #'   input \code{ExperimentSubset} object by specifying the rows and columns to
 #'   include in the subset.
-#' @param object Input \code{ExperimentSubset} object or any object inherited
-#'   from \code{SummarizedExperiment} for immediate conversion.
-#' @param subsetName Specify the name of the subset to create.
-#' @param rows Specify the rows to include in this subset. If \code{missing} or
-#'   \code{NULL}, all rows are included in the subset. Values can be
-#'   \code{numeric} or \code{character}. Default \code{NULL}.
-#' @param cols Specify the columns to include in this subset. If \code{missing}
-#'   or \code{NULL}, all columns are included in the subset. Values can be
-#'   \code{numeric} or \code{character}. Default \code{NULL}.
-#' @param parentAssay Specify the parent \code{assay} of the subset. This parent
-#'   \code{assay} must already be available in the \code{ExperimentSubset}
-#'   object. If \code{NULL}, the first available main \code{assay} will be
-#'   marked as parent. Default \code{NULL}.
+#' @param object \code{ExperimentSubset} Specify the object from which a subset
+#'   should be created. Input can also be any object inherited from
+#'   \code{SummarizedExperiment} for immediate conversion and subset formation.
+#' @param subsetName \code{character(1)} Specify the name of the subset to
+#'   create.
+#' @param rows \code{vector("numeric")} Specify the rows to include in this
+#'   subset. If \code{missing} or \code{NULL}, all rows are included in the
+#'   subset. Values can be \code{numeric} or \code{character}. Default
+#'   \code{NULL}.
+#' @param cols \code{vector("numeric")} Specify the columns to include in this
+#'   subset. If \code{missing} or \code{NULL}, all columns are included in the
+#'   subset. Values can be \code{numeric} or \code{character}. Default
+#'   \code{NULL}.
+#' @param parentAssay \code{character(1)} Specify the parent \code{assay} of the
+#'   subset. This parent \code{assay} must already be available in the
+#'   \code{ExperimentSubset} object. If \code{NULL}, the first available main
+#'   \code{assay} will be marked as parent. Default \code{NULL}.
 #' @return An \code{ExperimentSubset} object that now contains the newly created
 #'   subset.
 #' @rdname createSubset
@@ -324,13 +335,14 @@ setMethod(
 #' @title Method for storing new assays in ExperimentSubset objects
 #' @description Store a new subset \code{assay} inside a specified subset in the
 #'   input \code{ExperimentSubset} object.
-#' @param object Input \code{ExperimentSubset} object
-#' @param subsetName Specify the name of the existing subset inside which the
-#'   new subset \code{assay} should be stored.
-#' @param inputMatrix The input subset \code{assay}.
-#' @param subsetAssayName Specify the name of the new \code{assay} against the
-#'   \code{inputMatrix} parameter. If \code{NULL}, a new subset is created
-#'   internally using the \code{createSubset} function. Default \code{NULL}.
+#' @param object \code{ExperimentSubset} Specify the input object.
+#' @param subsetName \code{character(1)} Specify the name of the existing subset
+#'   inside which the new subset \code{assay} should be stored.
+#' @param inputMatrix \code{dgCMatrix} The input subset \code{assay}.
+#' @param subsetAssayName \code{character(1)} Specify the name of the new
+#'   \code{assay} against the \code{inputMatrix} parameter. If \code{NULL}, a
+#'   new subset is created internally using the \code{createSubset} function.
+#'   Default \code{NULL}.
 #' @return Updated \code{ExperimentSubset} object with the new \code{assay}
 #'   stored inside the specified subset.
 #' @rdname storeSubset
@@ -419,12 +431,13 @@ setMethod(
 #' @description Method to get an \code{assay} from an \code{ExperimentSubset}
 #'   object or a subset from an \code{ExperimentSubset} object or any object
 #'   supported by \code{assay} from \code{SummarizedExperiment}.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{assay} from \code{SummarizedExperiment}.
-#' @param i Name of an \code{assay} or name of a subset or name of a subset
-#'   \code{assay}.
-#' @param withDimnames Set whether dimnames should be applied to \code{assay}.
-#'   Default \code{FALSE}.
+#' @param x \code{ExperimentSubset} Specify the input object which can be either
+#'   \code{ExperimentSubset} or any object supported by \code{assay} from
+#'   \code{SummarizedExperiment}.
+#' @param i \code{character(1)} Name of an \code{assay} or name of a subset or
+#'   name of a subset \code{assay}.
+#' @param withDimnames \code{logical(1)} Set whether dimnames should be applied
+#'   to \code{assay}. Default \code{FALSE}.
 #' @param ... Additional parameters.
 #' @return The \code{assay} from the input object.
 #' @export
@@ -478,7 +491,7 @@ setMethod("assay", c("ExperimentSubset", "character"), function(x, i, withDimnam
 #' @title Get names of subsets in ExperimentSubset objects
 #' @description Retrieves the names of the available subsets in an
 #'   \code{ExperimentSubset} object.
-#' @param object Input \code{ExperimentSubset} object.
+#' @param object \code{ExperimentSubset} Specify the input object.
 #' @return A \code{vector} of subset names.
 #' @rdname subsetNames
 #' @export
@@ -512,12 +525,12 @@ setMethod(
 #' @title Alternative Experiment methods for ExperimentSubset objects
 #' @description A wrapper to the \link[SingleCellExperiment]{altExps} method
 #'   with additional support for subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \link[SingleCellExperiment]{altExps} method.
-#' @param withColData Same as \link[SingleCellExperiment]{altExps}. Default
-#'   \code{FALSE}.
-#' @param subsetName Specify the name of the subset from which the
-#'   \code{altExps} should be fetched from. If \code{missing},
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \link[SingleCellExperiment]{altExps} method.
+#' @param withColData \code{logical(1)} Same as
+#'   \link[SingleCellExperiment]{altExps}. Default \code{FALSE}.
+#' @param subsetName \code{character(1)} Specify the name of the subset from
+#'   which the \code{altExps} should be fetched from. If \code{missing},
 #'   \link[SingleCellExperiment]{altExps} method is called on the main object.
 #' @return \code{altExps} from the specified subset or same as
 #'   \link[SingleCellExperiment]{altExps} when \code{subsetName} is
@@ -575,14 +588,17 @@ setMethod(
 #' @description A wrapper to the \code{altExp} from
 #'   \link[SingleCellExperiment]{altExps} method with additional support for
 #'   subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{altExp} from \link[SingleCellExperiment]{altExps} method.
-#' @param e Same as \code{altExp} from \link[SingleCellExperiment]{altExps}.
-#' @param withColData Same as \code{altExp} from
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{altExp} from \link[SingleCellExperiment]{altExps}
+#'   method.
+#' @param e \code{character(1)} Same as \code{altExp} from
+#'   \link[SingleCellExperiment]{altExps}.
+#' @param withColData \code{logical(1)} Same as \code{altExp} from
 #'   \link[SingleCellExperiment]{altExps}. Default \code{FALSE}.
-#' @param subsetName Specify the name of the subset from which the \code{altExp}
-#'   should be fetched from. If \code{missing}, \code{altExp} from
-#'   \link[SingleCellExperiment]{altExps} method is called on the main object.
+#' @param subsetName \code{character(1)} Specify the name of the subset from
+#'   which the \code{altExp} should be fetched from. If \code{missing},
+#'   \code{altExp} from \link[SingleCellExperiment]{altExps} method is called on
+#'   the main object.
 #' @return The \code{altExp} from the specified subset or same as \code{altExp}
 #'   from \link[SingleCellExperiment]{altExps} when \code{subsetName} is
 #'   \code{missing}.
@@ -651,10 +667,11 @@ setMethod(
 #' @description A wrapper to the \code{altExpNames} from
 #'   \link[SingleCellExperiment]{altExps} method with additional support for
 #'   subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{altExpNames} from \link[SingleCellExperiment]{altExps} method.
-#' @param subsetName Specify the name of the subset from which the
-#'   \code{altExpNames} should be fetched from. If \code{missing},
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{altExpNames} from
+#'   \link[SingleCellExperiment]{altExps} method.
+#' @param subsetName \code{character(1)} Specify the name of the subset from
+#'   which the \code{altExpNames} should be fetched from. If \code{missing},
 #'   \code{altExpNames} from \link[SingleCellExperiment]{altExps} method is
 #'   called on the main object.
 #' @return The \code{altExpNames} from the specified subset or same as
@@ -711,11 +728,11 @@ setMethod(
 #' @description A wrapper to the \code{reducedDimNames} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims}
-#'   method.
-#' @param subsetName Specify the name of the subset from which the
-#'   \code{reducedDimNames} should be fetched from. If \code{missing},
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{reducedDimNames} from
+#'   \link[SingleCellExperiment]{reducedDims} method.
+#' @param subsetName \code{character(1)} Specify the name of the subset from
+#'   which the \code{reducedDimNames} should be fetched from. If \code{missing},
 #'   \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method
 #'   is called on the main object.
 #' @return The \code{reducedDimNames} from the specified subset or same as
@@ -760,14 +777,15 @@ setMethod(
 #' @description A wrapper to the \code{altExpNames<-} from
 #'   \link[SingleCellExperiment]{altExps} method with additional support for
 #'   subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method.
-#' @param subsetName Specify the name of the subset to which the
-#'   \code{altExpNames<-} should be set to. If \code{missing},
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{altExpNames<-} from
+#'   \link[SingleCellExperiment]{altExps} method.
+#' @param subsetName \code{character(1)} Specify the name of the subset to which
+#'   the \code{altExpNames<-} should be set to. If \code{missing},
 #'   \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method is
 #'   called on the main object.
-#' @param value Input value same as \code{altExpNames<-} from
-#'   \link[SingleCellExperiment]{altExps} method.
+#' @param value \code{vector("character")} Input value same as
+#'   \code{altExpNames<-} from \link[SingleCellExperiment]{altExps} method.
 #' @return Input object with \code{altExpNames} set.
 #' @rdname altExpNames-set
 #' @export
@@ -822,15 +840,16 @@ setReplaceMethod(
 #' @description A wrapper to the \code{reducedDimNames<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims}
-#'   method.
-#' @param subsetName Specify the name of the subset to which the
-#'   \code{reducedDimNames<-} should be set to. If \code{missing},
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{reducedDimNames<-} from
+#'   \link[SingleCellExperiment]{reducedDims} method.
+#' @param subsetName \code{character(1)} Specify the name of the subset to which
+#'   the \code{reducedDimNames<-} should be set to. If \code{missing},
 #'   \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims}
 #'   method is called on the main object.
-#' @param value Input value same as \code{reducedDimNames<-} from
-#'   \link[SingleCellExperiment]{reducedDims} method.
+#' @param value \code{vector("character")} Input value same as
+#'   \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims}
+#'   method.
 #' @return Input object with \code{reducedDimNames<-} set.
 #' @rdname reducedDimNames-set
 #' @export
@@ -873,17 +892,19 @@ setReplaceMethod(
 #' @description A wrapper to the \code{altExp<-} from
 #'   \link[SingleCellExperiment]{altExps} method with additional support for
 #'   subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{altExp<-} from \link[SingleCellExperiment]{altExps} method.
-#' @param e Same as \code{altExp<-} from \link[SingleCellExperiment]{altExps}
-#'   method.
-#' @param withColData Same as \code{altExp<-} from
-#'   \link[SingleCellExperiment]{altExps} method. Default \code{FALSE}.
-#' @param subsetName Specify the name of the subset to which the \code{altExp<-}
-#'   should be set to. If \code{missing}, \code{altExp<-} from
-#'   \link[SingleCellExperiment]{altExps} method is called on the main object.
-#' @param value Input value same as \code{altExp<-} from
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{altExp<-} from
 #'   \link[SingleCellExperiment]{altExps} method.
+#' @param e \code{character(1)} Same as \code{altExp<-} from
+#'   \link[SingleCellExperiment]{altExps} method.
+#' @param withColData \code{logical(1)} Same as \code{altExp<-} from
+#'   \link[SingleCellExperiment]{altExps} method. Default \code{FALSE}.
+#' @param subsetName \code{character(1)} Specify the name of the subset to which
+#'   the \code{altExp<-} should be set to. If \code{missing}, \code{altExp<-}
+#'   from \link[SingleCellExperiment]{altExps} method is called on the main
+#'   object.
+#' @param value \code{SingleCellExperiment} Input value same as \code{altExp<-}
+#'   from \link[SingleCellExperiment]{altExps} method.
 #' @return Input object with \code{altExp<-} set.
 #' @rdname altExp-set
 #' @export
@@ -956,12 +977,14 @@ setReplaceMethod(
 #' @description A wrapper to the \code{altExps<-} from
 #'   \link[SingleCellExperiment]{altExps} method with additional support for
 #'   subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{altExps<-} from \link[SingleCellExperiment]{altExps} method.
-#' @param subsetName Specify the name of the subset to which the
-#'   \code{altExps<-} should be set to. If \code{missing}, \code{altExps<-} from
-#'   \link[SingleCellExperiment]{altExps} method is called on the main object.
-#' @param value Input value same as \code{altExps<-} from
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{altExps<-} from
+#'   \link[SingleCellExperiment]{altExps} method.
+#' @param subsetName \code{character(1)} Specify the name of the subset to which
+#'   the \code{altExps<-} should be set to. If \code{missing}, \code{altExps<-}
+#'   from \link[SingleCellExperiment]{altExps} method is called on the main
+#'   object.
+#' @param value \code{list()} Input value same as \code{altExps<-} from
 #'   \link[SingleCellExperiment]{altExps} method.
 #' @return Input object with \code{altExps<-} set.
 #' @rdname altExps-set
@@ -1017,9 +1040,10 @@ setReplaceMethod(
 
 #' @title Metadata accessor method for ExperimentSubset objects
 #' @description Get \code{metadata} from an \code{ExperimentSubset} object.
-#' @param object Input \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset to get the \code{metadata} from. If
-#'   \code{missing}, \code{metadata} is fetched from the main input object.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to get the
+#'   \code{metadata} from. If \code{missing}, \code{metadata} is fetched from
+#'   the main input object.
 #' @return A \code{list} of \code{metadata} elements.
 #' @rdname metadata
 #' @export
@@ -1070,8 +1094,9 @@ setMethod(
 #' @title Get dimensions of subsets in ExperimentSubset objects
 #' @description Retrieves the dimensions of the specified subset in an
 #'   \code{ExperimentSubset} object.
-#' @param object Input \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset to retrieve the dimensions from.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to retrieve the
+#'   dimensions from.
 #' @return A \code{vector} containing the dimensions of the specified subset
 #'   i.e. the number of rows and the number of columns in the subset.
 #' @rdname subsetDim
@@ -1105,9 +1130,10 @@ setMethod(
 
 #' @title Metadata setter method for ExperimentSubset objects
 #' @description Set \code{metadata} to an \code{ExperimentSubset} object.
-#' @param object Input \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset to set the \code{metadata} to. If
-#'   \code{missing}, \code{metadata} is set to the main input object.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to set the
+#'   \code{metadata} to. If \code{missing}, \code{metadata} is set to the main
+#'   input object.
 #' @param value A \code{list} to set to the \code{metadata} slot.
 #' @return Input object with \code{metadata} set.
 #' @export
@@ -1131,9 +1157,11 @@ setGeneric(
 
 #' @title Metadata setter method for ExperimentSubset objects
 #' @description Set \code{metadata} to an \code{ExperimentSubset} object.
-#' @param object Input \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset to set the \code{metadata} to. If \code{missing}, \code{metadata} is set to the main input object.
-#' @param value A \code{list} to set to the \code{metadata} slot.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to set the
+#'   \code{metadata} to. If \code{missing}, \code{metadata} is set to the main
+#'   input object.
+#' @param value \code{list()} A \code{list} to set to the \code{metadata} slot.
 #' @return Input object with \code{metadata} set.
 #' @export
 setReplaceMethod(
@@ -1164,7 +1192,7 @@ setReplaceMethod(
 #' @title Subset count method for ExperimentSubset objects
 #' @description Get the total count of the available subsets in an
 #'   \code{ExperimentSubset} object.
-#' @param object Input \code{ExperimentSubset} object.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return A \code{numeric} value representing the total count of the subsets.
 #' @rdname subsetCount
 #' @export
@@ -1198,7 +1226,7 @@ setMethod(
 #' @title Count method for subset assays in ExperimentSubset objects
 #' @description Get the count of the total available subsets and the subset
 #'   assays inside these subsets in an \code{ExperimentSubset} object.
-#' @param object Input \code{ExperimentSubset} object.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return A \code{numeric} value representing the sum of the subset count and
 #'   subset assay count.
 #' @rdname subsetAssayCount
@@ -1241,7 +1269,7 @@ setMethod(
 #'   order the subsets in the object are linked with their parents. Moreover,
 #'   all supplementary data inside the subsets such as \code{reducedDims} and
 #'   \code{altExps} are also displayed against each subset entry.
-#' @param object Input \code{ExperimentSubset} object.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return Prints all the available subset information against the input
 #'   \code{ExperimentSubset} object.
 #' @rdname subsetSummary
@@ -1333,9 +1361,9 @@ setMethod(
 #' @title Subset parent hierarchy retrieval method for ExperimentSubset objects
 #' @description Retrieves a complete subset to parent link from a specified
 #'   subset.
-#' @param object Input \code{ExperimentSubset} object.
-#' @param subsetName Specify the name of the subset against which the subset to
-#'   parent link should be retrieved.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Specify the name of the subset against
+#'   which the subset to parent link should be retrieved.
 #' @return A \code{list} containing the parent link of the subset.
 #' @rdname subsetParent
 #' @export
@@ -1402,12 +1430,13 @@ setMethod(
 #' @description Get \code{rownames} from an \code{ExperimentSubset} object or a
 #'   subset in the \code{ExperimentSubset} object or any object supported by
 #'   \code{rownames} in \code{base} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by
-#'   \code{rownames} in \code{base} package.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object or
+#'   any object supported by \code{rownames} in \code{base} package.
 #' @param ... Additional parameters and \code{subsetName} parameter to pass the
 #'   name of the subset to get \code{rownames} from.
-#' @param subsetName Name of the subset to get \code{rownames} from. If
-#'   \code{missing}, \code{rownames} from main object are returned.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{rownames} from. If \code{missing}, \code{rownames} from main object
+#'   are returned.
 #' @return A \code{vector} of \code{rownames}.
 #' @rdname rownames
 #' @export
@@ -1465,13 +1494,15 @@ setMethod(
 #' @description Set \code{rownames} to an \code{ExperimentSubset} object or a
 #'   subset in the \code{ExperimentSubset} object or any object supported by
 #'   \code{rownames} in \code{base} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by
-#'   \code{rownames} in \code{base} package.
-#' @param subsetName Name of the subset to get \code{rownames} from. If
-#'   \code{missing}, \code{rownames} from main object are returned.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object or
+#'   any object supported by \code{rownames} in \code{base} package.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{rownames} from. If \code{missing}, \code{rownames} from main object
+#'   are returned.
 #' @param ... Additional parameters and \code{subsetName} parameter to pass the
 #'   name of the subset to get \code{rownames} from.
-#' @param value A \code{list} of \code{rownames} to set to the input object.
+#' @param value code{list()} A \code{list} of \code{rownames} to set to the
+#'   input object.
 #' @return Input object with \code{rownames} set.
 #' @rdname rownames-set
 #' @export
@@ -1523,10 +1554,11 @@ setReplaceMethod(
 #' @description Get \code{colnames} from an \code{ExperimentSubset} object or a
 #'   subset in the \code{ExperimentSubset} object or any object supported by
 #'   \code{colnames} in \code{base} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by
-#'   \code{colnames} in \code{base} package.
-#' @param subsetName Name of the subset to get \code{colnames} from. If
-#'   \code{missing}, \code{colnames} from main object are returned.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object or
+#'   any object supported by \code{colnames} in \code{base} package.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{colnames} from. If \code{missing}, \code{colnames} from main object
+#'   are returned.
 #' @param ... Additional parameters and \code{subsetName} parameter to pass the
 #'   name of the subset to get \code{colnames} from.
 #' @return A \code{vector} of \code{colnames}.
@@ -1586,13 +1618,15 @@ setMethod(
 #' @description Set \code{colnames} to an \code{ExperimentSubset} object or a
 #'   subset in the \code{ExperimentSubset} object or any object supported by
 #'   \code{colnames} in \code{base} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by
-#'   \code{colnames} in \code{base} package.
-#' @param subsetName Name of the subset to get \code{colnames} from. If
-#'   \code{missing}, \code{colnames} from main object are returned.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object or
+#'   any object supported by \code{colnames} in \code{base} package.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{colnames} from. If \code{missing}, \code{colnames} from main object
+#'   are returned.
 #' @param ... Additional parameters and \code{subsetName} parameter to pass the
 #'   name of the subset to get \code{colnames} from.
-#' @param value A \code{list} of \code{colnames} to set to the input object.
+#' @param value \code{list()} A \code{list} of \code{colnames} to set to the
+#'   input object.
 #' @return Input object with \code{colnames} set.
 #' @rdname colnames-set
 #' @export
@@ -1644,7 +1678,7 @@ setReplaceMethod(
 #'   objects
 #' @description Retrieves the names of all the subsets as well as the subset
 #'   assays.
-#' @param object Input \code{ExperimentSubset} object.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return A \code{vector} containing the names of the subsets and the subset
 #'   assays available in the input \code{ExperimentSubset} object.
 #' @rdname subsetAssayNames
@@ -1689,7 +1723,7 @@ setMethod(
 
 #' @title Display method for ExperimentSubset objects
 #' @description Show the \code{ExperimentSubset} object
-#' @param object Input \code{ExperimentSubset} object.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -1719,16 +1753,16 @@ setMethod(
 #' @description Method to set an \code{assay} to an \code{ExperimentSubset}
 #'   object or a subset from an \code{ExperimentSubset} object or any object
 #'   supported by \code{assay<-} from \code{SummarizedExperiment}.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{assay} from \code{SummarizedExperiment}.
-#' @param i Name of an \code{assay} or name of the subset if storing to an
-#'   \code{ExperimentSubset} object.
-#' @param withDimnames Set whether dimnames should be applied to \code{assay}.
-#'   Default \code{FALSE}.
-#' @param subsetAssayName Name of the assay to store if storing to an
-#'   \code{ExperimentSubset} object.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{assay} from \code{SummarizedExperiment}.
+#' @param i \code{character(1)} Name of an \code{assay} or name of the subset if
+#'   storing to an \code{ExperimentSubset} object.
+#' @param withDimnames \code{logical(1)} Set whether dimnames should be applied
+#'   to \code{assay}. Default \code{FALSE}.
+#' @param subsetAssayName \code{character(1)} Name of the assay to store if
+#'   storing to an \code{ExperimentSubset} object.
 #' @param ... Additional parameters.
-#' @param value The \code{assay} to store.
+#' @param value \code{dgCMatrix} The \code{assay} to store.
 #' @return Input object with \code{assay} stored.
 #' @export
 #' @importMethodsFrom SummarizedExperiment assay<-
@@ -1746,35 +1780,37 @@ setReplaceMethod(
   f = "assay",
   signature = c("ExperimentSubset", "character"),
   function(x,
-                          i,
-                          withDimnames = FALSE,
-                          subsetAssayName = NULL,
-                          ...,
-                          value) {
-                   if ((nrow(value) != nrow(.root(x)))
-                       || (ncol(value) != ncol(.root(x)))) {
-                     x <- storeSubset(
-                       object = x,
-                       subsetName = i,
-                       inputMatrix = value,
-                       subsetAssayName = subsetAssayName
-                     )
-                   }
-                   else{
-                     SummarizedExperiment::assay(
-                       x = .root(x),
-                       i = i,
-                       withDimnames = withDimnames,
-                       ... = ...
-                     ) <- value
-                   }
-                   x
-                 })
+           i,
+           withDimnames = FALSE,
+           subsetAssayName = NULL,
+           ...,
+           value){
+    test <- (nrow(value) != nrow(.root(x))) ||
+      (ncol(value) != ncol(.root(x)))
+    if (test) {
+      x <- storeSubset(
+        object = x,
+        subsetName = i,
+        inputMatrix = value,
+        subsetAssayName = subsetAssayName
+      )
+      }
+    else{
+      SummarizedExperiment::assay(
+        x = .root(x),
+        i = i,
+        withDimnames = withDimnames,
+        ... = ...
+      ) <- value
+      }
+    x
+    })
 
 #' @title Accessor method for rowData from subsets in ExperimentSubset objects
 #' @description Get \code{rowData} from a subset.
-#' @param object Input \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset to get \code{rowData} from.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{rowData} from.
 #' @return The \code{rowData} from input object.
 #' @rdname subsetRowData
 #' @export
@@ -1825,8 +1861,9 @@ setMethod(
 
 #' @title Accessor method for colData from subsets in ExperimentSubset objects
 #' @description Get \code{colData} from a subset.
-#' @param object Input \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset to get \code{colData} from.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{colData} from.
 #' @return The \code{colData} from input object.
 #' @rdname subsetColData
 #' @export
@@ -1871,14 +1908,15 @@ setMethod(
 #' @description A wrapper to the \code{reducedDim} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
-#' @param object Input \code{ExperimentSubset} object or any object supported by
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object or
+#'   any object supported by \code{reducedDim} from
+#'   \link[SingleCellExperiment]{reducedDims} method.
+#' @param type \code{character(1)} Same as \code{type} in \code{reducedDim} from
+#'   \link[SingleCellExperiment]{reducedDims} method.
+#' @param withDimnames \code{logical(1)} Same as \code{withDimnames} in
 #'   \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param type Same as \code{type} in \code{reducedDim} from
-#'   \link[SingleCellExperiment]{reducedDims} method.
-#' @param withDimnames Same as \code{withDimnames} in \code{reducedDim} from
-#'   \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset from which the
-#'   \code{reducedDim} should be fetched from. If \code{missing},
+#' @param subsetName \code{character(1)} Specify the name of the subset from
+#'   which the \code{reducedDim} should be fetched from. If \code{missing},
 #'   \code{reducedDim} from \link[SingleCellExperiment]{reducedDims} method is
 #'   called on the main object.
 #' @return The \code{reducedDim} from the specified subset or same as
@@ -1928,12 +1966,12 @@ setMethod("reducedDim", "ANY", function(object, type, withDimnames, subsetName) 
 #' @title Methods for Reduced Dimensions in ExperimentSubset objects
 #' @description A wrapper to the \link[SingleCellExperiment]{reducedDims} method
 #'   with additional support for subsets.
-#' @param object Input \code{ExperimentSubset} object or any object supported by
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object or
+#'   any object supported by \link[SingleCellExperiment]{reducedDims} method.
+#' @param withDimnames \code{logical(1)} Same as \code{withDimnames} in
 #'   \link[SingleCellExperiment]{reducedDims} method.
-#' @param withDimnames Same as \code{withDimnames} in
-#'   \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset from which the
-#'   \code{reducedDims} should be fetched from. If \code{missing},
+#' @param subsetName \code{character(1)} Specify the name of the subset from
+#'   which the \code{reducedDims} should be fetched from. If \code{missing},
 #'   \link[SingleCellExperiment]{reducedDims} method is called on the main
 #'   object.
 #' @return The \code{reducedDims} from the specified subset or same as
@@ -1986,15 +2024,16 @@ setMethod("reducedDims", "ANY", function(object, withDimnames, subsetName) {
 #' @description A wrapper to the \code{reducedDim<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
-#' @param object Input \code{ExperimentSubset} object or any object supported by
-#'   \code{reducedDim<-} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param type Same as \code{type} in \code{reducedDim<-} from
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object or
+#'   any object supported by \code{reducedDim<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset to which the
-#'   \code{reducedDim} should be set to. If \code{missing}, \code{reducedDim<-}
-#'   from \link[SingleCellExperiment]{reducedDims} method is called on the main
-#'   object.
-#' @param value Value to set to \code{reducedDim}.
+#' @param type \code{character(1)} Same as \code{type} in \code{reducedDim<-}
+#'   from \link[SingleCellExperiment]{reducedDims} method.
+#' @param subsetName \code{character(1)} Specify the name of the subset to which
+#'   the \code{reducedDim} should be set to. If \code{missing},
+#'   \code{reducedDim<-} from \link[SingleCellExperiment]{reducedDims} method is
+#'   called on the main object.
+#' @param value \code{matrix} Value to set to \code{reducedDim}.
 #' @return Updated input object with \code{reducedDim} set.
 #' @export
 #' @examples
@@ -2018,15 +2057,16 @@ setGeneric(
 #' @description A wrapper to the \code{reducedDim<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
-#' @param object Input \code{ExperimentSubset} object or any object supported by
-#'   \code{reducedDim<-} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param type Same as \code{type} in \code{reducedDim<-} from
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object or
+#'   any object supported by \code{reducedDim<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset to which the
-#'   \code{reducedDim} should be set to. If \code{missing}, \code{reducedDim<-}
-#'   from \link[SingleCellExperiment]{reducedDims} method is called on the main
-#'   object.
-#' @param value Value to set to \code{reducedDim}.
+#' @param type \code{character(1)} Same as \code{type} in \code{reducedDim<-}
+#'   from \link[SingleCellExperiment]{reducedDims} method.
+#' @param subsetName \code{character(1)} Specify the name of the subset to which
+#'   the \code{reducedDim} should be set to. If \code{missing},
+#'   \code{reducedDim<-} from \link[SingleCellExperiment]{reducedDims} method is
+#'   called on the main object.
+#' @param value \code{matrix} Value to set to \code{reducedDim}.
 #' @return Updated input object with \code{reducedDim} set.
 #' @export
 setReplaceMethod("reducedDim", "ANY", function(object, type, subsetName, value) {
@@ -2049,13 +2089,15 @@ setReplaceMethod("reducedDim", "ANY", function(object, type, subsetName, value) 
 #' @description A wrapper to the \code{reducedDims<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
-#' @param object Input \code{ExperimentSubset} object or any object supported by
-#'   \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset to which the
-#'   \code{reducedDims} should be set to. If \code{missing},
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object or
+#'   any object supported by \code{reducedDims<-} from
+#'   \link[SingleCellExperiment]{reducedDims} method.
+#' @param subsetName \code{character(1)} Specify the name of the subset to which
+#'   the \code{reducedDims} should be set to. If \code{missing},
 #'   \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method
 #'   is called on the main object.
-#' @param value A \code{list} of values to set to \code{reducedDims}.
+#' @param value \code{list()} A \code{list} of values to set to
+#'   \code{reducedDims}.
 #' @return Updated input object with \code{reducedDims} set.
 #' @export
 #' @examples
@@ -2080,13 +2122,15 @@ setGeneric(
 #' @description A wrapper to the \code{reducedDims<-} from
 #'   \link[SingleCellExperiment]{reducedDims} method with additional support for
 #'   subsets.
-#' @param object Input \code{ExperimentSubset} object or any object supported by
-#'   \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset to which the
-#'   \code{reducedDims} should be set to. If \code{missing},
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object or
+#'   any object supported by \code{reducedDims<-} from
+#'   \link[SingleCellExperiment]{reducedDims} method.
+#' @param subsetName \code{character(1)} Specify the name of the subset to which
+#'   the \code{reducedDims} should be set to. If \code{missing},
 #'   \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method
 #'   is called on the main object.
-#' @param value A \code{list} of values to set to \code{reducedDims}.
+#' @param value \code{list()} A \code{list} of values to set to
+#'   \code{reducedDims}.
 #' @return Updated input object with \code{reducedDims} set.
 #' @export
 setReplaceMethod("reducedDims", "ANY", function(object, subsetName, value) {
@@ -2108,11 +2152,11 @@ setReplaceMethod("reducedDims", "ANY", function(object, subsetName, value) {
 #' @title Accessor method for rowData in ExperimentSubset objects
 #' @description Get \code{rowData} from a subset of an input object or the
 #'   object itself.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{rowData} from \code{SummarizedExperiment}.
-#' @param subsetName Name of the subset to get \code{rowData} from. If
-#'   \code{NULL} or \code{missing}, \code{rowData} from main input object is
-#'   fetched.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{rowData} from \code{SummarizedExperiment}.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{rowData} from. If \code{NULL} or \code{missing}, \code{rowData} from
+#'   main input object is fetched.
 #' @param ... Additional parameters.
 #' @return The \code{rowData} from input object or subset of an input object.
 #' @export
@@ -2132,11 +2176,11 @@ setMethod("rowData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) 
 #' @title Accessor method for colData in ExperimentSubset objects
 #' @description Get \code{colData} from a subset of an input object or the
 #'   object itself.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{colData} from \code{SummarizedExperiment}.
-#' @param subsetName Name of the subset to get \code{colData} from. If
-#'   \code{NULL} or \code{missing}, \code{colData} from main input object is
-#'   fetched.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{colData} from \code{SummarizedExperiment}.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{colData} from. If \code{NULL} or \code{missing}, \code{colData} from
+#'   main input object is fetched.
 #' @param ... Additional parameters.
 #' @return The \code{colData} from input object or subset of an input object.
 #' @export
@@ -2156,12 +2200,14 @@ setMethod("colData", c("ExperimentSubset"), function(x, subsetName = NULL, ...) 
 #' @title Setter method for rowData in ExperimentSubset objects
 #' @description Set \code{rowData} to a subset of an input object or the object
 #'   itself.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{rowData<-} from \code{SummarizedExperiment}.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{rowData<-} from \code{SummarizedExperiment}.
 #' @param ... Additional parameters.
-#' @param subsetName Name of the subset to set \code{rowData} to. If \code{NULL}
-#'   or \code{missing}, \code{rowData} to main input object is set.
-#' @param value The \code{rowData} to store in an object or subset of an object.
+#' @param subsetName \code{character(1)} Name of the subset to set
+#'   \code{rowData} to. If \code{NULL} or \code{missing}, \code{rowData} to main
+#'   input object is set.
+#' @param value \code{DFrame} The \code{rowData} to store in an object or subset
+#'   of an object.
 #' @return Object with \code{rowData} set.
 #' @export
 #' @importMethodsFrom SummarizedExperiment rowData<-
@@ -2185,12 +2231,14 @@ setReplaceMethod("rowData", c("ExperimentSubset"), function(x, ..., subsetName, 
 #' @title Setter method for colData in ExperimentSubset objects
 #' @description Set \code{colData} to a subset of an input object or the object
 #'   itself.
-#' @param x Input \code{ExperimentSubset} object or any object supported by
-#'   \code{colData<-} from \code{SummarizedExperiment}.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object or any
+#'   object supported by \code{colData<-} from \code{SummarizedExperiment}.
 #' @param ... Additional parameters.
-#' @param subsetName Name of the subset to set \code{colData} to. If \code{NULL}
-#'   or \code{missing}, \code{colData} to main input object is set.
-#' @param value The \code{colData} to store in an object or subset of an object.
+#' @param subsetName \code{character(1)} Name of the subset to set
+#'   \code{colData} to. If \code{NULL} or \code{missing}, \code{colData} to main
+#'   input object is set.
+#' @param value \code{DFrame} The \code{colData} to store in an object or subset
+#'   of an object.
 #' @return Object with \code{colData} set.
 #' @export
 #' @importMethodsFrom SummarizedExperiment colData<-
@@ -2212,7 +2260,7 @@ setReplaceMethod("colData", c("ExperimentSubset" , "DataFrame"), function(x, ...
 
 #' @title Dimensions retrieval method for ExperimentSubset objects
 #' @description Get dimensions of the \code{ExperimentSubset} object.
-#' @param x Input \code{ExperimentSubset} object.
+#' @param x code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return A \code{list} containing number of rows and number of columns of the
 #'   object.
 #' @export
