@@ -85,57 +85,6 @@ another subset). In case a new assay is to be stored against a subset, it is
 stored as a separate experiment object (same class as the `root`) inside the 
 subset. 
 
-The internal structure of an `ExperimentSubset` class is described 
-below:
-
-## `root` slot
-
-The `root` slot of an `ExperimentSubset` object must be an experiment object
-inherited from `SummarizedExperiment` or `SingleCellExperiment` and acts as the
-root or the first immediate parent of any subset that is created initially. The 
-`ExperimentSubset`object can be used in a fashion similar to 
-`SummarizedExperiment` with all the common methods that have been overridden to
-support the manipulation of `ExperimentSubset` objects (with or without subsets)
-including `assay`, `rowData` and `colData`. Even though all of these methods 
-can be used with either `ExperimentSubset` or other experiment objects directly,
-the accessible `root` slot offers a convenient way to manipulate the original
-object if required by the user.
-
-## `subsets` slot
-
-The `subsets` slot of the `ExperimentSubset` object is a `list`, where each 
-element in this list is an object of an internal `AssaySubset` class. Each
-element represents one subset linked to the experiment object in the `root` 
-slot. The structure of each subset is described below:
-
-### `subsetName`
-
-A `character` string that represents a user-defined name of the subset.
-
-### `rowIndices`
-
-A `numeric` `vector` that stores the indices of the selected rows in the linked
-parent assay within for this subset.
-
-### `colIndices`
-
-A `numeric` `vector` that stores the indices of the selected columns in the 
-linked parent assay for this subset.
-
-### `parentAssay`
-
-A `character` string that stores the name of the immediate parent to which the
-subset is linked. The `parentAssay` can be an `assay` in the `root` slot of the
-`ExperimentSubset` object or any subset or any `internalAssay` of a subset.
-
-### `internalAssay`
-
-The `internalAssay` slot stores an experiment object of same type as the `root`
-object but with the dimensions of the subset. The `internalAssay` is initially
-an empty experiment object with only dimensions set to enable manipulation, but
-can be used to store additional data against a subset such as `assay`, 
-`rowData`, `colData`, `reducedDims`, `altExps` and `metadata`.
-
 # Core methods of `ExperimentSubset` class
 
 While all the common methods available with `SummarizedExperiment` and
@@ -317,7 +266,9 @@ Store an experiment object in the `altExp` slot of `subset2`:
 ```{r}
 altExp(x = es,
        e = "subset2_alt1",
-       subsetName = "subset2") <- es@subsets$subset2@internalAssay
+       subsetName = "subset2") <- SingleCellExperiment(assay = list(
+         counts = assay(es, "subset2")
+       ))
 ```
 
 Show the current condition of `ExperimentSubset` object:
@@ -432,6 +383,59 @@ subsetSummary(es)
 35. `rownames<-`
 36. `colnames`
 37. `colnames<-`
+
+# Implementation Details
+
+The internal structure of an `ExperimentSubset` class is described 
+below:
+
+## `root` slot
+
+The `root` slot of an `ExperimentSubset` object must be an experiment object
+inherited from `SummarizedExperiment` or `SingleCellExperiment` and acts as the
+root or the first immediate parent of any subset that is created initially. The 
+`ExperimentSubset`object can be used in a fashion similar to 
+`SummarizedExperiment` with all the common methods that have been overridden to
+support the manipulation of `ExperimentSubset` objects (with or without subsets)
+including `assay`, `rowData` and `colData`. Even though all of these methods 
+can be used with either `ExperimentSubset` or other experiment objects directly,
+the accessible `root` slot offers a convenient way to manipulate the original
+object if required by the user.
+
+## `subsets` slot
+
+The `subsets` slot of the `ExperimentSubset` object is a `list`, where each 
+element in this list is an object of an internal `AssaySubset` class. Each
+element represents one subset linked to the experiment object in the `root` 
+slot. The structure of each subset is described below:
+
+### `subsetName`
+
+A `character` string that represents a user-defined name of the subset.
+
+### `rowIndices`
+
+A `numeric` `vector` that stores the indices of the selected rows in the linked
+parent assay within for this subset.
+
+### `colIndices`
+
+A `numeric` `vector` that stores the indices of the selected columns in the 
+linked parent assay for this subset.
+
+### `parentAssay`
+
+A `character` string that stores the name of the immediate parent to which the
+subset is linked. The `parentAssay` can be an `assay` in the `root` slot of the
+`ExperimentSubset` object or any subset or any `internalAssay` of a subset.
+
+### `internalAssay`
+
+The `internalAssay` slot stores an experiment object of same type as the `root`
+object but with the dimensions of the subset. The `internalAssay` is initially
+an empty experiment object with only dimensions set to enable manipulation, but
+can be used to store additional data against a subset such as `assay`, 
+`rowData`, `colData`, `reducedDims`, `altExps` and `metadata`.
 
 # Session Information
 

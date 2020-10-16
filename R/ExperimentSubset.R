@@ -1739,13 +1739,12 @@ setMethod(
   {
     cat("class: ExperimentSubset\n",
         "root ", sep = "")
-    cat(SingleCellExperiment::show(object@root))
-    cat("subsets(", length(subsetNames(object)), "): ",
-        sep = "")
-    cat(subsetNames(object))
-    cat("\nsubsetAssays(", length(subsetAssayNames(object)), "): ",
-        sep = "")
-    cat(subsetAssayNames(object))
+    cat(show(object@root))
+    cat(paste0("subsets(", length(subsetNames(object)), "):"),
+        subsetNames(object),
+        paste0("\nsubsetAssays(", length(subsetAssayNames(object)), "): "),
+        subsetAssayNames(object)
+        )
   }
 )
 
