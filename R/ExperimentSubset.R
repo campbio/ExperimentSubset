@@ -1,8 +1,5 @@
 setClassUnion("NullOrCharacter", c("NULL", "character"))
-setClassUnion("MissingOrNullOrCharacter", c("missing", "NULL", "character"))
 setClassUnion("NullOrNumeric", c("NULL", "numeric"))
-setClassUnion("NullOrMissingOrNumericOrCharacter",
-              c("NULL", "missing", "numeric", "character"))
 
 #' An S4 class to create subset objects to store inside an
 #' \code{ExperimentSubset} object.
@@ -222,20 +219,15 @@ setGeneric(
                  rows = NULL,
                  cols = NULL,
                  parentAssay = NULL)
-  {
-    standardGeneric("createSubset")
-  }
+    standardGeneric("createSubset"),
+  signature = "object"
 )
 
 #' @rdname createSubset
 setMethod(
   f = "createSubset",
   signature = c(
-    "ANY",
-    "character",
-    "NullOrMissingOrNumericOrCharacter",
-    "NullOrMissingOrNumericOrCharacter",
-    "MissingOrNullOrCharacter"
+    "ExperimentSubset"
   ),
   definition = function(object,
                         subsetName,
@@ -243,11 +235,14 @@ setMethod(
                         cols,
                         parentAssay)
   {
-    #if input object is not ExperimentSubset, convert it before proceeding
-    if(!inherits(object, "ExperimentSubset")){
-      object <- ExperimentSubset(object)
-    }
-    
+    #checking parameters
+    stopifnot(
+      is.character(subsetName),
+      is.null(rows) || is.numeric(rows) || is.character(rows),
+      is.null(cols) || is.numeric(cols) || is.character(cols),
+      is.null(parentAssay) || is.character(parentAssay)
+    )
+     
     tempAssay <- ""
     if (is.null(parentAssay)) {
       tempAssay <- SummarizedExperiment::assayNames(.root(object))[1]
@@ -327,6 +322,224 @@ setMethod(
       )
     })
 
+    .subsets(object)[[subsetName]] <- scs
+    return(object)
+  }
+)
+
+#' @rdname createSubset
+setMethod(
+  f = "createSubset",
+  signature = c(
+    "SingleCellExperiment"
+  ),
+  definition = function(object,
+                        subsetName,
+                        rows,
+                        cols,
+                        parentAssay)
+  {
+    #if input object is not ExperimentSubset, convert it before proceeding
+    if(!inherits(object, "ExperimentSubset")){
+      object <- ExperimentSubset(object)
+    }
+    
+    #checking parameters
+    stopifnot(
+      is.character(subsetName),
+      is.null(rows) || is.numeric(rows) || is.character(rows),
+      is.null(cols) || is.numeric(cols) || is.character(cols),
+      is.null(parentAssay) || is.character(parentAssay)
+    )
+    
+    tempAssay <- ""
+    if (is.null(parentAssay)) {
+      tempAssay <- SummarizedExperiment::assayNames(.root(object))[1]
+      parentAssay <- tempAssay
+    }
+    else{
+      test <- parentAssay %in% SummarizedExperiment::assayNames(.root(object)) || 
+        parentAssay %in% subsetAssayNames(object)
+      if (test) {
+        tempAssay <- parentAssay
+      }
+      else{
+        stop("Input parentAssay does not exist.")
+      }
+    }
+    if (is.character(rows)) {
+      rows <-
+        match(rows, base::rownames(
+          ExperimentSubset::assay(object, withDimnames = TRUE, tempAssay)
+        ))
+    }
+    if (is.character(cols)) {
+      cols <-
+        match(cols, base::colnames(
+          ExperimentSubset::assay(object, withDimnames = TRUE, tempAssay)
+        ))
+    }
+    if (is.null(rows)) {
+      rows <-
+        seq(1, dim(
+          ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay)
+        )[1])
+    }
+    if (is.null(cols)) {
+      cols <-
+        seq(1, dim(
+          ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay)
+        )[2])
+    }
+    
+    #Check if count of stored row/column indices greater than the subset
+    test <- length(rows) > dim(ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay))[1] || 
+      length(cols) > dim(ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay))[2]
+    if (test) {
+      stop("More rows or columns selected than available in the parentAssay.")
+    }
+    
+    # Create an initial object for the internalAssay
+    a <- list(Matrix::Matrix(
+      nrow = length(rows),
+      ncol = length(cols),
+      data = 0,
+      sparse = TRUE))
+    names(a) <- "temp"
+    internalAssay <- SummarizedExperiment::SummarizedExperiment(assays = a)
+    
+    # Convert to class of root object (e.g. SingleCellExperiment)
+    internalAssay <- as(internalAssay, class(.root(object))[1])
+    
+    scs <- AssaySubset(
+      subsetName = subsetName,
+      rowIndices = rows,
+      colIndices = cols,
+      parentAssay = parentAssay,
+      internalAssay = internalAssay
+    )
+    SummarizedExperiment::assay(.internalAssay(scs),
+                                withDimnames = FALSE, "temp") <- NULL
+    
+    #Check if NAs introduced in the subset
+    tryCatch({
+      stats::na.fail(.rowIndices(scs))
+      stats::na.fail(.colIndices(scs))
+    }, error = function(e) {
+      stop(
+        "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent."
+      )
+    })
+    
+    .subsets(object)[[subsetName]] <- scs
+    return(object)
+  }
+)
+
+#' @rdname createSubset
+setMethod(
+  f = "createSubset",
+  signature = c(
+    "SummarizedExperiment"
+  ),
+  definition = function(object,
+                        subsetName,
+                        rows,
+                        cols,
+                        parentAssay)
+  {
+    #if input object is not ExperimentSubset, convert it before proceeding
+    if(!inherits(object, "ExperimentSubset")){
+      object <- ExperimentSubset(object)
+    }
+    
+    #checking parameters
+    stopifnot(
+      is.character(subsetName),
+      is.null(rows) || is.numeric(rows) || is.character(rows),
+      is.null(cols) || is.numeric(cols) || is.character(cols),
+      is.null(parentAssay) || is.character(parentAssay)
+    )
+    
+    tempAssay <- ""
+    if (is.null(parentAssay)) {
+      tempAssay <- SummarizedExperiment::assayNames(.root(object))[1]
+      parentAssay <- tempAssay
+    }
+    else{
+      test <- parentAssay %in% SummarizedExperiment::assayNames(.root(object)) || 
+        parentAssay %in% subsetAssayNames(object)
+      if (test) {
+        tempAssay <- parentAssay
+      }
+      else{
+        stop("Input parentAssay does not exist.")
+      }
+    }
+    if (is.character(rows)) {
+      rows <-
+        match(rows, base::rownames(
+          ExperimentSubset::assay(object, withDimnames = TRUE, tempAssay)
+        ))
+    }
+    if (is.character(cols)) {
+      cols <-
+        match(cols, base::colnames(
+          ExperimentSubset::assay(object, withDimnames = TRUE, tempAssay)
+        ))
+    }
+    if (is.null(rows)) {
+      rows <-
+        seq(1, dim(
+          ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay)
+        )[1])
+    }
+    if (is.null(cols)) {
+      cols <-
+        seq(1, dim(
+          ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay)
+        )[2])
+    }
+    
+    #Check if count of stored row/column indices greater than the subset
+    test <- length(rows) > dim(ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay))[1] || 
+      length(cols) > dim(ExperimentSubset::assay(object, withDimnames = FALSE, tempAssay))[2]
+    if (test) {
+      stop("More rows or columns selected than available in the parentAssay.")
+    }
+    
+    # Create an initial object for the internalAssay
+    a <- list(Matrix::Matrix(
+      nrow = length(rows),
+      ncol = length(cols),
+      data = 0,
+      sparse = TRUE))
+    names(a) <- "temp"
+    internalAssay <- SummarizedExperiment::SummarizedExperiment(assays = a)
+    
+    # Convert to class of root object (e.g. SingleCellExperiment)
+    internalAssay <- as(internalAssay, class(.root(object))[1])
+    
+    scs <- AssaySubset(
+      subsetName = subsetName,
+      rowIndices = rows,
+      colIndices = cols,
+      parentAssay = parentAssay,
+      internalAssay = internalAssay
+    )
+    SummarizedExperiment::assay(.internalAssay(scs),
+                                withDimnames = FALSE, "temp") <- NULL
+    
+    #Check if NAs introduced in the subset
+    tryCatch({
+      stats::na.fail(.rowIndices(scs))
+      stats::na.fail(.colIndices(scs))
+    }, error = function(e) {
+      stop(
+        "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent."
+      )
+    })
+    
     .subsets(object)[[subsetName]] <- scs
     return(object)
   }

@@ -2,12 +2,18 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{createSubset}
 \alias{createSubset}
-\alias{createSubset,ANY,character,NullOrMissingOrNumericOrCharacter,NullOrMissingOrNumericOrCharacter,MissingOrNullOrCharacter-method}
+\alias{createSubset,ExperimentSubset-method}
+\alias{createSubset,SingleCellExperiment-method}
+\alias{createSubset,SummarizedExperiment-method}
 \title{Subset creation method for ExperimentSubset objects}
 \usage{
 createSubset(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ANY,character,NullOrMissingOrNumericOrCharacter,NullOrMissingOrNumericOrCharacter,MissingOrNullOrCharacter}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{ExperimentSubset}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+
+\S4method{createSubset}{SingleCellExperiment}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+
+\S4method{createSubset}{SummarizedExperiment}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 }
 \arguments{
 \item{object}{\code{ExperimentSubset} Specify the object from which a subset
