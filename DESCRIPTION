@@ -16,7 +16,8 @@ RoxygenNote: 7.1.1
 Depends:
   R (>= 4.0.0),
   SummarizedExperiment,
-  SingleCellExperiment
+  SingleCellExperiment,
+  SpatialExperiment
 biocViews: Infrastructure, Software, DataImport, DataRepresentation
 Imports:
   methods,
