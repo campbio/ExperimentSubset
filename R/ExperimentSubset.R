@@ -224,7 +224,34 @@ setMethod(
 #' @rdname metadata
 setMethod(
   f = "metadata",
+  signature = signature(x = "ExperimentSubsetRSE"),
+  definition = function(x, ...) {
+    .metadata(x, ...)
+  }
+)
+
+#' @rdname metadata
+setMethod(
+  f = "metadata",
   signature = signature(x = "ExperimentSubsetSCE"),
+  definition = function(x, ...) {
+    .metadata(x, ...)
+  }
+)
+
+#' @rdname metadata
+setMethod(
+  f = "metadata",
+  signature = signature(x = "ExperimentSubsetSP"),
+  definition = function(x, ...) {
+    .metadata(x, ...)
+  }
+)
+
+#' @rdname metadata
+setMethod(
+  f = "metadata",
+  signature = signature(x = "ExperimentSubsetVE"),
   definition = function(x, ...) {
     .metadata(x, ...)
   }
@@ -1104,3 +1131,478 @@ setReplaceMethod("assay",
     callNextMethod(...)
   }
 }
+
+#' @title Subset parent hierarchy retrieval method for ExperimentSubset objects
+#' @description Retrieves a complete subset to parent link from a specified
+#'   subset.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Specify the name of the subset against
+#'   which the subset to parent link should be retrieved.
+#' @return A \code{list} containing the parent link of the subset.
+#' @rdname subsetParent
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' assay(es, "subset1",
+#' subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+#' subsetParent(es, "subset1pAssay")
+setGeneric(
+  name = "subsetParent",
+  def = function(object, subsetName)
+  {
+    standardGeneric("subsetParent")
+  }
+)
+
+#' @rdname subsetParent
+setMethod(
+  f = "subsetParent",
+  signature = "ExperimentSubsetSE",
+  definition = function(object, subsetName)
+  {
+    .subsetParent(object, subsetName)
+  }
+)
+
+#' @rdname subsetParent
+setMethod(
+  f = "subsetParent",
+  signature = "ExperimentSubsetRSE",
+  definition = function(object, subsetName)
+  {
+    .subsetParent(object, subsetName)
+  }
+)
+
+#' @rdname subsetParent
+setMethod(
+  f = "subsetParent",
+  signature = "ExperimentSubsetSCE",
+  definition = function(object, subsetName)
+  {
+    .subsetParent(object, subsetName)
+  }
+)
+
+#' @rdname subsetParent
+setMethod(
+  f = "subsetParent",
+  signature = "ExperimentSubsetSP",
+  definition = function(object, subsetName)
+  {
+    .subsetParent(object, subsetName)
+  }
+)
+
+#' @rdname subsetParent
+setMethod(
+  f = "subsetParent",
+  signature = "ExperimentSubsetVE",
+  definition = function(object, subsetName)
+  {
+    .subsetParent(object, subsetName)
+  }
+)
+
+.subsetParent <- function(object, subsetName){
+  parentList <- list()
+  if (!subsetName %in% subsetAssayNames(object)) {
+    stop(subsetName,
+         " does not exist in the subsets slot of the object.")
+  }
+  test <- !is.null(.subsets(object)[[subsetName]]) &&
+    is.null(.parentAssay(.subsets(object)[[subsetName]]))
+  if (test) {
+    return(NULL)
+  }
+  parent <- subsetName
+  while (TRUE) {
+    parentList <- c(parentList, parent)
+    if (!is.null(.subsets(object)[[parent]])) {
+      parent <- .parentAssay(.subsets(object)[[parent]])
+    }
+    else{
+      for (i in seq(subsetCount(object))) {
+        if (parent %in% assayNames(.internalAssay(.subsets(object)[[i]]))) {
+          parent <- .subsetName(.subsets(object)[[i]])
+        }
+      }
+      parentList <- c(parentList, parent)
+      parent <- .parentAssay(.subsets(object)[[parent]])
+    }
+    if (parent %in% assayNames(object)) {
+      parentList <- c(parentList, parent)
+      break
+    }
+  }
+  parentList[[1]] <- NULL
+  return(parentList)
+}
+
+#' @title Method for displaying child-parent link structure of subsets in
+#'   ExperimentSubset objects
+#' @description The function displays the content of an \code{ExperimentSubset}
+#'   object including all available main assays, all subsets and the subset
+#'   assays inside these subsets. This function also depicts how and in what
+#'   order the subsets in the object are linked with their parents. Moreover,
+#'   all supplementary data inside the subsets such as \code{reducedDims} and
+#'   \code{altExps} are also displayed against each subset entry.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @return Prints all the available subset information against the input
+#'   \code{ExperimentSubset} object.
+#' @rdname subsetSummary
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es,
+#' "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' assay(es, "subset1",
+#' subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
+#' subsetSummary(es)
+setGeneric(
+  name = "subsetSummary",
+  def = function(object)
+  {
+    standardGeneric("subsetSummary")
+  }
+)
+
+#' @rdname subsetSummary
+setMethod(
+  f = "subsetSummary",
+  signature = "ExperimentSubsetSE",
+  definition = function(object)
+  {
+    .subsetSummary(object)
+  }
+)
+
+#' @rdname subsetSummary
+setMethod(
+  f = "subsetSummary",
+  signature = "ExperimentSubsetRSE",
+  definition = function(object)
+  {
+    .subsetSummary(object)
+  }
+)
+
+#' @rdname subsetSummary
+setMethod(
+  f = "subsetSummary",
+  signature = "ExperimentSubsetSCE",
+  definition = function(object)
+  {
+    .subsetSummary(object)
+  }
+)
+
+#' @rdname subsetSummary
+setMethod(
+  f = "subsetSummary",
+  signature = "ExperimentSubsetSP",
+  definition = function(object)
+  {
+    .subsetSummary(object)
+  }
+)
+
+#' @rdname subsetSummary
+setMethod(
+  f = "subsetSummary",
+  signature = "ExperimentSubsetVE",
+  definition = function(object)
+  {
+    .subsetSummary(object)
+  }
+)
+
+.subsetSummary <- function(object){
+  cat("Main assay(s):\n",
+      assayNames(object),
+      "\n\n")
+  cat("Subset(s):\n")
+  if (!is.null(subsetNames(object))) {
+    Name <- list()
+    Dimensions <- list()
+    Parent <- list()
+    Assays <- list()
+    Metadata <- list()
+    ReducedDims <- list()
+    AltExperiments <- list()
+    
+    for (i in seq(length(subsetNames(object)))) {
+      parent <- subsetParent(object, subsetAssayNames(object)[i])
+      Name[[i]] <- subsetNames(object)[i]
+      Parent[[i]] <-
+        paste(unlist(parent), collapse = ' -> ')
+      if (is.null(assayNames(.internalAssay(.subsets(object)[[i]])))) {
+        Assays[[i]] <- ""
+      }
+      else{
+        Assays[[i]] <-
+          assayNames(.internalAssay(.subsets(object)[[i]]))
+      }
+      Dimensions[[i]] <-
+        paste(unlist(subsetDim(object, subsetNames(object)[i])), collapse = ', ')
+      ReducedDims[[i]] <-
+        paste(unlist(reducedDimNames(object, subsetNames(object)[i])), collapse = ", ")
+      AltExperiments[[i]] <-
+        paste(unlist(altExpNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
+    }
+    
+    df <- data.frame(
+      Name = as.character(Name),
+      Dim = as.character(Dimensions),
+      Parent = as.character(Parent)
+    )
+    
+    if (length(which(as.character(Assays) == "")) != subsetCount(object)) {
+      df <- cbind(df, Assays = as.character(Assays))
+    }
+    
+    if (length(which(as.character(AltExperiments) == "")) != subsetCount(object)) {
+      df <- cbind(df, AltExperiments = as.character(AltExperiments))
+    }
+    
+    if (length(which(as.character(ReducedDims) == "")) != subsetCount(object)) {
+      df <- cbind(df, ReducedDims = as.character(ReducedDims))
+    }
+    
+    print(df)
+  }
+  else{
+    cat("NULL\n")
+  }
+}
+
+#' @title Get dimensions of subsets in ExperimentSubset objects
+#' @description Retrieves the dimensions of the specified subset in an
+#'   \code{ExperimentSubset} object.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to retrieve the
+#'   dimensions from.
+#' @return A \code{vector} containing the dimensions of the specified subset
+#'   i.e. the number of rows and the number of columns in the subset.
+#' @rdname subsetDim
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es,
+#' "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' subsetDim(es, "subset1")
+setGeneric(
+  name = "subsetDim",
+  def = function(object, subsetName)
+  {
+    standardGeneric("subsetDim")
+  }
+)
+
+#' @rdname subsetDim
+setMethod(
+  f = "subsetDim",
+  signature = c("ExperimentSubsetSE", "character"),
+  definition = function(object, subsetName)
+  {
+    dim(.internalAssay(.subsets(object)[[subsetName]]))
+  }
+)
+
+#' @rdname subsetDim
+setMethod(
+  f = "subsetDim",
+  signature = c("ExperimentSubsetRSE", "character"),
+  definition = function(object, subsetName)
+  {
+    dim(.internalAssay(.subsets(object)[[subsetName]]))
+  }
+)
+
+#' @rdname subsetDim
+setMethod(
+  f = "subsetDim",
+  signature = c("ExperimentSubsetSCE", "character"),
+  definition = function(object, subsetName)
+  {
+    dim(.internalAssay(.subsets(object)[[subsetName]]))
+  }
+)
+
+#' @rdname subsetDim
+setMethod(
+  f = "subsetDim",
+  signature = c("ExperimentSubsetSP", "character"),
+  definition = function(object, subsetName)
+  {
+    dim(.internalAssay(.subsets(object)[[subsetName]]))
+  }
+)
+
+#' @rdname subsetDim
+setMethod(
+  f = "subsetDim",
+  signature = c("ExperimentSubsetVE", "character"),
+  definition = function(object, subsetName)
+  {
+    dim(.internalAssay(.subsets(object)[[subsetName]]))
+  }
+)
+
+
+#' @title reducedDimNames
+#' @description A wrapper to the \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.
+#' @param subsetName Specify the name of the subset from which the \code{reducedDimNames} should be fetched from. If \code{missing}, \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
+#' @return The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
+#' @rdname reducedDimNames
+#' @export
+setGeneric(
+  name = "reducedDimNames",
+  def = function(x, ...)
+  {
+    standardGeneric("reducedDimNames")
+  }
+)
+
+#' @rdname reducedDimNames
+setMethod(
+  f = "reducedDimNames",
+  signature = c("ANY"),
+  definition = function(x, ...)
+  {
+    arglist <- list(...)
+    if(!"subsetName" %in% names(arglist))
+      return(SingleCellExperiment::reducedDimNames(x))
+    subsetName = arglist[["subsetName"]]
+    SingleCellExperiment::reducedDimNames(x@subsets[[subsetName]]@internalAssay)
+  }
+)
+
+#' @title altExpNames
+#' @description A wrapper to the \code{altExpNames} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{altExpNames} from \link[SingleCellExperiment]{altExps} method.
+#' @param subsetName Specify the name of the subset from which the \code{altExpNames} should be fetched from. If \code{missing}, \code{altExpNames} from \link[SingleCellExperiment]{altExps} method is called on the main object.
+#' @return The \code{altExpNames} from the specified subset or same as \code{altExpNames} from \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
+#' @rdname altExpNames
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es,
+#' "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' altExp(es, e = "altExample",
+#' subsetName = "subset1") <- SingleCellExperiment(
+#' assays = list(counts = assay(es, "subset1")))
+#' altExpNames(es, subsetName = "subset1")
+setGeneric(
+  name = "altExpNames",
+  def = function(x, ...)
+  {
+    standardGeneric("altExpNames")
+  }
+)
+
+#' @rdname altExpNames
+setMethod(
+  f = "altExpNames",
+  signature = c("ANY"),
+  definition = function(x, ...)
+  {
+    arglist <- list(...)
+    if(!"subsetName" %in% names(arglist))
+      return(SingleCellExperiment::altExpNames(x))
+    subsetName = arglist[["subsetName"]]
+    SingleCellExperiment::altExpNames(x@subsets[[subsetName]]@internalAssay)
+  }
+)
+
+#' @title Subset count method for ExperimentSubset objects
+#' @description Get the total count of the available subsets in an
+#'   \code{ExperimentSubset} object.
+#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @return A \code{numeric} value representing the total count of the subsets.
+#' @rdname subsetCount
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es,
+#' "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' subsetCount(es)
+setGeneric(
+  name = "subsetCount",
+  def = function(object)
+  {
+    standardGeneric("subsetCount")
+  }
+)
+
+#' @rdname subsetCount
+setMethod(
+  f = "subsetCount",
+  signature = "ExperimentSubsetSE",
+  definition = function(object)
+  {
+    return(length(subsetNames(object)))
+  }
+)
+
+#' @rdname subsetCount
+setMethod(
+  f = "subsetCount",
+  signature = "ExperimentSubsetRSE",
+  definition = function(object)
+  {
+    return(length(subsetNames(object)))
+  }
+)
+
+#' @rdname subsetCount
+setMethod(
+  f = "subsetCount",
+  signature = "ExperimentSubsetSCE",
+  definition = function(object)
+  {
+    return(length(subsetNames(object)))
+  }
+)
+
+#' @rdname subsetCount
+setMethod(
+  f = "subsetCount",
+  signature = "ExperimentSubsetSP",
+  definition = function(object)
+  {
+    return(length(subsetNames(object)))
+  }
+)
+
+#' @rdname subsetCount
+setMethod(
+  f = "subsetCount",
+  signature = "ExperimentSubsetVE",
+  definition = function(object)
+  {
+    return(length(subsetNames(object)))
+  }
+)
