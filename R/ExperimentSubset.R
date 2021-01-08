@@ -1492,46 +1492,7 @@ setMethod(
   }
 )
 
-#' @title altExpNames
-#' @description A wrapper to the \code{altExpNames} from \link[SingleCellExperiment]{altExps} method with additional support for subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{altExpNames} from \link[SingleCellExperiment]{altExps} method.
-#' @param subsetName Specify the name of the subset from which the \code{altExpNames} should be fetched from. If \code{missing}, \code{altExpNames} from \link[SingleCellExperiment]{altExps} method is called on the main object.
-#' @return The \code{altExpNames} from the specified subset or same as \code{altExpNames} from \link[SingleCellExperiment]{altExps} when \code{subsetName} is \code{missing}.
-#' @rdname altExpNames
-#' @export
-#' @examples
-#' data(sce_chcl, package = "scds")
-#' es <- ExperimentSubset(sce_chcl)
-#' es <- createSubset(es,
-#' "subset1",
-#' rows = c(10,11,50,56,98,99,102,105,109, 200),
-#' cols = c(20,21,40,45,90,99,100,123,166,299),
-#' parentAssay = "counts")
-#' altExp(es, e = "altExample",
-#' subsetName = "subset1") <- SingleCellExperiment(
-#' assays = list(counts = assay(es, "subset1")))
-#' altExpNames(es, subsetName = "subset1")
-setGeneric(
-  name = "altExpNames",
-  def = function(x, ...)
-  {
-    standardGeneric("altExpNames")
-  }
-)
 
-#' @rdname altExpNames
-setMethod(
-  f = "altExpNames",
-  signature = c("ANY"),
-  definition = function(x, ...)
-  {
-    arglist <- list(...)
-    if(!"subsetName" %in% names(arglist))
-      return(SingleCellExperiment::altExpNames(x))
-    subsetName = arglist[["subsetName"]]
-    SingleCellExperiment::altExpNames(x@subsets[[subsetName]]@internalAssay)
-  }
-)
 
 #' @title Subset count method for ExperimentSubset objects
 #' @description Get the total count of the available subsets in an
@@ -1606,3 +1567,83 @@ setMethod(
     return(length(subsetNames(object)))
   }
 )
+
+#' @rdname altExp
+setMethod(
+  f = "altExp",
+  signature = signature(x = "ExperimentSubsetSE", e = "character"),
+  definition = function(x, e, ...) {
+    .altExp(x, e, ...)
+  }
+)
+
+#' @rdname altExp
+setMethod(
+  f = "altExp",
+  signature = signature(x = "ExperimentSubsetRSE", e = "character"),
+  definition = function(x, e, ...) {
+    .altExp(x, e, ...)
+  }
+)
+
+#' @rdname altExp
+setMethod(
+  f = "altExp",
+  signature = signature(x = "ExperimentSubsetSCE", e = "character"),
+  definition = function(x, e,  ...) {
+    .altExp(x, e, ...)
+  }
+)
+
+#' @rdname altExp
+setMethod(
+  f = "altExp",
+  signature = signature(x = "ExperimentSubsetSCE", e = "missing"),
+  definition = function(x, e,  ...) {
+    .altExp(x, ...)
+  }
+)
+
+.altExp <- function(x, ...){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  altExp(x@subsets[[subsetName]]@internalAssay)
+}
+
+#' @rdname altExps
+setMethod(
+  f = "altExps",
+  signature = signature(x = "ExperimentSubsetSCE"),
+  definition = function(x, ...) {
+    .altExps(x, ...)
+  }
+)
+
+.altExps <- function(x, ...){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  altExps(x@subsets[[subsetName]]@internalAssay)
+}
+
+#' @rdname altExpNames
+setMethod(
+  f = "altExpNames",
+  signature = signature(x = "ExperimentSubsetSCE"),
+  definition = function(x, ...) {
+    .altExpNames(x, ...)
+  }
+)
+
+.altExpNames <- function(x, ...){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  altExpNames(x@subsets[[subsetName]]@internalAssay)
+}
+
+
