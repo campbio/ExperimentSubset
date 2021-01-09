@@ -1918,7 +1918,7 @@ setGeneric(
 #' @rdname subsetRowData
 setMethod(
   f = "subsetRowData",
-  signature = c("ExperimentSubset", "character"),
+  signature = c("ExperimentSubsetSCE", "character"),
   definition = function(object, subsetName)
   {
     if (subsetName %in% subsetNames(object)) {
@@ -1971,7 +1971,7 @@ setGeneric(
 #' @rdname subsetColData
 setMethod(
   f = "subsetColData",
-  signature = c("ExperimentSubset", "character"),
+  signature = c("ExperimentSubsetSCE", "character"),
   definition = function(object, subsetName)
   {
     if (subsetName %in% subsetNames(object)) {
@@ -1996,3 +1996,171 @@ setMethod(
     return(out)
   }
 )
+
+#' @rdname reducedDim
+setMethod(
+  f = "reducedDim",
+  signature = signature(x = "ExperimentSubsetSCE", type = "character"),
+  definition = function(x, type, ...) {
+    .reducedDim(x, type, ...)
+  }
+)
+
+.reducedDim <- function(x, type, ...){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  reducedDim(x@subsets[[subsetName]]@internalAssay, type)
+}
+
+#' @rdname reducedDim<-
+setReplaceMethod(
+  f = "reducedDim",
+  signature = signature(x = "ExperimentSubsetSCE", type = "character"),
+  definition = function(x, type, ..., value) {
+    .reducedDim(x, type, ...) <- value
+    return(x)
+  }
+)
+
+'.reducedDim<-' <- function(x, type, ..., value){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  reducedDim(x@subsets[[subsetName]]@internalAssay, type, ...) <- value
+  return(x)
+}
+
+#' @rdname reducedDims
+setMethod(
+  f = "reducedDims",
+  signature = signature(x = "ExperimentSubsetSCE"),
+  definition = function(x, ...) {
+    .reducedDims(x, ...)
+  }
+)
+
+.reducedDims <- function(x, ...){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  reducedDims(x@subsets[[subsetName]]@internalAssay)
+}
+
+#' @title reducedDims<-
+#' @description A wrapper to the \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
+#' @param object Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.
+#' @param subsetName Specify the name of the subset to which the \code{reducedDims} should be set to. If \code{missing}, \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
+#' @param value A \code{list} of values to set to \code{reducedDims}.
+#' @return Updated input object with \code{reducedDims} set.
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1",
+#' rows = c(1:1500), cols = c(1:1500),
+#' parentAssay = "counts")
+#' reducedDims(es, subsetName = "subset1") <- list(
+#' PCA_1 = scater::calculatePCA(assay(es, "subset1")),
+#' PCA_2 = scater::calculatePCA(assay(es, "subset1")))
+#' reducedDims(es, subsetName = "subset1")
+setGeneric(
+  name = "reducedDims<-",
+  def = function(object, subsetName, value)
+  {
+    standardGeneric("reducedDims<-")
+  }
+)
+
+#' @title reducedDims<-
+#' @description A wrapper to the \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
+#' @param object Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.
+#' @param subsetName Specify the name of the subset to which the \code{reducedDims} should be set to. If \code{missing}, \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
+#' @param value A \code{list} of values to set to \code{reducedDims}.
+#' @return Updated input object with \code{reducedDims} set.
+#' @export
+setReplaceMethod("reducedDims", "ANY", function(object, subsetName, value) {
+  if (!missing(subsetName)) {
+    SingleCellExperiment::reducedDims(object@subsets[[subsetName]]@internalAssay) <-
+      value
+  }
+  else{
+    SingleCellExperiment::reducedDims(object) <- value
+  }
+  return(object)
+})
+
+#' @rdname rowData
+setMethod(
+  f = "rowData",
+  signature = signature(x = "ExperimentSubsetSCE"),
+  definition = function(x, ...) {
+    .rowData(x, ...)
+  }
+)
+
+.rowData <- function(x, ...){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  rowData(x@subsets[[subsetName]]@internalAssay)
+}
+
+#' @rdname colData
+setMethod(
+  f = "colData",
+  signature = signature(x = "ExperimentSubsetSCE"),
+  definition = function(x, ...) {
+    .colData(x, ...)
+  }
+)
+
+.colData <- function(x, ...){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  colData(x@subsets[[subsetName]]@internalAssay)
+}
+
+#' @rdname rowData<-
+setReplaceMethod(
+  f = "rowData",
+  signature = signature(x = "ExperimentSubsetSCE", value = "DataFrame"),
+  definition = function(x, ..., value) {
+    .rowData(x, ...) <- value
+    return(x)
+  }
+)
+
+'.rowData<-' <- function(x, ..., value){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  rowData(x@subsets[[subsetName]]@internalAssay) <- value
+  return(x)
+}
+
+#' @rdname colData<-
+setReplaceMethod(
+  f = "colData",
+  signature = signature(x = "ExperimentSubsetSCE", value = "DataFrame"),
+  definition = function(x, ..., value) {
+    .colData(x, ...) <- value
+    return(x)
+  }
+)
+
+'.colData<-' <- function(x, ..., value){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  colData(x@subsets[[subsetName]]@internalAssay) <- value
+  return(x)
+}
