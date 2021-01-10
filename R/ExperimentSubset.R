@@ -489,11 +489,28 @@ setMethod(
   }
 )
 
+.subsetValidty <- function(x,
+                          subsetName,
+                          rows,
+                          cols,
+                          parentAssay){
+  if(subsetName %in% subsetNames(x)){
+    stop("Subset already exists! Create one with a different name!")
+  }
+}
+
 .createSubset <- function(x,
                           subsetName,
                           rows,
                           cols,
                           parentAssay){
+  
+  .subsetValidty(x,
+                 subsetName,
+                 rows,
+                 cols,
+                 parentAssay)
+  
   #checking parameters
   stopifnot(
     is.character(subsetName),
