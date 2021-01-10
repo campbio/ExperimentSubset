@@ -693,7 +693,7 @@ setMethod(
 
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
-#' @param x Input \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -705,15 +705,15 @@ setMethod(
 setMethod(
   f = "show",
   signature = "ExperimentSubsetSE",
-  definition = function(x)
+  definition = function(object)
   {
-    .show(x)
+    .show(object)
   }
 )
 
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
-#' @param x Input \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -725,15 +725,15 @@ setMethod(
 setMethod(
   f = "show",
   signature = "ExperimentSubsetRSE",
-  definition = function(x)
+  definition = function(object)
   {
-    .show(x)
+    .show(object)
   }
 )
 
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
-#' @param x Input \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -745,15 +745,15 @@ setMethod(
 setMethod(
   f = "show",
   signature = "ExperimentSubsetSCE",
-  definition = function(x)
+  definition = function(object)
   {
-    .show(x)
+    .show(object)
   }
 )
 
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
-#' @param x Input \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -765,15 +765,15 @@ setMethod(
 setMethod(
   f = "show",
   signature = "ExperimentSubsetSP",
-  definition = function(x)
+  definition = function(object)
   {
-    .show(x)
+    .show(object)
   }
 )
 
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
-#' @param x Input \code{ExperimentSubset} object.
+#' @param object Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -785,20 +785,20 @@ setMethod(
 setMethod(
   f = "show",
   signature = "ExperimentSubsetVE",
-  definition = function(x)
+  definition = function(object)
   {
-    .show(x)
+    .show(object)
   }
 )
 
-.show <- function(x){
+.show <- function(object){
   callNextMethod()
-  cat("subsets(", length(subsetNames(x)), "): ",
+  cat("subsets(", length(subsetNames(object)), "): ",
       sep = "")
-  cat(subsetNames(x))
-  cat("\nsubsetAssays(", length(subsetAssayNames(x)), "): ",
+  cat(subsetNames(object))
+  cat("\nsubsetAssays(", length(subsetAssayNames(object)), "): ",
       sep = "")
-  cat(subsetAssayNames(x))
+  cat(subsetAssayNames(object))
 }
 
 

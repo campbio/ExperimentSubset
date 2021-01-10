@@ -19,7 +19,7 @@
 \S4method{show}{ExperimentSubsetVE}(object)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object.}
+\item{object}{Input \code{ExperimentSubset} object.}
 }
 \value{
 Displays the overall contents of the \code{ExperimentSubset} object.
