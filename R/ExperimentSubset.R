@@ -1354,10 +1354,12 @@ setMethod(
       }
       Dimensions[[i]] <-
         paste(unlist(subsetDim(object, subsetNames(object)[i])), collapse = ', ')
-      ReducedDims[[i]] <-
-        paste(unlist(reducedDimNames(object, subsetNames(object)[i])), collapse = ", ")
-      AltExperiments[[i]] <-
-        paste(unlist(altExpNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
+      if(inherits(object, "SingleCellExperiment")){
+        ReducedDims[[i]] <-
+          paste(unlist(reducedDimNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
+        AltExperiments[[i]] <-
+          paste(unlist(altExpNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
+      }
     }
     
     df <- data.frame(
@@ -1370,12 +1372,14 @@ setMethod(
       df <- cbind(df, Assays = as.character(Assays))
     }
     
-    if (length(which(as.character(AltExperiments) == "")) != subsetCount(object)) {
-      df <- cbind(df, AltExperiments = as.character(AltExperiments))
-    }
-    
-    if (length(which(as.character(ReducedDims) == "")) != subsetCount(object)) {
-      df <- cbind(df, ReducedDims = as.character(ReducedDims))
+    if(inherits(object, "SingleCellExperiment")){
+      if (length(which(as.character(AltExperiments) == "")) != subsetCount(object)) {
+        df <- cbind(df, AltExperiments = as.character(AltExperiments))
+      }
+      
+      if (length(which(as.character(ReducedDims) == "")) != subsetCount(object)) {
+        df <- cbind(df, ReducedDims = as.character(ReducedDims))
+      }
     }
     
     print(df)
@@ -2037,6 +2041,24 @@ setReplaceMethod(
 setMethod(
   f = "reducedDims",
   signature = signature(x = "ExperimentSubsetSCE"),
+  definition = function(x, ...) {
+    .reducedDims(x, ...)
+  }
+)
+
+#' @rdname reducedDims
+setMethod(
+  f = "reducedDims",
+  signature = signature(x = "ExperimentSubsetSE"),
+  definition = function(x, ...) {
+    .reducedDims(x, ...)
+  }
+)
+
+#' @rdname reducedDims
+setMethod(
+  f = "reducedDims",
+  signature = signature(x = "ExperimentSubsetRSE"),
   definition = function(x, ...) {
     .reducedDims(x, ...)
   }
