@@ -9,20 +9,20 @@
 \alias{subsetNames,ExperimentSubsetVE-method}
 \title{Get names of subsets in ExperimentSubset objects}
 \usage{
-subsetNames(object)
+subsetNames(x)
 
-\S4method{subsetNames}{ExperimentSubsetSE}(object)
+\S4method{subsetNames}{ExperimentSubsetSE}(x)
 
-\S4method{subsetNames}{ExperimentSubsetRSE}(object)
+\S4method{subsetNames}{ExperimentSubsetRSE}(x)
 
-\S4method{subsetNames}{ExperimentSubsetSCE}(object)
+\S4method{subsetNames}{ExperimentSubsetSCE}(x)
 
-\S4method{subsetNames}{ExperimentSubsetSP}(object)
+\S4method{subsetNames}{ExperimentSubsetSP}(x)
 
-\S4method{subsetNames}{ExperimentSubsetVE}(object)
+\S4method{subsetNames}{ExperimentSubsetVE}(x)
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Specify the input object.}
+\item{x}{\code{ExperimentSubset} Specify the input object.}
 }
 \value{
 A \code{vector} of subset names.

@@ -153,7 +153,7 @@ AssaySubset <- function(subsetName = "subset",
 
 #' @title ExperimentSubset constructor
 #' @description This constructor function is used to setup the \code{ExperimentSubset} object, either through manually specifying the \code{assays}, \code{rowData}, \code{colData} or directly by passing either a \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or objects inherited by these classes. A subset can also be directly created by pasing a named \code{list} to the \code{subset} parameter. This named \code{list} should have parameter values named as \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
-#' @param object A \code{SingleCellExperiment} or \code{SummarizedExperiment} object if direct conversion is required.
+#' @param x A \code{SingleCellExperiment} or \code{SummarizedExperiment} object if direct conversion is required.
 #' @param ... Additional parameters passed to \code{SingleCellExperiment} constructor.
 #' @param subset A named \code{list} if a subset should be created from within the constructor. Named parameters in this list should be \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
 #' @return A \code{ExperimentSubset} object.
@@ -166,7 +166,7 @@ AssaySubset <- function(subsetName = "subset",
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es
-ExperimentSubset <- function(object,
+ExperimentSubset <- function(x,
                              ...,
                              subset = list(
                                subsetName = NA,
@@ -175,25 +175,25 @@ ExperimentSubset <- function(object,
                                parentAssay = NA
                              ))
 {
-  if (!missing(object)) {
-    # if (inherits(object, "SummarizedExperiment")) {
-    #   object <- as(object, "SingleCellExperiment")
-    #   es <- .ExperimentSubset(object)
+  if (!missing(x)) {
+    # if (inherits(x, "SummarizedExperiment")) {
+    #   x <- as(x, "SingleCellExperiment")
+    #   es <- .ExperimentSubset(x)
     # }
-    if(inherits(object, "VisiumExperiment")){
-      es <- .ExperimentSubsetVE(object)
+    if(inherits(x, "VisiumExperiment")){
+      es <- .ExperimentSubsetVE(x)
     }
-    else if(inherits(object, "SpatialExperiment")){
-      es <- .ExperimentSubsetSP(object)
+    else if(inherits(x, "SpatialExperiment")){
+      es <- .ExperimentSubsetSP(x)
     }
-    else if(inherits(object, "SingleCellExperiment")){
-      es <- .ExperimentSubsetSCE(object)
+    else if(inherits(x, "SingleCellExperiment")){
+      es <- .ExperimentSubsetSCE(x)
     }
-    else if(inherits(object, "RangedSummarizedExperiment")){
-      es <- .ExperimentSubsetRSE(object)
+    else if(inherits(x, "RangedSummarizedExperiment")){
+      es <- .ExperimentSubsetRSE(x)
     }
-    else if(inherits(object, "SummarizedExperiment")){
-      es <- .ExperimentSubsetSE(object)
+    else if(inherits(x, "SummarizedExperiment")){
+      es <- .ExperimentSubsetSE(x)
     }
   }
   else{
@@ -262,7 +262,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  metadata(x@subsets[[subsetName]]@internalAssay)
+  metadata(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname assay
@@ -319,20 +319,20 @@ setMethod(
   #look at subsets
   else if (i %in% subsetNames(x)) {
     subsetName <- i
-    i <- x@subsets[[subsetName]]@parentAssay #change to .subsets
+    i <- .parentAssay(.subsets(x)[[subsetName]]) 
     if (is.null(i)) {
-      out <- assay(x = x@subsets[[subsetName]]@internalAssay, i = "counts", ...)
+      out <- assay(x = .internalAssay(.subsets(x)[[subsetName]]) , i = "counts", ...)
     }
     else{
       out <- assay(x = x, i = i, ...)
-      out <- out[x@subsets[[subsetName]]@rowIndices, x@subsets[[subsetName]]@colIndices]
+      out <- out[.rowIndices(.subsets(x)[[subsetName]]), .colIndices(.subsets(x)[[subsetName]])]
     }
   }
   #look inside subsets
   else{
     for (j in seq(length(x@subsets))) {
-      if (i %in% assayNames(x@subsets[[j]]@internalAssay)) {
-        out <- assay(x = x@subsets[[j]]@internalAssay, i = i)
+      if (i %in% assayNames(.internalAssay(.subsets(x)[[j]]))) {
+        out <- assay(x = .internalAssay(.subsets(x)[[j]]), i = i)
       }
     }
   }
@@ -348,7 +348,7 @@ setMethod(
 #' @description Create a subset from an already available \code{assay} in the
 #'   input \code{ExperimentSubset} object by specifying the rows and columns to
 #'   include in the subset.
-#' @param object \code{ExperimentSubset} Specify the object from which a subset
+#' @param x \code{ExperimentSubset} Specify the object from which a subset
 #'   should be created. Input can also be any object inherited from
 #'   \code{SummarizedExperiment} for immediate conversion and subset formation.
 #' @param subsetName \code{character(1)} Specify the name of the subset to
@@ -380,13 +380,13 @@ setMethod(
 #' es
 setGeneric(
   name = "createSubset",
-  def = function(object,
+  def = function(x,
                  subsetName,
                  rows = NULL,
                  cols = NULL,
                  parentAssay = NULL)
     standardGeneric("createSubset"),
-  signature = "object"
+  signature = "x"
 )
 
 #' @rdname createSubset
@@ -395,13 +395,13 @@ setMethod(
   signature = c(
     "ExperimentSubsetSE"
   ),
-  definition = function(object,
+  definition = function(x,
                         subsetName,
                         rows,
                         cols,
                         parentAssay)
   {
-    return(.createSubset(object,
+    return(.createSubset(x,
                          subsetName,
                          rows,
                          cols,
@@ -415,13 +415,13 @@ setMethod(
   signature = c(
     "ExperimentSubsetSCE"
   ),
-  definition = function(object,
+  definition = function(x,
                         subsetName,
                         rows,
                         cols,
                         parentAssay)
   {
-    return(.createSubset(object,
+    return(.createSubset(x,
                          subsetName,
                          rows,
                          cols,
@@ -435,13 +435,13 @@ setMethod(
   signature = c(
     "ExperimentSubsetRSE"
   ),
-  definition = function(object,
+  definition = function(x,
                         subsetName,
                         rows,
                         cols,
                         parentAssay)
   {
-    return(.createSubset(object,
+    return(.createSubset(x,
                          subsetName,
                          rows,
                          cols,
@@ -455,13 +455,13 @@ setMethod(
   signature = c(
     "ExperimentSubsetSP"
   ),
-  definition = function(object,
+  definition = function(x,
                         subsetName,
                         rows,
                         cols,
                         parentAssay)
   {
-    return(.createSubset(object,
+    return(.createSubset(x,
                          subsetName,
                          rows,
                          cols,
@@ -475,13 +475,13 @@ setMethod(
   signature = c(
     "ExperimentSubsetVE"
   ),
-  definition = function(object,
+  definition = function(x,
                         subsetName,
                         rows,
                         cols,
                         parentAssay)
   {
-    return(.createSubset(object,
+    return(.createSubset(x,
                          subsetName,
                          rows,
                          cols,
@@ -489,7 +489,7 @@ setMethod(
   }
 )
 
-.createSubset <- function(object,
+.createSubset <- function(x,
                           subsetName,
                           rows,
                           cols,
@@ -504,12 +504,12 @@ setMethod(
   
   tempAssay <- ""
   if (is.null(parentAssay)) {
-    tempAssay <- assayNames(object)[1]
+    tempAssay <- assayNames(x)[1]
     parentAssay <- tempAssay
   }
   else{
-    test <- parentAssay %in% assayNames(object) || 
-      parentAssay %in% subsetAssayNames(object)
+    test <- parentAssay %in% assayNames(x) || 
+      parentAssay %in% subsetAssayNames(x)
     if (test) {
       tempAssay <- parentAssay
     }
@@ -520,31 +520,31 @@ setMethod(
   if (is.character(rows)) {
     rows <-
       match(rows, rownames(
-        assay(object, withDimnames = TRUE, tempAssay)
+        assay(x, withDimnames = TRUE, tempAssay)
       ))
   }
   if (is.character(cols)) {
     cols <-
       match(cols, colnames(
-        assay(object, withDimnames = TRUE, tempAssay)
+        assay(x, withDimnames = TRUE, tempAssay)
       ))
   }
   if (is.null(rows)) {
     rows <-
       seq(1, dim(
-        assay(object, withDimnames = FALSE, tempAssay)
+        assay(x, withDimnames = FALSE, tempAssay)
       )[1])
   }
   if (is.null(cols)) {
     cols <-
       seq(1, dim(
-        assay(object, withDimnames = FALSE, tempAssay)
+        assay(x, withDimnames = FALSE, tempAssay)
       )[2])
   }
   
   #Check if count of stored row/column indices greater than the subset
-  test <- length(rows) > dim(assay(object, withDimnames = FALSE, tempAssay))[1] || 
-    length(cols) > dim(assay(object, withDimnames = FALSE, tempAssay))[2]
+  test <- length(rows) > dim(assay(x, withDimnames = FALSE, tempAssay))[1] || 
+    length(cols) > dim(assay(x, withDimnames = FALSE, tempAssay))[2]
   if (test) {
     stop("More rows or columns selected than available in the parentAssay.")
   }
@@ -559,19 +559,19 @@ setMethod(
   internalAssay <- SummarizedExperiment(assays = a)
   
   # Convert to class of root object (e.g. SingleCellExperiment)
-  if(inherits(object, "VisiumExperiment")){
+  if(inherits(x, "VisiumExperiment")){
     internalAssay <- as(internalAssay, "VisiumExperiment")
   }
-  else if(inherits(object, "SpatialExperiment")){
+  else if(inherits(x, "SpatialExperiment")){
     internalAssay <- as(internalAssay, "SpatialExperiment")
   }
-  else if(inherits(object, "SingleCellExperiment")){
+  else if(inherits(x, "SingleCellExperiment")){
     internalAssay <- as(internalAssay, "SingleCellExperiment")
   }
-  else if(inherits(object, "RangedSummarizedExperiment")){
+  else if(inherits(x, "RangedSummarizedExperiment")){
     internalAssay <- as(internalAssay, "RangedSummarizedExperiment")
   }
-  else if(inherits(object, "SummarizedExperiment")){
+  else if(inherits(x, "SummarizedExperiment")){
     internalAssay <- as(internalAssay, "SummarizedExperiment")
   }
   #add more conditions here but may need a better solution
@@ -596,15 +596,15 @@ setMethod(
     )
   })
   
-  .subsets(object)[[subsetName]] <- scs
-  return(object)
+  .subsets(x)[[subsetName]] <- scs
+  return(x)
 }
 
 #' @title Name retrieval method for all subset assays in ExperimentSubset
 #'   objects
 #' @description Retrieves the names of all the subsets as well as the subset
 #'   assays.
-#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return A \code{vector} containing the names of the subsets and the subset
 #'   assays available in the input \code{ExperimentSubset} object.
 #' @rdname subsetAssayNames
@@ -621,7 +621,7 @@ setMethod(
 #' subsetAssayNames(es)
 setGeneric(
   name = "subsetAssayNames",
-  def = function(object)
+  def = function(x)
   {
     standardGeneric("subsetAssayNames")
   }
@@ -631,9 +631,9 @@ setGeneric(
 setMethod(
   f = "subsetAssayNames",
   signature = "ExperimentSubsetSE",
-  definition = function(object)
+  definition = function(x)
   {
-    .subsetAssayNames(object)
+    .subsetAssayNames(x)
   }
 )
 
@@ -641,9 +641,9 @@ setMethod(
 setMethod(
   f = "subsetAssayNames",
   signature = "ExperimentSubsetRSE",
-  definition = function(object)
+  definition = function(x)
   {
-    .subsetAssayNames(object)
+    .subsetAssayNames(x)
   }
 )
 
@@ -651,9 +651,9 @@ setMethod(
 setMethod(
   f = "subsetAssayNames",
   signature = "ExperimentSubsetSCE",
-  definition = function(object)
+  definition = function(x)
   {
-    .subsetAssayNames(object)
+    .subsetAssayNames(x)
   }
 )
 
@@ -661,9 +661,9 @@ setMethod(
 setMethod(
   f = "subsetAssayNames",
   signature = "ExperimentSubsetSP",
-  definition = function(object)
+  definition = function(x)
   {
-    .subsetAssayNames(object)
+    .subsetAssayNames(x)
   }
 )
 
@@ -671,20 +671,20 @@ setMethod(
 setMethod(
   f = "subsetAssayNames",
   signature = "ExperimentSubsetVE",
-  definition = function(object)
+  definition = function(x)
   {
-    .subsetAssayNames(object)
+    .subsetAssayNames(x)
   }
 )
 
-.subsetAssayNames <- function(object){
-  tempNames <- names(.subsets(object))
-  if (length(.subsets(object)) > 0) {
-    for (i in seq(length(.subsets(object)))) {
+.subsetAssayNames <- function(x){
+  tempNames <- names(.subsets(x))
+  if (length(.subsets(x)) > 0) {
+    for (i in seq(length(.subsets(x)))) {
       tempNames <-
         c(
           tempNames,
-          assayNames(.internalAssay(.subsets(object)[[i]]))
+          assayNames(.internalAssay(.subsets(x)[[i]]))
         )
     }
   }
@@ -693,7 +693,7 @@ setMethod(
 
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
-#' @param object Input \code{ExperimentSubset} object.
+#' @param x Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -705,15 +705,15 @@ setMethod(
 setMethod(
   f = "show",
   signature = "ExperimentSubsetSE",
-  definition = function(object)
+  definition = function(x)
   {
-    .show(object)
+    .show(x)
   }
 )
 
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
-#' @param object Input \code{ExperimentSubset} object.
+#' @param x Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -725,15 +725,15 @@ setMethod(
 setMethod(
   f = "show",
   signature = "ExperimentSubsetRSE",
-  definition = function(object)
+  definition = function(x)
   {
-    .show(object)
+    .show(x)
   }
 )
 
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
-#' @param object Input \code{ExperimentSubset} object.
+#' @param x Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -745,15 +745,15 @@ setMethod(
 setMethod(
   f = "show",
   signature = "ExperimentSubsetSCE",
-  definition = function(object)
+  definition = function(x)
   {
-    .show(object)
+    .show(x)
   }
 )
 
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
-#' @param object Input \code{ExperimentSubset} object.
+#' @param x Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -765,15 +765,15 @@ setMethod(
 setMethod(
   f = "show",
   signature = "ExperimentSubsetSP",
-  definition = function(object)
+  definition = function(x)
   {
-    .show(object)
+    .show(x)
   }
 )
 
 #' @title show
 #' @description Show the \code{ExperimentSubset} object
-#' @param object Input \code{ExperimentSubset} object.
+#' @param x Input \code{ExperimentSubset} object.
 #' @return Displays the overall contents of the \code{ExperimentSubset} object.
 #' @rdname show
 #' @export
@@ -785,27 +785,27 @@ setMethod(
 setMethod(
   f = "show",
   signature = "ExperimentSubsetVE",
-  definition = function(object)
+  definition = function(x)
   {
-    .show(object)
+    .show(x)
   }
 )
 
-.show <- function(object){
+.show <- function(x){
   callNextMethod()
-  cat("subsets(", length(subsetNames(object)), "): ",
+  cat("subsets(", length(subsetNames(x)), "): ",
       sep = "")
-  cat(subsetNames(object))
-  cat("\nsubsetAssays(", length(subsetAssayNames(object)), "): ",
+  cat(subsetNames(x))
+  cat("\nsubsetAssays(", length(subsetAssayNames(x)), "): ",
       sep = "")
-  cat(subsetAssayNames(object))
+  cat(subsetAssayNames(x))
 }
 
 
 #' @title Get names of subsets in ExperimentSubset objects
 #' @description Retrieves the names of the available subsets in an
 #'   \code{ExperimentSubset} object.
-#' @param object \code{ExperimentSubset} Specify the input object.
+#' @param x \code{ExperimentSubset} Specify the input object.
 #' @return A \code{vector} of subset names.
 #' @rdname subsetNames
 #' @export
@@ -820,7 +820,7 @@ setMethod(
 #' subsetNames(es)
 setGeneric(
   name = "subsetNames",
-  def = function(object)
+  def = function(x)
   {
     standardGeneric("subsetNames")
   }
@@ -830,9 +830,9 @@ setGeneric(
 setMethod(
   f = "subsetNames",
   signature = "ExperimentSubsetSE",
-  definition = function(object)
+  definition = function(x)
   {
-    return(names(.subsets(object)))
+    return(names(.subsets(x)))
   }
 )
 
@@ -840,9 +840,9 @@ setMethod(
 setMethod(
   f = "subsetNames",
   signature = "ExperimentSubsetRSE",
-  definition = function(object)
+  definition = function(x)
   {
-    return(names(.subsets(object)))
+    return(names(.subsets(x)))
   }
 )
 
@@ -850,9 +850,9 @@ setMethod(
 setMethod(
   f = "subsetNames",
   signature = "ExperimentSubsetSCE",
-  definition = function(object)
+  definition = function(x)
   {
-    return(names(.subsets(object)))
+    return(names(.subsets(x)))
   }
 )
 
@@ -860,9 +860,9 @@ setMethod(
 setMethod(
   f = "subsetNames",
   signature = "ExperimentSubsetSP",
-  definition = function(object)
+  definition = function(x)
   {
-    return(names(.subsets(object)))
+    return(names(.subsets(x)))
   }
 )
 
@@ -870,16 +870,16 @@ setMethod(
 setMethod(
   f = "subsetNames",
   signature = "ExperimentSubsetVE",
-  definition = function(object)
+  definition = function(x)
   {
-    return(names(.subsets(object)))
+    return(names(.subsets(x)))
   }
 )
 
 #' @title Method for storing new assays in ExperimentSubset objects
 #' @description Store a new subset \code{assay} inside a specified subset in the
 #'   input \code{ExperimentSubset} object.
-#' @param object \code{ExperimentSubset} Specify the input object.
+#' @param x \code{ExperimentSubset} Specify the input object.
 #' @param subsetName \code{character(1)} Specify the name of the existing subset
 #'   inside which the new subset \code{assay} should be stored.
 #' @param inputMatrix \code{dgCMatrix} The input subset \code{assay}.
@@ -904,7 +904,7 @@ setMethod(
 #' es
 setGeneric(
   name = "storeSubset",
-  def = function(object,
+  def = function(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
@@ -917,12 +917,12 @@ setGeneric(
 setMethod(
   f = "storeSubset",
   signature = "ExperimentSubsetSE",
-  definition = function(object,
+  definition = function(x,
                         subsetName,
                         inputMatrix,
                         subsetAssayName = NULL)
   {
-    .storeSubset(object,
+    .storeSubset(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
@@ -933,12 +933,12 @@ setMethod(
 setMethod(
   f = "storeSubset",
   signature = "ExperimentSubsetRSE",
-  definition = function(object,
+  definition = function(x,
                         subsetName,
                         inputMatrix,
                         subsetAssayName = NULL)
   {
-    .storeSubset(object,
+    .storeSubset(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
@@ -949,12 +949,12 @@ setMethod(
 setMethod(
   f = "storeSubset",
   signature = "ExperimentSubsetSCE",
-  definition = function(object,
+  definition = function(x,
                         subsetName,
                         inputMatrix,
                         subsetAssayName = NULL)
   {
-    .storeSubset(object,
+    .storeSubset(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
@@ -965,12 +965,12 @@ setMethod(
 setMethod(
   f = "storeSubset",
   signature = "ExperimentSubsetSP",
-  definition = function(object,
+  definition = function(x,
                         subsetName,
                         inputMatrix,
                         subsetAssayName = NULL)
   {
-    .storeSubset(object,
+    .storeSubset(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
@@ -981,30 +981,30 @@ setMethod(
 setMethod(
   f = "storeSubset",
   signature = "ExperimentSubsetVE",
-  definition = function(object,
+  definition = function(x,
                         subsetName,
                         inputMatrix,
                         subsetAssayName = NULL)
   {
-    .storeSubset(object,
+    .storeSubset(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
   }
 )
 
-.storeSubset <- function(object,
+.storeSubset <- function(x,
                          subsetName,
                          inputMatrix,
                          subsetAssayName = NULL){
-  test <- is.null(.subsets(object)[[subsetName]]) &&
+  test <- is.null(.subsets(x)[[subsetName]]) &&
     !is.null(subsetAssayName)
   if (test) {
     stop(subsetName, " does not exist in the subsets slot of the object.")
   }
   
-  if (!is.null(.subsets(object)[[subsetName]])) {
-    test <- !all(dim(.internalAssay(.subsets(object)[[subsetName]])) == dim(inputMatrix)) && 
+  if (!is.null(.subsets(x)[[subsetName]])) {
+    test <- !all(dim(.internalAssay(.subsets(x)[[subsetName]])) == dim(inputMatrix)) && 
       is.null(subsetAssayName)
     if (test) {
       stop(
@@ -1014,14 +1014,14 @@ setMethod(
   }
   
   if (is.null(subsetAssayName)) {
-    if (subsetName %in% subsetNames(object)) {
+    if (subsetName %in% subsetNames(x)) {
       stop(subsetName,
            " already exists. Please choose a different subsetName parameter."
       )
     }
     
-    object <- createSubset(
-      object,
+    x <- createSubset(
+      x,
       subsetName,
       rownames(inputMatrix),
       colnames(inputMatrix),
@@ -1029,36 +1029,36 @@ setMethod(
     )
     
     internalAssay <- SummarizedExperiment(list(counts = inputMatrix))
-    if(inherits(object, "VisiumExperiment")){
+    if(inherits(x, "VisiumExperiment")){
       internalAssay <- as(internalAssay, "VisiumExperiment")
     }
-    else if(inherits(object, "SpatialExperiment")){
+    else if(inherits(x, "SpatialExperiment")){
       internalAssay <- as(internalAssay, "SpatialExperiment")
     }
-    else if(inherits(object, "SingleCellExperiment")){
+    else if(inherits(x, "SingleCellExperiment")){
       internalAssay <- as(internalAssay, "SingleCellExperiment")
     }
-    else if(inherits(object, "RangedSummarizedExperiment")){
+    else if(inherits(x, "RangedSummarizedExperiment")){
       internalAssay <- as(internalAssay, "RangedSummarizedExperiment")
     }
-    else if(inherits(object, "SummarizedExperiment")){
+    else if(inherits(x, "SummarizedExperiment")){
       internalAssay <- as(internalAssay, "SummarizedExperiment")
     }
-    .internalAssay(.subsets(object)[[subsetName]]) <- internalAssay
+    .internalAssay(.subsets(x)[[subsetName]]) <- internalAssay
       
     
   }
   else{
-    assay(.internalAssay(.subsets(object)[[subsetName]]),
+    assay(.internalAssay(.subsets(x)[[subsetName]]),
                                 withDimnames = FALSE,
                                 subsetAssayName) <- inputMatrix
-    rownames(.internalAssay(.subsets(object)[[subsetName]])) <-
+    rownames(.internalAssay(.subsets(x)[[subsetName]])) <-
       rownames(inputMatrix)
-    colnames(.internalAssay(.subsets(object)[[subsetName]])) <-
+    colnames(.internalAssay(.subsets(x)[[subsetName]])) <-
       colnames(inputMatrix)
   }
   
-  return(object)
+  return(x)
 }
 
 #' @rdname assay<-
@@ -1121,7 +1121,7 @@ setReplaceMethod("assay",
   if ((nrow(value) != nrow(x))
       || (ncol(value) != ncol(x))) {
     storeSubset(
-      object = x,
+      x = x,
       subsetName = i,
       inputMatrix = value,
       subsetAssayName = subsetAssayName
@@ -1135,7 +1135,7 @@ setReplaceMethod("assay",
 #' @title Subset parent hierarchy retrieval method for ExperimentSubset objects
 #' @description Retrieves a complete subset to parent link from a specified
 #'   subset.
-#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Specify the name of the subset against
 #'   which the subset to parent link should be retrieved.
 #' @return A \code{list} containing the parent link of the subset.
@@ -1153,7 +1153,7 @@ setReplaceMethod("assay",
 #' subsetParent(es, "subset1pAssay")
 setGeneric(
   name = "subsetParent",
-  def = function(object, subsetName)
+  def = function(x, subsetName)
   {
     standardGeneric("subsetParent")
   }
@@ -1163,9 +1163,9 @@ setGeneric(
 setMethod(
   f = "subsetParent",
   signature = "ExperimentSubsetSE",
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    .subsetParent(object, subsetName)
+    .subsetParent(x, subsetName)
   }
 )
 
@@ -1173,9 +1173,9 @@ setMethod(
 setMethod(
   f = "subsetParent",
   signature = "ExperimentSubsetRSE",
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    .subsetParent(object, subsetName)
+    .subsetParent(x, subsetName)
   }
 )
 
@@ -1183,9 +1183,9 @@ setMethod(
 setMethod(
   f = "subsetParent",
   signature = "ExperimentSubsetSCE",
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    .subsetParent(object, subsetName)
+    .subsetParent(x, subsetName)
   }
 )
 
@@ -1193,9 +1193,9 @@ setMethod(
 setMethod(
   f = "subsetParent",
   signature = "ExperimentSubsetSP",
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    .subsetParent(object, subsetName)
+    .subsetParent(x, subsetName)
   }
 )
 
@@ -1203,39 +1203,39 @@ setMethod(
 setMethod(
   f = "subsetParent",
   signature = "ExperimentSubsetVE",
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    .subsetParent(object, subsetName)
+    .subsetParent(x, subsetName)
   }
 )
 
-.subsetParent <- function(object, subsetName){
+.subsetParent <- function(x, subsetName){
   parentList <- list()
-  if (!subsetName %in% subsetAssayNames(object)) {
+  if (!subsetName %in% subsetAssayNames(x)) {
     stop(subsetName,
          " does not exist in the subsets slot of the object.")
   }
-  test <- !is.null(.subsets(object)[[subsetName]]) &&
-    is.null(.parentAssay(.subsets(object)[[subsetName]]))
+  test <- !is.null(.subsets(x)[[subsetName]]) &&
+    is.null(.parentAssay(.subsets(x)[[subsetName]]))
   if (test) {
     return(NULL)
   }
   parent <- subsetName
   while (TRUE) {
     parentList <- c(parentList, parent)
-    if (!is.null(.subsets(object)[[parent]])) {
-      parent <- .parentAssay(.subsets(object)[[parent]])
+    if (!is.null(.subsets(x)[[parent]])) {
+      parent <- .parentAssay(.subsets(x)[[parent]])
     }
     else{
-      for (i in seq(subsetCount(object))) {
-        if (parent %in% assayNames(.internalAssay(.subsets(object)[[i]]))) {
-          parent <- .subsetName(.subsets(object)[[i]])
+      for (i in seq(subsetCount(x))) {
+        if (parent %in% assayNames(.internalAssay(.subsets(x)[[i]]))) {
+          parent <- .subsetName(.subsets(x)[[i]])
         }
       }
       parentList <- c(parentList, parent)
-      parent <- .parentAssay(.subsets(object)[[parent]])
+      parent <- .parentAssay(.subsets(x)[[parent]])
     }
-    if (parent %in% assayNames(object)) {
+    if (parent %in% assayNames(x)) {
       parentList <- c(parentList, parent)
       break
     }
@@ -1252,7 +1252,7 @@ setMethod(
 #'   order the subsets in the object are linked with their parents. Moreover,
 #'   all supplementary data inside the subsets such as \code{reducedDims} and
 #'   \code{altExps} are also displayed against each subset entry.
-#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return Prints all the available subset information against the input
 #'   \code{ExperimentSubset} object.
 #' @rdname subsetSummary
@@ -1270,7 +1270,7 @@ setMethod(
 #' subsetSummary(es)
 setGeneric(
   name = "subsetSummary",
-  def = function(object)
+  def = function(x)
   {
     standardGeneric("subsetSummary")
   }
@@ -1280,9 +1280,9 @@ setGeneric(
 setMethod(
   f = "subsetSummary",
   signature = "ExperimentSubsetSE",
-  definition = function(object)
+  definition = function(x)
   {
-    .subsetSummary(object)
+    .subsetSummary(x)
   }
 )
 
@@ -1290,9 +1290,9 @@ setMethod(
 setMethod(
   f = "subsetSummary",
   signature = "ExperimentSubsetRSE",
-  definition = function(object)
+  definition = function(x)
   {
-    .subsetSummary(object)
+    .subsetSummary(x)
   }
 )
 
@@ -1300,9 +1300,9 @@ setMethod(
 setMethod(
   f = "subsetSummary",
   signature = "ExperimentSubsetSCE",
-  definition = function(object)
+  definition = function(x)
   {
-    .subsetSummary(object)
+    .subsetSummary(x)
   }
 )
 
@@ -1310,9 +1310,9 @@ setMethod(
 setMethod(
   f = "subsetSummary",
   signature = "ExperimentSubsetSP",
-  definition = function(object)
+  definition = function(x)
   {
-    .subsetSummary(object)
+    .subsetSummary(x)
   }
 )
 
@@ -1320,18 +1320,18 @@ setMethod(
 setMethod(
   f = "subsetSummary",
   signature = "ExperimentSubsetVE",
-  definition = function(object)
+  definition = function(x)
   {
-    .subsetSummary(object)
+    .subsetSummary(x)
   }
 )
 
-.subsetSummary <- function(object){
+.subsetSummary <- function(x){
   cat("Main assay(s):\n",
-      assayNames(object),
+      assayNames(x),
       "\n\n")
   cat("Subset(s):\n")
-  if (!is.null(subsetNames(object))) {
+  if (!is.null(subsetNames(x))) {
     Name <- list()
     Dimensions <- list()
     Parent <- list()
@@ -1340,25 +1340,25 @@ setMethod(
     ReducedDims <- list()
     AltExperiments <- list()
     
-    for (i in seq(length(subsetNames(object)))) {
-      parent <- subsetParent(object, subsetAssayNames(object)[i])
-      Name[[i]] <- subsetNames(object)[i]
+    for (i in seq(length(subsetNames(x)))) {
+      parent <- subsetParent(x, subsetAssayNames(x)[i])
+      Name[[i]] <- subsetNames(x)[i]
       Parent[[i]] <-
         paste(unlist(parent), collapse = ' -> ')
-      if (is.null(assayNames(.internalAssay(.subsets(object)[[i]])))) {
+      if (is.null(assayNames(.internalAssay(.subsets(x)[[i]])))) {
         Assays[[i]] <- ""
       }
       else{
         Assays[[i]] <-
-          assayNames(.internalAssay(.subsets(object)[[i]]))
+          assayNames(.internalAssay(.subsets(x)[[i]]))
       }
       Dimensions[[i]] <-
-        paste(unlist(subsetDim(object, subsetNames(object)[i])), collapse = ', ')
-      if(inherits(object, "SingleCellExperiment")){
+        paste(unlist(subsetDim(x, subsetNames(x)[i])), collapse = ', ')
+      if(inherits(x, "SingleCellExperiment")){
         ReducedDims[[i]] <-
-          paste(unlist(reducedDimNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
+          paste(unlist(reducedDimNames(x, subsetName = subsetNames(x)[i])), collapse = ", ")
         AltExperiments[[i]] <-
-          paste(unlist(altExpNames(object, subsetName = subsetNames(object)[i])), collapse = ", ")
+          paste(unlist(altExpNames(x, subsetName = subsetNames(x)[i])), collapse = ", ")
       }
     }
     
@@ -1368,16 +1368,16 @@ setMethod(
       Parent = as.character(Parent)
     )
     
-    if (length(which(as.character(Assays) == "")) != subsetCount(object)) {
+    if (length(which(as.character(Assays) == "")) != subsetCount(x)) {
       df <- cbind(df, Assays = as.character(Assays))
     }
     
-    if(inherits(object, "SingleCellExperiment")){
-      if (length(which(as.character(AltExperiments) == "")) != subsetCount(object)) {
+    if(inherits(x, "SingleCellExperiment")){
+      if (length(which(as.character(AltExperiments) == "")) != subsetCount(x)) {
         df <- cbind(df, AltExperiments = as.character(AltExperiments))
       }
       
-      if (length(which(as.character(ReducedDims) == "")) != subsetCount(object)) {
+      if (length(which(as.character(ReducedDims) == "")) != subsetCount(x)) {
         df <- cbind(df, ReducedDims = as.character(ReducedDims))
       }
     }
@@ -1392,7 +1392,7 @@ setMethod(
 #' @title Get dimensions of subsets in ExperimentSubset objects
 #' @description Retrieves the dimensions of the specified subset in an
 #'   \code{ExperimentSubset} object.
-#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to retrieve the
 #'   dimensions from.
 #' @return A \code{vector} containing the dimensions of the specified subset
@@ -1410,7 +1410,7 @@ setMethod(
 #' subsetDim(es, "subset1")
 setGeneric(
   name = "subsetDim",
-  def = function(object, subsetName)
+  def = function(x, subsetName)
   {
     standardGeneric("subsetDim")
   }
@@ -1420,9 +1420,9 @@ setGeneric(
 setMethod(
   f = "subsetDim",
   signature = c("ExperimentSubsetSE", "character"),
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    dim(.internalAssay(.subsets(object)[[subsetName]]))
+    dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1430,9 +1430,9 @@ setMethod(
 setMethod(
   f = "subsetDim",
   signature = c("ExperimentSubsetRSE", "character"),
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    dim(.internalAssay(.subsets(object)[[subsetName]]))
+    dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1440,9 +1440,9 @@ setMethod(
 setMethod(
   f = "subsetDim",
   signature = c("ExperimentSubsetSCE", "character"),
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    dim(.internalAssay(.subsets(object)[[subsetName]]))
+    dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1450,9 +1450,9 @@ setMethod(
 setMethod(
   f = "subsetDim",
   signature = c("ExperimentSubsetSP", "character"),
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    dim(.internalAssay(.subsets(object)[[subsetName]]))
+    dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1460,9 +1460,9 @@ setMethod(
 setMethod(
   f = "subsetDim",
   signature = c("ExperimentSubsetVE", "character"),
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    dim(.internalAssay(.subsets(object)[[subsetName]]))
+    dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1492,7 +1492,7 @@ setMethod(
     if(!"subsetName" %in% names(arglist))
       return(SingleCellExperiment::reducedDimNames(x))
     subsetName = arglist[["subsetName"]]
-    SingleCellExperiment::reducedDimNames(x@subsets[[subsetName]]@internalAssay)
+    SingleCellExperiment::reducedDimNames(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1501,7 +1501,7 @@ setMethod(
 #' @title Subset count method for ExperimentSubset objects
 #' @description Get the total count of the available subsets in an
 #'   \code{ExperimentSubset} object.
-#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return A \code{numeric} value representing the total count of the subsets.
 #' @rdname subsetCount
 #' @export
@@ -1516,7 +1516,7 @@ setMethod(
 #' subsetCount(es)
 setGeneric(
   name = "subsetCount",
-  def = function(object)
+  def = function(x)
   {
     standardGeneric("subsetCount")
   }
@@ -1526,9 +1526,9 @@ setGeneric(
 setMethod(
   f = "subsetCount",
   signature = "ExperimentSubsetSE",
-  definition = function(object)
+  definition = function(x)
   {
-    return(length(subsetNames(object)))
+    return(length(subsetNames(x)))
   }
 )
 
@@ -1536,9 +1536,9 @@ setMethod(
 setMethod(
   f = "subsetCount",
   signature = "ExperimentSubsetRSE",
-  definition = function(object)
+  definition = function(x)
   {
-    return(length(subsetNames(object)))
+    return(length(subsetNames(x)))
   }
 )
 
@@ -1546,9 +1546,9 @@ setMethod(
 setMethod(
   f = "subsetCount",
   signature = "ExperimentSubsetSCE",
-  definition = function(object)
+  definition = function(x)
   {
-    return(length(subsetNames(object)))
+    return(length(subsetNames(x)))
   }
 )
 
@@ -1556,9 +1556,9 @@ setMethod(
 setMethod(
   f = "subsetCount",
   signature = "ExperimentSubsetSP",
-  definition = function(object)
+  definition = function(x)
   {
-    return(length(subsetNames(object)))
+    return(length(subsetNames(x)))
   }
 )
 
@@ -1566,9 +1566,9 @@ setMethod(
 setMethod(
   f = "subsetCount",
   signature = "ExperimentSubsetVE",
-  definition = function(object)
+  definition = function(x)
   {
-    return(length(subsetNames(object)))
+    return(length(subsetNames(x)))
   }
 )
 
@@ -1613,7 +1613,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExp(x@subsets[[subsetName]]@internalAssay)
+  altExp(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname altExps
@@ -1630,7 +1630,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExps(x@subsets[[subsetName]]@internalAssay)
+  altExps(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname altExpNames
@@ -1647,12 +1647,12 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExpNames(x@subsets[[subsetName]]@internalAssay)
+  altExpNames(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @title rownames
 #' @description Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
 #' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.
 #' @param subsetName Name of the subset to get \code{rownames} from. If \code{missing}, \code{rownames} from main object are returned.
 #' @return A \code{vector} of \code{rownames}.
@@ -1668,7 +1668,7 @@ setMethod(
 #' rownames(es, subsetName = "subset1")
 setGeneric(
   name = "rownames",
-  def = function(object, ...)
+  def = function(x, ...)
   {
     standardGeneric("rownames")
   }
@@ -1678,18 +1678,18 @@ setGeneric(
 setMethod(
   f = "rownames",
   signature = "ANY",
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
     if (missing(subsetName)) {
-      BiocGenerics::rownames(object)
+      BiocGenerics::rownames(x)
     }
     else{
-      if (subsetName %in% subsetNames(object)) {
-        BiocGenerics::rownames(object)[object@subsets[[subsetName]]@rowIndices]
+      if (subsetName %in% subsetNames(x)) {
+        BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
       }
-      else if (subsetName %in% subsetAssayNames(object)) {
-        subsetName <- .getParentAssayName(object, subsetName)
-        BiocGenerics::rownames(object)[object@subsets[[subsetName]]@rowIndices]
+      else if (subsetName %in% subsetAssayNames(x)) {
+        subsetName <- .getParentAssayName(x, subsetName)
+        BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
       }
     }
   }
@@ -1697,7 +1697,7 @@ setMethod(
 
 #' @title colnames
 #' @description Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
 #' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.
 #' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
 #' @return A \code{vector} of \code{colnames}.
@@ -1713,7 +1713,7 @@ setMethod(
 #' colnames(es, subsetName = "subset1")
 setGeneric(
   name = "colnames",
-  def = function(object, ...)
+  def = function(x, ...)
   {
     standardGeneric("colnames")
   }
@@ -1723,18 +1723,18 @@ setGeneric(
 setMethod(
   f = "colnames",
   signature = "ANY",
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
     if (missing(subsetName)) {
-      BiocGenerics::colnames(object)
+      BiocGenerics::colnames(x)
     }
     else{
-      if (subsetName %in% subsetNames(object)) {
-        BiocGenerics::colnames(object)[object@subsets[[subsetName]]@colIndices]
+      if (subsetName %in% subsetNames(x)) {
+        BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
       }
-      else if (subsetName %in% subsetAssayNames(object)) {
-        subsetName <- .getParentAssayName(object, subsetName)
-        BiocGenerics::colnames(object)[object@subsets[[subsetName]]@colIndices]
+      else if (subsetName %in% subsetAssayNames(x)) {
+        subsetName <- .getParentAssayName(x, subsetName)
+        BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
       }
     }
   }
@@ -1755,7 +1755,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExpNames(x@subsets[[subsetName]]@internalAssay) <- value
+  altExpNames(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -1788,7 +1788,7 @@ setReplaceMethod(
           "does not exist in the subsets slot of the object."
         ))
       }
-      SingleCellExperiment::reducedDimNames(x@subsets[[subsetName]]@internalAssay) <-
+      SingleCellExperiment::reducedDimNames(.internalAssay(.subsets(x)[[subsetName]])) <-
         value
     }
     else{
@@ -1823,7 +1823,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExp(x@subsets[[subsetName]]@internalAssay, ...) <- value
+  altExp(.internalAssay(.subsets(x)[[subsetName]]), ...) <- value
   return(x)
 }
 
@@ -1842,7 +1842,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExps(x@subsets[[subsetName]]@internalAssay) <- value
+  altExps(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -1861,14 +1861,14 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  metadata(x@subsets[[subsetName]]@internalAssay) <- value
+  metadata(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
 #' @title Count method for subset assays in ExperimentSubset objects
 #' @description Get the count of the total available subsets and the subset
 #'   assays inside these subsets in an \code{ExperimentSubset} object.
-#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return A \code{numeric} value representing the sum of the subset count and
 #'   subset assay count.
 #' @rdname subsetAssayCount
@@ -1886,7 +1886,7 @@ setReplaceMethod(
 #' subsetAssayCount(es)
 setGeneric(
   name = "subsetAssayCount",
-  def = function(object)
+  def = function(x)
   {
     standardGeneric("subsetAssayCount")
   }
@@ -1897,15 +1897,15 @@ setGeneric(
 setMethod(
   f = "subsetAssayCount",
   signature = "ExperimentSubsetSCE",
-  definition = function(object)
+  definition = function(x)
   {
-    return(length(subsetAssayNames(object)))
+    return(length(subsetAssayNames(x)))
   }
 )
 
 #' @title Accessor method for rowData from subsets in ExperimentSubset objects
 #' @description Get \code{rowData} from a subset.
-#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{rowData} from.
 #' @return The \code{rowData} from input object.
@@ -1913,7 +1913,7 @@ setMethod(
 #' @export
 setGeneric(
   name = "subsetRowData",
-  def = function(object, subsetName)
+  def = function(x, subsetName)
   {
     standardGeneric("subsetRowData")
   }
@@ -1923,22 +1923,22 @@ setGeneric(
 setMethod(
   f = "subsetRowData",
   signature = c("ExperimentSubsetSCE", "character"),
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    if (subsetName %in% subsetNames(object)) {
+    if (subsetName %in% subsetNames(x)) {
       #is a subset
       out <-
-        SummarizedExperiment::rowData(object)[.rowIndices(.subsets(object)[[subsetName]]), , drop = FALSE]
+        SummarizedExperiment::rowData(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
       out <-
-        cbind(out, rowData(.internalAssay(.subsets(object)[[subsetName]])))
+        cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
     }
-    else if (subsetName %in% subsetAssayNames(object)) {
+    else if (subsetName %in% subsetAssayNames(x)) {
       #is a subset assay
-      subsetName <- .getParentAssayName(object, subsetName)
+      subsetName <- .getParentAssayName(x, subsetName)
       out <-
-        SummarizedExperiment::rowData(object)[.rowIndices(.subsets(object)[[subsetName]]), , drop = FALSE]
+        SummarizedExperiment::rowData(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
       out <-
-        cbind(out, rowData(.internalAssay(.subsets(object)[[subsetName]])))
+        cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
     }
     else{
       #neither a subset nor a subset assay
@@ -1948,17 +1948,17 @@ setMethod(
   }
 )
 
-.getParentAssayName <- function(object, childAssayName) {
-  for (i in seq(length(.subsets(object)))) {
-    if (childAssayName %in% SummarizedExperiment::assayNames(.internalAssay(.subsets(object)[[i]]))) {
-      return(.subsetName(.subsets(object)[[i]]))
+.getParentAssayName <- function(x, childAssayName) {
+  for (i in seq(length(.subsets(x)))) {
+    if (childAssayName %in% SummarizedExperiment::assayNames(.internalAssay(.subsets(x)[[i]]))) {
+      return(.subsetName(.subsets(x)[[i]]))
     }
   }
 }
 
 #' @title Accessor method for colData from subsets in ExperimentSubset objects
 #' @description Get \code{colData} from a subset.
-#' @param object \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{colData} from.
 #' @return The \code{colData} from input object.
@@ -1966,7 +1966,7 @@ setMethod(
 #' @export
 setGeneric(
   name = "subsetColData",
-  def = function(object, subsetName)
+  def = function(x, subsetName)
   {
     standardGeneric("subsetColData")
   }
@@ -1976,22 +1976,22 @@ setGeneric(
 setMethod(
   f = "subsetColData",
   signature = c("ExperimentSubsetSCE", "character"),
-  definition = function(object, subsetName)
+  definition = function(x, subsetName)
   {
-    if (subsetName %in% subsetNames(object)) {
+    if (subsetName %in% subsetNames(x)) {
       #is a subset
       out <-
-        SummarizedExperiment::colData(object)[.colIndices(.subsets(object)[[subsetName]]), , drop = FALSE]
+        SummarizedExperiment::colData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
       out <-
-        cbind(out, colData(.internalAssay(.subsets(object)[[subsetName]])))
+        cbind(out, colData(.internalAssay(.subsets(x)[[subsetName]])))
     }
-    else if (subsetName %in% subsetAssayNames(object)) {
+    else if (subsetName %in% subsetAssayNames(x)) {
       #is a subset assay
-      subsetName <- .getParentAssayName(object, subsetName)
+      subsetName <- .getParentAssayName(x, subsetName)
       out <-
-        SummarizedExperiment::colData(object)[.colIndices(.subsets(object)[[subsetName]]), , drop = FALSE]
+        SummarizedExperiment::colData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
       out <-
-        cbind(out, colData(.internalAssay(.subsets(object)[[subsetName]])))
+        cbind(out, colData(.internalAssay(.subsets(x)[[subsetName]])))
     }
     else{
       #neither a subset nor a subset assay
@@ -2015,7 +2015,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  reducedDim(x@subsets[[subsetName]]@internalAssay, type)
+  reducedDim(.internalAssay(.subsets(x)[[subsetName]]), type)
 }
 
 #' @rdname reducedDim<-
@@ -2033,7 +2033,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  reducedDim(x@subsets[[subsetName]]@internalAssay, type, ...) <- value
+  reducedDim(.internalAssay(.subsets(x)[[subsetName]]), type, ...) <- value
   return(x)
 }
 
@@ -2069,12 +2069,12 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  reducedDims(x@subsets[[subsetName]]@internalAssay)
+  reducedDims(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @title reducedDims<-
 #' @description A wrapper to the \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.
 #' @param subsetName Specify the name of the subset to which the \code{reducedDims} should be set to. If \code{missing}, \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
 #' @param value A \code{list} of values to set to \code{reducedDims}.
 #' @return Updated input object with \code{reducedDims} set.
@@ -2091,7 +2091,7 @@ setMethod(
 #' reducedDims(es, subsetName = "subset1")
 setGeneric(
   name = "reducedDims<-",
-  def = function(object, subsetName, value)
+  def = function(x, subsetName, value)
   {
     standardGeneric("reducedDims<-")
   }
@@ -2099,20 +2099,20 @@ setGeneric(
 
 #' @title reducedDims<-
 #' @description A wrapper to the \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.
 #' @param subsetName Specify the name of the subset to which the \code{reducedDims} should be set to. If \code{missing}, \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
 #' @param value A \code{list} of values to set to \code{reducedDims}.
 #' @return Updated input object with \code{reducedDims} set.
 #' @export
-setReplaceMethod("reducedDims", "ANY", function(object, subsetName, value) {
+setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   if (!missing(subsetName)) {
-    SingleCellExperiment::reducedDims(object@subsets[[subsetName]]@internalAssay) <-
+    SingleCellExperiment::reducedDims(.internalAssay(.subsets(x)[[subsetName]])) <-
       value
   }
   else{
-    SingleCellExperiment::reducedDims(object) <- value
+    SingleCellExperiment::reducedDims(x) <- value
   }
-  return(object)
+  return(x)
 })
 
 #' @rdname rowData
@@ -2129,7 +2129,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  rowData(x@subsets[[subsetName]]@internalAssay)
+  rowData(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname colData
@@ -2146,7 +2146,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  colData(x@subsets[[subsetName]]@internalAssay)
+  colData(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname rowData<-
@@ -2164,7 +2164,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  rowData(x@subsets[[subsetName]]@internalAssay) <- value
+  rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -2183,7 +2183,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  colData(x@subsets[[subsetName]]@internalAssay) <- value
+  colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -2201,7 +2201,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExp(x@subsets[[subsetName]]@internalAssay, e)
+  altExp(.internalAssay(.subsets(x)[[subsetName]]), e)
 }
 
 #' @rdname altExp<-
@@ -2219,7 +2219,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExp(x@subsets[[subsetName]]@internalAssay, e) <- value
+  altExp(.internalAssay(.subsets(x)[[subsetName]]), e) <- value
   return(x)
 }
 
@@ -2237,7 +2237,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExps(x@subsets[[subsetName]]@internalAssay)
+  altExps(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname altExps<-
@@ -2255,20 +2255,20 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExps(x@subsets[[subsetName]]@internalAssay) <- value
+  altExps(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
 #' @title subsetColnames
 #' @description Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
 #' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname subsetColnames
 #' @export
 setGeneric(
   name = "subsetColnames",
-  def = function(object, subsetName)
+  def = function(x, subsetName)
   {
     standardGeneric("subsetColnames")
   }
@@ -2277,26 +2277,26 @@ setGeneric(
 #' @rdname subsetColnames
 setMethod(
   f = "subsetColnames",
-  signature = c(object = "ExperimentSubsetSCE", subsetName = "character"),
-  definition = function(object, subsetName)
+  signature = c(x = "ExperimentSubsetSCE", subsetName = "character"),
+  definition = function(x, subsetName)
   {
-    .subsetColnames(object, subsetName)
+    .subsetColnames(x, subsetName)
   }
 )
 
-.subsetColnames <- function(object, subsetName){
-  if (subsetName %in% subsetNames(object)) {
-    BiocGenerics::colnames(object)[object@subsets[[subsetName]]@colIndices]
+.subsetColnames <- function(x, subsetName){
+  if (subsetName %in% subsetNames(x)) {
+    BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
   }
-  else if (subsetName %in% subsetAssayNames(object)) {
-    subsetName <- .getParentAssayName(object, subsetName)
-    BiocGenerics::colnames(object)[object@subsets[[subsetName]]@colIndices]
+  else if (subsetName %in% subsetAssayNames(x)) {
+    subsetName <- .getParentAssayName(x, subsetName)
+    BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
   }
 }
 
 #' @title subsetColnames
 #' @description Set \code{colnames} to an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
 #' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
 #' @param value Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
 #' @return A \code{vector} of \code{colnames}.
@@ -2304,7 +2304,7 @@ setMethod(
 #' @export
 setGeneric(
   name = "subsetColnames<-",
-  def = function(object, subsetName, value)
+  def = function(x, subsetName, value)
   {
     standardGeneric("subsetColnames<-")
   }
@@ -2313,35 +2313,35 @@ setGeneric(
 #' @rdname subsetColnames
 setReplaceMethod(
   f = "subsetColnames",
-  signature = c(object = "ExperimentSubsetSCE", subsetName = "character"),
-  definition = function(object, subsetName, value)
+  signature = c(x = "ExperimentSubsetSCE", subsetName = "character"),
+  definition = function(x, subsetName, value)
   {
-    .subsetColnames(object, subsetName) <- value
-    return(object)
+    .subsetColnames(x, subsetName) <- value
+    return(x)
   }
 )
 
-'.subsetColnames<-' <- function(object, subsetName, value){
-  if (subsetName %in% subsetNames(object)) {
-    BiocGenerics::colnames(object)[object@subsets[[subsetName]]@colIndices] <- value
+'.subsetColnames<-' <- function(x, subsetName, value){
+  if (subsetName %in% subsetNames(x)) {
+    BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
   }
-  else if (subsetName %in% subsetAssayNames(object)) {
-    subsetName <- .getParentAssayName(object, subsetName)
-    BiocGenerics::colnames(object)[object@subsets[[subsetName]]@colIndices] <- value
+  else if (subsetName %in% subsetAssayNames(x)) {
+    subsetName <- .getParentAssayName(x, subsetName)
+    BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
   }
-  return(object)
+  return(x)
 }
 
 #' @title subsetRownames
 #' @description Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
 #' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname subsetRownames
 #' @export
 setGeneric(
   name = "subsetRownames",
-  def = function(object, subsetName)
+  def = function(x, subsetName)
   {
     standardGeneric("subsetRownames")
   }
@@ -2350,26 +2350,26 @@ setGeneric(
 #' @rdname subsetRownames
 setMethod(
   f = "subsetRownames",
-  signature = c(object = "ExperimentSubsetSCE", subsetName = "character"),
-  definition = function(object, subsetName)
+  signature = c(x = "ExperimentSubsetSCE", subsetName = "character"),
+  definition = function(x, subsetName)
   {
-    .subsetRownames(object, subsetName)
+    .subsetRownames(x, subsetName)
   }
 )
 
-.subsetRownames <- function(object, subsetName){
-  if (subsetName %in% subsetNames(object)) {
-    BiocGenerics::rownames(object)[object@subsets[[subsetName]]@rowIndices]
+.subsetRownames <- function(x, subsetName){
+  if (subsetName %in% subsetNames(x)) {
+    BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
   }
-  else if (subsetName %in% subsetAssayNames(object)) {
-    subsetName <- .getParentAssayName(object, subsetName)
-    BiocGenerics::rownames(object)[object@subsets[[subsetName]]@rowIndices]
+  else if (subsetName %in% subsetAssayNames(x)) {
+    subsetName <- .getParentAssayName(x, subsetName)
+    BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
   }
 }
 
 #' @title subsetRownames
 #' @description Set \code{colnames} to an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param object Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
+#' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
 #' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
 #' @param value Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
 #' @return A \code{vector} of \code{colnames}.
@@ -2377,7 +2377,7 @@ setMethod(
 #' @export
 setGeneric(
   name = "subsetRownames<-",
-  def = function(object, subsetName, value)
+  def = function(x, subsetName, value)
   {
     standardGeneric("subsetRownames<-")
   }
@@ -2386,21 +2386,22 @@ setGeneric(
 #' @rdname subsetRownames
 setReplaceMethod(
   f = "subsetRownames",
-  signature = c(object = "ExperimentSubsetSCE", subsetName = "character"),
-  definition = function(object, subsetName, value)
+  signature = c(x = "ExperimentSubsetSCE", subsetName = "character"),
+  definition = function(x, subsetName, value)
   {
-    .subsetRownames(object, subsetName) <- value
-    return(object)
+    .subsetRownames(x, subsetName) <- value
+    return(x)
   }
 )
 
-'.subsetRownames<-' <- function(object, subsetName, value){
-  if (subsetName %in% subsetNames(object)) {
-    BiocGenerics::rownames(object)[object@subsets[[subsetName]]@rowIndices] <- value
+'.subsetRownames<-' <- function(x, subsetName, value){
+  if (subsetName %in% subsetNames(x)) {
+    BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
   }
-  else if (subsetName %in% subsetAssayNames(object)) {
-    subsetName <- .getParentAssayName(object, subsetName)
-    BiocGenerics::rownames(object)[object@subsets[[subsetName]]@rowIndices] <- value
+  else if (subsetName %in% subsetAssayNames(x)) {
+    subsetName <- .getParentAssayName(x, subsetName)
+    BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
   }
-  return(object)
+  return(x)
 }
+

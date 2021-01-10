@@ -10,20 +10,20 @@
 \title{Name retrieval method for all subset assays in ExperimentSubset
   objects}
 \usage{
-subsetAssayNames(object)
+subsetAssayNames(x)
 
-\S4method{subsetAssayNames}{ExperimentSubsetSE}(object)
+\S4method{subsetAssayNames}{ExperimentSubsetSE}(x)
 
-\S4method{subsetAssayNames}{ExperimentSubsetRSE}(object)
+\S4method{subsetAssayNames}{ExperimentSubsetRSE}(x)
 
-\S4method{subsetAssayNames}{ExperimentSubsetSCE}(object)
+\S4method{subsetAssayNames}{ExperimentSubsetSCE}(x)
 
-\S4method{subsetAssayNames}{ExperimentSubsetSP}(object)
+\S4method{subsetAssayNames}{ExperimentSubsetSP}(x)
 
-\S4method{subsetAssayNames}{ExperimentSubsetVE}(object)
+\S4method{subsetAssayNames}{ExperimentSubsetVE}(x)
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 }
 \value{
 A \code{vector} containing the names of the subsets and the subset

@@ -9,20 +9,20 @@
 \alias{subsetCount,ExperimentSubsetVE-method}
 \title{Subset count method for ExperimentSubset objects}
 \usage{
-subsetCount(object)
+subsetCount(x)
 
-\S4method{subsetCount}{ExperimentSubsetSE}(object)
+\S4method{subsetCount}{ExperimentSubsetSE}(x)
 
-\S4method{subsetCount}{ExperimentSubsetRSE}(object)
+\S4method{subsetCount}{ExperimentSubsetRSE}(x)
 
-\S4method{subsetCount}{ExperimentSubsetSCE}(object)
+\S4method{subsetCount}{ExperimentSubsetSCE}(x)
 
-\S4method{subsetCount}{ExperimentSubsetSP}(object)
+\S4method{subsetCount}{ExperimentSubsetSP}(x)
 
-\S4method{subsetCount}{ExperimentSubsetVE}(object)
+\S4method{subsetCount}{ExperimentSubsetVE}(x)
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 }
 \value{
 A \code{numeric} value representing the total count of the subsets.

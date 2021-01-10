@@ -7,16 +7,16 @@
 \alias{subsetRownames<-,ExperimentSubsetSCE,character-method}
 \title{subsetRownames}
 \usage{
-subsetRownames(object, subsetName)
+subsetRownames(x, subsetName)
 
-\S4method{subsetRownames}{ExperimentSubsetSCE,character}(object, subsetName)
+\S4method{subsetRownames}{ExperimentSubsetSCE,character}(x, subsetName)
 
-subsetRownames(object, subsetName) <- value
+subsetRownames(x, subsetName) <- value
 
-\S4method{subsetRownames}{ExperimentSubsetSCE,character}(object, subsetName) <- value
+\S4method{subsetRownames}{ExperimentSubsetSCE,character}(x, subsetName) <- value
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.}
 
 \item{subsetName}{Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.}
 

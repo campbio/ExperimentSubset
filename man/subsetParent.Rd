@@ -9,20 +9,20 @@
 \alias{subsetParent,ExperimentSubsetVE-method}
 \title{Subset parent hierarchy retrieval method for ExperimentSubset objects}
 \usage{
-subsetParent(object, subsetName)
+subsetParent(x, subsetName)
 
-\S4method{subsetParent}{ExperimentSubsetSE}(object, subsetName)
+\S4method{subsetParent}{ExperimentSubsetSE}(x, subsetName)
 
-\S4method{subsetParent}{ExperimentSubsetRSE}(object, subsetName)
+\S4method{subsetParent}{ExperimentSubsetRSE}(x, subsetName)
 
-\S4method{subsetParent}{ExperimentSubsetSCE}(object, subsetName)
+\S4method{subsetParent}{ExperimentSubsetSCE}(x, subsetName)
 
-\S4method{subsetParent}{ExperimentSubsetSP}(object, subsetName)
+\S4method{subsetParent}{ExperimentSubsetSP}(x, subsetName)
 
-\S4method{subsetParent}{ExperimentSubsetVE}(object, subsetName)
+\S4method{subsetParent}{ExperimentSubsetVE}(x, subsetName)
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
 \item{subsetName}{\code{character(1)} Specify the name of the subset against
 which the subset to parent link should be retrieved.}

@@ -4,10 +4,10 @@
 \alias{reducedDims<-,ANY-method}
 \title{reducedDims<-}
 \usage{
-\S4method{reducedDims}{ANY}(object, subsetName) <- value
+\S4method{reducedDims}{ANY}(x, subsetName) <- value
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.}
 
 \item{subsetName}{Specify the name of the subset to which the \code{reducedDims} should be set to. If \code{missing}, \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.}
 

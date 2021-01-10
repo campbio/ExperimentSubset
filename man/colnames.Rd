@@ -5,12 +5,12 @@
 \alias{colnames,ANY-method}
 \title{colnames}
 \usage{
-colnames(object, ...)
+colnames(x, ...)
 
-\S4method{colnames}{ANY}(object, subsetName)
+\S4method{colnames}{ANY}(x, subsetName)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.}
 
 \item{...}{Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.}
 

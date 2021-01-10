@@ -5,12 +5,12 @@
 \alias{subsetRowData,ExperimentSubsetSCE,character-method}
 \title{Accessor method for rowData from subsets in ExperimentSubset objects}
 \usage{
-subsetRowData(object, subsetName)
+subsetRowData(x, subsetName)
 
-\S4method{subsetRowData}{ExperimentSubsetSCE,character}(object, subsetName)
+\S4method{subsetRowData}{ExperimentSubsetSCE,character}(x, subsetName)
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
 \item{subsetName}{\code{character(1)} Name of the subset to get
 \code{rowData} from.}

@@ -9,20 +9,20 @@
 \alias{subsetDim,ExperimentSubsetVE,character-method}
 \title{Get dimensions of subsets in ExperimentSubset objects}
 \usage{
-subsetDim(object, subsetName)
+subsetDim(x, subsetName)
 
-\S4method{subsetDim}{ExperimentSubsetSE,character}(object, subsetName)
+\S4method{subsetDim}{ExperimentSubsetSE,character}(x, subsetName)
 
-\S4method{subsetDim}{ExperimentSubsetRSE,character}(object, subsetName)
+\S4method{subsetDim}{ExperimentSubsetRSE,character}(x, subsetName)
 
-\S4method{subsetDim}{ExperimentSubsetSCE,character}(object, subsetName)
+\S4method{subsetDim}{ExperimentSubsetSCE,character}(x, subsetName)
 
-\S4method{subsetDim}{ExperimentSubsetSP,character}(object, subsetName)
+\S4method{subsetDim}{ExperimentSubsetSP,character}(x, subsetName)
 
-\S4method{subsetDim}{ExperimentSubsetVE,character}(object, subsetName)
+\S4method{subsetDim}{ExperimentSubsetVE,character}(x, subsetName)
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
 \item{subsetName}{\code{character(1)} Name of the subset to retrieve the
 dimensions from.}

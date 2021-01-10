@@ -9,20 +9,20 @@
 \alias{createSubset,ExperimentSubsetVE-method}
 \title{Subset creation method for ExperimentSubset objects}
 \usage{
-createSubset(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+createSubset(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ExperimentSubsetSE}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{ExperimentSubsetSE}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ExperimentSubsetSCE}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{ExperimentSubsetSCE}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ExperimentSubsetRSE}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{ExperimentSubsetRSE}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ExperimentSubsetSP}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{ExperimentSubsetSP}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ExperimentSubsetVE}(object, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{ExperimentSubsetVE}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Specify the object from which a subset
+\item{x}{\code{ExperimentSubset} Specify the object from which a subset
 should be created. Input can also be any object inherited from
 \code{SummarizedExperiment} for immediate conversion and subset formation.}
 

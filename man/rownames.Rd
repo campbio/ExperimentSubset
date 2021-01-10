@@ -5,12 +5,12 @@
 \alias{rownames,ANY-method}
 \title{rownames}
 \usage{
-rownames(object, ...)
+rownames(x, ...)
 
-\S4method{rownames}{ANY}(object, subsetName)
+\S4method{rownames}{ANY}(x, subsetName)
 }
 \arguments{
-\item{object}{Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.}
 
 \item{...}{Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.}
 

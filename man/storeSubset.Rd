@@ -9,20 +9,20 @@
 \alias{storeSubset,ExperimentSubsetVE-method}
 \title{Method for storing new assays in ExperimentSubset objects}
 \usage{
-storeSubset(object, subsetName, inputMatrix, subsetAssayName)
+storeSubset(x, subsetName, inputMatrix, subsetAssayName)
 
-\S4method{storeSubset}{ExperimentSubsetSE}(object, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{ExperimentSubsetSE}(x, subsetName, inputMatrix, subsetAssayName = NULL)
 
-\S4method{storeSubset}{ExperimentSubsetRSE}(object, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{ExperimentSubsetRSE}(x, subsetName, inputMatrix, subsetAssayName = NULL)
 
-\S4method{storeSubset}{ExperimentSubsetSCE}(object, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{ExperimentSubsetSCE}(x, subsetName, inputMatrix, subsetAssayName = NULL)
 
-\S4method{storeSubset}{ExperimentSubsetSP}(object, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{ExperimentSubsetSP}(x, subsetName, inputMatrix, subsetAssayName = NULL)
 
-\S4method{storeSubset}{ExperimentSubsetVE}(object, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{ExperimentSubsetVE}(x, subsetName, inputMatrix, subsetAssayName = NULL)
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Specify the input object.}
+\item{x}{\code{ExperimentSubset} Specify the input object.}
 
 \item{subsetName}{\code{character(1)} Specify the name of the existing subset
 inside which the new subset \code{assay} should be stored.}

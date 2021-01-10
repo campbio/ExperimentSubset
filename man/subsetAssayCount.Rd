@@ -5,12 +5,12 @@
 \alias{subsetAssayCount,ExperimentSubsetSCE-method}
 \title{Count method for subset assays in ExperimentSubset objects}
 \usage{
-subsetAssayCount(object)
+subsetAssayCount(x)
 
-\S4method{subsetAssayCount}{ExperimentSubsetSCE}(object)
+\S4method{subsetAssayCount}{ExperimentSubsetSCE}(x)
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 }
 \value{
 A \code{numeric} value representing the sum of the subset count and

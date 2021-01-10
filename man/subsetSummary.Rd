@@ -10,20 +10,20 @@
 \title{Method for displaying child-parent link structure of subsets in
   ExperimentSubset objects}
 \usage{
-subsetSummary(object)
+subsetSummary(x)
 
-\S4method{subsetSummary}{ExperimentSubsetSE}(object)
+\S4method{subsetSummary}{ExperimentSubsetSE}(x)
 
-\S4method{subsetSummary}{ExperimentSubsetRSE}(object)
+\S4method{subsetSummary}{ExperimentSubsetRSE}(x)
 
-\S4method{subsetSummary}{ExperimentSubsetSCE}(object)
+\S4method{subsetSummary}{ExperimentSubsetSCE}(x)
 
-\S4method{subsetSummary}{ExperimentSubsetSP}(object)
+\S4method{subsetSummary}{ExperimentSubsetSP}(x)
 
-\S4method{subsetSummary}{ExperimentSubsetVE}(object)
+\S4method{subsetSummary}{ExperimentSubsetVE}(x)
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
+\item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 }
 \value{
 Prints all the available subset information against the input
