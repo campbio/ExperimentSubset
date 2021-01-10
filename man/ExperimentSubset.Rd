@@ -5,7 +5,7 @@
 \title{ExperimentSubset constructor}
 \usage{
 ExperimentSubset(
-  x,
+  x = NULL,
   ...,
   subset = list(subsetName = NA, rows = NA, cols = NA, parentAssay = NA)
 )

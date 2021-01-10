@@ -166,7 +166,7 @@ AssaySubset <- function(subsetName = "subset",
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es
-ExperimentSubset <- function(x,
+ExperimentSubset <- function(x = NULL,
                              ...,
                              subset = list(
                                subsetName = NA,
@@ -175,7 +175,8 @@ ExperimentSubset <- function(x,
                                parentAssay = NA
                              ))
 {
-  if (!missing(x)) {
+  if (!missing(x)
+      && !is.null(x)) {
     # if (inherits(x, "SummarizedExperiment")) {
     #   x <- as(x, "SingleCellExperiment")
     #   es <- .ExperimentSubset(x)
@@ -198,7 +199,7 @@ ExperimentSubset <- function(x,
   }
   else{
     sce <- SingleCellExperiment::SingleCellExperiment(...)
-    es <- .ExperimentSubset(sce)
+    es <- .ExperimentSubsetSCE(sce)
   }
   if (!anyNA(subset)) {
     es <- createSubset(
