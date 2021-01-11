@@ -2,24 +2,24 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{createSubset}
 \alias{createSubset}
-\alias{createSubset,ExperimentSubsetSE-method}
-\alias{createSubset,ExperimentSubsetSCE-method}
-\alias{createSubset,ExperimentSubsetRSE-method}
-\alias{createSubset,ExperimentSubsetSP-method}
-\alias{createSubset,ExperimentSubsetVE-method}
+\alias{createSubset,SubsetSummarizedExperiment-method}
+\alias{createSubset,SubsetSingleCellExperiment-method}
+\alias{createSubset,SubsetRangedSummarizedExperiment-method}
+\alias{createSubset,SubsetSpatialExperiment-method}
+\alias{createSubset,SubsetVisiumExperiment-method}
 \title{Subset creation method for ExperimentSubset objects}
 \usage{
 createSubset(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ExperimentSubsetSE}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{SubsetSummarizedExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ExperimentSubsetSCE}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{SubsetSingleCellExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ExperimentSubsetRSE}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{SubsetRangedSummarizedExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ExperimentSubsetSP}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{SubsetSpatialExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 
-\S4method{createSubset}{ExperimentSubsetVE}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{SubsetVisiumExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the object from which a subset

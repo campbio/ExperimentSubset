@@ -2,18 +2,18 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetRownames}
 \alias{subsetRownames}
-\alias{subsetRownames,ExperimentSubsetSCE,character-method}
+\alias{subsetRownames,SubsetSingleCellExperiment,character-method}
 \alias{subsetRownames<-}
-\alias{subsetRownames<-,ExperimentSubsetSCE,character-method}
+\alias{subsetRownames<-,SubsetSingleCellExperiment,character-method}
 \title{subsetRownames}
 \usage{
 subsetRownames(x, subsetName)
 
-\S4method{subsetRownames}{ExperimentSubsetSCE,character}(x, subsetName)
+\S4method{subsetRownames}{SubsetSingleCellExperiment,character}(x, subsetName)
 
 subsetRownames(x, subsetName) <- value
 
-\S4method{subsetRownames}{ExperimentSubsetSCE,character}(x, subsetName) <- value
+\S4method{subsetRownames}{SubsetSingleCellExperiment,character}(x, subsetName) <- value
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.}

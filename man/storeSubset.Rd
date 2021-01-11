@@ -2,24 +2,24 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{storeSubset}
 \alias{storeSubset}
-\alias{storeSubset,ExperimentSubsetSE-method}
-\alias{storeSubset,ExperimentSubsetRSE-method}
-\alias{storeSubset,ExperimentSubsetSCE-method}
-\alias{storeSubset,ExperimentSubsetSP-method}
-\alias{storeSubset,ExperimentSubsetVE-method}
+\alias{storeSubset,SubsetSummarizedExperiment-method}
+\alias{storeSubset,SubsetRangedSummarizedExperiment-method}
+\alias{storeSubset,SubsetSingleCellExperiment-method}
+\alias{storeSubset,SubsetSpatialExperiment-method}
+\alias{storeSubset,SubsetVisiumExperiment-method}
 \title{Method for storing new assays in ExperimentSubset objects}
 \usage{
 storeSubset(x, subsetName, inputMatrix, subsetAssayName)
 
-\S4method{storeSubset}{ExperimentSubsetSE}(x, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{SubsetSummarizedExperiment}(x, subsetName, inputMatrix, subsetAssayName = NULL)
 
-\S4method{storeSubset}{ExperimentSubsetRSE}(x, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{SubsetRangedSummarizedExperiment}(x, subsetName, inputMatrix, subsetAssayName = NULL)
 
-\S4method{storeSubset}{ExperimentSubsetSCE}(x, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{SubsetSingleCellExperiment}(x, subsetName, inputMatrix, subsetAssayName = NULL)
 
-\S4method{storeSubset}{ExperimentSubsetSP}(x, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{SubsetSpatialExperiment}(x, subsetName, inputMatrix, subsetAssayName = NULL)
 
-\S4method{storeSubset}{ExperimentSubsetVE}(x, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{SubsetVisiumExperiment}(x, subsetName, inputMatrix, subsetAssayName = NULL)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the input object.}

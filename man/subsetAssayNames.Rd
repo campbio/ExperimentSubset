@@ -2,25 +2,25 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetAssayNames}
 \alias{subsetAssayNames}
-\alias{subsetAssayNames,ExperimentSubsetSE-method}
-\alias{subsetAssayNames,ExperimentSubsetRSE-method}
-\alias{subsetAssayNames,ExperimentSubsetSCE-method}
-\alias{subsetAssayNames,ExperimentSubsetSP-method}
-\alias{subsetAssayNames,ExperimentSubsetVE-method}
+\alias{subsetAssayNames,SubsetSummarizedExperiment-method}
+\alias{subsetAssayNames,SubsetRangedSummarizedExperiment-method}
+\alias{subsetAssayNames,SubsetSingleCellExperiment-method}
+\alias{subsetAssayNames,SubsetSpatialExperiment-method}
+\alias{subsetAssayNames,SubsetVisiumExperiment-method}
 \title{Name retrieval method for all subset assays in ExperimentSubset
   objects}
 \usage{
 subsetAssayNames(x)
 
-\S4method{subsetAssayNames}{ExperimentSubsetSE}(x)
+\S4method{subsetAssayNames}{SubsetSummarizedExperiment}(x)
 
-\S4method{subsetAssayNames}{ExperimentSubsetRSE}(x)
+\S4method{subsetAssayNames}{SubsetRangedSummarizedExperiment}(x)
 
-\S4method{subsetAssayNames}{ExperimentSubsetSCE}(x)
+\S4method{subsetAssayNames}{SubsetSingleCellExperiment}(x)
 
-\S4method{subsetAssayNames}{ExperimentSubsetSP}(x)
+\S4method{subsetAssayNames}{SubsetSpatialExperiment}(x)
 
-\S4method{subsetAssayNames}{ExperimentSubsetVE}(x)
+\S4method{subsetAssayNames}{SubsetVisiumExperiment}(x)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

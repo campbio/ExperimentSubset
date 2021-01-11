@@ -2,24 +2,24 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetCount}
 \alias{subsetCount}
-\alias{subsetCount,ExperimentSubsetSE-method}
-\alias{subsetCount,ExperimentSubsetRSE-method}
-\alias{subsetCount,ExperimentSubsetSCE-method}
-\alias{subsetCount,ExperimentSubsetSP-method}
-\alias{subsetCount,ExperimentSubsetVE-method}
+\alias{subsetCount,SubsetSummarizedExperiment-method}
+\alias{subsetCount,SubsetRangedSummarizedExperiment-method}
+\alias{subsetCount,SubsetSingleCellExperiment-method}
+\alias{subsetCount,SubsetSpatialExperiment-method}
+\alias{subsetCount,SubsetVisiumExperiment-method}
 \title{Subset count method for ExperimentSubset objects}
 \usage{
 subsetCount(x)
 
-\S4method{subsetCount}{ExperimentSubsetSE}(x)
+\S4method{subsetCount}{SubsetSummarizedExperiment}(x)
 
-\S4method{subsetCount}{ExperimentSubsetRSE}(x)
+\S4method{subsetCount}{SubsetRangedSummarizedExperiment}(x)
 
-\S4method{subsetCount}{ExperimentSubsetSCE}(x)
+\S4method{subsetCount}{SubsetSingleCellExperiment}(x)
 
-\S4method{subsetCount}{ExperimentSubsetSP}(x)
+\S4method{subsetCount}{SubsetSpatialExperiment}(x)
 
-\S4method{subsetCount}{ExperimentSubsetVE}(x)
+\S4method{subsetCount}{SubsetVisiumExperiment}(x)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

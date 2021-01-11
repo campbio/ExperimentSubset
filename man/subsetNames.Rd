@@ -2,24 +2,24 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetNames}
 \alias{subsetNames}
-\alias{subsetNames,ExperimentSubsetSE-method}
-\alias{subsetNames,ExperimentSubsetRSE-method}
-\alias{subsetNames,ExperimentSubsetSCE-method}
-\alias{subsetNames,ExperimentSubsetSP-method}
-\alias{subsetNames,ExperimentSubsetVE-method}
+\alias{subsetNames,SubsetSummarizedExperiment-method}
+\alias{subsetNames,SubsetRangedSummarizedExperiment-method}
+\alias{subsetNames,SubsetSingleCellExperiment-method}
+\alias{subsetNames,SubsetSpatialExperiment-method}
+\alias{subsetNames,SubsetVisiumExperiment-method}
 \title{Get names of subsets in ExperimentSubset objects}
 \usage{
 subsetNames(x)
 
-\S4method{subsetNames}{ExperimentSubsetSE}(x)
+\S4method{subsetNames}{SubsetSummarizedExperiment}(x)
 
-\S4method{subsetNames}{ExperimentSubsetRSE}(x)
+\S4method{subsetNames}{SubsetRangedSummarizedExperiment}(x)
 
-\S4method{subsetNames}{ExperimentSubsetSCE}(x)
+\S4method{subsetNames}{SubsetSingleCellExperiment}(x)
 
-\S4method{subsetNames}{ExperimentSubsetSP}(x)
+\S4method{subsetNames}{SubsetSpatialExperiment}(x)
 
-\S4method{subsetNames}{ExperimentSubsetVE}(x)
+\S4method{subsetNames}{SubsetVisiumExperiment}(x)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the input object.}

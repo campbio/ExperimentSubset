@@ -2,25 +2,25 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetSummary}
 \alias{subsetSummary}
-\alias{subsetSummary,ExperimentSubsetSE-method}
-\alias{subsetSummary,ExperimentSubsetRSE-method}
-\alias{subsetSummary,ExperimentSubsetSCE-method}
-\alias{subsetSummary,ExperimentSubsetSP-method}
-\alias{subsetSummary,ExperimentSubsetVE-method}
+\alias{subsetSummary,SubsetSummarizedExperiment-method}
+\alias{subsetSummary,SubsetRangedSummarizedExperiment-method}
+\alias{subsetSummary,SubsetSingleCellExperiment-method}
+\alias{subsetSummary,SubsetSpatialExperiment-method}
+\alias{subsetSummary,SubsetVisiumExperiment-method}
 \title{Method for displaying child-parent link structure of subsets in
   ExperimentSubset objects}
 \usage{
 subsetSummary(x)
 
-\S4method{subsetSummary}{ExperimentSubsetSE}(x)
+\S4method{subsetSummary}{SubsetSummarizedExperiment}(x)
 
-\S4method{subsetSummary}{ExperimentSubsetRSE}(x)
+\S4method{subsetSummary}{SubsetRangedSummarizedExperiment}(x)
 
-\S4method{subsetSummary}{ExperimentSubsetSCE}(x)
+\S4method{subsetSummary}{SubsetSingleCellExperiment}(x)
 
-\S4method{subsetSummary}{ExperimentSubsetSP}(x)
+\S4method{subsetSummary}{SubsetSpatialExperiment}(x)
 
-\S4method{subsetSummary}{ExperimentSubsetVE}(x)
+\S4method{subsetSummary}{SubsetVisiumExperiment}(x)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

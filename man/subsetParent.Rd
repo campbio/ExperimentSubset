@@ -2,24 +2,24 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetParent}
 \alias{subsetParent}
-\alias{subsetParent,ExperimentSubsetSE-method}
-\alias{subsetParent,ExperimentSubsetRSE-method}
-\alias{subsetParent,ExperimentSubsetSCE-method}
-\alias{subsetParent,ExperimentSubsetSP-method}
-\alias{subsetParent,ExperimentSubsetVE-method}
+\alias{subsetParent,SubsetSummarizedExperiment-method}
+\alias{subsetParent,SubsetRangedSummarizedExperiment-method}
+\alias{subsetParent,SubsetSingleCellExperiment-method}
+\alias{subsetParent,SubsetSpatialExperiment-method}
+\alias{subsetParent,SubsetVisiumExperiment-method}
 \title{Subset parent hierarchy retrieval method for ExperimentSubset objects}
 \usage{
 subsetParent(x, subsetName)
 
-\S4method{subsetParent}{ExperimentSubsetSE}(x, subsetName)
+\S4method{subsetParent}{SubsetSummarizedExperiment}(x, subsetName)
 
-\S4method{subsetParent}{ExperimentSubsetRSE}(x, subsetName)
+\S4method{subsetParent}{SubsetRangedSummarizedExperiment}(x, subsetName)
 
-\S4method{subsetParent}{ExperimentSubsetSCE}(x, subsetName)
+\S4method{subsetParent}{SubsetSingleCellExperiment}(x, subsetName)
 
-\S4method{subsetParent}{ExperimentSubsetSP}(x, subsetName)
+\S4method{subsetParent}{SubsetSpatialExperiment}(x, subsetName)
 
-\S4method{subsetParent}{ExperimentSubsetVE}(x, subsetName)
+\S4method{subsetParent}{SubsetVisiumExperiment}(x, subsetName)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

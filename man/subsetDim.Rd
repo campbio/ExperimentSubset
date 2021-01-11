@@ -2,24 +2,24 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetDim}
 \alias{subsetDim}
-\alias{subsetDim,ExperimentSubsetSE,character-method}
-\alias{subsetDim,ExperimentSubsetRSE,character-method}
-\alias{subsetDim,ExperimentSubsetSCE,character-method}
-\alias{subsetDim,ExperimentSubsetSP,character-method}
-\alias{subsetDim,ExperimentSubsetVE,character-method}
+\alias{subsetDim,SubsetSummarizedExperiment,character-method}
+\alias{subsetDim,SubsetRangedSummarizedExperiment,character-method}
+\alias{subsetDim,SubsetSingleCellExperiment,character-method}
+\alias{subsetDim,SubsetSpatialExperiment,character-method}
+\alias{subsetDim,SubsetVisiumExperiment,character-method}
 \title{Get dimensions of subsets in ExperimentSubset objects}
 \usage{
 subsetDim(x, subsetName)
 
-\S4method{subsetDim}{ExperimentSubsetSE,character}(x, subsetName)
+\S4method{subsetDim}{SubsetSummarizedExperiment,character}(x, subsetName)
 
-\S4method{subsetDim}{ExperimentSubsetRSE,character}(x, subsetName)
+\S4method{subsetDim}{SubsetRangedSummarizedExperiment,character}(x, subsetName)
 
-\S4method{subsetDim}{ExperimentSubsetSCE,character}(x, subsetName)
+\S4method{subsetDim}{SubsetSingleCellExperiment,character}(x, subsetName)
 
-\S4method{subsetDim}{ExperimentSubsetSP,character}(x, subsetName)
+\S4method{subsetDim}{SubsetSpatialExperiment,character}(x, subsetName)
 
-\S4method{subsetDim}{ExperimentSubsetVE,character}(x, subsetName)
+\S4method{subsetDim}{SubsetVisiumExperiment,character}(x, subsetName)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

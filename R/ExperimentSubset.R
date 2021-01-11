@@ -82,13 +82,16 @@ AssaySubset <- function(subsetName = "subset",
     subsetName <- gsub("\\s", "", subsetName)
     warning("Removing spaces from subsetName argument.")
   }
-  .AssaySubset(
+  
+  x <- .AssaySubset(
     subsetName = subsetName,
     rowIndices = rowIndices,
     colIndices = colIndices,
     parentAssay = parentAssay,
     internalAssay = internalAssay
   )
+  
+  return(x)
 }
 
 #' An S4 class to create an \code{ExperimentSubset} object with support for subsets.
@@ -97,8 +100,8 @@ AssaySubset <- function(subsetName = "subset",
 #' @export
 #' @import methods
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
-.ExperimentSubsetSCE <- setClass(
-  Class = "ExperimentSubsetSCE",
+.SubsetSingleCellExperiment <- setClass(
+  Class = "SubsetSingleCellExperiment",
   slots = representation(subsets = "list"),
   prototype = list(subsets = list()),
   contains = "SingleCellExperiment"
@@ -110,8 +113,8 @@ AssaySubset <- function(subsetName = "subset",
 #' @export
 #' @import methods
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
-.ExperimentSubsetSE <- setClass(
-  Class = "ExperimentSubsetSE",
+.SubsetSummarizedExperiment <- setClass(
+  Class = "SubsetSummarizedExperiment",
   slots = representation(subsets = "list"),
   prototype = list(subsets = list()),
   contains = "SummarizedExperiment"
@@ -123,8 +126,8 @@ AssaySubset <- function(subsetName = "subset",
 #' @export
 #' @import methods
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
-.ExperimentSubsetRSE <- setClass(
-  Class = "ExperimentSubsetRSE",
+.SubsetRangedSummarizedExperiment <- setClass(
+  Class = "SubsetRangedSummarizedExperiment",
   slots = representation(subsets = "list"),
   prototype = list(subsets = list()),
   contains = "RangedSummarizedExperiment"
@@ -136,8 +139,8 @@ AssaySubset <- function(subsetName = "subset",
 #' @export
 #' @import methods
 #' @importClassesFrom SpatialExperiment VisiumExperiment
-.ExperimentSubsetVE <- setClass(
-  Class = "ExperimentSubsetVE",
+.SubsetVisiumExperiment <- setClass(
+  Class = "SubsetVisiumExperiment",
   slots = representation(subsets = "list"),
   prototype = list(subsets = list()),
   contains = "VisiumExperiment"
@@ -149,8 +152,8 @@ AssaySubset <- function(subsetName = "subset",
 #' @export
 #' @import methods
 #' @importClassesFrom SpatialExperiment SpatialExperiment
-.ExperimentSubsetSP <- setClass(
-  Class = "ExperimentSubsetSP",
+.SubsetSpatialExperiment <- setClass(
+  Class = "SubsetSpatialExperiment",
   slots = representation(subsets = "list"),
   prototype = list(subsets = list()),
   contains = "SpatialExperiment"
@@ -188,24 +191,24 @@ ExperimentSubset <- function(x = NULL,
     #   es <- .ExperimentSubset(x)
     # }
     if(inherits(x, "VisiumExperiment")){
-      es <- .ExperimentSubsetVE(x)
+      es <- .SubsetVisiumExperiment(x)
     }
     else if(inherits(x, "SpatialExperiment")){
-      es <- .ExperimentSubsetSP(x)
+      es <- .SubsetSpatialExperiment(x)
     }
     else if(inherits(x, "SingleCellExperiment")){
-      es <- .ExperimentSubsetSCE(x)
+      es <- .SubsetSingleCellExperiment(x)
     }
     else if(inherits(x, "RangedSummarizedExperiment")){
-      es <- .ExperimentSubsetRSE(x)
+      es <- .SubsetRangedSummarizedExperiment(x)
     }
     else if(inherits(x, "SummarizedExperiment")){
-      es <- .ExperimentSubsetSE(x)
+      es <- .SubsetSummarizedExperiment(x)
     }
   }
   else{
     sce <- SingleCellExperiment::SingleCellExperiment(...)
-    es <- .ExperimentSubsetSCE(sce)
+    es <- .SubsetSingleCellExperiment(sce)
   }
   if (!anyNA(subset)) {
     es <- createSubset(
@@ -222,7 +225,7 @@ ExperimentSubset <- function(x = NULL,
 #' @rdname metadata
 setMethod(
   f = "metadata",
-  signature = signature(x = "ExperimentSubsetSE"),
+  signature = signature(x = "SubsetSummarizedExperiment"),
   definition = function(x, ...) {
     .metadata(x, ...)
   }
@@ -231,7 +234,7 @@ setMethod(
 #' @rdname metadata
 setMethod(
   f = "metadata",
-  signature = signature(x = "ExperimentSubsetRSE"),
+  signature = signature(x = "SubsetRangedSummarizedExperiment"),
   definition = function(x, ...) {
     .metadata(x, ...)
   }
@@ -240,7 +243,7 @@ setMethod(
 #' @rdname metadata
 setMethod(
   f = "metadata",
-  signature = signature(x = "ExperimentSubsetSCE"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, ...) {
     .metadata(x, ...)
   }
@@ -249,7 +252,7 @@ setMethod(
 #' @rdname metadata
 setMethod(
   f = "metadata",
-  signature = signature(x = "ExperimentSubsetSP"),
+  signature = signature(x = "SubsetSpatialExperiment"),
   definition = function(x, ...) {
     .metadata(x, ...)
   }
@@ -258,7 +261,7 @@ setMethod(
 #' @rdname metadata
 setMethod(
   f = "metadata",
-  signature = signature(x = "ExperimentSubsetVE"),
+  signature = signature(x = "SubsetVisiumExperiment"),
   definition = function(x, ...) {
     .metadata(x, ...)
   }
@@ -275,7 +278,7 @@ setMethod(
 #' @rdname assay
 setMethod(
   f = "assay",
-  signature = signature(x = "ExperimentSubsetSE", i = "character"),
+  signature = signature(x = "SubsetSummarizedExperiment", i = "character"),
   definition = function(x, i, ...) {
     .assay(x, i, ...)
   }
@@ -284,7 +287,7 @@ setMethod(
 #' @rdname assay
 setMethod(
   f = "assay",
-  signature = signature(x = "ExperimentSubsetRSE", i = "character"),
+  signature = signature(x = "SubsetRangedSummarizedExperiment", i = "character"),
   definition = function(x, i, ...) {
     .assay(x, i, ...)
   }
@@ -293,7 +296,7 @@ setMethod(
 #' @rdname assay
 setMethod(
   f = "assay",
-  signature = signature(x = "ExperimentSubsetSCE", i = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment", i = "character"),
   definition = function(x, i, ...) {
     .assay(x, i, ...)
   }
@@ -302,7 +305,7 @@ setMethod(
 #' @rdname assay
 setMethod(
   f = "assay",
-  signature = signature(x = "ExperimentSubsetSP", i = "character"),
+  signature = signature(x = "SubsetSpatialExperiment", i = "character"),
   definition = function(x, i, ...) {
     .assay(x, i, ...)
   }
@@ -311,7 +314,7 @@ setMethod(
 #' @rdname assay
 setMethod(
   f = "assay",
-  signature = signature(x = "ExperimentSubsetVE", i = "character"),
+  signature = signature(x = "SubsetVisiumExperiment", i = "character"),
   definition = function(x, i, ...) {
     .assay(x, i, ...)
   }
@@ -400,7 +403,7 @@ setGeneric(
 setMethod(
   f = "createSubset",
   signature = c(
-    "ExperimentSubsetSE"
+    "SubsetSummarizedExperiment"
   ),
   definition = function(x,
                         subsetName,
@@ -420,7 +423,7 @@ setMethod(
 setMethod(
   f = "createSubset",
   signature = c(
-    "ExperimentSubsetSCE"
+    "SubsetSingleCellExperiment"
   ),
   definition = function(x,
                         subsetName,
@@ -440,7 +443,7 @@ setMethod(
 setMethod(
   f = "createSubset",
   signature = c(
-    "ExperimentSubsetRSE"
+    "SubsetRangedSummarizedExperiment"
   ),
   definition = function(x,
                         subsetName,
@@ -460,7 +463,7 @@ setMethod(
 setMethod(
   f = "createSubset",
   signature = c(
-    "ExperimentSubsetSP"
+    "SubsetSpatialExperiment"
   ),
   definition = function(x,
                         subsetName,
@@ -480,7 +483,7 @@ setMethod(
 setMethod(
   f = "createSubset",
   signature = c(
-    "ExperimentSubsetVE"
+    "SubsetVisiumExperiment"
   ),
   definition = function(x,
                         subsetName,
@@ -496,14 +499,84 @@ setMethod(
   }
 )
 
-.subsetValidty <- function(x,
+.subsetParamsValidty <- function(x,
                           subsetName,
                           rows,
                           cols,
                           parentAssay){
-  if(subsetName %in% subsetNames(x)){
-    stop("Subset already exists! Create one with a different name!")
+  if(subsetName %in% subsetNames(x))
+    stop("A subset with the specified 'subsetName' parameter already exists
+         in the object. Subset names must be unique.")
+  
+  if(!is.character(subsetName))
+    stop("'subsetName' parameter must be a unique a character value.")
+  
+  testForRows <- is.null(rows) || is.numeric(rows) || is.character(rows)
+  if(!testForRows)
+    stop("'rows' parameter must be either a 'NULL' to include all rows,
+         or a numeric vector or a character vector that specify the rows to 
+         include in the subset.")
+  
+  testForCols <- is.null(cols) || is.numeric(cols) || is.character(cols)
+  if(!testForCols)
+    stop("'cols' parameter must be either a 'NULL' to include all rows,
+         or a numeric vector or a character vector that specify the columns to 
+         include in the subset.")
+  
+  testForParentAssay <- is.null(parentAssay) || is.character(parentAssay)
+  if(!testForParentAssay)
+    stop("'parentAssay' parameter can either be 'NULL' to use the default
+         assay in the input object or a character value that specifies the
+         parentAssay to use from parent object.")
+  
+}
+
+.rows <- function(x, rows, assayName){
+  tempRows <- NULL
+  if (is.character(rows)) {
+    tempRows <-
+      match(rows, rownames(
+        assay(x, withDimnames = TRUE, assayName)
+      ))
   }
+  else if (is.null(rows)) {
+    tempRows <-
+      seq(1, dim(
+        assay(x, withDimnames = FALSE, assayName)
+      )[1])
+  }
+  else{
+    tempRows <- rows
+  }
+  
+  if(length(tempRows) > dim(assay(x, withDimnames = FALSE, assayName))[1])
+    stop("More rows selected than available in the parentAssay.")
+  
+  return(tempRows)
+}
+
+.cols <- function(x, cols, assayName){
+  tempCols <- NULL
+  if (is.character(cols)) {
+    tempCols <-
+      match(cols, colnames(
+        assay(x, withDimnames = TRUE, assayName)
+      ))
+  }
+  else if (is.null(cols)) {
+    tempCols <-
+      seq(1, dim(
+        assay(x, withDimnames = FALSE, assayName)
+      )[2])
+  }
+  else{
+    tempCols <- cols
+  }
+  
+  if(length(tempCols) > dim(assay(x, withDimnames = FALSE, assayName))[2])
+    stop("More columns selected than available in the parentAssay.")
+  
+  return(tempCols)
 }
 
 .createSubset <- function(x,
@@ -512,19 +585,11 @@ setMethod(
                           cols,
                           parentAssay){
   
-  .subsetValidty(x,
+  .subsetParamsValidty(x,
                  subsetName,
                  rows,
                  cols,
                  parentAssay)
-  
-  #checking parameters
-  stopifnot(
-    is.character(subsetName),
-    is.null(rows) || is.numeric(rows) || is.character(rows),
-    is.null(cols) || is.numeric(cols) || is.character(cols),
-    is.null(parentAssay) || is.character(parentAssay)
-  )
   
   tempAssay <- ""
   if (is.null(parentAssay)) {
@@ -541,37 +606,9 @@ setMethod(
       stop("Input parentAssay does not exist.")
     }
   }
-  if (is.character(rows)) {
-    rows <-
-      match(rows, rownames(
-        assay(x, withDimnames = TRUE, tempAssay)
-      ))
-  }
-  if (is.character(cols)) {
-    cols <-
-      match(cols, colnames(
-        assay(x, withDimnames = TRUE, tempAssay)
-      ))
-  }
-  if (is.null(rows)) {
-    rows <-
-      seq(1, dim(
-        assay(x, withDimnames = FALSE, tempAssay)
-      )[1])
-  }
-  if (is.null(cols)) {
-    cols <-
-      seq(1, dim(
-        assay(x, withDimnames = FALSE, tempAssay)
-      )[2])
-  }
-  
-  #Check if count of stored row/column indices greater than the subset
-  test <- length(rows) > dim(assay(x, withDimnames = FALSE, tempAssay))[1] || 
-    length(cols) > dim(assay(x, withDimnames = FALSE, tempAssay))[2]
-  if (test) {
-    stop("More rows or columns selected than available in the parentAssay.")
-  }
+
+  rows <- .rows(x, rows, tempAssay)
+  cols <- .cols(x, cols, tempAssay)
   
   # Create an initial object for the internalAssay
   a <- list(Matrix(
@@ -581,24 +618,7 @@ setMethod(
     sparse = TRUE))
   names(a) <- "temp"
   internalAssay <- SummarizedExperiment(assays = a)
-  
-  # Convert to class of root object (e.g. SingleCellExperiment)
-  if(inherits(x, "VisiumExperiment")){
-    internalAssay <- as(internalAssay, "VisiumExperiment")
-  }
-  else if(inherits(x, "SpatialExperiment")){
-    internalAssay <- as(internalAssay, "SpatialExperiment")
-  }
-  else if(inherits(x, "SingleCellExperiment")){
-    internalAssay <- as(internalAssay, "SingleCellExperiment")
-  }
-  else if(inherits(x, "RangedSummarizedExperiment")){
-    internalAssay <- as(internalAssay, "RangedSummarizedExperiment")
-  }
-  else if(inherits(x, "SummarizedExperiment")){
-    internalAssay <- as(internalAssay, "SummarizedExperiment")
-  }
-  #add more conditions here but may need a better solution
+  internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
   
   scs <- AssaySubset(
     subsetName = subsetName,
@@ -654,7 +674,7 @@ setGeneric(
 #' @rdname subsetAssayNames
 setMethod(
   f = "subsetAssayNames",
-  signature = "ExperimentSubsetSE",
+  signature = "SubsetSummarizedExperiment",
   definition = function(x)
   {
     .subsetAssayNames(x)
@@ -664,7 +684,7 @@ setMethod(
 #' @rdname subsetAssayNames
 setMethod(
   f = "subsetAssayNames",
-  signature = "ExperimentSubsetRSE",
+  signature = "SubsetRangedSummarizedExperiment",
   definition = function(x)
   {
     .subsetAssayNames(x)
@@ -674,7 +694,7 @@ setMethod(
 #' @rdname subsetAssayNames
 setMethod(
   f = "subsetAssayNames",
-  signature = "ExperimentSubsetSCE",
+  signature = "SubsetSingleCellExperiment",
   definition = function(x)
   {
     .subsetAssayNames(x)
@@ -684,7 +704,7 @@ setMethod(
 #' @rdname subsetAssayNames
 setMethod(
   f = "subsetAssayNames",
-  signature = "ExperimentSubsetSP",
+  signature = "SubsetSpatialExperiment",
   definition = function(x)
   {
     .subsetAssayNames(x)
@@ -694,7 +714,7 @@ setMethod(
 #' @rdname subsetAssayNames
 setMethod(
   f = "subsetAssayNames",
-  signature = "ExperimentSubsetVE",
+  signature = "SubsetVisiumExperiment",
   definition = function(x)
   {
     .subsetAssayNames(x)
@@ -728,7 +748,7 @@ setMethod(
 #' es
 setMethod(
   f = "show",
-  signature = "ExperimentSubsetSE",
+  signature = "SubsetSummarizedExperiment",
   definition = function(object)
   {
     .show(object)
@@ -748,7 +768,7 @@ setMethod(
 #' es
 setMethod(
   f = "show",
-  signature = "ExperimentSubsetRSE",
+  signature = "SubsetRangedSummarizedExperiment",
   definition = function(object)
   {
     .show(object)
@@ -768,7 +788,7 @@ setMethod(
 #' es
 setMethod(
   f = "show",
-  signature = "ExperimentSubsetSCE",
+  signature = "SubsetSingleCellExperiment",
   definition = function(object)
   {
     .show(object)
@@ -788,7 +808,7 @@ setMethod(
 #' es
 setMethod(
   f = "show",
-  signature = "ExperimentSubsetSP",
+  signature = "SubsetSpatialExperiment",
   definition = function(object)
   {
     .show(object)
@@ -808,7 +828,7 @@ setMethod(
 #' es
 setMethod(
   f = "show",
-  signature = "ExperimentSubsetVE",
+  signature = "SubsetVisiumExperiment",
   definition = function(object)
   {
     .show(object)
@@ -853,7 +873,7 @@ setGeneric(
 #' @rdname subsetNames
 setMethod(
   f = "subsetNames",
-  signature = "ExperimentSubsetSE",
+  signature = "SubsetSummarizedExperiment",
   definition = function(x)
   {
     return(names(.subsets(x)))
@@ -863,7 +883,7 @@ setMethod(
 #' @rdname subsetNames
 setMethod(
   f = "subsetNames",
-  signature = "ExperimentSubsetRSE",
+  signature = "SubsetRangedSummarizedExperiment",
   definition = function(x)
   {
     return(names(.subsets(x)))
@@ -873,7 +893,7 @@ setMethod(
 #' @rdname subsetNames
 setMethod(
   f = "subsetNames",
-  signature = "ExperimentSubsetSCE",
+  signature = "SubsetSingleCellExperiment",
   definition = function(x)
   {
     return(names(.subsets(x)))
@@ -883,7 +903,7 @@ setMethod(
 #' @rdname subsetNames
 setMethod(
   f = "subsetNames",
-  signature = "ExperimentSubsetSP",
+  signature = "SubsetSpatialExperiment",
   definition = function(x)
   {
     return(names(.subsets(x)))
@@ -893,7 +913,7 @@ setMethod(
 #' @rdname subsetNames
 setMethod(
   f = "subsetNames",
-  signature = "ExperimentSubsetVE",
+  signature = "SubsetVisiumExperiment",
   definition = function(x)
   {
     return(names(.subsets(x)))
@@ -940,7 +960,7 @@ setGeneric(
 #' @rdname storeSubset
 setMethod(
   f = "storeSubset",
-  signature = "ExperimentSubsetSE",
+  signature = "SubsetSummarizedExperiment",
   definition = function(x,
                         subsetName,
                         inputMatrix,
@@ -956,7 +976,7 @@ setMethod(
 #' @rdname storeSubset
 setMethod(
   f = "storeSubset",
-  signature = "ExperimentSubsetRSE",
+  signature = "SubsetRangedSummarizedExperiment",
   definition = function(x,
                         subsetName,
                         inputMatrix,
@@ -972,7 +992,7 @@ setMethod(
 #' @rdname storeSubset
 setMethod(
   f = "storeSubset",
-  signature = "ExperimentSubsetSCE",
+  signature = "SubsetSingleCellExperiment",
   definition = function(x,
                         subsetName,
                         inputMatrix,
@@ -988,7 +1008,7 @@ setMethod(
 #' @rdname storeSubset
 setMethod(
   f = "storeSubset",
-  signature = "ExperimentSubsetSP",
+  signature = "SubsetSpatialExperiment",
   definition = function(x,
                         subsetName,
                         inputMatrix,
@@ -1004,7 +1024,7 @@ setMethod(
 #' @rdname storeSubset
 setMethod(
   f = "storeSubset",
-  signature = "ExperimentSubsetVE",
+  signature = "SubsetVisiumExperiment",
   definition = function(x,
                         subsetName,
                         inputMatrix,
@@ -1087,7 +1107,7 @@ setMethod(
 
 #' @rdname assay<-
 setReplaceMethod("assay",
-                 c("ExperimentSubsetSE", "character"),
+                 c("SubsetSummarizedExperiment", "character"),
                  function(x,
                           i,
                           ...,
@@ -1098,7 +1118,7 @@ setReplaceMethod("assay",
 
 #' @rdname assay<-
 setReplaceMethod("assay",
-                 c("ExperimentSubsetRSE", "character"),
+                 c("SubsetRangedSummarizedExperiment", "character"),
                  function(x,
                           i,
                           ...,
@@ -1109,7 +1129,7 @@ setReplaceMethod("assay",
 
 #' @rdname assay<-
 setReplaceMethod("assay",
-                 c("ExperimentSubsetSCE", "character"),
+                 c("SubsetSingleCellExperiment", "character"),
                  function(x,
                           i,
                           ...,
@@ -1120,7 +1140,7 @@ setReplaceMethod("assay",
 
 #' @rdname assay<-
 setReplaceMethod("assay",
-                 c("ExperimentSubsetSP", "character"),
+                 c("SubsetSpatialExperiment", "character"),
                  function(x,
                           i,
                           ...,
@@ -1131,7 +1151,7 @@ setReplaceMethod("assay",
 
 #' @rdname assay<-
 setReplaceMethod("assay",
-                 c("ExperimentSubsetVE", "character"),
+                 c("SubsetVisiumExperiment", "character"),
                  function(x,
                           i,
                           ...,
@@ -1186,7 +1206,7 @@ setGeneric(
 #' @rdname subsetParent
 setMethod(
   f = "subsetParent",
-  signature = "ExperimentSubsetSE",
+  signature = "SubsetSummarizedExperiment",
   definition = function(x, subsetName)
   {
     .subsetParent(x, subsetName)
@@ -1196,7 +1216,7 @@ setMethod(
 #' @rdname subsetParent
 setMethod(
   f = "subsetParent",
-  signature = "ExperimentSubsetRSE",
+  signature = "SubsetRangedSummarizedExperiment",
   definition = function(x, subsetName)
   {
     .subsetParent(x, subsetName)
@@ -1206,7 +1226,7 @@ setMethod(
 #' @rdname subsetParent
 setMethod(
   f = "subsetParent",
-  signature = "ExperimentSubsetSCE",
+  signature = "SubsetSingleCellExperiment",
   definition = function(x, subsetName)
   {
     .subsetParent(x, subsetName)
@@ -1216,7 +1236,7 @@ setMethod(
 #' @rdname subsetParent
 setMethod(
   f = "subsetParent",
-  signature = "ExperimentSubsetSP",
+  signature = "SubsetSpatialExperiment",
   definition = function(x, subsetName)
   {
     .subsetParent(x, subsetName)
@@ -1226,7 +1246,7 @@ setMethod(
 #' @rdname subsetParent
 setMethod(
   f = "subsetParent",
-  signature = "ExperimentSubsetVE",
+  signature = "SubsetVisiumExperiment",
   definition = function(x, subsetName)
   {
     .subsetParent(x, subsetName)
@@ -1303,7 +1323,7 @@ setGeneric(
 #' @rdname subsetSummary
 setMethod(
   f = "subsetSummary",
-  signature = "ExperimentSubsetSE",
+  signature = "SubsetSummarizedExperiment",
   definition = function(x)
   {
     .subsetSummary(x)
@@ -1313,7 +1333,7 @@ setMethod(
 #' @rdname subsetSummary
 setMethod(
   f = "subsetSummary",
-  signature = "ExperimentSubsetRSE",
+  signature = "SubsetRangedSummarizedExperiment",
   definition = function(x)
   {
     .subsetSummary(x)
@@ -1323,7 +1343,7 @@ setMethod(
 #' @rdname subsetSummary
 setMethod(
   f = "subsetSummary",
-  signature = "ExperimentSubsetSCE",
+  signature = "SubsetSingleCellExperiment",
   definition = function(x)
   {
     .subsetSummary(x)
@@ -1333,7 +1353,7 @@ setMethod(
 #' @rdname subsetSummary
 setMethod(
   f = "subsetSummary",
-  signature = "ExperimentSubsetSP",
+  signature = "SubsetSpatialExperiment",
   definition = function(x)
   {
     .subsetSummary(x)
@@ -1343,7 +1363,7 @@ setMethod(
 #' @rdname subsetSummary
 setMethod(
   f = "subsetSummary",
-  signature = "ExperimentSubsetVE",
+  signature = "SubsetVisiumExperiment",
   definition = function(x)
   {
     .subsetSummary(x)
@@ -1443,7 +1463,7 @@ setGeneric(
 #' @rdname subsetDim
 setMethod(
   f = "subsetDim",
-  signature = c("ExperimentSubsetSE", "character"),
+  signature = c("SubsetSummarizedExperiment", "character"),
   definition = function(x, subsetName)
   {
     dim(.internalAssay(.getSubset(x, subsetName)))
@@ -1453,7 +1473,7 @@ setMethod(
 #' @rdname subsetDim
 setMethod(
   f = "subsetDim",
-  signature = c("ExperimentSubsetRSE", "character"),
+  signature = c("SubsetRangedSummarizedExperiment", "character"),
   definition = function(x, subsetName)
   {
     dim(.internalAssay(.getSubset(x, subsetName)))
@@ -1463,7 +1483,7 @@ setMethod(
 #' @rdname subsetDim
 setMethod(
   f = "subsetDim",
-  signature = c("ExperimentSubsetSCE", "character"),
+  signature = c("SubsetSingleCellExperiment", "character"),
   definition = function(x, subsetName)
   {
     dim(.internalAssay(.getSubset(x, subsetName)))
@@ -1473,7 +1493,7 @@ setMethod(
 #' @rdname subsetDim
 setMethod(
   f = "subsetDim",
-  signature = c("ExperimentSubsetSP", "character"),
+  signature = c("SubsetSpatialExperiment", "character"),
   definition = function(x, subsetName)
   {
     dim(.internalAssay(.getSubset(x, subsetName)))
@@ -1483,7 +1503,7 @@ setMethod(
 #' @rdname subsetDim
 setMethod(
   f = "subsetDim",
-  signature = c("ExperimentSubsetVE", "character"),
+  signature = c("SubsetVisiumExperiment", "character"),
   definition = function(x, subsetName)
   {
     dim(.internalAssay(.getSubset(x, subsetName)))
@@ -1549,7 +1569,7 @@ setGeneric(
 #' @rdname subsetCount
 setMethod(
   f = "subsetCount",
-  signature = "ExperimentSubsetSE",
+  signature = "SubsetSummarizedExperiment",
   definition = function(x)
   {
     return(length(subsetNames(x)))
@@ -1559,7 +1579,7 @@ setMethod(
 #' @rdname subsetCount
 setMethod(
   f = "subsetCount",
-  signature = "ExperimentSubsetRSE",
+  signature = "SubsetRangedSummarizedExperiment",
   definition = function(x)
   {
     return(length(subsetNames(x)))
@@ -1569,7 +1589,7 @@ setMethod(
 #' @rdname subsetCount
 setMethod(
   f = "subsetCount",
-  signature = "ExperimentSubsetSCE",
+  signature = "SubsetSingleCellExperiment",
   definition = function(x)
   {
     return(length(subsetNames(x)))
@@ -1579,7 +1599,7 @@ setMethod(
 #' @rdname subsetCount
 setMethod(
   f = "subsetCount",
-  signature = "ExperimentSubsetSP",
+  signature = "SubsetSpatialExperiment",
   definition = function(x)
   {
     return(length(subsetNames(x)))
@@ -1589,7 +1609,7 @@ setMethod(
 #' @rdname subsetCount
 setMethod(
   f = "subsetCount",
-  signature = "ExperimentSubsetVE",
+  signature = "SubsetVisiumExperiment",
   definition = function(x)
   {
     return(length(subsetNames(x)))
@@ -1599,7 +1619,7 @@ setMethod(
 #' @rdname altExp
 setMethod(
   f = "altExp",
-  signature = signature(x = "ExperimentSubsetSE", e = "character"),
+  signature = signature(x = "SubsetSummarizedExperiment", e = "character"),
   definition = function(x, e, ...) {
     .altExp(x, e, ...)
   }
@@ -1608,7 +1628,7 @@ setMethod(
 #' @rdname altExp
 setMethod(
   f = "altExp",
-  signature = signature(x = "ExperimentSubsetRSE", e = "character"),
+  signature = signature(x = "SubsetRangedSummarizedExperiment", e = "character"),
   definition = function(x, e, ...) {
     .altExp(x, e, ...)
   }
@@ -1617,7 +1637,7 @@ setMethod(
 #' @rdname altExp
 setMethod(
   f = "altExp",
-  signature = signature(x = "ExperimentSubsetSCE", e = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment", e = "character"),
   definition = function(x, e,  ...) {
     .altExp(x, e, ...)
   }
@@ -1626,7 +1646,7 @@ setMethod(
 #' @rdname altExp
 setMethod(
   f = "altExp",
-  signature = signature(x = "ExperimentSubsetSCE", e = "missing"),
+  signature = signature(x = "SubsetSingleCellExperiment", e = "missing"),
   definition = function(x, e,  ...) {
     .altExp(x, ...)
   }
@@ -1643,7 +1663,7 @@ setMethod(
 #' @rdname altExps
 setMethod(
   f = "altExps",
-  signature = signature(x = "ExperimentSubsetSCE"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, ...) {
     .altExps(x, ...)
   }
@@ -1660,7 +1680,7 @@ setMethod(
 #' @rdname altExpNames
 setMethod(
   f = "altExpNames",
-  signature = signature(x = "ExperimentSubsetSCE"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, ...) {
     .altExpNames(x, ...)
   }
@@ -1767,7 +1787,7 @@ setMethod(
 #' @rdname altExpNames<-
 setReplaceMethod(
   f = "altExpNames",
-  signature = signature(x = "ExperimentSubsetSCE", value = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment", value = "character"),
   definition = function(x, ..., value) {
     .altExpNames(x, ...) <- value
     return(x)
@@ -1825,7 +1845,7 @@ setReplaceMethod(
 #' @rdname altExp<-
 setReplaceMethod(
   f = "altExp",
-  signature = signature(x = "ExperimentSubsetSCE", e = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment", e = "character"),
   definition = function(x, e,  ..., value) {
     .altExp(x, e, ...) <- value
     return(x)
@@ -1835,7 +1855,7 @@ setReplaceMethod(
 #' @rdname altExp<-
 setReplaceMethod(
   f = "altExp",
-  signature = signature(x = "ExperimentSubsetSCE", e = "missing"),
+  signature = signature(x = "SubsetSingleCellExperiment", e = "missing"),
   definition = function(x, e,  ..., value) {
     .altExp(x, ...) <- value
     return(x)
@@ -1854,7 +1874,7 @@ setReplaceMethod(
 #' @rdname altExps<-
 setReplaceMethod(
   f = "altExps",
-  signature = signature(x = "ExperimentSubsetSCE"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, ..., value) {
     .altExps(x, ...) <- value
     return(x)
@@ -1873,7 +1893,7 @@ setReplaceMethod(
 #' @rdname metadata<-
 setReplaceMethod(
   f = "metadata",
-  signature = signature(x = "ExperimentSubsetSCE"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, ..., value) {
     .metadata(x, ...) <- value
     return(x)
@@ -1920,7 +1940,7 @@ setGeneric(
 #' @rdname subsetAssayCount
 setMethod(
   f = "subsetAssayCount",
-  signature = "ExperimentSubsetSCE",
+  signature = "SubsetSingleCellExperiment",
   definition = function(x)
   {
     return(length(subsetAssayNames(x)))
@@ -1946,7 +1966,7 @@ setGeneric(
 #' @rdname subsetRowData
 setMethod(
   f = "subsetRowData",
-  signature = c("ExperimentSubsetSCE", "character"),
+  signature = c("SubsetSingleCellExperiment", "character"),
   definition = function(x, subsetName)
   {
     if (subsetName %in% subsetNames(x)) {
@@ -1999,7 +2019,7 @@ setGeneric(
 #' @rdname subsetColData
 setMethod(
   f = "subsetColData",
-  signature = c("ExperimentSubsetSCE", "character"),
+  signature = c("SubsetSingleCellExperiment", "character"),
   definition = function(x, subsetName)
   {
     if (subsetName %in% subsetNames(x)) {
@@ -2028,7 +2048,7 @@ setMethod(
 #' @rdname reducedDim
 setMethod(
   f = "reducedDim",
-  signature = signature(x = "ExperimentSubsetSCE", type = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment", type = "character"),
   definition = function(x, type, ...) {
     .reducedDim(x, type, ...)
   }
@@ -2045,7 +2065,7 @@ setMethod(
 #' @rdname reducedDim<-
 setReplaceMethod(
   f = "reducedDim",
-  signature = signature(x = "ExperimentSubsetSCE", type = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment", type = "character"),
   definition = function(x, type, ..., value) {
     .reducedDim(x, type, ...) <- value
     return(x)
@@ -2064,7 +2084,7 @@ setReplaceMethod(
 #' @rdname reducedDims
 setMethod(
   f = "reducedDims",
-  signature = signature(x = "ExperimentSubsetSCE"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, ...) {
     .reducedDims(x, ...)
   }
@@ -2073,7 +2093,7 @@ setMethod(
 #' @rdname reducedDims
 setMethod(
   f = "reducedDims",
-  signature = signature(x = "ExperimentSubsetSE"),
+  signature = signature(x = "SubsetSummarizedExperiment"),
   definition = function(x, ...) {
     .reducedDims(x, ...)
   }
@@ -2082,7 +2102,7 @@ setMethod(
 #' @rdname reducedDims
 setMethod(
   f = "reducedDims",
-  signature = signature(x = "ExperimentSubsetRSE"),
+  signature = signature(x = "SubsetRangedSummarizedExperiment"),
   definition = function(x, ...) {
     .reducedDims(x, ...)
   }
@@ -2142,7 +2162,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 #' @rdname rowData
 setMethod(
   f = "rowData",
-  signature = signature(x = "ExperimentSubsetSCE"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, ...) {
     .rowData(x, ...)
   }
@@ -2159,7 +2179,7 @@ setMethod(
 #' @rdname colData
 setMethod(
   f = "colData",
-  signature = signature(x = "ExperimentSubsetSCE"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, ...) {
     .colData(x, ...)
   }
@@ -2176,7 +2196,7 @@ setMethod(
 #' @rdname rowData<-
 setReplaceMethod(
   f = "rowData",
-  signature = signature(x = "ExperimentSubsetSCE", value = "DataFrame"),
+  signature = signature(x = "SubsetSingleCellExperiment", value = "DataFrame"),
   definition = function(x, ..., value) {
     .rowData(x, ...) <- value
     return(x)
@@ -2195,7 +2215,7 @@ setReplaceMethod(
 #' @rdname colData<-
 setReplaceMethod(
   f = "colData",
-  signature = signature(x = "ExperimentSubsetSCE", value = "DataFrame"),
+  signature = signature(x = "SubsetSingleCellExperiment", value = "DataFrame"),
   definition = function(x, ..., value) {
     .colData(x, ...) <- value
     return(x)
@@ -2214,7 +2234,7 @@ setReplaceMethod(
 #' @rdname altExp
 setMethod(
   f = "altExp",
-  signature = signature(x = "ExperimentSubsetSCE", e = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment", e = "character"),
   definition = function(x, e, ...) {
     .altExp(x, e, ...)
   }
@@ -2231,7 +2251,7 @@ setMethod(
 #' @rdname altExp<-
 setReplaceMethod(
   f = "altExp",
-  signature = signature(x = "ExperimentSubsetSCE", e = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment", e = "character"),
   definition = function(x, e, ..., value) {
     .altExp(x, e, ...) <- value
     return(x)
@@ -2250,7 +2270,7 @@ setReplaceMethod(
 #' @rdname altExps
 setMethod(
   f = "altExps",
-  signature = signature(x = "ExperimentSubsetSCE"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, ...) {
     .altExps(x, ...)
   }
@@ -2267,7 +2287,7 @@ setMethod(
 #' @rdname altExps<-
 setReplaceMethod(
   f = "altExps",
-  signature = signature(x = "ExperimentSubsetSCE"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, ..., value) {
     .altExps(x, ...) <- value
     return(x)
@@ -2301,7 +2321,7 @@ setGeneric(
 #' @rdname subsetColnames
 setMethod(
   f = "subsetColnames",
-  signature = c(x = "ExperimentSubsetSCE", subsetName = "character"),
+  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
   definition = function(x, subsetName)
   {
     .subsetColnames(x, subsetName)
@@ -2337,7 +2357,7 @@ setGeneric(
 #' @rdname subsetColnames
 setReplaceMethod(
   f = "subsetColnames",
-  signature = c(x = "ExperimentSubsetSCE", subsetName = "character"),
+  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
   definition = function(x, subsetName, value)
   {
     .subsetColnames(x, subsetName) <- value
@@ -2374,7 +2394,7 @@ setGeneric(
 #' @rdname subsetRownames
 setMethod(
   f = "subsetRownames",
-  signature = c(x = "ExperimentSubsetSCE", subsetName = "character"),
+  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
   definition = function(x, subsetName)
   {
     .subsetRownames(x, subsetName)
@@ -2410,7 +2430,7 @@ setGeneric(
 #' @rdname subsetRownames
 setReplaceMethod(
   f = "subsetRownames",
-  signature = c(x = "ExperimentSubsetSCE", subsetName = "character"),
+  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
   definition = function(x, subsetName, value)
   {
     .subsetRownames(x, subsetName) <- value

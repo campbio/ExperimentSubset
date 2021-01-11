@@ -2,12 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetColData}
 \alias{subsetColData}
-\alias{subsetColData,ExperimentSubsetSCE,character-method}
+\alias{subsetColData,SubsetSingleCellExperiment,character-method}
 \title{Accessor method for colData from subsets in ExperimentSubset objects}
 \usage{
 subsetColData(x, subsetName)
 
-\S4method{subsetColData}{ExperimentSubsetSCE,character}(x, subsetName)
+\S4method{subsetColData}{SubsetSingleCellExperiment,character}(x, subsetName)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

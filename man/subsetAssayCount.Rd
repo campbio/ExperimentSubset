@@ -2,12 +2,12 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetAssayCount}
 \alias{subsetAssayCount}
-\alias{subsetAssayCount,ExperimentSubsetSCE-method}
+\alias{subsetAssayCount,SubsetSingleCellExperiment-method}
 \title{Count method for subset assays in ExperimentSubset objects}
 \usage{
 subsetAssayCount(x)
 
-\S4method{subsetAssayCount}{ExperimentSubsetSCE}(x)
+\S4method{subsetAssayCount}{SubsetSingleCellExperiment}(x)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
