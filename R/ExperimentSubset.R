@@ -180,25 +180,7 @@ ExperimentSubset <- function(x = NULL,
 {
   if (!missing(x)
       && !is.null(x)) {
-    # if (inherits(x, "SummarizedExperiment")) {
-    #   x <- as(x, "SingleCellExperiment")
-    #   es <- .ExperimentSubset(x)
-    # }
-    if(inherits(x, "VisiumExperiment")){
-      es <- .SubsetVisiumExperiment(x)
-    }
-    else if(inherits(x, "SpatialExperiment")){
-      es <- .SubsetSpatialExperiment(x)
-    }
-    else if(inherits(x, "SingleCellExperiment")){
-      es <- .SubsetSingleCellExperiment(x)
-    }
-    else if(inherits(x, "RangedSummarizedExperiment")){
-      es <- .SubsetRangedSummarizedExperiment(x)
-    }
-    else if(inherits(x, "SummarizedExperiment")){
-      es <- .SubsetSummarizedExperiment(x)
-    }
+    es <- as(x, paste0("Subset", class(x)))
   }
   else{
     sce <- SingleCellExperiment::SingleCellExperiment(...)
@@ -1067,21 +1049,7 @@ setMethod(
     )
     
     internalAssay <- SummarizedExperiment(list(counts = inputMatrix))
-    if(inherits(x, "VisiumExperiment")){
-      internalAssay <- as(internalAssay, "VisiumExperiment")
-    }
-    else if(inherits(x, "SpatialExperiment")){
-      internalAssay <- as(internalAssay, "SpatialExperiment")
-    }
-    else if(inherits(x, "SingleCellExperiment")){
-      internalAssay <- as(internalAssay, "SingleCellExperiment")
-    }
-    else if(inherits(x, "RangedSummarizedExperiment")){
-      internalAssay <- as(internalAssay, "RangedSummarizedExperiment")
-    }
-    else if(inherits(x, "SummarizedExperiment")){
-      internalAssay <- as(internalAssay, "SummarizedExperiment")
-    }
+    internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
     .internalAssay(.subsets(x)[[subsetName]]) <- internalAssay
       
     
