@@ -1356,7 +1356,7 @@ setMethod(
       }
       else{
         Assays[[i]] <-
-          assayNames(.internalAssay(.subsets(x)[[i]]))
+          paste(unlist(assayNames(.internalAssay(.subsets(x)[[i]]))), collapse = ", ")
       }
       Dimensions[[i]] <-
         paste(unlist(subsetDim(x, subsetNames(x)[i])), collapse = ', ')
