@@ -4,12 +4,6 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 #subsets accessor (ExperimentSubset)
 .subsets <- function(x) x@subsets
 
-.getSubset <- function(x, subsetName){
-  if(!subsetName %in% subsetNames(x))
-    stop("Subset does not exist!")
-  x@subsets[[subsetName]]
-}
-
 #subsets setter (ExperimentSubset)
 '.subsets<-' <- function(x, value){
   x@subsets <- value
@@ -272,7 +266,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  metadata(.internalAssay(.getSubset(x, subsetName)))
+  metadata(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname assay
@@ -329,20 +323,20 @@ setMethod(
   #look at subsets
   else if (i %in% subsetNames(x)) {
     subsetName <- i
-    i <- .parentAssay(.getSubset(x, subsetName)) 
+    i <- .parentAssay(.subsets(x)[[subsetName]]) 
     if (is.null(i)) {
-      out <- assay(x = .internalAssay(.getSubset(x, subsetName)) , i = "counts", ...)
+      out <- assay(x = .internalAssay(.subsets(x)[[subsetName]]) , i = "counts", ...)
     }
     else{
       out <- assay(x = x, i = i, ...)
-      out <- out[.rowIndices(.getSubset(x, subsetName)), .colIndices(.getSubset(x, subsetName))]
+      out <- out[.rowIndices(.subsets(x)[[subsetName]]), .colIndices(.subsets(x)[[subsetName]])]
     }
   }
   #look inside subsets
   else{
     for (j in seq(length(x@subsets))) {
-      if (i %in% assayNames(.internalAssay(.getSubset(x, subsetNames(x)[j])))) {
-        out <- assay(x = .internalAssay(.getSubset(x, subsetNames(x)[j])), i = i)
+      if (i %in% assayNames(.internalAssay(.subsets(x)[[j]]))) {
+        out <- assay(.internalAssay(.subsets(x)[[j]]), withDimnames = FALSE,  i)
       }
     }
   }
@@ -1041,14 +1035,14 @@ setMethod(
                          subsetName,
                          inputMatrix,
                          subsetAssayName = NULL){
-  test <- is.null(.getSubset(x, subsetName)) &&
+  test <- is.null(.subsets(x)[[subsetName]]) &&
     !is.null(subsetAssayName)
   if (test) {
     stop(subsetName, " does not exist in the subsets slot of the object.")
   }
   
-  if (!is.null(.getSubset(x, subsetName))) {
-    test <- !all(dim(.internalAssay(.getSubset(x, subsetName))) == dim(inputMatrix)) && 
+  if (!is.null(.subsets(x)[[subsetName]])) {
+    test <- !all(dim(.internalAssay(.subsets(x)[[subsetName]])) == dim(inputMatrix)) && 
       is.null(subsetAssayName)
     if (test) {
       stop(
@@ -1088,17 +1082,17 @@ setMethod(
     else if(inherits(x, "SummarizedExperiment")){
       internalAssay <- as(internalAssay, "SummarizedExperiment")
     }
-    .internalAssay(.getSubset(x, subsetName)) <- internalAssay
+    .internalAssay(.subsets(x)[[subsetName]]) <- internalAssay
       
     
   }
   else{
-    assay(.internalAssay(.getSubset(x, subsetName)),
+    assay(.internalAssay(.subsets(x)[[subsetName]]),
                                 withDimnames = FALSE,
                                 subsetAssayName) <- inputMatrix
-    rownames(.internalAssay(.getSubset(x, subsetName))) <-
+    rownames(.internalAssay(.subsets(x)[[subsetName]])) <-
       rownames(inputMatrix)
-    colnames(.internalAssay(.getSubset(x, subsetName))) <-
+    colnames(.internalAssay(.subsets(x)[[subsetName]])) <-
       colnames(inputMatrix)
   }
   
@@ -1162,6 +1156,7 @@ setReplaceMethod("assay",
                  })
 
 '.assay<-' <- function(x, i, ..., subsetAssayName = NULL, value){
+  print(x)
   if ((nrow(value) != nrow(x))
       || (ncol(value) != ncol(x))) {
     storeSubset(
@@ -1259,16 +1254,16 @@ setMethod(
     stop(subsetName,
          " does not exist in the subsets slot of the object.")
   }
-  test <- !is.null(.getSubset(x, subsetName)) &&
-    is.null(.parentAssay(.getSubset(x, subsetName)))
+  test <- !is.null(.subsets(x)[[subsetName]]) &&
+    is.null(.parentAssay(.subsets(x)[[subsetName]]))
   if (test) {
     return(NULL)
   }
   parent <- subsetName
   while (TRUE) {
     parentList <- c(parentList, parent)
-    if (!is.null(.getSubset(x, subsetName))) {
-      parent <- .parentAssay(.getSubset(x, subsetName))
+    if (!is.null(.subsets(x)[[subsetName]])) {
+      parent <- .parentAssay(.subsets(x)[[parent]])
     }
     else{
       for (i in seq(subsetCount(x))) {
@@ -1277,7 +1272,7 @@ setMethod(
         }
       }
       parentList <- c(parentList, parent)
-      parent <- .parentAssay(.getSubset(x, subsetName))
+      parent <- .parentAssay(.subsets(x)[[parent]])
     }
     if (parent %in% assayNames(x)) {
       parentList <- c(parentList, parent)
@@ -1466,7 +1461,7 @@ setMethod(
   signature = c("SubsetSummarizedExperiment", "character"),
   definition = function(x, subsetName)
   {
-    dim(.internalAssay(.getSubset(x, subsetName)))
+    dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1476,7 +1471,7 @@ setMethod(
   signature = c("SubsetRangedSummarizedExperiment", "character"),
   definition = function(x, subsetName)
   {
-    dim(.internalAssay(.getSubset(x, subsetName)))
+    dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1486,7 +1481,7 @@ setMethod(
   signature = c("SubsetSingleCellExperiment", "character"),
   definition = function(x, subsetName)
   {
-    dim(.internalAssay(.getSubset(x, subsetName)))
+    dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1496,7 +1491,7 @@ setMethod(
   signature = c("SubsetSpatialExperiment", "character"),
   definition = function(x, subsetName)
   {
-    dim(.internalAssay(.getSubset(x, subsetName)))
+    dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1506,7 +1501,7 @@ setMethod(
   signature = c("SubsetVisiumExperiment", "character"),
   definition = function(x, subsetName)
   {
-    dim(.internalAssay(.getSubset(x, subsetName)))
+    dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1536,7 +1531,7 @@ setMethod(
     if(!"subsetName" %in% names(arglist))
       return(SingleCellExperiment::reducedDimNames(x))
     subsetName = arglist[["subsetName"]]
-    SingleCellExperiment::reducedDimNames(.internalAssay(.getSubset(x, subsetName)))
+    SingleCellExperiment::reducedDimNames(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 
@@ -1657,7 +1652,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExp(.internalAssay(.getSubset(x, subsetName)))
+  altExp(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname altExps
@@ -1674,7 +1669,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExps(.internalAssay(.getSubset(x, subsetName)))
+  altExps(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname altExpNames
@@ -1691,7 +1686,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExpNames(.internalAssay(.getSubset(x, subsetName)))
+  altExpNames(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @title rownames
@@ -1729,11 +1724,11 @@ setMethod(
     }
     else{
       if (subsetName %in% subsetNames(x)) {
-        BiocGenerics::rownames(x)[.rowIndices(.getSubset(x, subsetName))]
+        BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
       }
       else if (subsetName %in% subsetAssayNames(x)) {
         subsetName <- .getParentAssayName(x, subsetName)
-        BiocGenerics::rownames(x)[.rowIndices(.getSubset(x, subsetName))]
+        BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
       }
     }
   }
@@ -1774,11 +1769,11 @@ setMethod(
     }
     else{
       if (subsetName %in% subsetNames(x)) {
-        BiocGenerics::colnames(x)[.colIndices(.getSubset(x, subsetName))]
+        BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
       }
       else if (subsetName %in% subsetAssayNames(x)) {
         subsetName <- .getParentAssayName(x, subsetName)
-        BiocGenerics::colnames(x)[.colIndices(.getSubset(x, subsetName))]
+        BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
       }
     }
   }
@@ -1799,7 +1794,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExpNames(.internalAssay(.getSubset(x, subsetName))) <- value
+  altExpNames(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -1832,7 +1827,7 @@ setReplaceMethod(
           "does not exist in the subsets slot of the object."
         ))
       }
-      SingleCellExperiment::reducedDimNames(.internalAssay(.getSubset(x, subsetName))) <-
+      SingleCellExperiment::reducedDimNames(.internalAssay(.subsets(x)[[subsetName]])) <-
         value
     }
     else{
@@ -1867,7 +1862,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExp(.internalAssay(.getSubset(x, subsetName)), ...) <- value
+  altExp(.internalAssay(.subsets(x)[[subsetName]]), ...) <- value
   return(x)
 }
 
@@ -1886,7 +1881,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExps(.internalAssay(.getSubset(x, subsetName))) <- value
+  altExps(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -1905,7 +1900,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  metadata(.internalAssay(.getSubset(x, subsetName))) <- value
+  metadata(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -1972,17 +1967,17 @@ setMethod(
     if (subsetName %in% subsetNames(x)) {
       #is a subset
       out <-
-        SummarizedExperiment::rowData(x)[.rowIndices(.getSubset(x, subsetName)), , drop = FALSE]
+        SummarizedExperiment::rowData(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
       out <-
-        cbind(out, rowData(.internalAssay(.getSubset(x, subsetName))))
+        cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
     }
     else if (subsetName %in% subsetAssayNames(x)) {
       #is a subset assay
       subsetName <- .getParentAssayName(x, subsetName)
       out <-
-        SummarizedExperiment::rowData(x)[.rowIndices(.getSubset(x, subsetName)), , drop = FALSE]
+        SummarizedExperiment::rowData(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
       out <-
-        cbind(out, rowData(.internalAssay(.getSubset(x, subsetName))))
+        cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
     }
     else{
       #neither a subset nor a subset assay
@@ -2025,17 +2020,17 @@ setMethod(
     if (subsetName %in% subsetNames(x)) {
       #is a subset
       out <-
-        SummarizedExperiment::colData(x)[.colIndices(.getSubset(x, subsetName)), , drop = FALSE]
+        SummarizedExperiment::colData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
       out <-
-        cbind(out, colData(.internalAssay(.getSubset(x, subsetName))))
+        cbind(out, colData(.internalAssay(.subsets(x)[[subsetName]])))
     }
     else if (subsetName %in% subsetAssayNames(x)) {
       #is a subset assay
       subsetName <- .getParentAssayName(x, subsetName)
       out <-
-        SummarizedExperiment::colData(x)[.colIndices(.getSubset(x, subsetName)), , drop = FALSE]
+        SummarizedExperiment::colData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
       out <-
-        cbind(out, colData(.internalAssay(.getSubset(x, subsetName))))
+        cbind(out, colData(.internalAssay(.subsets(x)[[subsetName]])))
     }
     else{
       #neither a subset nor a subset assay
@@ -2059,7 +2054,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  reducedDim(.internalAssay(.getSubset(x, subsetName)), type)
+  reducedDim(.internalAssay(.subsets(x)[[subsetName]]), type)
 }
 
 #' @rdname reducedDim<-
@@ -2077,7 +2072,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  reducedDim(.internalAssay(.getSubset(x, subsetName)), type, ...) <- value
+  reducedDim(.internalAssay(.subsets(x)[[subsetName]]), type, ...) <- value
   return(x)
 }
 
@@ -2113,7 +2108,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  reducedDims(.internalAssay(.getSubset(x, subsetName)))
+  reducedDims(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @title reducedDims<-
@@ -2150,7 +2145,7 @@ setGeneric(
 #' @export
 setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   if (!missing(subsetName)) {
-    SingleCellExperiment::reducedDims(.internalAssay(.getSubset(x, subsetName))) <-
+    SingleCellExperiment::reducedDims(.internalAssay(.subsets(x)[[subsetName]])) <-
       value
   }
   else{
@@ -2173,7 +2168,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  rowData(.internalAssay(.getSubset(x, subsetName)))
+  rowData(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname colData
@@ -2190,7 +2185,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  colData(.internalAssay(.getSubset(x, subsetName)))
+  colData(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname rowData<-
@@ -2208,7 +2203,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  rowData(.internalAssay(.getSubset(x, subsetName))) <- value
+  rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -2227,7 +2222,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  colData(.internalAssay(.getSubset(x, subsetName))) <- value
+  colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -2245,7 +2240,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExp(.internalAssay(.getSubset(x, subsetName)), e)
+  altExp(.internalAssay(.subsets(x)[[subsetName]]), e)
 }
 
 #' @rdname altExp<-
@@ -2263,7 +2258,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExp(.internalAssay(.getSubset(x, subsetName)), e) <- value
+  altExp(.internalAssay(.subsets(x)[[subsetName]]), e) <- value
   return(x)
 }
 
@@ -2281,7 +2276,7 @@ setMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExps(.internalAssay(.getSubset(x, subsetName)))
+  altExps(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 #' @rdname altExps<-
@@ -2299,7 +2294,7 @@ setReplaceMethod(
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
-  altExps(.internalAssay(.getSubset(x, subsetName))) <- value
+  altExps(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -2330,11 +2325,11 @@ setMethod(
 
 .subsetColnames <- function(x, subsetName){
   if (subsetName %in% subsetNames(x)) {
-    BiocGenerics::colnames(x)[.colIndices(.getSubset(x, subsetName))]
+    BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
   }
   else if (subsetName %in% subsetAssayNames(x)) {
     subsetName <- .getParentAssayName(x, subsetName)
-    BiocGenerics::colnames(x)[.colIndices(.getSubset(x, subsetName))]
+    BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
   }
 }
 
@@ -2367,11 +2362,11 @@ setReplaceMethod(
 
 '.subsetColnames<-' <- function(x, subsetName, value){
   if (subsetName %in% subsetNames(x)) {
-    BiocGenerics::colnames(x)[.colIndices(.getSubset(x, subsetName))] <- value
+    BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
   }
   else if (subsetName %in% subsetAssayNames(x)) {
     subsetName <- .getParentAssayName(x, subsetName)
-    BiocGenerics::colnames(x)[.colIndices(.getSubset(x, subsetName))] <- value
+    BiocGenerics::colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
   }
   return(x)
 }
@@ -2403,11 +2398,11 @@ setMethod(
 
 .subsetRownames <- function(x, subsetName){
   if (subsetName %in% subsetNames(x)) {
-    BiocGenerics::rownames(x)[.rowIndices(.getSubset(x, subsetName))]
+    BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
   }
   else if (subsetName %in% subsetAssayNames(x)) {
     subsetName <- .getParentAssayName(x, subsetName)
-    BiocGenerics::rownames(x)[.rowIndices(.getSubset(x, subsetName))]
+    BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
   }
 }
 
@@ -2440,11 +2435,11 @@ setReplaceMethod(
 
 '.subsetRownames<-' <- function(x, subsetName, value){
   if (subsetName %in% subsetNames(x)) {
-    BiocGenerics::rownames(x)[.rowIndices(.getSubset(x, subsetName))] <- value
+    BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
   }
   else if (subsetName %in% subsetAssayNames(x)) {
     subsetName <- .getParentAssayName(x, subsetName)
-    BiocGenerics::rownames(x)[.rowIndices(.getSubset(x, subsetName))] <- value
+    BiocGenerics::rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
   }
   return(x)
 }
