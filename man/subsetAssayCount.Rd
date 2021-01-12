@@ -2,12 +2,24 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetAssayCount}
 \alias{subsetAssayCount}
+\alias{subsetAssayCount,SubsetSummarizedExperiment-method}
+\alias{subsetAssayCount,SubsetRangedSummarizedExperiment-method}
 \alias{subsetAssayCount,SubsetSingleCellExperiment-method}
+\alias{subsetAssayCount,SubsetSpatialExperiment-method}
+\alias{subsetAssayCount,SubsetVisiumExperiment-method}
 \title{Count method for subset assays in ExperimentSubset objects}
 \usage{
 subsetAssayCount(x)
 
+\S4method{subsetAssayCount}{SubsetSummarizedExperiment}(x)
+
+\S4method{subsetAssayCount}{SubsetRangedSummarizedExperiment}(x)
+
 \S4method{subsetAssayCount}{SubsetSingleCellExperiment}(x)
+
+\S4method{subsetAssayCount}{SubsetSpatialExperiment}(x)
+
+\S4method{subsetAssayCount}{SubsetVisiumExperiment}(x)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

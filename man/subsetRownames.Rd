@@ -2,18 +2,42 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{subsetRownames}
 \alias{subsetRownames}
+\alias{subsetRownames,SubsetSummarizedExperiment,character-method}
+\alias{subsetRownames,SubsetRangedSummarizedExperiment,character-method}
 \alias{subsetRownames,SubsetSingleCellExperiment,character-method}
+\alias{subsetRownames,SubsetSpatialExperiment,character-method}
+\alias{subsetRownames,SubsetVisiumExperiment,character-method}
 \alias{subsetRownames<-}
+\alias{subsetRownames<-,SubsetSummarizedExperiment,character-method}
+\alias{subsetRownames<-,SubsetRangedSummarizedExperiment,character-method}
 \alias{subsetRownames<-,SubsetSingleCellExperiment,character-method}
+\alias{subsetRownames<-,SubsetSpatialExperiment,character-method}
+\alias{subsetRownames<-,SubsetVisiumExperiment,character-method}
 \title{subsetRownames}
 \usage{
 subsetRownames(x, subsetName)
 
+\S4method{subsetRownames}{SubsetSummarizedExperiment,character}(x, subsetName)
+
+\S4method{subsetRownames}{SubsetRangedSummarizedExperiment,character}(x, subsetName)
+
 \S4method{subsetRownames}{SubsetSingleCellExperiment,character}(x, subsetName)
+
+\S4method{subsetRownames}{SubsetSpatialExperiment,character}(x, subsetName)
+
+\S4method{subsetRownames}{SubsetVisiumExperiment,character}(x, subsetName)
 
 subsetRownames(x, subsetName) <- value
 
+\S4method{subsetRownames}{SubsetSummarizedExperiment,character}(x, subsetName) <- value
+
+\S4method{subsetRownames}{SubsetRangedSummarizedExperiment,character}(x, subsetName) <- value
+
 \S4method{subsetRownames}{SubsetSingleCellExperiment,character}(x, subsetName) <- value
+
+\S4method{subsetRownames}{SubsetSpatialExperiment,character}(x, subsetName) <- value
+
+\S4method{subsetRownames}{SubsetVisiumExperiment,character}(x, subsetName) <- value
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.}
