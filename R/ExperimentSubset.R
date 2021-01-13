@@ -525,8 +525,10 @@ setMethod(
     tempRows <- rows
   }
   
-  if(length(tempRows) > dim(assay(x, withDimnames = FALSE, assayName))[1])
-    stop("More rows selected than available in the parentAssay.")
+  dimR <- dim(assay(x, withDimnames = FALSE, assayName))[1]
+  if(length(tempRows) > dimR
+     || any(tempRows > dimR))
+    stop("Selected rows not available in the specified assay.")
   
   return(tempRows)
 }
@@ -549,8 +551,10 @@ setMethod(
     tempCols <- cols
   }
   
-  if(length(tempCols) > dim(assay(x, withDimnames = FALSE, assayName))[2])
-    stop("More columns selected than available in the parentAssay.")
+  dimC <- dim(assay(x, withDimnames = FALSE, assayName))[2]
+  if(length(tempCols) > dimC
+     || any(tempCols > dimC))
+    stop("Selected columns not available in the specified assay.")
   
   return(tempCols)
 }
