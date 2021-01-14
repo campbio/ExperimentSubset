@@ -134,23 +134,23 @@ es <- createSubset(es,
 es
 ```
 
-## `storeSubset`
+## `storeSubsetAssay`
 
-The `storeSubset` method should be used when a subset `assay` needs to be stored
+The `storeSubsetAssay` method should be used when a subset `assay` needs to be stored
 either in a previously created subset or a new subset. This is specifically
 different from the `createSubset` method which only creates a subset by
 referencing to a defined `parentAssay` where the `internalAssay` of the subset
-has no assays stored. The `storeSubset` method however, is used to store an
+has no assays stored. The `storeSubsetAssay` method however, is used to store an
 `assay` in this `internalAssay` slot of the subset which in fact is a subset
 experiment object of the same class as the `root` object. Additionally, the
-`storeSubset` method can be used to directly create a subset and then store an
+`storeSubsetAssay` method can be used to directly create a subset and then store an
 `assay` inside this subset depending upon the parameters with which the method
 is called.
 
 ```{r}
 subset1Assay <- assay(es, "subset1")
 subset1Assay[,] <- subset1Assay[,] + 1
-es <- storeSubset(es, 
+es <- storeSubsetAssay(es, 
                   subsetName = "subset1", 
                   inputMatrix = subset1Assay, 
                   subsetAssayName = "subset1Assay")
@@ -251,7 +251,7 @@ Store the updated `assay` back to `subset2` using one of the two approaches:
 
 ```{r}
 #approach 1
-es <- storeSubset(es, 
+es <- storeSubsetAssay(es, 
                   subsetName = "subset2", 
                   inputMatrix = subset2Assay, 
                   subsetAssayName = "subset2Assay_a1")
@@ -348,7 +348,7 @@ subsetSummary(es)
 
 1. `ExperimentSubset` constructor
 2. `createSubset`
-3. `storeSubset`
+3. `storeSubsetAssay`
 4. `subsetSummary`
 5. `subsetParent`
 6. `subsetCount`
