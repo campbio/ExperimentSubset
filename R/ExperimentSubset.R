@@ -606,8 +606,15 @@ setMethod(
     sparse = TRUE))
   names(a) <- "temp"
   
-  internalAssay <- SummarizedExperiment(assays = a)
-  internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
+  # internalAssay <- SingleCellExperiment(assays = a)
+  # internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
+  
+  internalAssay <- SingleCellExperiment(assays = a)
+  if(inherits(x, "SpatialExperiment"))
+    internalAssay <- as(internalAssay, "VisiumExperiment")
+  else
+    internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
+  internalAssay <- .VisiumSpatialSubset(x, internalAssay, cols)
   
   scs <- AssaySubset(
     subsetName = subsetName,
@@ -622,6 +629,18 @@ setMethod(
   
   .subsets(x)[[subsetName]] <- scs
   return(x)
+}
+
+.VisiumSpatialSubset <- function(x, internalAssay, cols){
+  if(inherits(x, "VisiumExperiment")){
+    spatialCoords(internalAssay) <- spatialCoords(x)[cols, ]
+    scaleFactors(internalAssay) <- scaleFactors(x)
+  }
+  else if(inherits(x, "SpatialExperiment")){
+    spatialCoords(internalAssay) <- spatialCoords(x)[cols, ]
+    internalAssay <- as(internalAssay, "SpatialExperiment")
+  }
+  return(internalAssay)
 }
 
 #' @title Name retrieval method for all subset assays in ExperimentSubset

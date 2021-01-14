@@ -268,3 +268,11 @@ testthat::test_that("Testing createSubset with multiple paramter options",{
   # testthat::expect_error(es <- createSubset(es, "subset22", cols = c("CTGTG", "CAGTCC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
   
 })
+
+testthat::test_that("Completing test coverage, move this into relevant places later",{
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "subset 1", rows = c(1:5), cols = (1:5))
+  
+  es <- ExperimentSubset(x = NULL, list(counts = assay(sce_chcl, "counts")))
+  
+})
