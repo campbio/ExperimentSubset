@@ -2,24 +2,24 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{storeSubset}
 \alias{storeSubset}
-\alias{storeSubset,SubsetSummarizedExperiment-method}
-\alias{storeSubset,SubsetRangedSummarizedExperiment-method}
-\alias{storeSubset,SubsetSingleCellExperiment-method}
-\alias{storeSubset,SubsetSpatialExperiment-method}
-\alias{storeSubset,SubsetVisiumExperiment-method}
+\alias{storeSubset,SubsetSummarizedExperiment,character,ANY,character-method}
+\alias{storeSubset,SubsetRangedSummarizedExperiment,character,ANY,character-method}
+\alias{storeSubset,SubsetSingleCellExperiment,character,ANY,character-method}
+\alias{storeSubset,SubsetSpatialExperiment,character,ANY,character-method}
+\alias{storeSubset,SubsetVisiumExperiment,character,ANY,character-method}
 \title{Method for storing new assays in ExperimentSubset objects}
 \usage{
 storeSubset(x, subsetName, inputMatrix, subsetAssayName)
 
-\S4method{storeSubset}{SubsetSummarizedExperiment}(x, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{SubsetSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
 
-\S4method{storeSubset}{SubsetRangedSummarizedExperiment}(x, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{SubsetRangedSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
 
-\S4method{storeSubset}{SubsetSingleCellExperiment}(x, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{SubsetSingleCellExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
 
-\S4method{storeSubset}{SubsetSpatialExperiment}(x, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{SubsetSpatialExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
 
-\S4method{storeSubset}{SubsetVisiumExperiment}(x, subsetName, inputMatrix, subsetAssayName = NULL)
+\S4method{storeSubset}{SubsetVisiumExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the input object.}
