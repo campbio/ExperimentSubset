@@ -21,7 +21,8 @@ Depends:
 biocViews: Infrastructure, Software, DataImport, DataRepresentation
 Imports:
   methods,
-  Matrix
+  Matrix,
+  S4Vectors
 Suggests: 
     BiocStyle,
     knitr,

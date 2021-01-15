@@ -245,6 +245,7 @@ setMethod(
   }
 )
 
+#' @importMethodsFrom S4Vectors metadata
 .metadata <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -648,6 +649,7 @@ setMethod(
 #' @return A \code{vector} containing the names of the subsets and the subset
 #'   assays available in the input \code{ExperimentSubset} object.
 #' @rdname subsetAssayNames
+#' @importMethodsFrom SummarizedExperiment assayNames
 #' @export
 #' @examples
 #' data(sce_chcl, package = "scds")
@@ -930,6 +932,7 @@ setMethod(
 #' @return Updated \code{ExperimentSubset} object with the new \code{assay}
 #'   stored inside the specified subset.
 #' @rdname setSubsetAssay
+#' @importMethodsFrom SummarizedExperiment assay<-
 #' @export
 #' @examples
 #' data(sce_chcl, package = "scds")
@@ -1147,6 +1150,7 @@ setReplaceMethod("assay",
 #'   which the subset to parent link should be retrieved.
 #' @return A \code{list} containing the parent link of the subset.
 #' @rdname subsetParent
+#' @importMethodsFrom SummarizedExperiment assayNames
 #' @export
 #' @examples
 #' data(sce_chcl, package = "scds")
@@ -1263,6 +1267,8 @@ setMethod(
 #' @return Prints all the available subset information against the input
 #'   \code{ExperimentSubset} object.
 #' @rdname subsetSummary
+#' @importMethodsFrom SingleCellExperiment altExpNames
+#' @importMethodsFrom SummarizedExperiment assayNames
 #' @export
 #' @examples
 #' data(sce_chcl, package = "scds")
@@ -1659,6 +1665,7 @@ setMethod(
   }
 )
 
+#' @importMethodsFrom SingleCellExperiment altExp
 .altExp <- function(x, e, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -1695,6 +1702,7 @@ setMethod(
   }
 )
 
+#' @importMethodsFrom SingleCellExperiment altExps
 .altExps <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -1731,6 +1739,7 @@ setMethod(
   }
 )
 
+#' @importMethodsFrom SingleCellExperiment altExpNames
 .altExpNames <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -1860,6 +1869,7 @@ setReplaceMethod(
   }
 )
 
+#' @importMethodsFrom SingleCellExperiment altExpNames<-
 '.altExpNames<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -1999,6 +2009,7 @@ setReplaceMethod(
   }
 )
 
+#' @importMethodsFrom SingleCellExperiment altExp<-
 '.altExp<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -2039,6 +2050,7 @@ setReplaceMethod(
   }
 )
 
+#' @importMethodsFrom SingleCellExperiment altExps<-
 '.altExps<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -2098,6 +2110,7 @@ setReplaceMethod(
   }
 )
 
+#' @importMethodsFrom S4Vectors metadata<-
 '.metadata<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -2193,6 +2206,7 @@ setMethod(
 #'   \code{rowData} from.
 #' @return The \code{rowData} from input object.
 #' @rdname subsetRowData
+#' @importMethodsFrom SingleCellExperiment rowData
 #' @export
 setGeneric(
   name = "subsetRowData",
@@ -2291,6 +2305,7 @@ setMethod(
 #'   \code{colData} from.
 #' @return The \code{colData} from input object.
 #' @rdname subsetColData
+#' @importMethodsFrom SingleCellExperiment colData
 #' @export
 setGeneric(
   name = "subsetColData",
@@ -2453,6 +2468,7 @@ setMethod(
   }
 )
 
+#' @importMethodsFrom SingleCellExperiment reducedDim
 .reducedDim <- function(x, type, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -2552,6 +2568,7 @@ setReplaceMethod(
   }
 )
 
+#' @importMethodsFrom SingleCellExperiment reducedDim<-
 '.reducedDim<-' <- function(x, type, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -2589,6 +2606,7 @@ setMethod(
   }
 )
 
+#' @importMethodsFrom SingleCellExperiment reducedDims
 .reducedDims <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -2799,6 +2817,7 @@ setReplaceMethod(
   }
 )
 
+#' @importMethodsFrom SummarizedExperiment rowData<-
 '.rowData<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -2859,6 +2878,7 @@ setReplaceMethod(
   }
 )
 
+#' @importMethodsFrom SummarizedExperiment colData<-
 '.colData<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -3189,6 +3209,7 @@ setReplaceMethod(
 #' @param assayName Input assay name to get
 #'
 #' @return subset assay
+#' @importMethodsFrom SummarizedExperiment assay
 #' @export
 setGeneric(
   name = "getSubsetAssay",
