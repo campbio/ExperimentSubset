@@ -5,15 +5,12 @@
 \title{ExperimentSubset constructor}
 \usage{
 ExperimentSubset(
-  x = NULL,
-  ...,
+  x,
   subset = list(subsetName = NA, rows = NA, cols = NA, parentAssay = NA)
 )
 }
 \arguments{
 \item{x}{A \code{SingleCellExperiment} or \code{SummarizedExperiment} object if direct conversion is required.}
-
-\item{...}{Additional parameters passed to \code{SingleCellExperiment} constructor.}
 
 \item{subset}{A named \code{list} if a subset should be created from within the constructor. Named parameters in this list should be \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.}
 }

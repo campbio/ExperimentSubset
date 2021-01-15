@@ -163,7 +163,6 @@ AssaySubset <- function(subsetName = "subset",
 #' @title ExperimentSubset constructor
 #' @description This constructor function is used to setup the \code{ExperimentSubset} object, either through manually specifying the \code{assays}, \code{rowData}, \code{colData} or directly by passing either a \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or objects inherited by these classes. A subset can also be directly created by pasing a named \code{list} to the \code{subset} parameter. This named \code{list} should have parameter values named as \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
 #' @param x A \code{SingleCellExperiment} or \code{SummarizedExperiment} object if direct conversion is required.
-#' @param ... Additional parameters passed to \code{SingleCellExperiment} constructor.
 #' @param subset A named \code{list} if a subset should be created from within the constructor. Named parameters in this list should be \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
 #' @return A \code{ExperimentSubset} object.
 #' @export
@@ -174,8 +173,7 @@ AssaySubset <- function(subsetName = "subset",
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es
-ExperimentSubset <- function(x = NULL,
-                             ...,
+ExperimentSubset <- function(x,
                              subset = list(
                                subsetName = NA,
                                rows = NA,
@@ -183,12 +181,11 @@ ExperimentSubset <- function(x = NULL,
                                parentAssay = NA
                              ))
 {
-  if (!missing(x)
-      && !is.null(x)) {
+  if (!is.list(x)) {
     es <- as(x, paste0("Subset", class(x)))
   }
   else{
-    sce <- SingleCellExperiment::SingleCellExperiment(...)
+    sce <- SingleCellExperiment::SingleCellExperiment(x)
     es <- .SubsetSingleCellExperiment(sce)
   }
   if (!anyNA(subset)) {

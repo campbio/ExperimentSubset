@@ -271,8 +271,9 @@ testthat::test_that("Testing createSubset with multiple paramter options",{
 
 testthat::test_that("Completing test coverage, move this into relevant places later",{
   es <- ExperimentSubset(sce_chcl)
-  es <- createSubset(es, "subset 1", rows = c(1:5), cols = (1:5))
+  testthat::expect_warning(es <- createSubset(es, "subset 1", rows = c(1:5), cols = (1:5)),
+                           "Removing spaces from the specified subsetName.")
   
-  es <- ExperimentSubset(x = NULL, list(counts = assay(sce_chcl, "counts")))
+  es <- ExperimentSubset(list(counts = assay(sce_chcl, "counts")))
   
 })
