@@ -133,33 +133,6 @@ AssaySubset <- function(subsetName = "subset",
   contains = "RangedSummarizedExperiment"
 )
 
-#' An S4 class to create an \code{ExperimentSubset} object with support for subsets.
-#'
-#' @slot subsets A \code{list} of \code{SingleCellSubset} objects.
-#' @export
-#' @import methods
-#' @importClassesFrom SpatialExperiment VisiumExperiment
-.SubsetVisiumExperiment <- setClass(
-  Class = "SubsetVisiumExperiment",
-  slots = representation(subsets = "list"),
-  prototype = list(subsets = list()),
-  contains = "VisiumExperiment"
-)
-
-#' An S4 class to create an \code{ExperimentSubset} object with support for subsets.
-#'
-#' @slot subsets A \code{list} of \code{SingleCellSubset} objects.
-#' @export
-#' @import methods
-#' @importClassesFrom SpatialExperiment SpatialExperiment
-.SubsetSpatialExperiment <- setClass(
-  Class = "SubsetSpatialExperiment",
-  slots = representation(subsets = "list"),
-  prototype = list(subsets = list()),
-  contains = "SpatialExperiment"
-)
-
-
 #' @title ExperimentSubset constructor
 #' @description This constructor function is used to setup the \code{ExperimentSubset} object, either through manually specifying the \code{assays}, \code{rowData}, \code{colData} or directly by passing either a \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or objects inherited by these classes. A subset can also be directly created by pasing a named \code{list} to the \code{subset} parameter. This named \code{list} should have parameter values named as \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
 #' @param x A \code{SingleCellExperiment} or \code{SummarizedExperiment} object if direct conversion is required.
@@ -227,24 +200,6 @@ setMethod(
   }
 )
 
-#' @rdname metadata
-setMethod(
-  f = "metadata",
-  signature = signature(x = "SubsetSpatialExperiment"),
-  definition = function(x, ...) {
-    .metadata(x, ...)
-  }
-)
-
-#' @rdname metadata
-setMethod(
-  f = "metadata",
-  signature = signature(x = "SubsetVisiumExperiment"),
-  definition = function(x, ...) {
-    .metadata(x, ...)
-  }
-)
-
 #' @importMethodsFrom S4Vectors metadata
 .metadata <- function(x, ...){
   arglist <- list(...)
@@ -277,24 +232,6 @@ setMethod(
 setMethod(
   f = "assay",
   signature = signature(x = "SubsetSingleCellExperiment", i = "character"),
-  definition = function(x, i, ...) {
-    .assay(x, i, ...)
-  }
-)
-
-#' @rdname assay
-setMethod(
-  f = "assay",
-  signature = signature(x = "SubsetSpatialExperiment", i = "character"),
-  definition = function(x, i, ...) {
-    .assay(x, i, ...)
-  }
-)
-
-#' @rdname assay
-setMethod(
-  f = "assay",
-  signature = signature(x = "SubsetVisiumExperiment", i = "character"),
   definition = function(x, i, ...) {
     .assay(x, i, ...)
   }
@@ -419,46 +356,6 @@ setMethod(
   f = "createSubset",
   signature = c(
     "SubsetRangedSummarizedExperiment"
-  ),
-  definition = function(x,
-                        subsetName,
-                        rows,
-                        cols,
-                        parentAssay)
-  {
-    return(.createSubset(x,
-                         subsetName,
-                         rows,
-                         cols,
-                         parentAssay))
-  }
-)
-
-#' @rdname createSubset
-setMethod(
-  f = "createSubset",
-  signature = c(
-    "SubsetSpatialExperiment"
-  ),
-  definition = function(x,
-                        subsetName,
-                        rows,
-                        cols,
-                        parentAssay)
-  {
-    return(.createSubset(x,
-                         subsetName,
-                         rows,
-                         cols,
-                         parentAssay))
-  }
-)
-
-#' @rdname createSubset
-setMethod(
-  f = "createSubset",
-  signature = c(
-    "SubsetVisiumExperiment"
   ),
   definition = function(x,
                         subsetName,
@@ -604,15 +501,8 @@ setMethod(
     sparse = TRUE))
   names(a) <- "temp"
   
-  # internalAssay <- SingleCellExperiment(assays = a)
-  # internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
-  
   internalAssay <- SingleCellExperiment(assays = a)
-  if(inherits(x, "SpatialExperiment"))
-    internalAssay <- as(internalAssay, "VisiumExperiment")
-  else
-    internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
-  internalAssay <- .VisiumSpatialSubset(x, internalAssay, cols)
+  internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
   
   scs <- AssaySubset(
     subsetName = subsetName,
@@ -627,18 +517,6 @@ setMethod(
   
   .subsets(x)[[subsetName]] <- scs
   return(x)
-}
-
-.VisiumSpatialSubset <- function(x, internalAssay, cols){
-  if(inherits(x, "VisiumExperiment")){
-    spatialCoords(internalAssay) <- spatialCoords(x)[cols, ]
-    scaleFactors(internalAssay) <- scaleFactors(x)
-  }
-  else if(inherits(x, "SpatialExperiment")){
-    spatialCoords(internalAssay) <- spatialCoords(x)[cols, ]
-    internalAssay <- as(internalAssay, "SpatialExperiment")
-  }
-  return(internalAssay)
 }
 
 #' @title Name retrieval method for all subset assays in ExperimentSubset
@@ -693,26 +571,6 @@ setMethod(
 setMethod(
   f = "subsetAssayNames",
   signature = "SubsetSingleCellExperiment",
-  definition = function(x)
-  {
-    .subsetAssayNames(x)
-  }
-)
-
-#' @rdname subsetAssayNames
-setMethod(
-  f = "subsetAssayNames",
-  signature = "SubsetSpatialExperiment",
-  definition = function(x)
-  {
-    .subsetAssayNames(x)
-  }
-)
-
-#' @rdname subsetAssayNames
-setMethod(
-  f = "subsetAssayNames",
-  signature = "SubsetVisiumExperiment",
   definition = function(x)
   {
     .subsetAssayNames(x)
@@ -793,46 +651,6 @@ setMethod(
   }
 )
 
-#' @title show
-#' @description Show the \code{ExperimentSubset} object
-#' @param object Input \code{ExperimentSubset} object.
-#' @return Displays the overall contents of the \code{ExperimentSubset} object.
-#' @rdname show
-#' @export
-#' @importMethodsFrom SingleCellExperiment show
-#' @examples
-#' data(sce_chcl, package = "scds")
-#' es <- ExperimentSubset(sce_chcl)
-#' es
-setMethod(
-  f = "show",
-  signature = "SubsetSpatialExperiment",
-  definition = function(object)
-  {
-    .show(object)
-  }
-)
-
-#' @title show
-#' @description Show the \code{ExperimentSubset} object
-#' @param object Input \code{ExperimentSubset} object.
-#' @return Displays the overall contents of the \code{ExperimentSubset} object.
-#' @rdname show
-#' @export
-#' @importMethodsFrom SingleCellExperiment show
-#' @examples
-#' data(sce_chcl, package = "scds")
-#' es <- ExperimentSubset(sce_chcl)
-#' es
-setMethod(
-  f = "show",
-  signature = "SubsetVisiumExperiment",
-  definition = function(object)
-  {
-    .show(object)
-  }
-)
-
 .show <- function(object){
   callNextMethod()
   cat("subsets(", length(subsetNames(object)), "): ",
@@ -892,26 +710,6 @@ setMethod(
 setMethod(
   f = "subsetNames",
   signature = "SubsetSingleCellExperiment",
-  definition = function(x)
-  {
-    return(names(.subsets(x)))
-  }
-)
-
-#' @rdname subsetNames
-setMethod(
-  f = "subsetNames",
-  signature = "SubsetSpatialExperiment",
-  definition = function(x)
-  {
-    return(names(.subsets(x)))
-  }
-)
-
-#' @rdname subsetNames
-setMethod(
-  f = "subsetNames",
-  signature = "SubsetVisiumExperiment",
   definition = function(x)
   {
     return(names(.subsets(x)))
@@ -1013,44 +811,6 @@ setMethod(
   }
 )
 
-#' @rdname setSubsetAssay
-setMethod(
-  f = "setSubsetAssay",
-  signature = c(
-    x ="SubsetSpatialExperiment",
-    subsetName = "character",
-    subsetAssayName = "character"),
-  definition = function(x,
-                        subsetName,
-                        inputMatrix,
-                        subsetAssayName)
-  {
-    .setSubsetAssay(x,
-                 subsetName,
-                 inputMatrix,
-                 subsetAssayName)
-  }
-)
-
-#' @rdname setSubsetAssay
-setMethod(
-  f = "setSubsetAssay",
-  signature = c(
-    x ="SubsetVisiumExperiment",
-    subsetName = "character",
-    subsetAssayName = "character"),
-  definition = function(x,
-                        subsetName,
-                        inputMatrix,
-                        subsetAssayName)
-  {
-    .setSubsetAssay(x,
-                 subsetName,
-                 inputMatrix,
-                 subsetAssayName)
-  }
-)
-
 .setSubsetAssay <- function(x,
                          subsetName,
                          inputMatrix,
@@ -1098,29 +858,6 @@ setReplaceMethod("assay",
                  function(x,
                           i,
                           ...,
-                          value) {
-                   .assay(x, i, ...) <- value
-                   return(x)
-                 })
-
-#' @rdname assay<-
-setReplaceMethod("assay",
-                 c("SubsetSpatialExperiment", "character"),
-                 function(x,
-                          i,
-                          ...,
-                          value) {
-                   .assay(x, i, ...) <- value
-                   return(x)
-                 })
-
-#' @rdname assay<-
-setReplaceMethod("assay",
-                 c("SubsetVisiumExperiment", "character"),
-                 function(x,
-                          i,
-                          ...,
-                          subsetAssayName = NULL,
                           value) {
                    .assay(x, i, ...) <- value
                    return(x)
@@ -1194,26 +931,6 @@ setMethod(
 setMethod(
   f = "subsetParent",
   signature = "SubsetSingleCellExperiment",
-  definition = function(x, subsetName)
-  {
-    .subsetParent(x, subsetName)
-  }
-)
-
-#' @rdname subsetParent
-setMethod(
-  f = "subsetParent",
-  signature = "SubsetSpatialExperiment",
-  definition = function(x, subsetName)
-  {
-    .subsetParent(x, subsetName)
-  }
-)
-
-#' @rdname subsetParent
-setMethod(
-  f = "subsetParent",
-  signature = "SubsetVisiumExperiment",
   definition = function(x, subsetName)
   {
     .subsetParent(x, subsetName)
@@ -1313,26 +1030,6 @@ setMethod(
 setMethod(
   f = "subsetSummary",
   signature = "SubsetSingleCellExperiment",
-  definition = function(x)
-  {
-    .subsetSummary(x)
-  }
-)
-
-#' @rdname subsetSummary
-setMethod(
-  f = "subsetSummary",
-  signature = "SubsetSpatialExperiment",
-  definition = function(x)
-  {
-    .subsetSummary(x)
-  }
-)
-
-#' @rdname subsetSummary
-setMethod(
-  f = "subsetSummary",
-  signature = "SubsetVisiumExperiment",
   definition = function(x)
   {
     .subsetSummary(x)
@@ -1459,31 +1156,10 @@ setMethod(
   }
 )
 
-#' @rdname subsetDim
-setMethod(
-  f = "subsetDim",
-  signature = c("SubsetSpatialExperiment", "character"),
-  definition = function(x, subsetName)
-  {
-    dim(.internalAssay(.subsets(x)[[subsetName]]))
-  }
-)
-
-#' @rdname subsetDim
-setMethod(
-  f = "subsetDim",
-  signature = c("SubsetVisiumExperiment", "character"),
-  definition = function(x, subsetName)
-  {
-    dim(.internalAssay(.subsets(x)[[subsetName]]))
-  }
-)
-
-
 #' @title reducedDimNames
 #' @description A wrapper to the \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset from which the \code{reducedDimNames} should be fetched from. If \code{missing}, \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
+#' @param ... Additional arguments
 #' @return The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
 #' @rdname reducedDimNames
 #' @export
@@ -1564,48 +1240,10 @@ setMethod(
   }
 )
 
-#' @rdname subsetCount
-setMethod(
-  f = "subsetCount",
-  signature = "SubsetSpatialExperiment",
-  definition = function(x)
-  {
-    return(length(subsetNames(x)))
-  }
-)
-
-#' @rdname subsetCount
-setMethod(
-  f = "subsetCount",
-  signature = "SubsetVisiumExperiment",
-  definition = function(x)
-  {
-    return(length(subsetNames(x)))
-  }
-)
-
 #' @rdname altExp
 setMethod(
   f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "character"),
-  definition = function(x, e,  ...) {
-    .altExp(x, e, ...)
-  }
-)
-
-#' @rdname altExp
-setMethod(
-  f = "altExp",
-  signature = signature(x = "SubsetSpatialExperiment", e = "character"),
-  definition = function(x, e,  ...) {
-    .altExp(x, e, ...)
-  }
-)
-
-#' @rdname altExp
-setMethod(
-  f = "altExp",
-  signature = signature(x = "SubsetVisiumExperiment", e = "character"),
   definition = function(x, e,  ...) {
     .altExp(x, e, ...)
   }
@@ -1623,43 +1261,7 @@ setMethod(
 #' @rdname altExp
 setMethod(
   f = "altExp",
-  signature = signature(x = "SubsetSpatialExperiment", e = "missing"),
-  definition = function(x, e,  ...) {
-    .altExp(x, ...)
-  }
-)
-
-#' @rdname altExp
-setMethod(
-  f = "altExp",
-  signature = signature(x = "SubsetVisiumExperiment", e = "missing"),
-  definition = function(x, e,  ...) {
-    .altExp(x, ...)
-  }
-)
-
-#' @rdname altExp
-setMethod(
-  f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "numeric"),
-  definition = function(x, e,  ...) {
-    .altExp(x, e, ...)
-  }
-)
-
-#' @rdname altExp
-setMethod(
-  f = "altExp",
-  signature = signature(x = "SubsetSpatialExperiment", e = "numeric"),
-  definition = function(x, e,  ...) {
-    .altExp(x, e, ...)
-  }
-)
-
-#' @rdname altExp
-setMethod(
-  f = "altExp",
-  signature = signature(x = "SubsetVisiumExperiment", e = "numeric"),
   definition = function(x, e,  ...) {
     .altExp(x, e, ...)
   }
@@ -1684,24 +1286,6 @@ setMethod(
   }
 )
 
-#' @rdname altExps
-setMethod(
-  f = "altExps",
-  signature = signature(x = "SubsetSpatialExperiment"),
-  definition = function(x, ...) {
-    .altExps(x, ...)
-  }
-)
-
-#' @rdname altExps
-setMethod(
-  f = "altExps",
-  signature = signature(x = "SubsetVisiumExperiment"),
-  definition = function(x, ...) {
-    .altExps(x, ...)
-  }
-)
-
 #' @importMethodsFrom SingleCellExperiment altExps
 .altExps <- function(x, ...){
   arglist <- list(...)
@@ -1716,24 +1300,6 @@ setMethod(
 setMethod(
   f = "altExpNames",
   signature = signature(x = "SubsetSingleCellExperiment"),
-  definition = function(x, ...) {
-    .altExpNames(x, ...)
-  }
-)
-
-#' @rdname altExpNames
-setMethod(
-  f = "altExpNames",
-  signature = signature(x = "SubsetSpatialExperiment"),
-  definition = function(x, ...) {
-    .altExpNames(x, ...)
-  }
-)
-
-#' @rdname altExpNames
-setMethod(
-  f = "altExpNames",
-  signature = signature(x = "SubsetVisiumExperiment"),
   definition = function(x, ...) {
     .altExpNames(x, ...)
   }
@@ -1849,26 +1415,6 @@ setReplaceMethod(
   }
 )
 
-#' @rdname altExpNames<-
-setReplaceMethod(
-  f = "altExpNames",
-  signature = signature(x = "SubsetSpatialExperiment", value = "character"),
-  definition = function(x, ..., value) {
-    .altExpNames(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname altExpNames<-
-setReplaceMethod(
-  f = "altExpNames",
-  signature = signature(x = "SubsetVisiumExperiment", value = "character"),
-  definition = function(x, ..., value) {
-    .altExpNames(x, ...) <- value
-    return(x)
-  }
-)
-
 #' @importMethodsFrom SingleCellExperiment altExpNames<-
 '.altExpNames<-' <- function(x, ..., value){
   arglist <- list(...)
@@ -1932,26 +1478,6 @@ setReplaceMethod(
 #' @rdname altExp<-
 setReplaceMethod(
   f = "altExp",
-  signature = signature(x = "SubsetSpatialExperiment", e = "character"),
-  definition = function(x, e,  ..., value) {
-    .altExp(x, e, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname altExp<-
-setReplaceMethod(
-  f = "altExp",
-  signature = signature(x = "SubsetVisiumExperiment", e = "character"),
-  definition = function(x, e,  ..., value) {
-    .altExp(x, e, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname altExp<-
-setReplaceMethod(
-  f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "missing"),
   definition = function(x, e,  ..., value) {
     .altExp(x, ...) <- value
@@ -1962,47 +1488,7 @@ setReplaceMethod(
 #' @rdname altExp<-
 setReplaceMethod(
   f = "altExp",
-  signature = signature(x = "SubsetSpatialExperiment", e = "missing"),
-  definition = function(x, e,  ..., value) {
-    .altExp(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname altExp<-
-setReplaceMethod(
-  f = "altExp",
-  signature = signature(x = "SubsetVisiumExperiment", e = "missing"),
-  definition = function(x, e,  ..., value) {
-    .altExp(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname altExp<-
-setReplaceMethod(
-  f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "numeric"),
-  definition = function(x, e,  ..., value) {
-    .altExp(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname altExp<-
-setReplaceMethod(
-  f = "altExp",
-  signature = signature(x = "SubsetSpatialExperiment", e = "numeric"),
-  definition = function(x, e,  ..., value) {
-    .altExp(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname altExp<-
-setReplaceMethod(
-  f = "altExp",
-  signature = signature(x = "SubsetVisiumExperiment", e = "numeric"),
   definition = function(x, e,  ..., value) {
     .altExp(x, ...) <- value
     return(x)
@@ -2024,26 +1510,6 @@ setReplaceMethod(
 setReplaceMethod(
   f = "altExps",
   signature = signature(x = "SubsetSingleCellExperiment"),
-  definition = function(x, ..., value) {
-    .altExps(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname altExps<-
-setReplaceMethod(
-  f = "altExps",
-  signature = signature(x = "SubsetSpatialExperiment"),
-  definition = function(x, ..., value) {
-    .altExps(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname altExps<-
-setReplaceMethod(
-  f = "altExps",
-  signature = signature(x = "SubsetVisiumExperiment"),
   definition = function(x, ..., value) {
     .altExps(x, ...) <- value
     return(x)
@@ -2085,25 +1551,6 @@ setReplaceMethod(
 setReplaceMethod(
   f = "metadata",
   signature = signature(x = "SubsetSingleCellExperiment"),
-  definition = function(x, ..., value) {
-    .metadata(x, ...) <- value
-    return(x)
-  }
-)
-#' @rdname metadata<-
-setReplaceMethod(
-  f = "metadata",
-  signature = signature(x = "SubsetSpatialExperiment"),
-  definition = function(x, ..., value) {
-    .metadata(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname metadata<-
-setReplaceMethod(
-  f = "metadata",
-  signature = signature(x = "SubsetVisiumExperiment"),
   definition = function(x, ..., value) {
     .metadata(x, ...) <- value
     return(x)
@@ -2179,26 +1626,6 @@ setMethod(
   }
 )
 
-#' @rdname subsetAssayCount
-setMethod(
-  f = "subsetAssayCount",
-  signature = "SubsetSpatialExperiment",
-  definition = function(x)
-  {
-    return(length(subsetAssayNames(x)))
-  }
-)
-
-#' @rdname subsetAssayCount
-setMethod(
-  f = "subsetAssayCount",
-  signature = "SubsetVisiumExperiment",
-  definition = function(x)
-  {
-    return(length(subsetAssayNames(x)))
-  }
-)
-
 #' @title Accessor method for rowData from subsets in ExperimentSubset objects
 #' @description Get \code{rowData} from a subset.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
@@ -2245,27 +1672,6 @@ setMethod(
     .subsetRowData(x, subsetName)
   }
 )
-
-#' @rdname subsetRowData
-setMethod(
-  f = "subsetRowData",
-  signature = c("SubsetSpatialExperiment", "character"),
-  definition = function(x, subsetName)
-  {
-    .subsetRowData(x, subsetName)
-  }
-)
-
-#' @rdname subsetRowData
-setMethod(
-  f = "subsetRowData",
-  signature = c("SubsetVisiumExperiment", "character"),
-  definition = function(x, subsetName)
-  {
-    .subsetRowData(x, subsetName)
-  }
-)
-
 
 .subsetRowData <- function(x, subsetName){
   if (subsetName %in% subsetNames(x)) {
@@ -2345,26 +1751,6 @@ setMethod(
   }
 )
 
-#' @rdname subsetColData
-setMethod(
-  f = "subsetColData",
-  signature = c("SubsetSpatialExperiment", "character"),
-  definition = function(x, subsetName)
-  {
-    .subsetColData(x, subsetName)
-  }
-)
-
-#' @rdname subsetColData
-setMethod(
-  f = "subsetColData",
-  signature = c("SubsetVisiumExperiment", "character"),
-  definition = function(x, subsetName)
-  {
-    .subsetColData(x, subsetName)
-  }
-)
-
 .subsetColData <- function(x, subsetName){
   if (subsetName %in% subsetNames(x)) {
     #is a subset
@@ -2400,24 +1786,6 @@ setMethod(
 #' @rdname reducedDim
 setMethod(
   f = "reducedDim",
-  signature = signature(x = "SubsetSpatialExperiment", type = "character"),
-  definition = function(x, type, ...) {
-    .reducedDim(x, type, ...)
-  }
-)
-
-#' @rdname reducedDim
-setMethod(
-  f = "reducedDim",
-  signature = signature(x = "SubsetVisiumExperiment", type = "character"),
-  definition = function(x, type, ...) {
-    .reducedDim(x, type, ...)
-  }
-)
-
-#' @rdname reducedDim
-setMethod(
-  f = "reducedDim",
   signature = signature(x = "SubsetSingleCellExperiment", type = "missing"),
   definition = function(x, type, ...) {
     .reducedDim(x, type, ...)
@@ -2427,42 +1795,7 @@ setMethod(
 #' @rdname reducedDim
 setMethod(
   f = "reducedDim",
-  signature = signature(x = "SubsetSpatialExperiment", type = "missing"),
-  definition = function(x, type, ...) {
-    .reducedDim(x, type, ...)
-  }
-)
-
-#' @rdname reducedDim
-setMethod(
-  f = "reducedDim",
-  signature = signature(x = "SubsetVisiumExperiment", type = "numeric"),
-  definition = function(x, type, ...) {
-    .reducedDim(x, type, ...)
-  }
-)
-#' @rdname reducedDim
-setMethod(
-  f = "reducedDim",
   signature = signature(x = "SubsetSingleCellExperiment", type = "numeric"),
-  definition = function(x, type, ...) {
-    .reducedDim(x, type, ...)
-  }
-)
-
-#' @rdname reducedDim
-setMethod(
-  f = "reducedDim",
-  signature = signature(x = "SubsetSpatialExperiment", type = "numeric"),
-  definition = function(x, type, ...) {
-    .reducedDim(x, type, ...)
-  }
-)
-
-#' @rdname reducedDim
-setMethod(
-  f = "reducedDim",
-  signature = signature(x = "SubsetVisiumExperiment", type = "numeric"),
   definition = function(x, type, ...) {
     .reducedDim(x, type, ...)
   }
@@ -2491,26 +1824,6 @@ setReplaceMethod(
 #' @rdname reducedDim<-
 setReplaceMethod(
   f = "reducedDim",
-  signature = signature(x = "SubsetSpatialExperiment", type = "character"),
-  definition = function(x, type, ..., value) {
-    .reducedDim(x, type, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname reducedDim<-
-setReplaceMethod(
-  f = "reducedDim",
-  signature = signature(x = "SubsetVisiumExperiment", type = "character"),
-  definition = function(x, type, ..., value) {
-    .reducedDim(x, type, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname reducedDim<-
-setReplaceMethod(
-  f = "reducedDim",
   signature = signature(x = "SubsetSingleCellExperiment", type = "missing"),
   definition = function(x, type, ..., value) {
     .reducedDim(x, type, ...) <- value
@@ -2521,47 +1834,7 @@ setReplaceMethod(
 #' @rdname reducedDim<-
 setReplaceMethod(
   f = "reducedDim",
-  signature = signature(x = "SubsetSpatialExperiment", type = "missing"),
-  definition = function(x, type, ..., value) {
-    .reducedDim(x, type, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname reducedDim<-
-setReplaceMethod(
-  f = "reducedDim",
-  signature = signature(x = "SubsetVisiumExperiment", type = "missing"),
-  definition = function(x, type, ..., value) {
-    .reducedDim(x, type, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname reducedDim<-
-setReplaceMethod(
-  f = "reducedDim",
   signature = signature(x = "SubsetSingleCellExperiment", type = "numeric"),
-  definition = function(x, type, ..., value) {
-    .reducedDim(x, type, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname reducedDim<-
-setReplaceMethod(
-  f = "reducedDim",
-  signature = signature(x = "SubsetSpatialExperiment", type = "numeric"),
-  definition = function(x, type, ..., value) {
-    .reducedDim(x, type, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname reducedDim<-
-setReplaceMethod(
-  f = "reducedDim",
-  signature = signature(x = "SubsetVisiumExperiment", type = "numeric"),
   definition = function(x, type, ..., value) {
     .reducedDim(x, type, ...) <- value
     return(x)
@@ -2686,24 +1959,6 @@ setMethod(
   }
 )
 
-#' @rdname rowData
-setMethod(
-  f = "rowData",
-  signature = signature(x = "SubsetSpatialExperiment"),
-  definition = function(x, ...) {
-    .rowData(x, ...)
-  }
-)
-
-#' @rdname rowData
-setMethod(
-  f = "rowData",
-  signature = signature(x = "SubsetVisiumExperiment"),
-  definition = function(x, ...) {
-    .rowData(x, ...)
-  }
-)
-
 .rowData <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
@@ -2735,24 +1990,6 @@ setMethod(
 setMethod(
   f = "colData",
   signature = signature(x = "SubsetSingleCellExperiment"),
-  definition = function(x, ...) {
-    .colData(x, ...)
-  }
-)
-
-#' @rdname colData
-setMethod(
-  f = "colData",
-  signature = signature(x = "SubsetSpatialExperiment"),
-  definition = function(x, ...) {
-    .colData(x, ...)
-  }
-)
-
-#' @rdname colData
-setMethod(
-  f = "colData",
-  signature = signature(x = "SubsetVisiumExperiment"),
   definition = function(x, ...) {
     .colData(x, ...)
   }
@@ -2797,26 +2034,6 @@ setReplaceMethod(
   }
 )
 
-#' @rdname rowData<-
-setReplaceMethod(
-  f = "rowData",
-  signature = signature(x = "SubsetSpatialExperiment", value = "DataFrame"),
-  definition = function(x, ..., value) {
-    .rowData(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname rowData<-
-setReplaceMethod(
-  f = "rowData",
-  signature = signature(x = "SubsetVisiumExperiment", value = "DataFrame"),
-  definition = function(x, ..., value) {
-    .rowData(x, ...) <- value
-    return(x)
-  }
-)
-
 #' @importMethodsFrom SummarizedExperiment rowData<-
 '.rowData<-' <- function(x, ..., value){
   arglist <- list(...)
@@ -2852,26 +2069,6 @@ setReplaceMethod(
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetSingleCellExperiment", value = "DataFrame"),
-  definition = function(x, ..., value) {
-    .colData(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname colData<-
-setReplaceMethod(
-  f = "colData",
-  signature = signature(x = "SubsetSpatialExperiment", value = "DataFrame"),
-  definition = function(x, ..., value) {
-    .colData(x, ...) <- value
-    return(x)
-  }
-)
-
-#' @rdname colData<-
-setReplaceMethod(
-  f = "colData",
-  signature = signature(x = "SubsetVisiumExperiment", value = "DataFrame"),
   definition = function(x, ..., value) {
     .colData(x, ...) <- value
     return(x)
@@ -2928,26 +2125,6 @@ setMethod(
 setMethod(
   f = "subsetColnames",
   signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
-  definition = function(x, subsetName)
-  {
-    .subsetColnames(x, subsetName)
-  }
-)
-
-#' @rdname subsetColnames
-setMethod(
-  f = "subsetColnames",
-  signature = c(x = "SubsetSpatialExperiment", subsetName = "character"),
-  definition = function(x, subsetName)
-  {
-    .subsetColnames(x, subsetName)
-  }
-)
-
-#' @rdname subsetColnames
-setMethod(
-  f = "subsetColnames",
-  signature = c(x = "SubsetVisiumExperiment", subsetName = "character"),
   definition = function(x, subsetName)
   {
     .subsetColnames(x, subsetName)
@@ -3013,28 +2190,6 @@ setReplaceMethod(
   }
 )
 
-#' @rdname subsetColnames
-setReplaceMethod(
-  f = "subsetColnames",
-  signature = c(x = "SubsetSpatialExperiment", subsetName = "character"),
-  definition = function(x, subsetName, value)
-  {
-    .subsetColnames(x, subsetName) <- value
-    return(x)
-  }
-)
-
-#' @rdname subsetColnames
-setReplaceMethod(
-  f = "subsetColnames",
-  signature = c(x = "SubsetVisiumExperiment", subsetName = "character"),
-  definition = function(x, subsetName, value)
-  {
-    .subsetColnames(x, subsetName) <- value
-    return(x)
-  }
-)
-
 '.subsetColnames<-' <- function(x, subsetName, value){
   if (subsetName %in% subsetNames(x)) {
     colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
@@ -3085,26 +2240,6 @@ setMethod(
 setMethod(
   f = "subsetRownames",
   signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
-  definition = function(x, subsetName)
-  {
-    .subsetRownames(x, subsetName)
-  }
-)
-
-#' @rdname subsetRownames
-setMethod(
-  f = "subsetRownames",
-  signature = c(x = "SubsetSpatialExperiment", subsetName = "character"),
-  definition = function(x, subsetName)
-  {
-    .subsetRownames(x, subsetName)
-  }
-)
-
-#' @rdname subsetRownames
-setMethod(
-  f = "subsetRownames",
-  signature = c(x = "SubsetVisiumExperiment", subsetName = "character"),
   definition = function(x, subsetName)
   {
     .subsetRownames(x, subsetName)
@@ -3170,28 +2305,6 @@ setReplaceMethod(
   }
 )
 
-#' @rdname subsetRownames
-setReplaceMethod(
-  f = "subsetRownames",
-  signature = c(x = "SubsetSpatialExperiment", subsetName = "character"),
-  definition = function(x, subsetName, value)
-  {
-    .subsetRownames(x, subsetName) <- value
-    return(x)
-  }
-)
-
-#' @rdname subsetRownames
-setReplaceMethod(
-  f = "subsetRownames",
-  signature = c(x = "SubsetVisiumExperiment", subsetName = "character"),
-  definition = function(x, subsetName, value)
-  {
-    .subsetRownames(x, subsetName) <- value
-    return(x)
-  }
-)
-
 '.subsetRownames<-' <- function(x, subsetName, value){
   if (subsetName %in% subsetNames(x)) {
     rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
@@ -3206,7 +2319,7 @@ setReplaceMethod(
 #' Get subset assay
 #'
 #' @param x Input object
-#' @param assayName Input assay name to get
+#' @param subsetName Input assay name to get
 #'
 #' @return subset assay
 #' @importMethodsFrom SummarizedExperiment assay
@@ -3251,32 +2364,6 @@ setMethod(
   f = "getSubsetAssay",
   signature = c(
     x ="SubsetSingleCellExperiment",
-    subsetName = "character"),
-  definition = function(x,
-                        subsetName)
-  {
-    assay(x = x, i = subsetName)
-  }
-)
-
-#' @rdname getSubsetAssay
-setMethod(
-  f = "getSubsetAssay",
-  signature = c(
-    x ="SubsetSpatialExperiment",
-    subsetName = "character"),
-  definition = function(x,
-                        subsetName)
-  {
-    assay(x = x, i = subsetName)
-  }
-)
-
-#' @rdname getSubsetAssay
-setMethod(
-  f = "getSubsetAssay",
-  signature = c(
-    x ="SubsetVisiumExperiment",
     subsetName = "character"),
   definition = function(x,
                         subsetName)

@@ -5,8 +5,6 @@
 \alias{subsetDim,SubsetSummarizedExperiment,character-method}
 \alias{subsetDim,SubsetRangedSummarizedExperiment,character-method}
 \alias{subsetDim,SubsetSingleCellExperiment,character-method}
-\alias{subsetDim,SubsetSpatialExperiment,character-method}
-\alias{subsetDim,SubsetVisiumExperiment,character-method}
 \title{Get dimensions of subsets in ExperimentSubset objects}
 \usage{
 subsetDim(x, subsetName)
@@ -16,10 +14,6 @@ subsetDim(x, subsetName)
 \S4method{subsetDim}{SubsetRangedSummarizedExperiment,character}(x, subsetName)
 
 \S4method{subsetDim}{SubsetSingleCellExperiment,character}(x, subsetName)
-
-\S4method{subsetDim}{SubsetSpatialExperiment,character}(x, subsetName)
-
-\S4method{subsetDim}{SubsetVisiumExperiment,character}(x, subsetName)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

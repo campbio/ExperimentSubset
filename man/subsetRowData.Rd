@@ -5,8 +5,6 @@
 \alias{subsetRowData,SubsetSummarizedExperiment,character-method}
 \alias{subsetRowData,SubsetRangedSummarizedExperiment,character-method}
 \alias{subsetRowData,SubsetSingleCellExperiment,character-method}
-\alias{subsetRowData,SubsetSpatialExperiment,character-method}
-\alias{subsetRowData,SubsetVisiumExperiment,character-method}
 \title{Accessor method for rowData from subsets in ExperimentSubset objects}
 \usage{
 subsetRowData(x, subsetName)
@@ -16,10 +14,6 @@ subsetRowData(x, subsetName)
 \S4method{subsetRowData}{SubsetRangedSummarizedExperiment,character}(x, subsetName)
 
 \S4method{subsetRowData}{SubsetSingleCellExperiment,character}(x, subsetName)
-
-\S4method{subsetRowData}{SubsetSpatialExperiment,character}(x, subsetName)
-
-\S4method{subsetRowData}{SubsetVisiumExperiment,character}(x, subsetName)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

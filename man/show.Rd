@@ -4,8 +4,6 @@
 \alias{show,SubsetSummarizedExperiment-method}
 \alias{show,SubsetRangedSummarizedExperiment-method}
 \alias{show,SubsetSingleCellExperiment-method}
-\alias{show,SubsetSpatialExperiment-method}
-\alias{show,SubsetVisiumExperiment-method}
 \title{show}
 \usage{
 \S4method{show}{SubsetSummarizedExperiment}(object)
@@ -13,19 +11,11 @@
 \S4method{show}{SubsetRangedSummarizedExperiment}(object)
 
 \S4method{show}{SubsetSingleCellExperiment}(object)
-
-\S4method{show}{SubsetSpatialExperiment}(object)
-
-\S4method{show}{SubsetVisiumExperiment}(object)
 }
 \arguments{
 \item{object}{Input \code{ExperimentSubset} object.}
 }
 \value{
-Displays the overall contents of the \code{ExperimentSubset} object.
-
-Displays the overall contents of the \code{ExperimentSubset} object.
-
 Displays the overall contents of the \code{ExperimentSubset} object.
 
 Displays the overall contents of the \code{ExperimentSubset} object.
@@ -38,18 +28,8 @@ Show the \code{ExperimentSubset} object
 Show the \code{ExperimentSubset} object
 
 Show the \code{ExperimentSubset} object
-
-Show the \code{ExperimentSubset} object
-
-Show the \code{ExperimentSubset} object
 }
 \examples{
-data(sce_chcl, package = "scds")
-es <- ExperimentSubset(sce_chcl)
-es
-data(sce_chcl, package = "scds")
-es <- ExperimentSubset(sce_chcl)
-es
 data(sce_chcl, package = "scds")
 es <- ExperimentSubset(sce_chcl)
 es

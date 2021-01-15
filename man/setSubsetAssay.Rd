@@ -5,8 +5,6 @@
 \alias{setSubsetAssay,SubsetSummarizedExperiment,character,ANY,character-method}
 \alias{setSubsetAssay,SubsetRangedSummarizedExperiment,character,ANY,character-method}
 \alias{setSubsetAssay,SubsetSingleCellExperiment,character,ANY,character-method}
-\alias{setSubsetAssay,SubsetSpatialExperiment,character,ANY,character-method}
-\alias{setSubsetAssay,SubsetVisiumExperiment,character,ANY,character-method}
 \title{Method for storing new assays in ExperimentSubset objects}
 \usage{
 setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName)
@@ -16,10 +14,6 @@ setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName)
 \S4method{setSubsetAssay}{SubsetRangedSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
 
 \S4method{setSubsetAssay}{SubsetSingleCellExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
-
-\S4method{setSubsetAssay}{SubsetSpatialExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
-
-\S4method{setSubsetAssay}{SubsetVisiumExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the input object.}

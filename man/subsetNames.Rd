@@ -5,8 +5,6 @@
 \alias{subsetNames,SubsetSummarizedExperiment-method}
 \alias{subsetNames,SubsetRangedSummarizedExperiment-method}
 \alias{subsetNames,SubsetSingleCellExperiment-method}
-\alias{subsetNames,SubsetSpatialExperiment-method}
-\alias{subsetNames,SubsetVisiumExperiment-method}
 \title{Get names of subsets in ExperimentSubset objects}
 \usage{
 subsetNames(x)
@@ -16,10 +14,6 @@ subsetNames(x)
 \S4method{subsetNames}{SubsetRangedSummarizedExperiment}(x)
 
 \S4method{subsetNames}{SubsetSingleCellExperiment}(x)
-
-\S4method{subsetNames}{SubsetSpatialExperiment}(x)
-
-\S4method{subsetNames}{SubsetVisiumExperiment}(x)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the input object.}

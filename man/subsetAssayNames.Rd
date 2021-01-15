@@ -5,8 +5,6 @@
 \alias{subsetAssayNames,SubsetSummarizedExperiment-method}
 \alias{subsetAssayNames,SubsetRangedSummarizedExperiment-method}
 \alias{subsetAssayNames,SubsetSingleCellExperiment-method}
-\alias{subsetAssayNames,SubsetSpatialExperiment-method}
-\alias{subsetAssayNames,SubsetVisiumExperiment-method}
 \title{Name retrieval method for all subset assays in ExperimentSubset
   objects}
 \usage{
@@ -17,10 +15,6 @@ subsetAssayNames(x)
 \S4method{subsetAssayNames}{SubsetRangedSummarizedExperiment}(x)
 
 \S4method{subsetAssayNames}{SubsetSingleCellExperiment}(x)
-
-\S4method{subsetAssayNames}{SubsetSpatialExperiment}(x)
-
-\S4method{subsetAssayNames}{SubsetVisiumExperiment}(x)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

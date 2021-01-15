@@ -5,8 +5,6 @@
 \alias{subsetAssayCount,SubsetSummarizedExperiment-method}
 \alias{subsetAssayCount,SubsetRangedSummarizedExperiment-method}
 \alias{subsetAssayCount,SubsetSingleCellExperiment-method}
-\alias{subsetAssayCount,SubsetSpatialExperiment-method}
-\alias{subsetAssayCount,SubsetVisiumExperiment-method}
 \title{Count method for subset assays in ExperimentSubset objects}
 \usage{
 subsetAssayCount(x)
@@ -16,10 +14,6 @@ subsetAssayCount(x)
 \S4method{subsetAssayCount}{SubsetRangedSummarizedExperiment}(x)
 
 \S4method{subsetAssayCount}{SubsetSingleCellExperiment}(x)
-
-\S4method{subsetAssayCount}{SubsetSpatialExperiment}(x)
-
-\S4method{subsetAssayCount}{SubsetVisiumExperiment}(x)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

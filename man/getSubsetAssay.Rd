@@ -5,8 +5,6 @@
 \alias{getSubsetAssay,SubsetSummarizedExperiment,character-method}
 \alias{getSubsetAssay,SubsetRangedSummarizedExperiment,character-method}
 \alias{getSubsetAssay,SubsetSingleCellExperiment,character-method}
-\alias{getSubsetAssay,SubsetSpatialExperiment,character-method}
-\alias{getSubsetAssay,SubsetVisiumExperiment,character-method}
 \title{Get subset assay}
 \usage{
 getSubsetAssay(x, subsetName)
@@ -16,15 +14,11 @@ getSubsetAssay(x, subsetName)
 \S4method{getSubsetAssay}{SubsetRangedSummarizedExperiment,character}(x, subsetName)
 
 \S4method{getSubsetAssay}{SubsetSingleCellExperiment,character}(x, subsetName)
-
-\S4method{getSubsetAssay}{SubsetSpatialExperiment,character}(x, subsetName)
-
-\S4method{getSubsetAssay}{SubsetVisiumExperiment,character}(x, subsetName)
 }
 \arguments{
 \item{x}{Input object}
 
-\item{assayName}{Input assay name to get}
+\item{subsetName}{Input assay name to get}
 }
 \value{
 subset assay

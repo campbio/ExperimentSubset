@@ -5,8 +5,6 @@
 \alias{subsetSummary,SubsetSummarizedExperiment-method}
 \alias{subsetSummary,SubsetRangedSummarizedExperiment-method}
 \alias{subsetSummary,SubsetSingleCellExperiment-method}
-\alias{subsetSummary,SubsetSpatialExperiment-method}
-\alias{subsetSummary,SubsetVisiumExperiment-method}
 \title{Method for displaying child-parent link structure of subsets in
   ExperimentSubset objects}
 \usage{
@@ -17,10 +15,6 @@ subsetSummary(x)
 \S4method{subsetSummary}{SubsetRangedSummarizedExperiment}(x)
 
 \S4method{subsetSummary}{SubsetSingleCellExperiment}(x)
-
-\S4method{subsetSummary}{SubsetSpatialExperiment}(x)
-
-\S4method{subsetSummary}{SubsetVisiumExperiment}(x)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

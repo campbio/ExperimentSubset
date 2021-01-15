@@ -5,8 +5,6 @@
 \alias{subsetParent,SubsetSummarizedExperiment-method}
 \alias{subsetParent,SubsetRangedSummarizedExperiment-method}
 \alias{subsetParent,SubsetSingleCellExperiment-method}
-\alias{subsetParent,SubsetSpatialExperiment-method}
-\alias{subsetParent,SubsetVisiumExperiment-method}
 \title{Subset parent hierarchy retrieval method for ExperimentSubset objects}
 \usage{
 subsetParent(x, subsetName)
@@ -16,10 +14,6 @@ subsetParent(x, subsetName)
 \S4method{subsetParent}{SubsetRangedSummarizedExperiment}(x, subsetName)
 
 \S4method{subsetParent}{SubsetSingleCellExperiment}(x, subsetName)
-
-\S4method{subsetParent}{SubsetSpatialExperiment}(x, subsetName)
-
-\S4method{subsetParent}{SubsetVisiumExperiment}(x, subsetName)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
