@@ -932,7 +932,7 @@ setMethod(
 #'   Default \code{NULL}.
 #' @return Updated \code{ExperimentSubset} object with the new \code{assay}
 #'   stored inside the specified subset.
-#' @rdname storeSubsetAssay
+#' @rdname setSubsetAssay
 #' @export
 #' @examples
 #' data(sce_chcl, package = "scds")
@@ -943,22 +943,22 @@ setMethod(
 #' parentAssay = "counts")
 #' counts1p <- assay(es, "subset1")
 #' counts1p[,] <- counts1p[,] + 1
-#' es <- storeSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
+#' es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
 #' es
 setGeneric(
-  name = "storeSubsetAssay",
+  name = "setSubsetAssay",
   def = function(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
   {
-    standardGeneric("storeSubsetAssay")
+    standardGeneric("setSubsetAssay")
   }
 )
 
-#' @rdname storeSubsetAssay
+#' @rdname setSubsetAssay
 setMethod(
-  f = "storeSubsetAssay",
+  f = "setSubsetAssay",
   signature = c(
     x ="SubsetSummarizedExperiment",
     subsetName = "character",
@@ -968,16 +968,16 @@ setMethod(
                         inputMatrix,
                         subsetAssayName)
   {
-    .storeSubsetAssay(x,
+    .setSubsetAssay(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
   }
 )
 
-#' @rdname storeSubsetAssay
+#' @rdname setSubsetAssay
 setMethod(
-  f = "storeSubsetAssay",
+  f = "setSubsetAssay",
   signature = c(
     x ="SubsetRangedSummarizedExperiment",
     subsetName = "character",
@@ -987,16 +987,16 @@ setMethod(
                         inputMatrix,
                         subsetAssayName)
   {
-    .storeSubsetAssay(x,
+    .setSubsetAssay(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
   }
 )
 
-#' @rdname storeSubsetAssay
+#' @rdname setSubsetAssay
 setMethod(
-  f = "storeSubsetAssay",
+  f = "setSubsetAssay",
   signature = c(
     x ="SubsetSingleCellExperiment",
     subsetName = "character",
@@ -1006,16 +1006,16 @@ setMethod(
                         inputMatrix,
                         subsetAssayName)
   {
-    .storeSubsetAssay(x,
+    .setSubsetAssay(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
   }
 )
 
-#' @rdname storeSubsetAssay
+#' @rdname setSubsetAssay
 setMethod(
-  f = "storeSubsetAssay",
+  f = "setSubsetAssay",
   signature = c(
     x ="SubsetSpatialExperiment",
     subsetName = "character",
@@ -1025,16 +1025,16 @@ setMethod(
                         inputMatrix,
                         subsetAssayName)
   {
-    .storeSubsetAssay(x,
+    .setSubsetAssay(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
   }
 )
 
-#' @rdname storeSubsetAssay
+#' @rdname setSubsetAssay
 setMethod(
-  f = "storeSubsetAssay",
+  f = "setSubsetAssay",
   signature = c(
     x ="SubsetVisiumExperiment",
     subsetName = "character",
@@ -1044,14 +1044,14 @@ setMethod(
                         inputMatrix,
                         subsetAssayName)
   {
-    .storeSubsetAssay(x,
+    .setSubsetAssay(x,
                  subsetName,
                  inputMatrix,
                  subsetAssayName)
   }
 )
 
-.storeSubsetAssay <- function(x,
+.setSubsetAssay <- function(x,
                          subsetName,
                          inputMatrix,
                          subsetAssayName = NULL){
@@ -1130,7 +1130,7 @@ setReplaceMethod("assay",
   if ((nrow(value) != nrow(x))
       || (ncol(value) != ncol(x))) {
     message("Storing assay inside subset '", i, "'.")
-    storeSubsetAssay(
+    setSubsetAssay(
       x = x,
       subsetName = i,
       inputMatrix = value,
@@ -3185,3 +3185,84 @@ setReplaceMethod(
   }
   return(x)
 }
+
+#' Get subset assay
+#'
+#' @param x Input object
+#' @param assayName Input assay name to get
+#'
+#' @return subset assay
+#' @export
+setGeneric(
+  name = "getSubsetAssay",
+  def = function(x,
+                 subsetName)
+  {
+    standardGeneric("getSubsetAssay")
+  }
+)
+
+#' @rdname getSubsetAssay
+setMethod(
+  f = "getSubsetAssay",
+  signature = c(
+    x ="SubsetSummarizedExperiment",
+    subsetName = "character"),
+  definition = function(x,
+                        subsetName)
+  {
+    assay(x = x, i = subsetName)
+  }
+)
+
+#' @rdname getSubsetAssay
+setMethod(
+  f = "getSubsetAssay",
+  signature = c(
+    x ="SubsetRangedSummarizedExperiment",
+    subsetName = "character"),
+  definition = function(x,
+                        subsetName)
+  {
+    assay(x = x, i = subsetName)
+  }
+)
+
+#' @rdname getSubsetAssay
+setMethod(
+  f = "getSubsetAssay",
+  signature = c(
+    x ="SubsetSingleCellExperiment",
+    subsetName = "character"),
+  definition = function(x,
+                        subsetName)
+  {
+    assay(x = x, i = subsetName)
+  }
+)
+
+#' @rdname getSubsetAssay
+setMethod(
+  f = "getSubsetAssay",
+  signature = c(
+    x ="SubsetSpatialExperiment",
+    subsetName = "character"),
+  definition = function(x,
+                        subsetName)
+  {
+    assay(x = x, i = subsetName)
+  }
+)
+
+#' @rdname getSubsetAssay
+setMethod(
+  f = "getSubsetAssay",
+  signature = c(
+    x ="SubsetVisiumExperiment",
+    subsetName = "character"),
+  definition = function(x,
+                        subsetName)
+  {
+    assay(x = x, i = subsetName)
+  }
+)

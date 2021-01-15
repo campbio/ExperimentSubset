@@ -40,7 +40,7 @@ testthat::test_that("Testing ExperimentSubset constructor with subset & createSu
   testthat::expect_equal(es@subsets$subset1@parentAssay, "counts")
 })
 
-testthat::test_that("Testing createSubset and storeSubsetAssay",{
+testthat::test_that("Testing createSubset and setSubsetAssay",{
   es <- ExperimentSubset(sce_chcl)
   #createSubset
   es <- createSubset(es, "subset1",
@@ -66,16 +66,16 @@ testthat::test_that("Testing createSubset and storeSubsetAssay",{
   #                                                   cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC", "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG", "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC", "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC", "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
   #                                                   parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
   
-  #storeSubsetAssay
+  #setSubsetAssay
   counts1p <- assay(es, "subset1")
   counts1p[,] <- counts1p[,] + 1
-  expect_error(es <- storeSubsetAssay(es, "subset4", counts1p, "scaledSubset1"),
+  expect_error(es <- setSubsetAssay(es, "subset4", counts1p, "scaledSubset1"),
                "subset4 does not exist in the subsets slot of the object.")
-  es <- storeSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
+  es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
   expect_true("scaledSubset1" %in% assayNames(es@subsets$subset1@internalAssay))
-  # expect_error(es <- storeSubsetAssay(es, "subset1", counts1p, subsetAssayName = NULL),
+  # expect_error(es <- setSubsetAssay(es, "subset1", counts1p, subsetAssayName = NULL),
   #              "subset1 already exists. Please choose a different subsetName parameter.")
-  # es <- storeSubsetAssay(es, "subset4", counts1p, subsetAssayName = NULL)
+  # es <- setSubsetAssay(es, "subset4", counts1p, subsetAssayName = NULL)
   # expect_equal(rownames(counts1p), rownames(es, "subset4"))
   # expect_equal(colnames(counts1p), colnames(es, "subset4"))
   #cant have null now
@@ -89,7 +89,7 @@ testthat::test_that("Testing rownames, colnames, rowData and colData",{
                                        parentAssay = "counts")
   counts1p <- assay(es, "subset1")
   counts1p[,] <- counts1p[,] + 1
-  es <- storeSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
+  es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
   
   expect_equal(rownames(es, subsetName = "scaledSubset1"), rownames(counts1p))
   expect_equal(colnames(es, subsetName = "scaledSubset1"), colnames(counts1p))
@@ -115,7 +115,7 @@ testthat::test_that("Testing subset helper/supplementary functions",{
                                        parentAssay = "counts")
   counts1p <- assay(es, "subset1")
   counts1p[,] <- counts1p[,] + 1
-  es <- storeSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
+  es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
   expect_equal(subsetCount(es), 1)
   expect_equal(subsetAssayCount(es), 2)
   expect_equal(subsetAssayNames(es), c("subset1", "scaledSubset1"))
