@@ -157,6 +157,9 @@ ExperimentSubset <- function(x,
   internalAssay <- SingleCellExperiment(assays = a)
   internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
   
+  rownames(internalAssay) <- rownames(x)[rows]
+  colnames(internalAssay) <- colnames(x)[cols]
+  
   scs <- AssaySubset(
     subsetName = subsetName,
     rowIndices = rows,
@@ -548,42 +551,50 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 
 .subsetColnames <- function(x, subsetName){
   if (subsetName %in% subsetNames(x)) {
-    colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
+    # colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
+    colnames(.internalAssay(.subsets(x)[[subsetName]]))
   }
   else if (subsetName %in% subsetAssayNames(x)) {
     subsetName <- .getParentAssayName(x, subsetName)
-    colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
+    # colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
+    colnames(.internalAssay(.subsets(x)[[subsetName]]))
   }
 }
 
 '.subsetColnames<-' <- function(x, subsetName, value){
   if (subsetName %in% subsetNames(x)) {
-    colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
+    # colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
+    colnames(.internalAssay(.subsets(x)[[subsetName]])) <- value
   }
   else if (subsetName %in% subsetAssayNames(x)) {
     subsetName <- .getParentAssayName(x, subsetName)
-    colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
+    # colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
+    colnames(.internalAssay(.subsets(x)[[subsetName]])) <- value
   }
   return(x)
 }
 
 .subsetRownames <- function(x, subsetName){
   if (subsetName %in% subsetNames(x)) {
-    rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
+    # rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
+    rownames(.internalAssay(.subsets(x)[[subsetName]]))
   }
   else if (subsetName %in% subsetAssayNames(x)) {
     subsetName <- .getParentAssayName(x, subsetName)
-    rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
+    # rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
+    rownames(.internalAssay(.subsets(x)[[subsetName]]))
   }
 }
 
 '.subsetRownames<-' <- function(x, subsetName, value){
   if (subsetName %in% subsetNames(x)) {
-    rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
+    # rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
+    rownames(.internalAssay(.subsets(x)[[subsetName]])) <- value
   }
   else if (subsetName %in% subsetAssayNames(x)) {
     subsetName <- .getParentAssayName(x, subsetName)
-    rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
+    # rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
+    rownames(.internalAssay(.subsets(x)[[subsetName]])) <- value
   }
   return(x)
 }
