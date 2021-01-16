@@ -1,28 +1,3 @@
-setClassUnion("NullOrCharacter", c("NULL", "character"))
-setClassUnion("NullOrNumeric", c("NULL", "numeric"))
-
-#' An S4 class to create subset objects to store inside an
-#' \code{ExperimentSubset} object.
-#'
-#' @slot subsetName \code{character(1)} Name of the subset.
-#' @slot rowIndices \code{vector("numeric")} Indices of the rows to include in
-#'   the subset.
-#' @slot colIndices \code{vector("numeric")} Indices of the columns to include
-#'   in the subset.
-#' @slot parentAssay \code{character(1)} Name of the parent of this subset.
-#' @slot internalAssay \code{SummarizedExperiment} An internal experiment object
-#'   to store additional subset data.
-#' @import methods
-.AssaySubset <- setClass(
-  "AssaySubset",
-  slots = representation(
-    subsetName = "character",
-    rowIndices = "NullOrNumeric",
-    colIndices = "NullOrNumeric",
-    parentAssay = "NullOrCharacter",
-    internalAssay = "ANY"
-  )
-)
 
 #' @title AssaySubset constructor
 #' @description Constructor for creating a experiment object internally by the
