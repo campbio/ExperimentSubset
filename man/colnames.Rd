@@ -13,8 +13,6 @@ colnames(x, ...)
 \item{x}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.}
 
 \item{...}{Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.}
-
-\item{subsetName}{Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.}
 }
 \value{
 A \code{vector} of \code{colnames}.

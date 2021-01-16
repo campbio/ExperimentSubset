@@ -20,7 +20,9 @@ createSubset(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the object from which a subset
 should be created. Input can also be any object inherited from
-\code{SummarizedExperiment} for immediate conversion and subset formation.}
+\code{SummarizedExperiment} for immediate conversion and subset formation.
+A list of slots can also be passed to directly construct an ES object from
+matrices similar to SE and SCE constructors.}
 
 \item{subsetName}{\code{character(1)} Specify the name of the subset to
 create.}

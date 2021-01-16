@@ -7,7 +7,7 @@
 \alias{subsetNames,SubsetRangedSummarizedExperiment-method}
 \alias{subsetNames,SubsetSingleCellExperiment-method}
 \alias{subsetNames,SubsetSummarizedExperiment-method}
-\title{Get names of subsets in ExperimentSubset objects}
+\title{Get names of only the subsets in ExperimentSubset objects}
 \usage{
 subsetNames(x)
 
@@ -18,14 +18,14 @@ subsetNames(x)
 \S4method{subsetNames}{SubsetSummarizedExperiment}(x)
 }
 \arguments{
-\item{x}{\code{ExperimentSubset} Specify the input object.}
+\item{x}{\code{ExperimentSubset} Specify the input ES object.}
 }
 \value{
 A \code{vector} of subset names.
 }
 \description{
-Retrieves the names of the available subsets in an
-  \code{ExperimentSubset} object.
+Retrieves the names of the available subsets (not the subset 
+  assays) in an \code{ExperimentSubset} object.
 }
 \examples{
 data(sce_chcl, package = "scds")

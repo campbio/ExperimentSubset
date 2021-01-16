@@ -21,13 +21,13 @@ subsetParent(x, subsetName)
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
 \item{subsetName}{\code{character(1)} Specify the name of the subset against
-which the subset to parent link should be retrieved.}
+which the 'subset to parent link' should be retrieved.}
 }
 \value{
-A \code{list} containing the parent link of the subset.
+A \code{list} containing the 'subset to parent' link.
 }
 \description{
-Retrieves a complete subset to parent link from a specified
+Retrieves a complete 'subset to parent' link from a specified
   subset.
 }
 \examples{

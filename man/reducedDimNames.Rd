@@ -12,7 +12,7 @@ reducedDimNames(x, ...)
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.}
 
-\item{...}{Additional arguments}
+\item{...}{Additional arguments to pass to into the SCE method.}
 }
 \value{
 The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.

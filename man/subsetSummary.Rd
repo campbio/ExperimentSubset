@@ -7,7 +7,7 @@
 \alias{subsetSummary,SubsetRangedSummarizedExperiment-method}
 \alias{subsetSummary,SubsetSingleCellExperiment-method}
 \alias{subsetSummary,SubsetSummarizedExperiment-method}
-\title{Method for displaying child-parent link structure of subsets in
+\title{Method for displaying 'child-parent' link structure of subsets in
   ExperimentSubset objects}
 \usage{
 subsetSummary(x)

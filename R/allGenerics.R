@@ -5,6 +5,8 @@
 #' @param x \code{ExperimentSubset} Specify the object from which a subset
 #'   should be created. Input can also be any object inherited from
 #'   \code{SummarizedExperiment} for immediate conversion and subset formation.
+#'   A list of slots can also be passed to directly construct an ES object from
+#'   matrices similar to SE and SCE constructors.
 #' @param subsetName \code{character(1)} Specify the name of the subset to
 #'   create.
 #' @param rows \code{vector("numeric")} Specify the rows to include in this
@@ -71,10 +73,10 @@ setGeneric(
   }
 )
 
-#' @title Get names of subsets in ExperimentSubset objects
-#' @description Retrieves the names of the available subsets in an
-#'   \code{ExperimentSubset} object.
-#' @param x \code{ExperimentSubset} Specify the input object.
+#' @title Get names of only the subsets in ExperimentSubset objects
+#' @description Retrieves the names of the available subsets (not the subset 
+#'   assays) in an \code{ExperimentSubset} object.
+#' @param x \code{ExperimentSubset} Specify the input ES object.
 #' @return A \code{vector} of subset names.
 #' @rdname subsetNames
 #' @export
@@ -95,7 +97,8 @@ setGeneric(
   }
 )
 
-#' @title Method for storing new assays in ExperimentSubset objects
+#' @title Method for storing new assays inside subsets in ExperimentSubset 
+#'   objects
 #' @description Store a new subset \code{assay} inside a specified subset in the
 #'   input \code{ExperimentSubset} object.
 #' @param x \code{ExperimentSubset} Specify the input object.
@@ -103,9 +106,7 @@ setGeneric(
 #'   inside which the new subset \code{assay} should be stored.
 #' @param inputMatrix \code{dgCMatrix} The input subset \code{assay}.
 #' @param subsetAssayName \code{character(1)} Specify the name of the new
-#'   \code{assay} against the \code{inputMatrix} parameter. If \code{NULL}, a
-#'   new subset is created internally using the \code{createSubset} function.
-#'   Default \code{NULL}.
+#'   \code{assay} against the \code{inputMatrix} parameter.
 #' @return Updated \code{ExperimentSubset} object with the new \code{assay}
 #'   stored inside the specified subset.
 #' @rdname setSubsetAssay
@@ -134,12 +135,12 @@ setGeneric(
 )
 
 #' @title Subset parent hierarchy retrieval method for ExperimentSubset objects
-#' @description Retrieves a complete subset to parent link from a specified
+#' @description Retrieves a complete 'subset to parent' link from a specified
 #'   subset.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Specify the name of the subset against
-#'   which the subset to parent link should be retrieved.
-#' @return A \code{list} containing the parent link of the subset.
+#'   which the 'subset to parent link' should be retrieved.
+#' @return A \code{list} containing the 'subset to parent' link.
 #' @rdname subsetParent
 #' @importMethodsFrom SummarizedExperiment assayNames
 #' @export
@@ -161,7 +162,7 @@ setGeneric(
   }
 )
 
-#' @title Method for displaying child-parent link structure of subsets in
+#' @title Method for displaying 'child-parent' link structure of subsets in
 #'   ExperimentSubset objects
 #' @description The function displays the content of an \code{ExperimentSubset}
 #'   object including all available main assays, all subsets and the subset
@@ -225,7 +226,7 @@ setGeneric(
 #' @title reducedDimNames
 #' @description A wrapper to the \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param ... Additional arguments
+#' @param ... Additional arguments to pass to into the SCE method.
 #' @return The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
 #' @rdname reducedDimNames
 #' @export
@@ -238,8 +239,8 @@ setGeneric(
 )
 
 #' @title Subset count method for ExperimentSubset objects
-#' @description Get the total count of the available subsets in an
-#'   \code{ExperimentSubset} object.
+#' @description Get the total count of the available subsets (excluding subset
+#'   assays) in an \code{ExperimentSubset} object.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @return A \code{numeric} value representing the total count of the subsets.
 #' @rdname subsetCount
@@ -264,8 +265,7 @@ setGeneric(
 #' @title rownames
 #' @description Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
-#' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.
-#' @param subsetName Name of the subset to get \code{rownames} from. If \code{missing}, \code{rownames} from main object are returned.
+#' @param ... Additional parameters and \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.
 #' @return A \code{vector} of \code{rownames}.
 #' @rdname rownames
 #' @export
@@ -289,7 +289,6 @@ setGeneric(
 #' @description Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
 #' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.
-#' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname colnames
 #' @export
@@ -308,8 +307,6 @@ setGeneric(
     standardGeneric("colnames")
   }
 )
-
-
 
 #' @title Count method for subset assays in ExperimentSubset objects
 #' @description Get the count of the total available subsets and the subset
@@ -398,9 +395,9 @@ setGeneric(
 )
 
 #' @title subsetColnames
-#' @description Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
+#' @description Get \code{colnames} from a subset in the \code{ExperimentSubset} object.
+#' @param x Input \code{ExperimentSubset} object 
+#' @param subsetName Name of the subset to get \code{colnames} from.
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname subsetColnames
 #' @export
@@ -413,11 +410,11 @@ setGeneric(
 )
 
 #' @title subsetColnames
-#' @description Set \code{colnames} to an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
-#' @param value Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
-#' @return A \code{vector} of \code{colnames}.
+#' @description Set \code{colnames} to a subset in the \code{ExperimentSubset} object.
+#' @param x Input \code{ExperimentSubset} object.
+#' @param subsetName Name of the subset to set \code{colnames} to.
+#' @param value Specify the colname values to replace.
+#' @return Input object with colnames set to a subset.
 #' @rdname subsetColnames
 #' @export
 setGeneric(
@@ -429,9 +426,9 @@ setGeneric(
 )
 
 #' @title subsetRownames
-#' @description Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
+#' @description Get \code{rownames} from a subset in the \code{ExperimentSubset} object.
+#' @param x Input \code{ExperimentSubset} object.
+#' @param subsetName Name of the subset to get \code{colnames} from.
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname subsetRownames
 #' @export
@@ -444,11 +441,11 @@ setGeneric(
 )
 
 #' @title subsetRownames
-#' @description Set \code{colnames} to an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param subsetName Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
-#' @param value Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.
-#' @return A \code{vector} of \code{colnames}.
+#' @description Set \code{colnames} to a subset in the \code{ExperimentSubset} object.
+#' @param x Input \code{ExperimentSubset} object.
+#' @param subsetName Name of the subset to set \code{colnames} to.
+#' @param value Specify the rownames values to replace.
+#' @return Input object with rownames set to a subset.
 #' @rdname subsetRownames
 #' @export
 setGeneric(
@@ -459,12 +456,12 @@ setGeneric(
   }
 )
 
-#' Get subset assay
+#' Get subset assay from an \code{ExperimentSubset} object.
 #'
-#' @param x Input object
-#' @param subsetName Input assay name to get
-#'
-#' @return subset assay
+#' @param x Input \code{ExperimentSubset} object.
+#' @param subsetName Specify 'subset name' or 'subset assay name' to fetch the
+#'   assay from.
+#' @return Subset assay
 #' @importMethodsFrom SummarizedExperiment assay
 #' @export
 setGeneric(

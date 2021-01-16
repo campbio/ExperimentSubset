@@ -7,7 +7,7 @@
 \alias{getSubsetAssay,SubsetRangedSummarizedExperiment,character-method}
 \alias{getSubsetAssay,SubsetSingleCellExperiment,character-method}
 \alias{getSubsetAssay,SubsetSummarizedExperiment,character-method}
-\title{Get subset assay}
+\title{Get subset assay from an \code{ExperimentSubset} object.}
 \usage{
 getSubsetAssay(x, subsetName)
 
@@ -18,13 +18,14 @@ getSubsetAssay(x, subsetName)
 \S4method{getSubsetAssay}{SubsetSummarizedExperiment,character}(x, subsetName)
 }
 \arguments{
-\item{x}{Input object}
+\item{x}{Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Input assay name to get}
+\item{subsetName}{Specify 'subset name' or 'subset assay name' to fetch the
+assay from.}
 }
 \value{
-subset assay
+Subset assay
 }
 \description{
-Get subset assay
+Get subset assay from an \code{ExperimentSubset} object.
 }

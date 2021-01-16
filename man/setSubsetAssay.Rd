@@ -7,7 +7,8 @@
 \alias{setSubsetAssay,SubsetRangedSummarizedExperiment,character,ANY,character-method}
 \alias{setSubsetAssay,SubsetSingleCellExperiment,character,ANY,character-method}
 \alias{setSubsetAssay,SubsetSummarizedExperiment,character,ANY,character-method}
-\title{Method for storing new assays in ExperimentSubset objects}
+\title{Method for storing new assays inside subsets in ExperimentSubset 
+  objects}
 \usage{
 setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName)
 
@@ -26,9 +27,7 @@ inside which the new subset \code{assay} should be stored.}
 \item{inputMatrix}{\code{dgCMatrix} The input subset \code{assay}.}
 
 \item{subsetAssayName}{\code{character(1)} Specify the name of the new
-\code{assay} against the \code{inputMatrix} parameter. If \code{NULL}, a
-new subset is created internally using the \code{createSubset} function.
-Default \code{NULL}.}
+\code{assay} against the \code{inputMatrix} parameter.}
 }
 \value{
 Updated \code{ExperimentSubset} object with the new \code{assay}

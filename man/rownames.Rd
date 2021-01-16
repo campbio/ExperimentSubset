@@ -12,9 +12,7 @@ rownames(x, ...)
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.}
 
-\item{...}{Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.}
-
-\item{subsetName}{Name of the subset to get \code{rownames} from. If \code{missing}, \code{rownames} from main object are returned.}
+\item{...}{Additional parameters and \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.}
 }
 \value{
 A \code{vector} of \code{rownames}.

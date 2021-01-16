@@ -30,19 +30,19 @@ subsetColnames(x, subsetName) <- value
 \S4method{subsetColnames}{SubsetSummarizedExperiment,character}(x, subsetName) <- value
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.}
+\item{x}{Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.}
+\item{subsetName}{Name of the subset to set \code{colnames} to.}
 
-\item{value}{Name of the subset to get \code{colnames} from. If \code{missing}, \code{colnames} from main object are returned.}
+\item{value}{Specify the colname values to replace.}
 }
 \value{
 A \code{vector} of \code{colnames}.
 
-A \code{vector} of \code{colnames}.
+Input object with colnames set to a subset.
 }
 \description{
-Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
+Get \code{colnames} from a subset in the \code{ExperimentSubset} object.
 
-Set \code{colnames} to an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
+Set \code{colnames} to a subset in the \code{ExperimentSubset} object.
 }
