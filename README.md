@@ -1,6 +1,6 @@
 # ExperimentSubset
-[![Build Status](https://travis-ci.org/campbio/ExperimentSubset.svg?branch=master)](https://travis-ci.org/campbio/ExperimentSubset)
-[![Codecov test coverage](https://codecov.io/gh/campbio/ExperimentSubset/branch/master/graph/badge.svg)](https://codecov.io/gh/campbio/ExperimentSubset?branch=master)
+[![Build Status](https://travis-ci.org/campbio/ExperimentSubset.svg?branch=devel)](https://travis-ci.org/campbio/ExperimentSubset)
+[![Codecov test coverage](https://codecov.io/gh/campbio/ExperimentSubset/branch/devel/graph/badge.svg)](https://codecov.io/gh/campbio/ExperimentSubset?branch=devel)
 
 ## Introduction
 Manages subsets of data with Bioconductor Experiment objects
