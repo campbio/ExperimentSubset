@@ -6,6 +6,7 @@ library(scds)
 library(TENxPBMCData)
 library(scater)
 library(scran)
+library(airway)
 
 #load data once
 data(sce_chcl, package = "scds")
@@ -20,10 +21,90 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
 })
 
 testthat::test_that("Testing ExperimentSubset constructor by implicitly providing a SummarizedExperiment object",{
+  se <- SummarizedExperiment::SummarizedExperiment(sce_chcl)
+  testthat::expect_error(es <- ExperimentSubset(se), "Experiment objects with unnamed assays are not supported. Use assayNames<- setter method to set assay names before creating ES object.")
   se <- SummarizedExperiment::SummarizedExperiment(list(counts = assay(sce_chcl, "counts"), logcounts = assay(sce_chcl, "logcounts")))
   es <- ExperimentSubset(se)
   testthat::expect_true(validObject(es))
   testthat::expect_equal(class(es)[1], "SubsetSummarizedExperiment")
+  metadata(es)
+  assay(es, "counts")
+  es <- createSubset(es, "s1", rows = c(1:10))
+  subsetAssayNames(es)
+  show(es)
+  es <- setSubsetAssay(es, "s1", assay(es, "s1"), "newS1")
+  assay(es, "assay2") <- assay(es, "counts")
+  subsetParent(es, "s1")
+  subsetSummary(es)
+  subsetDim(es, "s1")
+  subsetCount(es)
+  metadata(es) <- list(a="meta")
+  getSubsetAssay(es, "s1")
+  subsetRownames(es, "s1") <- subsetRownames(es, "s1")
+  subsetColnames(es, "s1") <- subsetColnames(es, "s1")
+  subsetRownames(es, "newS1") <- subsetRownames(es, "newS1")
+  subsetColnames(es, "newS1") <- subsetColnames(es, "newS1")
+  colData(es, subsetName = "s1") <- cbind(colData(es, subsetName = "s1"), 
+                                          DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s1")[2]))))
+  rowData(es, subsetName = "s1") <- cbind(rowData(es, subsetName = "s1"), 
+                                          DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s1")[1]))))
+  
+  data(airway, package="airway")
+  rse <- airway
+  es <- ExperimentSubset(rse)
+  subsetSummary(es)
+  metadata(es)
+  assay(es, "counts")
+  es <- createSubset(es, "s2", rows = c(1:15))
+  subsetAssayNames(es)
+  show(es)
+  es <- setSubsetAssay(es, "s2", assay(es, "s2"), "newS2")
+  assay(es, "assay2") <- assay(es, "counts")
+  subsetParent(es, "s2")
+  subsetSummary(es)
+  subsetDim(es, "s2")
+  subsetCount(es)
+  metadata(es) <- list(a="meta")
+  getSubsetAssay(es, "s2")
+  subsetRownames(es, "s2") <- subsetRownames(es, "s2")
+  subsetColnames(es, "s2") <- subsetColnames(es, "s2")
+  subsetRownames(es, "newS2") <- subsetRownames(es, "newS2")
+  subsetColnames(es, "newS2") <- subsetColnames(es, "newS2")
+  colData(es, subsetName = "s2") <- cbind(colData(es, subsetName = "s2"), 
+                                          DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[2]))))
+  rowData(es, subsetName = "s2") <- cbind(rowData(es, subsetName = "s2"), 
+                                          DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[1]))))
+  
+  testthat::expect_error(es <- createSubset(es, "s2", rows = c(1:15)),
+                         "A subset with the specified 'subsetName' parameter already exists
+         in the object. Subset names must be unique.")
+  testthat::expect_error(es <- createSubset(es, subsetName = 12, rows = c(1:15)),
+                         "'subsetName' parameter must be a unique a character value.")
+  testthat::expect_error(es <- createSubset(es, subsetName = "s3", rows = list()),
+                         "'rows' parameter must be either a 'NULL' to include all rows,
+         or a numeric vector or a character vector that specify the rows to 
+         include in the subset.")
+  testthat::expect_error(es <- createSubset(es, subsetName = "s3", cols = list()),
+                         "'cols' parameter must be either a 'NULL' to include all rows,
+         or a numeric vector or a character vector that specify the columns to 
+         include in the subset.")
+  testthat::expect_error(es <- createSubset(es, subsetName = "s3", parentAssay = 1),
+                         "'parentAssay' parameter can either be 'NULL' to use the default
+         assay in the input object or a character value that specifies the
+         parentAssay to use from parent object.")
+  testthat::expect_error(es <- createSubset(es, subsetName = "s3", rows = c(64103:64103)),
+                         "Selected rows not available in the specified assay.")
+  testthat::expect_error(es <- createSubset(es, subsetName = "s3", rows = c(seq(1:64102), 64102)),
+                         "Selected rows not available in the specified assay.")
+  testthat::expect_error(es <- createSubset(es, subsetName = "s3", rows = c(1,3, NA)),
+                         "Selected rows not available in the specified assay.")
+  testthat::expect_error(es <- createSubset(es, subsetName = "s3", cols = c(10:12)),
+                         "Selected columns not available in the specified assay.")
+  testthat::expect_error(es <- createSubset(es, subsetName = "s3", cols = c(seq(1:8), 8)),
+                         "Selected columns not available in the specified assay.")
+  testthat::expect_error(es <- createSubset(es, subsetName = "s3", cols = c(1,3, NA)),
+                         "Selected columns not available in the specified assay.")
+  
 })
 
 testthat::test_that("Testing ExperimentSubset constructor with subset & createSubset without parentAssay",{
@@ -52,6 +133,11 @@ testthat::test_that("Testing createSubset and setSubsetAssay",{
   testthat::expect_equal(es@subsets$subset1@colIndices, c(20,21,40,45,90,99,100,123,166,299))
   testthat::expect_equal(es@subsets$subset1@parentAssay, "counts")
   
+  subsetRownames(es, "subset1") <- subsetRownames(es, "subset1")
+  subsetColnames(es, "subset1") <- subsetColnames(es, "subset1")
+  subsetRownames(es, "subset1") <- subsetRownames(es, "subset1")
+  subsetColnames(es, "subset1") <- subsetColnames(es, "subset1")
+  
   es <- createSubset(es, "subset2",
                                        rows = c("OPCML", "RP11-338K17.8", "RP11-770J1.3", "NPSR1", "AC060835.1", "GABRA2", "PRDM16", "CAB39", "LYRM1", "RP1-178F10.3"),
                                        cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC", "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG", "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC", "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC", "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
@@ -73,6 +159,7 @@ testthat::test_that("Testing createSubset and setSubsetAssay",{
                "subset4 does not exist in the subsets slot of the object.")
   es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
   expect_true("scaledSubset1" %in% assayNames(es@subsets$subset1@internalAssay))
+  getSubsetAssay(es, "scaledSubset1")
   # expect_error(es <- setSubsetAssay(es, "subset1", counts1p, subsetAssayName = NULL),
   #              "subset1 already exists. Please choose a different subsetName parameter.")
   # es <- setSubsetAssay(es, "subset4", counts1p, subsetAssayName = NULL)
