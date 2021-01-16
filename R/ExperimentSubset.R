@@ -155,12 +155,16 @@ ExperimentSubset <- function(x,
                              ))
 {
   if (!is.list(x)) {
+    if(is.null(assayNames(x))
+       || "" %in% assayNames(x))
+      stop("Experiment objects with unnamed assays are not supported. Use assayNames<- setter method to set assay names before creating ES object.")
     es <- as(x, paste0("Subset", class(x)))
   }
   else{
     sce <- SingleCellExperiment::SingleCellExperiment(x)
     es <- .SubsetSingleCellExperiment(sce)
   }
+  
   if (!anyNA(subset)) {
     es <- createSubset(
       es,

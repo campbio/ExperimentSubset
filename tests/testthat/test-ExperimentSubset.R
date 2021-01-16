@@ -20,7 +20,7 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
 })
 
 testthat::test_that("Testing ExperimentSubset constructor by implicitly providing a SummarizedExperiment object",{
-  se <- SummarizedExperiment::SummarizedExperiment(sce_chcl)
+  se <- SummarizedExperiment::SummarizedExperiment(list(counts = assay(sce_chcl, "counts"), logcounts = assay(sce_chcl, "logcounts")))
   es <- ExperimentSubset(se)
   testthat::expect_true(validObject(es))
   testthat::expect_equal(class(es)[1], "SubsetSummarizedExperiment")
