@@ -262,52 +262,6 @@ setGeneric(
   }
 )
 
-#' @title rownames
-#' @description Get \code{rownames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{rownames} in \code{BiocGenerics} package.
-#' @param ... Additional parameters and \code{subsetName} parameter to pass the name of the subset to get \code{rownames} from.
-#' @return A \code{vector} of \code{rownames}.
-#' @rdname rownames
-#' @export
-#' @examples
-#' data(sce_chcl, package = "scds")
-#' es <- ExperimentSubset(sce_chcl)
-#' es <- createSubset(es, "subset1",
-#' rows = c(10,11,50,56,98,99,102,105,109, 200),
-#' cols = c(20,21,40,45,90,99,100,123,166,299),
-#' parentAssay = "counts")
-#' rownames(es, subsetName = "subset1")
-setGeneric(
-  name = "rownames",
-  def = function(x, ...)
-  {
-    standardGeneric("rownames")
-  }
-)
-
-#' @title colnames
-#' @description Get \code{colnames} from an \code{ExperimentSubset} object or a subset in the \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{colnames} in \code{BiocGenerics} package.
-#' @param ... Additional parameters amd \code{subsetName} parameter to pass the name of the subset to get \code{colnames} from.
-#' @return A \code{vector} of \code{colnames}.
-#' @rdname colnames
-#' @export
-#' @examples
-#' data(sce_chcl, package = "scds")
-#' es <- ExperimentSubset(sce_chcl)
-#' es <- createSubset(es, "subset1",
-#' rows = c(10,11,50,56,98,99,102,105,109, 200),
-#' cols = c(20,21,40,45,90,99,100,123,166,299),
-#' parentAssay = "counts")
-#' colnames(es, subsetName = "subset1")
-setGeneric(
-  name = "colnames",
-  def = function(x, ...)
-  {
-    standardGeneric("colnames")
-  }
-)
-
 #' @title Count method for subset assays in ExperimentSubset objects
 #' @description Get the count of the total available subsets and the subset
 #'   assays inside these subsets in an \code{ExperimentSubset} object.

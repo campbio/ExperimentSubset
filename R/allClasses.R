@@ -1,8 +1,7 @@
 setClassUnion("NullOrCharacter", c("NULL", "character"))
 setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 
-#' An S4 class to create subset objects to store inside an
-#' \code{ExperimentSubset} object.
+#' An S4 class to manage subset representation.
 #'
 #' @slot subsetName \code{character(1)} Name of the subset.
 #' @slot rowIndices \code{vector("numeric")} Indices of the rows to include in
@@ -24,9 +23,9 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
   )
 )
 
-#' An S4 class to create an \code{ExperimentSubset} object with support for subsets.
-#'
-#' @slot subsets A \code{list} of \code{SingleCellSubset} objects.
+#' An S4 class for \code{SummarizedExperiment} objects with added support for
+#'   subsets.
+#' @slot subsets A list of \code{AssaySubset} objects.
 #' @export
 #' @import methods
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
@@ -37,9 +36,9 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
   contains = "SummarizedExperiment"
 )
 
-#' An S4 class to create an \code{ExperimentSubset} object with support for subsets.
-#'
-#' @slot subsets A \code{list} of \code{SingleCellSubset} objects.
+#' An S4 class for \code{RangedSummarizedExperiment} objects with added support for
+#'   subsets.
+#' @slot subsets A list of \code{AssaySubset} objects.
 #' @export
 #' @import methods
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
@@ -50,9 +49,9 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
   contains = "RangedSummarizedExperiment"
 )
 
-#' An S4 class to create an \code{ExperimentSubset} object with support for subsets.
-#'
-#' @slot subsets A \code{list} of \code{SingleCellSubset} objects.
+#' An S4 class for \code{SingleCellExperiment} objects with added support for
+#'   subsets.
+#' @slot subsets A list of \code{AssaySubset} objects.
 #' @export
 #' @import methods
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment

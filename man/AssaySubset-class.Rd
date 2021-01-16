@@ -4,11 +4,9 @@
 \name{AssaySubset-class}
 \alias{AssaySubset-class}
 \alias{.AssaySubset}
-\title{An S4 class to create subset objects to store inside an
-\code{ExperimentSubset} object.}
+\title{An S4 class to manage subset representation.}
 \description{
-An S4 class to create subset objects to store inside an
-\code{ExperimentSubset} object.
+An S4 class to manage subset representation.
 }
 \section{Slots}{
 

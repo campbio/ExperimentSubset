@@ -4,13 +4,15 @@
 \name{SubsetSingleCellExperiment-class}
 \alias{SubsetSingleCellExperiment-class}
 \alias{.SubsetSingleCellExperiment}
-\title{An S4 class to create an \code{ExperimentSubset} object with support for subsets.}
+\title{An S4 class for \code{SingleCellExperiment} objects with added support for
+  subsets.}
 \description{
-An S4 class to create an \code{ExperimentSubset} object with support for subsets.
+An S4 class for \code{SingleCellExperiment} objects with added support for
+  subsets.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{subsets}}{A \code{list} of \code{SingleCellSubset} objects.}
+\item{\code{subsets}}{A list of \code{AssaySubset} objects.}
 }}
 
