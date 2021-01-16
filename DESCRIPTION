@@ -35,3 +35,10 @@ Suggests:
     TENxPBMCData,
     airway
 VignetteBuilder: knitr
+Collate: 
+    'allClasses.R'
+    'allGenerics.R'
+    'ExperimentSubset.R'
+    'SubsetRangedSummarizedExperiment.R'
+    'SubsetSingleCellExperiment.R'
+    'SubsetSummarizedExperiment.R'
