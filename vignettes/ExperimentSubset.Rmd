@@ -47,7 +47,8 @@ row and column data. Often only a subset of the original data is needed for
 down-stream analysis. For example, filtering out poor quality samples will 
 require excluding some columns before analysis. The `ExperimentSubset` object 
 is a container to efficiently manage different subsets of the same data without 
-having to make separate objects for each new subset. 
+having to make separate objects for each new subset and can be used as a
+drop-in replacement for other experiment classes.
 
 # A Brief Description
 
@@ -67,12 +68,15 @@ simply as if they were using `SingleCellExperiment` container with no change
 required to the existing code. 
 
 # Overview of the `ExperimentSubset` class
+The `ExperimentSubset` package is composed of multiple classes that support
+subsets management capability depending upon the class of the input experiment
+object. The currently supported experiment classes which can be used with
+`ExperimentSubset` include `SummarizedExperiment`, `RangedSummarizedExperiment`
+and `SingleCellExperiment`.
 
-The `ExperimentSubset` class contains two slots, the `root` slot and the
-`subsets` slot. The `root` slot is always an experiment object inherited from
-`SummarizedExperiment` class, while the `subsets` slot is a `list` of subsets
-created from the `root` object.
-
+The `ExperimentSubset` package adds an additional slot `subsets` to the objects
+from these classes which enables support for the creation and management of 
+subsets of data.
 
 ![](es_structure.png)
 
@@ -80,14 +84,14 @@ created from the `root` object.
 Each subset inside the `ExperimentSubset` object (more specifically inside the
 `subsets` slot of the object) is stored as an `AssaySubset` instance. This 
 `AssaySubset` instance creates reference to the row and column indices for this
-particular subset against a parent (which can either be the root object or
+particular subset against a parent (which can be the inherited parent object or
 another subset). In case a new assay is to be stored against a subset, it is 
-stored as a separate experiment object (same class as the `root`) inside the 
-subset. 
+stored as a separate experiment object (same class as the inherited object) 
+inside the subset. 
 
 # Core methods of `ExperimentSubset` class
 
-While all the common methods available with `SummarizedExperiment` and
+While all methods available with `SummarizedExperiment` and
 `SingleCellExperiment` classes have been overridden to support the
 `ExperimentSubset` class with additional support for subsets, some core methods
 for the creation and manipulation of subsets have been provided with the 
@@ -108,6 +112,15 @@ es <- ExperimentSubset(sce)
 es
 ```
 
+Additionally, an `ExperimentSubset` object can also be created directly from
+generally loaded data such as counts matrices, which can be passed to the
+constructor function in a list.
+
+```{r}
+counts <- matrix(rpois(100, lambda = 10), ncol=10, nrow=10)
+ExperimentSubset(list(counts = counts))
+```
+
 ## `createSubset`
 
 The `createSubset` method as evident from the name, creates a subset from an
@@ -117,13 +130,9 @@ already available `assay` in the object. The `subsetName` (a `character` string)
 parameters of the `createSubset` method. If `rowIndices` or `colIndices` are
 `missing` or `NULL`, all of the rows or columns are selected from the specified
 `parentAssay`. If `parentAssay` is `missing` or `NULL`, the first available
-assay from the `root` object is linked as the parent of this subset. The
-`parentAssay` can be an `assay` in the `root` object, a subset or an `assay` 
+assay from the parent object is linked as the parent of this subset. The
+`parentAssay` can be an `assay` in the parent object, a subset or an `assay` 
 within a subset. 
-
-The method accepts an `ExperimentSubset` object or any object inherited
-from `SummarizedExperiment` for immediate conversion and the creation of the
-subset through a single function call.
 
 ```{r}
 es <- createSubset(es, 
@@ -134,18 +143,15 @@ es <- createSubset(es,
 es
 ```
 
-## `setSubsetAssay`
+## `setSubsetAssay` and `getSubsetAssay`
 
-The `setSubsetAssay` method should be used when a subset `assay` needs to be stored
-either in a previously created subset or a new subset. This is specifically
+The `setSubsetAssay` method should be used when a subset `assay` needs to be 
+stored either in a previously created subset. This is specifically
 different from the `createSubset` method which only creates a subset by
 referencing to a defined `parentAssay` where the `internalAssay` of the subset
 has no assays stored. The `setSubsetAssay` method however, is used to store an
 `assay` in this `internalAssay` slot of the subset which in fact is a subset
-experiment object of the same class as the `root` object. Additionally, the
-`setSubsetAssay` method can be used to directly create a subset and then store an
-`assay` inside this subset depending upon the parameters with which the method
-is called.
+experiment object of the same class as the parent object.
 
 ```{r}
 subset1Assay <- assay(es, "subset1")
@@ -161,18 +167,30 @@ The parameters of interest against this method are `subsetName` which specifies
 the name of the subset inside which the an input assay should be stored, 
 `inputMatrix` which is a matrix-type object to be stored as an assay inside a 
 subset specified by the `subsetName` parameter and lastly the `subsetAssayName`
-parameter which represents the name of the new assay. If `subsetAssayName` is 
-set to `NULL`, a new subset is created and the `inputMatrix` is stored inside
-the new subset.
+parameter which represents the name of the new assay.
+
+To get a subset assay, `getSubsetAssay` method can be used:
+
+```{r}
+#get assay from 'subset1'
+getSubsetAssay(es, "subset1")
+
+#get internal 'subset1Assay'
+getSubsetAssay(es, "subset1Assay")
+```
+
+Apart from `setSubsetAssay` and `getSubsetAssay` methods, `assay` and `assay<-`
+methods can also be used for the same purpose. Their usage has been described
+in the overridden methods section below.
 
 ## `subsetSummary`
 
 The `subsetSummary` method displays an overall summary of the 
-`ExperimentSubset` object including the assays in the `root` object, the list
+`ExperimentSubset` object including the assays in the parent object, the list
 of subsets along with the stored assays, reduced dimensions, alt experiments
 and other supplementary information that may help the users understand the
 current condition of the object. The most important piece of information
-displayed by this method is the hierarchical parent-subset link against each
+displayed by this method is the hierarchical 'parent-subset' link against each
 subset in the object.
 
 ```{r}
@@ -181,30 +199,93 @@ subsetSummary(es)
 
 ## Additional helper methods
 
-Some additional helper methods are available for the users to use during
-certain circumstances such as during iteration of all subsets. These methods
-include `subsetNames` that returns a `character` `vector` of all available
-subsets, `subsetAssayNames` that returns a `character` `vector` of all available
-subsets and the assays within these subsets, `subsetCount` that returns the
-count of the subsets, `subsetAssayCount` that returns the total count of the sum
-of the subsets and the assays within these subsets, `subsetDim` that returns the
-dimensions of a subset and lastly the `subsetParent` method that returns a 
-`character` `list` of complete parent hierarchy of a subset.
+Helper methods have been provided for use by the users during specific
+circumstances while manipulating subsets of data. These helper methods and 
+their short descriptions are given below:
 
-## Overriden methods for `ExperimentSubset` class
+1. `subsetNames` Returns the names of all available subsets (excluding internal subset assays)
+2. `subsetAssayNames` Returns the names of all available subsets (including internal subset assays)
+3. `subsetCount` Returns the total count of the subsets (excluding internal subset assays)
+4. `subsetAssayCount` Returns the total count of the subsets (including internal subset assays)
+5. `subsetDim` Returns the dimensions of a specified subset
+6. `subsetColData` Gets or sets colData from/to a subset
+7. `subsetRowData` Gets or sets rowData from/to a subset
+8. `subsetColnames` Gets or sets colnames from/to a subset
+9. `subsetRownames` Gets or sets rownames from/to a subset
+10. `subsetParent` Returns the 'subset-parent` link of a specified subset
+11. `setSubsetAssay` Sets an assay to a subset
+12. `getSubsetAssay` Gets an assay from a subset
+
+## Overridden methods for `ExperimentSubset` class
 
 These are the methods that have been overridden from other classes to support
 the subset feature of the `ExperimentSubset` objects by introducing an
 additional parameter `subsetName` to these methods. These methods can simply
-be called on any `ExperimentSubset` object to get or set from the `root` object
+be called on any `ExperimentSubset` object to get or set from the parent object
 or from any subset by passing the optional `subsetName` parameter.
 
-The methods include `assay`, `assay<-`, `rowData`, `rowData<-`, `colData`,
+The methods include `rowData`, `rowData<-`, `colData`,
 `colData<-`, `metadata`, `metadata<-`, `reducedDim`, `reducedDim<-`, 
 `reducedDims`, `reducedDims<-`, `reducedDimNames`, `reducedDimNames<-`,
-`altExp`, `altExp<-`, `altExps`, `altExps<-`, `altExpNames`, `altExpNames<-`,
-`rownames`, `rownames<-`, `colnames` and `colnames<-`. All of the methods
-can be used with the subsets by providing the optional `subsetName` parameter.
+`altExp`, `altExp<-`, `altExps`, `altExps<-`, `altExpNames` and `altExpNames<-`.
+All of the methods can be used with the subsets by providing the optional 
+`subsetName` parameter.
+
+An exception to the above approach is the use of `assay` and `assay<-` methods,
+both of which have a slightly different usage as described below: 
+
+Because the `assay<-` setter method in the case of a subset needs to store the 
+assay inside the subset, we need to specify the subset name inside which the
+assay should be stored as `i` parameter and define the new name of the subset
+assay as the additional `subsetAssayName` parameter.
+
+```{r}
+#creating a dummy ES object
+counts <- matrix(rpois(100, lambda = 10), ncol=10, nrow=10)
+sce <- SingleCellExperiment(list(counts = counts))
+es <- ExperimentSubset(sce)
+
+#create a subset
+es <- createSubset(es, subsetName = "subset1", rows = c(1:2), cols = c(1:4))
+
+#store an assay inside the newly created 'subset1'
+#note that 'assay<-' setter has two important parameters 'x' and 'i' where
+#'x' is the object and 'i' is the assay name, but in the case of storing to a
+#subset we use 'x' as the object, 'i' as the subset name inside which the assay
+#should be stored and an additional 'subsetAssayName' parameter which defines
+#the name of the new assay
+assay(
+  x = es, 
+  i = "subset1", 
+  subsetAssayName = "subset1InternalAssay") <- matrix(rpois(100, lambda = 10), 
+                                                      ncol=4, nrow=2)
+```
+
+Using `assay` getter method is simple, as no additional parameter is required
+unlike in the setter method. 
+
+```{r}
+#assay getter has parameters 'x' which is the input object, 'i' which can either
+#be a assay name in the parent object, a subset name or a subset assay name
+
+#getting 'counts' from parent es object
+assay(
+  x = es,
+  i = "counts"
+)
+
+#getting just the 'subset1' from es object
+assay(
+  x = es,
+  i = "subset1"
+)
+
+#getting the 'subset1InternalAssay' from inside the 'subset1'
+assay(
+  x = es,
+  i = "subset1InternalAssay"
+)
+```
 
 # Using the `ExperimentSubset` object: A toy example
 
@@ -349,65 +430,63 @@ subsetSummary(es)
 1. `ExperimentSubset` constructor
 2. `createSubset`
 3. `setSubsetAssay`
-4. `subsetSummary`
-5. `subsetParent`
-6. `subsetCount`
-7. `subsetAssayCount`
-8. `subsetNames`
-9. `subsetAssayNames`
-10. `subsetDim`
-11. `subsetRowData`
-12. `subsetColData`
-13. `show`
-14. `assay`
-15. `assay<-`
-16. `rowData` 
-17. `rowData<-`
-18. `colData`
-19. `colData<-`
-20. `metadata`
-21. `metadata<-`
-22. `reducedDim`
-23. `reducedDim<-`
-24. `reducedDims`
-25. `reducedDims<-`
-26. `reducedDimNames`
-27. `reducedDimNames<-`,
-28. `altExp`
-29. `altExp<-`
-30. `altExps`
-31. `altExps<-`
-32. `altExpNames`
-33. `altExpNames<-`
-34. `rownames`
-35. `rownames<-`
-36. `colnames`
-37. `colnames<-`
+4. `getSubsetAssay`
+5. `subsetSummary`
+6. `subsetParent`
+7. `subsetCount`
+8. `subsetAssayCount`
+9. `subsetNames`
+10. `subsetAssayNames`
+11. `subsetDim`
+12. `subsetRowData`
+13. `subsetColData`
+14. `subsetColnames`
+15. `subsetRownames`
+16. `show`
+17. `assay`
+18. `assay<-`
+19. `rowData` 
+20. `rowData<-`
+21. `colData`
+22. `colData<-`
+23. `metadata`
+24. `metadata<-`
+25. `reducedDim`
+26. `reducedDim<-`
+27. `reducedDims`
+28. `reducedDims<-`
+29. `reducedDimNames`
+30. `reducedDimNames<-`
+31. `altExp`
+32. `altExp<-`
+33. `altExps`
+34. `altExps<-`
+35. `altExpNames`
+36. `altExpNames<-`
 
 # Implementation Details
 
 The internal structure of an `ExperimentSubset` class is described 
 below:
 
-## `root` slot
+## Inherited parent object
 
-The `root` slot of an `ExperimentSubset` object must be an experiment object
-inherited from `SummarizedExperiment` or `SingleCellExperiment` and acts as the
-root or the first immediate parent of any subset that is created initially. The 
-`ExperimentSubset`object can be used in a fashion similar to 
-`SummarizedExperiment` with all the common methods that have been overridden to
-support the manipulation of `ExperimentSubset` objects (with or without subsets)
-including `assay`, `rowData` and `colData`. Even though all of these methods 
-can be used with either `ExperimentSubset` or other experiment objects directly,
-the accessible `root` slot offers a convenient way to manipulate the original
-object if required by the user.
+The `ExperimentSubset` object during creation is assigned one of the classes
+from `SubsetSummarizedExperiment`, `SubsetRangedSummarizedExperiment` or
+`SubsetSingleCellExperiment` which inherit from the class of the input object.
+This ensures that `ExperimentSubset` object can be manipulated in a fashion
+similar to the input object class and so can be used as a drop-in replacement
+for these classes. All methods that are compatible with the input object class
+are compatible with the `ExperimentSubset` objects as well.
 
-## `subsets` slot
+## Additional `subsets` slot
 
-The `subsets` slot of the `ExperimentSubset` object is a `list`, where each 
-element in this list is an object of an internal `AssaySubset` class. Each
-element represents one subset linked to the experiment object in the `root` 
-slot. The structure of each subset is described below:
+The `subsets` slot of the `ExperimentSubset` object is a `SimpleList`, where 
+each element in this list is an object of an internal `AssaySubset` class. 
+The slot itself is not directly accessible to the users and should be accessed
+through the provided methods of the `ExperimentSubset` package. Each element 
+represents one subset linked to the experiment object in the parent object. 
+The structure of each subset is described below:
 
 ### `subsetName`
 
@@ -426,12 +505,12 @@ linked parent assay for this subset.
 ### `parentAssay`
 
 A `character` string that stores the name of the immediate parent to which the
-subset is linked. The `parentAssay` can be an `assay` in the `root` slot of the
+subset is linked. The `parentAssay` can be an `assay` in the parent
 `ExperimentSubset` object or any subset or any `internalAssay` of a subset.
 
 ### `internalAssay`
 
-The `internalAssay` slot stores an experiment object of same type as the `root`
+The `internalAssay` slot stores an experiment object of same type as the input
 object but with the dimensions of the subset. The `internalAssay` is initially
 an empty experiment object with only dimensions set to enable manipulation, but
 can be used to store additional data against a subset such as `assay`, 
