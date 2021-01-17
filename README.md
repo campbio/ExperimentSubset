@@ -6,6 +6,12 @@ https://github.com/irzamsarfraz/SpatialExperiment
 
 ## Setting up SpatialExperiment & VisiumExperiment objects
 ```
+#loading libraries
+library("SpatialExperiment")
+library("Matrix")
+library("rjson")
+
+
 #Setting up SpatialExperiment object as described in the official vignette
 
 fishCoordFile <- system.file(file.path("extdata", "seqFISH",
@@ -72,19 +78,46 @@ ve <- VisiumExperiment(rowData=featuresEx, colData=barcodesEx,
 
 ## Creating ExperimentSubset object from SpatialExperiment
 ```
-es <- ExperimentSubset(se)
+ExperimentSubset(se)
 ```
 
 Output:
 ```
-
+class: SubsetSpatialExperiment 
+dim: 113 1597 
+metadata(0):
+assays(1): counts
+rownames(113): abca15 abca9 ... zfp715 zfp90
+rowData names(1): X
+colnames(1597): V2 V3 ... V1597 V1598
+colData names(6): Cell_ID cluster ... Irrelevant Prob
+reducedDimNames(0):
+altExpNames(0):
+spatialCoords(4): Cell_ID Irrelevant x y
+subsets(0): 
+subsetAssays(0): 
 ```
 
 ## Creating ExperimentSubset object from VisiumExperiment
 ```
-es <- ExperimentSubset(ve)
+ExperimentSubset(ve)
 ```
 
 Output:
 ```
+class: SubsetVisiumExperiment 
+dim: 50 50 
+metadata(0):
+assays(1): counts
+rownames: NULL
+rowData names(3): Feature_ID Feature_name Feature_type
+colnames: NULL
+colData names(1): Cell_ID
+reducedDimNames(0):
+altExpNames(0):
+spatialCoords(6): Cell_ID in_tissue ... pxl_col_in_fullres pxl_row_in_fullres
+inTissue(1): 22
+imagePaths(0):
+subsets(0): 
+subsetAssays(0):
 ```
