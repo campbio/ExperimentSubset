@@ -78,7 +78,8 @@ ve <- VisiumExperiment(rowData=featuresEx, colData=barcodesEx,
 
 ## Creating ExperimentSubset object from SpatialExperiment
 ```
-ExperimentSubset(se)
+es <- ExperimentSubset(se)
+es
 ```
 
 Output:
@@ -100,7 +101,8 @@ subsetAssays(0):
 
 ## Creating ExperimentSubset object from VisiumExperiment
 ```
-ExperimentSubset(ve)
+es <- ExperimentSubset(ve)
+es
 ```
 
 Output:
@@ -121,3 +123,30 @@ imagePaths(0):
 subsets(0): 
 subsetAssays(0):
 ```
+
+## Creating a subset from es object (from ve)
+```
+es <- createSubset(es, "subset1", cols = c(1:30))
+es
+```
+
+Output:
+```
+class: SubsetVisiumExperiment 
+dim: 50 50 
+metadata(0):
+assays(1): counts
+rownames: NULL
+rowData names(3): Feature_ID Feature_name Feature_type
+colnames: NULL
+colData names(1): Cell_ID
+reducedDimNames(0):
+altExpNames(0):
+spatialCoords(6): Cell_ID in_tissue ... pxl_col_in_fullres pxl_row_in_fullres
+inTissue(1): 22
+imagePaths(0):
+subsets(1): subset1
+subsetAssays(1): subset1
+```
+
+
