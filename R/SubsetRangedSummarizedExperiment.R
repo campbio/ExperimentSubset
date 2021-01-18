@@ -257,6 +257,28 @@ setReplaceMethod(
   }
 )
 
+#' @rdname subsetColData
+setReplaceMethod(
+  f = "subsetColData",
+  signature = c(x = "SubsetRangedSummarizedExperiment", subsetName = "character", value = "DataFrame"),
+  definition = function(x, subsetName, value)
+  {
+    .subsetColData(x, subsetName) <- value
+    return(x)
+  }
+)
+
+#' @rdname subsetRowData
+setReplaceMethod(
+  f = "subsetRowData",
+  signature = c(x = "SubsetRangedSummarizedExperiment", subsetName = "character", value = "DataFrame"),
+  definition = function(x, subsetName, value)
+  {
+    .subsetRowData(x, subsetName) <- value
+    return(x)
+  }
+)
+
 #' @rdname getSubsetAssay
 setMethod(
   f = "getSubsetAssay",

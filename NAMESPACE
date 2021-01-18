@@ -2,7 +2,9 @@
 
 export("reducedDimNames<-")
 export("reducedDims<-")
+export("subsetColData<-")
 export("subsetColnames<-")
+export("subsetRowData<-")
 export("subsetRownames<-")
 export(ExperimentSubset)
 export(createSubset)

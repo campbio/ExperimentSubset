@@ -407,25 +407,8 @@ ExperimentSubset <- function(x,
 }
 
 .subsetRowData <- function(x, subsetName){
-  if (subsetName %in% subsetNames(x)) {
-    #is a subset
-    out <-
-      rowData(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
-    out <-
-      cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
-  }
-  else if (subsetName %in% subsetAssayNames(x)) {
-    #is a subset assay
-    subsetName <- .getParentAssayName(x, subsetName)
-    out <-
-      rowData(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
-    out <-
-      cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
-  }
-  else{
-    #neither a subset nor a subset assay
-    stop("Neither a subset nor a subsetAssay.")
-  }
+  out <- rowData(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+  out <- cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
   return(out)
 }
 
@@ -438,26 +421,45 @@ ExperimentSubset <- function(x,
 }
 
 .subsetColData <- function(x, subsetName){
-  if (subsetName %in% subsetNames(x)) {
-    #is a subset
-    out <-
-      colData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
-    out <-
-      cbind(out, colData(.internalAssay(.subsets(x)[[subsetName]])))
-  }
-  else if (subsetName %in% subsetAssayNames(x)) {
-    #is a subset assay
-    subsetName <- .getParentAssayName(x, subsetName)
-    out <-
-      colData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
-    out <-
-      cbind(out, colData(.internalAssay(.subsets(x)[[subsetName]])))
+  out <- colData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+  out <- cbind(out, colData(.internalAssay(.subsets(x)[[subsetName]])))
+  return(out)
+}
+
+'.subsetColData<-' <- function(x, subsetName, value){
+  if(!any(colnames(value) %in% colnames(colData(x)))){
+    colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   }
   else{
-    #neither a subset nor a subset assay
-    stop("Neither a subset nor a subsetAssay.")
+    message("Some columns in the input colData have same colnames as the colData in parent object. These columns will not be stored separately against the specified subset. If you want to override, use unique colnames in the input DataFrame.")
+    selectedCols <- colnames(value)[which(!colnames(value) %in% colnames(colData(x)) == TRUE)]
+    if(length(selectedCols) == 1){
+      colData(.internalAssay(.subsets(x)[[subsetName]])) <- S4Vectors::DataFrame(temp = value[, !colnames(value) %in% colnames(colData(x))])
+      colnames(colData(.internalAssay(.subsets(x)[[subsetName]]))) <- selectedCols
+    }
+    else{
+      colData(.internalAssay(.subsets(x)[[subsetName]])) <- value[, !colnames(value) %in% colnames(colData(x))]
+    }
   }
-  return(out)
+  return(x)
+}
+
+'.subsetRowData<-' <- function(x, subsetName, value){
+  if(!any(colnames(value) %in% colnames(rowData(x)))){
+    rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
+  }
+  else{
+    message("Some columns in the input rowData have same colnames as the rowData in parent object. These columns will not be stored separately against the specified subset. If you want to override, use unique colnames in the input DataFrame.")
+    selectedCols <- colnames(value)[which(!colnames(value) %in% colnames(rowData(x)) == TRUE)]
+    if(length(selectedCols) == 1){
+      rowData(.internalAssay(.subsets(x)[[subsetName]])) <- S4Vectors::DataFrame(temp = value[, !colnames(value) %in% colnames(rowData(x))])
+      colnames(rowData(.internalAssay(.subsets(x)[[subsetName]]))) <- selectedCols
+    }
+    else{
+      rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value[, !colnames(value) %in% colnames(rowData(x))]
+    }
+  }
+  return(x)
 }
 
 #' @importMethodsFrom SingleCellExperiment reducedDim
@@ -515,7 +517,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  subsetRowData(x, subsetName)
+  .subsetRowData(x, subsetName)
 }
 
 .colData <- function(x, ...){
@@ -524,7 +526,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  subsetColData(x, subsetName)
+  .subsetColData(x, subsetName)
 }
 
 #' @importMethodsFrom SummarizedExperiment rowData<-
@@ -534,7 +536,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
+  .subsetRowData(x, subsetName) <- value
   return(x)
 }
 
@@ -545,7 +547,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
+  .subsetColData(x, subsetName) <- value
   return(x)
 }
 

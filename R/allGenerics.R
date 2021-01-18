@@ -323,6 +323,42 @@ setGeneric(
   }
 )
 
+#' @title Setter method for colData to subsets in ExperimentSubset objects
+#' @description Set \code{colData} to a subset.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to set
+#'   \code{colData} to.
+#' @param value Input \code{DataFrame} to store.
+#' @return Input object with \code{colData} stored.
+#' @rdname subsetColData
+#' @importMethodsFrom SingleCellExperiment colData
+#' @export
+setGeneric(
+  name = "subsetColData<-",
+  def = function(x, subsetName, value)
+  {
+    standardGeneric("subsetColData<-")
+  }
+)
+
+#' @title Setter method for rowData to subsets in ExperimentSubset objects
+#' @description Set \code{rowData} to a subset.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to set
+#'   \code{rowData} to.
+#' @param value Input \code{DataFrame} to store.
+#' @return Input object with \code{rowData} stored.
+#' @rdname subsetRowData
+#' @importMethodsFrom SingleCellExperiment rowData
+#' @export
+setGeneric(
+  name = "subsetRowData<-",
+  def = function(x, subsetName, value)
+  {
+    standardGeneric("subsetRowData<-")
+  }
+)
+
 #' @title reducedDims<-
 #' @description A wrapper to the \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.

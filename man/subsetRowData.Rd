@@ -4,28 +4,46 @@
 %   R/SubsetSummarizedExperiment.R
 \name{subsetRowData}
 \alias{subsetRowData}
+\alias{subsetRowData<-}
 \alias{subsetRowData,SubsetRangedSummarizedExperiment,character-method}
+\alias{subsetRowData<-,SubsetRangedSummarizedExperiment,character,DataFrame-method}
 \alias{subsetRowData,SubsetSingleCellExperiment,character-method}
+\alias{subsetRowData<-,SubsetSingleCellExperiment,character,DataFrame-method}
+\alias{subsetRowData<-,SubsetSummarizedExperiment,character,DataFrame-method}
 \alias{subsetRowData,SubsetSummarizedExperiment,character-method}
 \title{Accessor method for rowData from subsets in ExperimentSubset objects}
 \usage{
 subsetRowData(x, subsetName)
 
+subsetRowData(x, subsetName) <- value
+
 \S4method{subsetRowData}{SubsetRangedSummarizedExperiment,character}(x, subsetName)
 
+\S4method{subsetRowData}{SubsetRangedSummarizedExperiment,character,DataFrame}(x, subsetName) <- value
+
 \S4method{subsetRowData}{SubsetSingleCellExperiment,character}(x, subsetName)
+
+\S4method{subsetRowData}{SubsetSingleCellExperiment,character,DataFrame}(x, subsetName) <- value
+
+\S4method{subsetRowData}{SubsetSummarizedExperiment,character,DataFrame}(x, subsetName) <- value
 
 \S4method{subsetRowData}{SubsetSummarizedExperiment,character}(x, subsetName)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{\code{character(1)} Name of the subset to get
-\code{rowData} from.}
+\item{subsetName}{\code{character(1)} Name of the subset to set
+\code{rowData} to.}
+
+\item{value}{Input \code{DataFrame} to store.}
 }
 \value{
 The \code{rowData} from input object.
+
+Input object with \code{rowData} stored.
 }
 \description{
 Get \code{rowData} from a subset.
+
+Set \code{rowData} to a subset.
 }
