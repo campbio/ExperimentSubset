@@ -431,7 +431,7 @@ ExperimentSubset <- function(x,
     colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   }
   else{
-    message("Some columns in the input colData have same colnames as the colData in parent object. These columns will not be stored separately against the specified subset. If you want to override, use unique colnames in the input DataFrame.")
+    message("Some columns in the input DataFrame have same colnames as the colData in parent object. These columns will not be stored separately against the specified subset. If you want to override, use unique colnames in the input DataFrame.")
     selectedCols <- colnames(value)[which(!colnames(value) %in% colnames(colData(x)) == TRUE)]
     if(length(selectedCols) == 1){
       colData(.internalAssay(.subsets(x)[[subsetName]])) <- S4Vectors::DataFrame(temp = value[, !colnames(value) %in% colnames(colData(x))])
@@ -449,7 +449,7 @@ ExperimentSubset <- function(x,
     rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   }
   else{
-    message("Some columns in the input rowData have same colnames as the rowData in parent object. These columns will not be stored separately against the specified subset. If you want to override, use unique colnames in the input DataFrame.")
+    message("Some columns in the input DataFrame have same colnames as the rowData in parent object. These columns will not be stored separately against the specified subset. If you want to override, use unique colnames in the input DataFrame.")
     selectedCols <- colnames(value)[which(!colnames(value) %in% colnames(rowData(x)) == TRUE)]
     if(length(selectedCols) == 1){
       rowData(.internalAssay(.subsets(x)[[subsetName]])) <- S4Vectors::DataFrame(temp = value[, !colnames(value) %in% colnames(rowData(x))])
