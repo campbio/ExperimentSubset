@@ -94,7 +94,7 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
   testthat::expect_equal(length(subsetColnames(es, "newS2")), 8)
   colData(es, subsetName = "s2") <- cbind(colData(es, subsetName = "s2"), 
                                           DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[2]))))
-  testthat::expect_equal(ncol(colData(es, subsetName = "s2")), 10)
+  testthat::expect_equal(ncol(colData(es, subsetName = "s2", parentColData = TRUE)), 10)
   rowData(es, subsetName = "s2") <- cbind(rowData(es, subsetName = "s2"), 
                                           DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[1]))))
   testthat::expect_equal(ncol(rowData(es, subsetName = "s2")), 1)
@@ -212,10 +212,10 @@ testthat::test_that("Testing rownames, colnames, rowData and colData",{
                          "subset1Internal subset does not exist.")
   rowData(es, subsetName = "subset1") <- DataFrame(col1 = c(seq(subsetDim(es, subsetName = "subset1")[1])))
   colData(es, subsetName = "subset1") <- DataFrame(col1 = c(seq(subsetDim(es, subsetName = "subset1")[2])))
-  expect_equal(ncol(rowData(es, subsetName = "subset1")), 2)
-  expect_equal(nrow(rowData(es, subsetName = "subset1")), subsetDim(es, subsetName = "subset1")[1])
-  expect_equal(ncol(colData(es, subsetName = "subset1")), 12)
-  expect_equal(nrow(rowData(es, subsetName = "subset1")), subsetDim(es, subsetName = "subset1")[2])
+  expect_equal(ncol(rowData(es, subsetName = "subset1", parentRowData = TRUE)), 2)
+  expect_equal(nrow(rowData(es, subsetName = "subset1", parentRowData = TRUE)), subsetDim(es, subsetName = "subset1")[1])
+  expect_equal(ncol(colData(es, subsetName = "subset1", parentColData = TRUE)), 12)
+  expect_equal(nrow(rowData(es, subsetName = "subset1", parentColData = TRUE)), subsetDim(es, subsetName = "subset1")[2])
 })
 
 testthat::test_that("Testing subset helper/supplementary functions",{

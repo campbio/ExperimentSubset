@@ -294,13 +294,15 @@ setGeneric(
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{rowData} from.
+#' @param parentRowData \code{logical(1)} Logical value indicating if parent
+#'   rowData should be combined or not. Default \code{FALSE}.
 #' @return The \code{rowData} from input object.
 #' @rdname subsetRowData
 #' @importMethodsFrom SingleCellExperiment rowData
 #' @export
 setGeneric(
   name = "subsetRowData",
-  def = function(x, subsetName)
+  def = function(x, subsetName, parentRowData)
   {
     standardGeneric("subsetRowData")
   }
@@ -311,13 +313,15 @@ setGeneric(
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{colData} from.
+#' @param parentColData \code{logical(1)} Logical value indicating if parent
+#'   colData should be combined or not. Default \code{FALSE}.
 #' @return The \code{colData} from input object.
 #' @rdname subsetColData
 #' @importMethodsFrom SingleCellExperiment colData
 #' @export
 setGeneric(
   name = "subsetColData",
-  def = function(x, subsetName)
+  def = function(x, subsetName, parentColData)
   {
     standardGeneric("subsetColData")
   }

@@ -237,20 +237,20 @@ setMethod(
 #' @rdname subsetRowData
 setMethod(
   f = "subsetRowData",
-  signature = c("SubsetSummarizedExperiment", "character"),
-  definition = function(x, subsetName)
+  signature = c(x = "SubsetSummarizedExperiment", subsetName = "character"),
+  definition = function(x, subsetName, parentRowData)
   {
-    .subsetRowData(x, subsetName)
+    .subsetRowData(x, subsetName, parentRowData)
   }
 )
 
 #' @rdname subsetColData
 setMethod(
   f = "subsetColData",
-  signature = c("SubsetSummarizedExperiment", "character"),
-  definition = function(x, subsetName)
+  signature = c(x = "SubsetSummarizedExperiment", subsetName = "character"),
+  definition = function(x, subsetName, parentColData)
   {
-    .subsetColData(x, subsetName)
+    .subsetColData(x, subsetName, parentColData)
   }
 )
 

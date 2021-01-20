@@ -406,12 +406,6 @@ ExperimentSubset <- function(x,
   return(x)
 }
 
-.subsetRowData <- function(x, subsetName){
-  out <- rowData(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
-  out <- cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
-  return(out)
-}
-
 .getParentAssayName <- function(x, childAssayName) {
   for (i in seq(length(.subsets(x)))) {
     if (childAssayName %in% SummarizedExperiment::assayNames(.internalAssay(.subsets(x)[[i]]))) {
@@ -420,45 +414,35 @@ ExperimentSubset <- function(x,
   }
 }
 
-.subsetColData <- function(x, subsetName){
-  out <- colData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+.subsetRowData <- function(x, subsetName, parentRowData){
+  if(missing(parentRowData)
+     || is.null(parentRowData))
+    parentRowData = FALSE
+  out <- S4Vectors::DataFrame(row.names = seq(subsetDim(x, subsetName)[1]))
+  if(parentRowData)
+    out <- rowData(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+  out <- cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
+  return(out)
+}
+
+.subsetColData <- function(x, subsetName, parentColData){
+  if(missing(parentColData)
+     || is.null(parentColData))
+    parentColData = FALSE
+  out <- S4Vectors::DataFrame(row.names = seq(subsetDim(x, subsetName)[2]))
+  if(parentColData)
+    out <- colData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
   out <- cbind(out, colData(.internalAssay(.subsets(x)[[subsetName]])))
   return(out)
 }
 
 '.subsetColData<-' <- function(x, subsetName, value){
-  if(!any(colnames(value) %in% colnames(colData(x)))){
-    colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
-  }
-  else{
-    message("Some columns in the input DataFrame have same colnames as the colData in parent object. These columns will not be stored separately against the specified subset. If you want to override, use unique colnames in the input DataFrame.")
-    selectedCols <- colnames(value)[which(!colnames(value) %in% colnames(colData(x)) == TRUE)]
-    if(length(selectedCols) == 1){
-      colData(.internalAssay(.subsets(x)[[subsetName]])) <- S4Vectors::DataFrame(temp = value[, !colnames(value) %in% colnames(colData(x))])
-      colnames(colData(.internalAssay(.subsets(x)[[subsetName]]))) <- selectedCols
-    }
-    else{
-      colData(.internalAssay(.subsets(x)[[subsetName]])) <- value[, !colnames(value) %in% colnames(colData(x))]
-    }
-  }
+  colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
 '.subsetRowData<-' <- function(x, subsetName, value){
-  if(!any(colnames(value) %in% colnames(rowData(x)))){
-    rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
-  }
-  else{
-    message("Some columns in the input DataFrame have same colnames as the rowData in parent object. These columns will not be stored separately against the specified subset. If you want to override, use unique colnames in the input DataFrame.")
-    selectedCols <- colnames(value)[which(!colnames(value) %in% colnames(rowData(x)) == TRUE)]
-    if(length(selectedCols) == 1){
-      rowData(.internalAssay(.subsets(x)[[subsetName]])) <- S4Vectors::DataFrame(temp = value[, !colnames(value) %in% colnames(rowData(x))])
-      colnames(rowData(.internalAssay(.subsets(x)[[subsetName]]))) <- selectedCols
-    }
-    else{
-      rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value[, !colnames(value) %in% colnames(rowData(x))]
-    }
-  }
+  rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -516,8 +500,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
+  parentRowData = arglist[["parentRowData"]]
   .isSubset(x, subsetName)
-  .subsetRowData(x, subsetName)
+  .subsetRowData(x, subsetName, parentRowData)
 }
 
 .colData <- function(x, ...){
@@ -525,8 +510,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
+  parentColData = arglist[["parentColData"]]
   .isSubset(x, subsetName)
-  .subsetColData(x, subsetName)
+  .subsetColData(x, subsetName, parentColData)
 }
 
 #' @importMethodsFrom SummarizedExperiment rowData<-

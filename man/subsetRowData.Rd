@@ -13,27 +13,30 @@
 \alias{subsetRowData,SubsetSummarizedExperiment,character-method}
 \title{Accessor method for rowData from subsets in ExperimentSubset objects}
 \usage{
-subsetRowData(x, subsetName)
+subsetRowData(x, subsetName, parentRowData)
 
 subsetRowData(x, subsetName) <- value
 
-\S4method{subsetRowData}{SubsetRangedSummarizedExperiment,character}(x, subsetName)
+\S4method{subsetRowData}{SubsetRangedSummarizedExperiment,character}(x, subsetName, parentRowData)
 
 \S4method{subsetRowData}{SubsetRangedSummarizedExperiment,character,DataFrame}(x, subsetName) <- value
 
-\S4method{subsetRowData}{SubsetSingleCellExperiment,character}(x, subsetName)
+\S4method{subsetRowData}{SubsetSingleCellExperiment,character}(x, subsetName, parentRowData)
 
 \S4method{subsetRowData}{SubsetSingleCellExperiment,character,DataFrame}(x, subsetName) <- value
 
 \S4method{subsetRowData}{SubsetSummarizedExperiment,character,DataFrame}(x, subsetName) <- value
 
-\S4method{subsetRowData}{SubsetSummarizedExperiment,character}(x, subsetName)
+\S4method{subsetRowData}{SubsetSummarizedExperiment,character}(x, subsetName, parentRowData)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
 \item{subsetName}{\code{character(1)} Name of the subset to set
 \code{rowData} to.}
+
+\item{parentRowData}{\code{logical(1)} Logical value indicating if parent
+rowData should be combined or not. Default \code{FALSE}.}
 
 \item{value}{Input \code{DataFrame} to store.}
 }
