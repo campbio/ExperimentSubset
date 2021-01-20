@@ -60,12 +60,12 @@ one the most widely used containers for Single-Cell data. However, in addition
 to the features offered by `SingleCellExperiment` container, `ExperimentSubset` 
 offers subsetting features while hiding the implementation details from the 
 users. It does so by creating references to the subset `rows` and `columns` 
-instead of storing a new assay whenever possible. Functions from 
-`SingleCellExperiment` such as `assay`, `rowData` and `colData` can be used for 
-regular assays as one would normally do, as well as with newly created subsets
-of the data. This allows the users to use the `ExperimentSubset` container 
-simply as if they were using `SingleCellExperiment` container with no change 
-required to the existing code. 
+instead of storing a new assay whenever possible instead of actually copying
+the redundant data. Functions from `SingleCellExperiment` such as `assay`, 
+`rowData` and `colData` can be used for regular assays as one would normally do,
+as well as with newly created subsets of the data. This allows the users to use 
+the `ExperimentSubset` container simply as if they were using 
+`SingleCellExperiment` container with no change required to the existing code. 
 
 # Overview of the `ExperimentSubset` class
 The `ExperimentSubset` package is composed of multiple classes that support
@@ -216,6 +216,42 @@ their short descriptions are given below:
 11. `setSubsetAssay` Sets an assay to a subset
 12. `getSubsetAssay` Gets an assay from a subset
 
+### subsetColData & subsetRowData
+
+Both `subsetColData` and `subsetrowData` getter methods take in an additional 
+logical parameter `parentColData` or `parentRowData` that specifies if the 
+returned 'colData' or 'rowData' should include the 'colData' and 'rowData' 
+from the parent object as well. By default, `parentColData` and `parentRowData` 
+parameters are set to `FALSE`. Same applies to the usage of inherited `rowData` 
+and `colData` methods.
+
+```{r}
+#store colData to parent object
+colData(es) <- cbind(colData(es), sampleID = seq(1:dim(es)[2]))
+
+#store colData to 'subset1' using option 1
+colData(es, subsetName = "subset1") <- cbind(
+  colData(es, subsetName = "subset1"), 
+  subsetSampleID1 = seq(1:subsetDim(es, "subset1")[2]))
+
+#store colData to 'subset1' using option 2
+subsetColData(es, "subset1") <- cbind(
+  subsetColData(es, "subset1"), 
+  subsetSampleID2 = seq(1:subsetDim(es, "subset1")[2]))
+
+#get colData from 'subset1' without parent colData
+subsetColData(es, "subset1", parentColData = FALSE)
+
+#get colData from 'subset1' with parent colData
+subsetColData(es, "subset1", parentColData = TRUE)
+
+#same applies to `colData` and `rowData` methods when using with subsets
+colData(es, subsetName = "subset1", parentColData = FALSE) #without parent data
+colData(es, subsetName = "subset1", parentColData = TRUE) #with parent data
+
+```
+
+
 ## Overridden methods for `ExperimentSubset` class
 
 These are the methods that have been overridden from other classes to support
@@ -231,6 +267,7 @@ The methods include `rowData`, `rowData<-`, `colData`,
 All of the methods can be used with the subsets by providing the optional 
 `subsetName` parameter.
 
+### assay-get & assay-set inherited methods
 An exception to the above approach is the use of `assay` and `assay<-` methods,
 both of which have a slightly different usage as described below: 
 
