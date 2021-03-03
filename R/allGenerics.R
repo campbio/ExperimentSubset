@@ -482,3 +482,41 @@ setGeneric(
     standardGeneric("reducedDimNames<-")
   }
 )
+
+#' @title Accessor method for rowLinks from subsets in ExperimentSubset objects
+#' @description Get \code{rowLinks} from a subset.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{rowLinks} from.
+#' @param parentRowLinkData \code{logical(1)} Logical value indicating if parent
+#'   rowLinks should be combined or not. Default \code{FALSE}.
+#' @return The \code{rowLinks} from input object.
+#' @rdname subsetRowLinks
+#' @importMethodsFrom TreeSummarizedExperiment rowLinks
+#' @export
+setGeneric(
+  name = "subsetRowLinks",
+  def = function(x, subsetName, parentRowLinkData)
+  {
+    standardGeneric("subsetRowLinks")
+  }
+)
+
+#' @title Accessor method for colLinks from subsets in ExperimentSubset objects
+#' @description Get \code{colLinks} from a subset.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{colLinks} from.
+#' @param parentColLinkData \code{logical(1)} Logical value indicating if parent
+#'   colLinks should be combined or not. Default \code{FALSE}.
+#' @return The \code{colLinks} from input object.
+#' @rdname subsetColLinks
+#' @importMethodsFrom TreeSummarizedExperiment colLinks
+#' @export
+setGeneric(
+  name = "subsetColLinks",
+  def = function(x, subsetName, parentColLinkData)
+  {
+    standardGeneric("subsetColLinks")
+  }
+)

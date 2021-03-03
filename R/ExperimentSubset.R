@@ -587,6 +587,36 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   return(x)
 }
 
+.subsetRowLinkData <- function(x, subsetName, parentLinkRowData){
+  if(missing(parentLinkRowData)
+     || is.null(parentLinkRowData))
+    parentLinkRowData = FALSE
+  out <- S4Vectors::DataFrame(row.names = seq(subsetDim(x, subsetName)[1]))
+  if(parentLinkRowData)
+    out <- rowLinks(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+  subsetLinkData <- rowLinks(.internalAssay(.subsets(x)[[subsetName]])) 
+  if(!is.null(subsetLinkData))
+    out <- cbind(out, subsetLinkData)
+  if(ncol(out) == 0)
+    out <- NULL
+  return(out)
+}
+
+.subsetColLinkData <- function(x, subsetName, parentLinkColData){
+  if(missing(parentLinkColData)
+     || is.null(parentLinkColData))
+    parentLinkColData = FALSE
+  out <- S4Vectors::DataFrame(row.names = seq(subsetDim(x, subsetName)[2]))
+  if(parentLinkColData)
+    out <- colLinks(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+  subsetLinkData <- colLinks(.internalAssay(.subsets(x)[[subsetName]])) 
+  if(!is.null(subsetLinkData))
+    out <- cbind(out, subsetLinkData)
+  if(ncol(out) == 0)
+    out <- NULL
+  return(out)
+}
+
 #helpers
 
 #checks if is a subset

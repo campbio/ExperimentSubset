@@ -16,7 +16,8 @@ RoxygenNote: 7.1.1
 Depends:
   R (>= 4.0.0),
   SummarizedExperiment,
-  SingleCellExperiment
+  SingleCellExperiment,
+  TreeSummarizedExperiment
 biocViews: Infrastructure, Software, DataImport, DataRepresentation
 Imports:
   methods,
@@ -42,3 +43,4 @@ Collate:
     'SubsetRangedSummarizedExperiment.R'
     'SubsetSingleCellExperiment.R'
     'SubsetSummarizedExperiment.R'
+    'SubsetTreeSummarizedExperiment.R'
