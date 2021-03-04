@@ -543,14 +543,34 @@ setGeneric(
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{spatialData} from.
+#' @param parentSpatialData \code{logical(1)} Logical value indicating if parent
+#'   spatialData should be combined or not. Default \code{FALSE}.
 #' @return The \code{spatialData} from input object.
 #' @rdname subsetSpatialData
 #' @importMethodsFrom SpatialExperiment spatialData
 #' @export
 setGeneric(
   name = "subsetSpatialData",
-  def = function(x, subsetName)
+  def = function(x, subsetName, parentSpatialData)
   {
     standardGeneric("subsetSpatialData")
+  }
+)
+
+#' @title Setter method for spatialData to subsets in ExperimentSubset objects
+#' @description Set \code{spatialData} to a subset.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to set
+#'   \code{spatialData} to.
+#' @param value Input \code{data.frame} to store.
+#' @return Input object with \code{spatialData} stored.
+#' @rdname subsetSpatialData
+#' @importMethodsFrom SpatialExperiment spatialData
+#' @export
+setGeneric(
+  name = "subsetSpatialData<-",
+  def = function(x, subsetName, value)
+  {
+    standardGeneric("subsetSpatialData<-")
   }
 )

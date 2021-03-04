@@ -417,6 +417,7 @@ ExperimentSubset <- function(x,
 }
 
 .subsetRowData <- function(x, subsetName, parentRowData){
+  .isSubset(x, subsetName)
   if(missing(parentRowData)
      || is.null(parentRowData))
     parentRowData = FALSE
@@ -428,6 +429,7 @@ ExperimentSubset <- function(x,
 }
 
 .subsetColData <- function(x, subsetName, parentColData){
+  .isSubset(x, subsetName)
   if(missing(parentColData)
      || is.null(parentColData))
     parentColData = FALSE
@@ -439,11 +441,13 @@ ExperimentSubset <- function(x,
 }
 
 '.subsetColData<-' <- function(x, subsetName, value){
+  .isSubset(x, subsetName)
   colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
 '.subsetRowData<-' <- function(x, subsetName, value){
+  .isSubset(x, subsetName)
   rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
@@ -590,6 +594,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 }
 
 .subsetRowLinkData <- function(x, subsetName, parentLinkRowData){
+  .isSubset(x, subsetName)
   if(missing(parentLinkRowData)
      || is.null(parentLinkRowData))
     parentLinkRowData = FALSE
@@ -605,6 +610,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 }
 
 .subsetColLinkData <- function(x, subsetName, parentLinkColData){
+  .isSubset(x, subsetName)
   if(missing(parentLinkColData)
      || is.null(parentLinkColData))
     parentLinkColData = FALSE
@@ -620,6 +626,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 }
 
 .subsetSpatialCoords <- function(x, subsetName){
+  .isSubset(x, subsetName)
   out <- spatialCoords(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
   return(out)
 }
@@ -634,8 +641,17 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   .subsetSpatialCoords(x, subsetName)
 }
 
-.subsetSpatialData <- function(x, subsetName){
-  out <- spatialData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+.subsetSpatialData <- function(x, subsetName, parentSpatialData){
+  .isSubset(x, subsetName)
+  if(missing(parentSpatialData)
+     || is.null(parentSpatialData))
+    parentSpatialData = FALSE
+  out <- data.frame(row.names = seq(subsetDim(x, subsetName)[2]))
+  if(parentSpatialData)
+    out <- spatialData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+  subsetSpatialData <- spatialData(.internalAssay(.subsets(x)[[subsetName]]))
+  if(ncol(subsetSpatialData) > 0)
+    out <- cbind(out, subsetSpatialData)
   return(out)
 }
 
@@ -645,8 +661,15 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod(...))
   subsetName = arglist[["subsetName"]]
+  parentSpatialData = arglist[["parentSpatialData"]]
   .isSubset(x, subsetName)
-  .subsetSpatialData(x, subsetName)
+  .subsetSpatialData(x, subsetName, parentSpatialData)
+}
+
+'.subsetSpatialData<-' <- function(x, subsetName, value){
+  .isSubset(x, subsetName)
+  spatialData(.internalAssay(.subsets(x)[[subsetName]])) <- value
+  return(x)
 }
 
 #helpers

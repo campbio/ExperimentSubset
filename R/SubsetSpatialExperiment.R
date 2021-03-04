@@ -514,9 +514,9 @@ setMethod(
 setMethod(
   f = "subsetSpatialData",
   signature = c(x = "SubsetSpatialExperiment", subsetName = "character"),
-  definition = function(x, subsetName)
+  definition = function(x, subsetName, parentSpatialData)
   {
-    .subsetSpatialData(x, subsetName)
+    .subsetSpatialData(x, subsetName, parentSpatialData)
   }
 )
 
@@ -526,5 +526,16 @@ setMethod(
   signature = signature(x = "SubsetSpatialExperiment"),
   definition = function(x, ...) {
     .spatialData(x, ...)
+  }
+)
+
+#' @rdname subsetSpatialData
+setReplaceMethod(
+  f = "subsetSpatialData",
+  signature = c(x = "SubsetSpatialExperiment", subsetName = "character", value = "data.frame"),
+  definition = function(x, subsetName, value)
+  {
+    .subsetSpatialData(x, subsetName) <- value
+    return(x)
   }
 )

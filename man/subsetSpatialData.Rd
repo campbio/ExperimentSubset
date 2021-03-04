@@ -2,22 +2,37 @@
 % Please edit documentation in R/allGenerics.R, R/SubsetSpatialExperiment.R
 \name{subsetSpatialData}
 \alias{subsetSpatialData}
+\alias{subsetSpatialData<-}
 \alias{subsetSpatialData,SubsetSpatialExperiment,character-method}
+\alias{subsetSpatialData<-,SubsetSpatialExperiment,character,data.frame-method}
 \title{Accessor method for spatialData from subsets in ExperimentSubset objects}
 \usage{
-subsetSpatialData(x, subsetName)
+subsetSpatialData(x, subsetName, parentSpatialData)
 
-\S4method{subsetSpatialData}{SubsetSpatialExperiment,character}(x, subsetName)
+subsetSpatialData(x, subsetName) <- value
+
+\S4method{subsetSpatialData}{SubsetSpatialExperiment,character}(x, subsetName, parentSpatialData)
+
+\S4method{subsetSpatialData}{SubsetSpatialExperiment,character,data.frame}(x, subsetName) <- value
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{\code{character(1)} Name of the subset to get
-\code{spatialData} from.}
+\item{subsetName}{\code{character(1)} Name of the subset to set
+\code{spatialData} to.}
+
+\item{parentSpatialData}{\code{logical(1)} Logical value indicating if parent
+spatialData should be combined or not. Default \code{FALSE}.}
+
+\item{value}{Input \code{data.frame} to store.}
 }
 \value{
 The \code{spatialData} from input object.
+
+Input object with \code{spatialData} stored.
 }
 \description{
 Get \code{spatialData} from a subset.
+
+Set \code{spatialData} to a subset.
 }
