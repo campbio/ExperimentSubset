@@ -17,6 +17,7 @@ Depends:
   R (>= 4.0.0),
   SummarizedExperiment,
   SingleCellExperiment,
+  SpatialExperiment,
   TreeSummarizedExperiment
 biocViews: Infrastructure, Software, DataImport, DataRepresentation
 Imports:
@@ -43,4 +44,5 @@ Collate:
     'SubsetRangedSummarizedExperiment.R'
     'SubsetSingleCellExperiment.R'
     'SubsetSummarizedExperiment.R'
+    'SubsetSpatialExperiment.R'
     'SubsetTreeSummarizedExperiment.R'

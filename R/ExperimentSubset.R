@@ -155,6 +155,8 @@ ExperimentSubset <- function(x,
   names(a) <- "temp"
   
   internalAssay <- SingleCellExperiment(assays = a)
+  if(inherits(x, "SpatialExperiment"))
+    internalAssay$sample_id <- x$sample_id[cols]
   internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
   
   rownames(internalAssay) <- rownames(x)[rows]
@@ -615,6 +617,36 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   if(ncol(out) == 0)
     out <- NULL
   return(out)
+}
+
+.subsetSpatialCoords <- function(x, subsetName){
+  out <- spatialCoords(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+  return(out)
+}
+
+#' @importMethodsFrom SpatialExperiment spatialCoords
+.spatialCoords <- function(x, ...){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  .isSubset(x, subsetName)
+  .subsetSpatialCoords(x, subsetName)
+}
+
+.subsetSpatialData <- function(x, subsetName){
+  out <- spatialData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+  return(out)
+}
+
+#' @importMethodsFrom SpatialExperiment spatialData
+.spatialData <- function(x, ...){
+  arglist <- list(...)
+  if(!"subsetName" %in% names(arglist))
+    return(callNextMethod(...))
+  subsetName = arglist[["subsetName"]]
+  .isSubset(x, subsetName)
+  .subsetSpatialData(x, subsetName)
 }
 
 #helpers

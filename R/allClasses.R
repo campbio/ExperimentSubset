@@ -74,3 +74,16 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
   prototype = SimpleList(subsets = SimpleList()),
   contains = "TreeSummarizedExperiment"
 )
+
+#' An S4 class for \code{SpatialExperiment} objects with added support for
+#'   subsets.
+#' @slot subsets A list of \code{AssaySubset} objects.
+#' @export
+#' @import methods
+#' @importClassesFrom SpatialExperiment SpatialExperiment
+.SubsetSpatialExperiment <- setClass(
+  Class = "SubsetSpatialExperiment",
+  slots = representation(subsets = "SimpleList"),
+  prototype = SimpleList(subsets = SimpleList()),
+  contains = "SpatialExperiment"
+)

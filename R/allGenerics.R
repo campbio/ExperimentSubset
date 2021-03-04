@@ -520,3 +520,37 @@ setGeneric(
     standardGeneric("subsetColLinks")
   }
 )
+
+#' @title Accessor method for spatialCoords from subsets in ExperimentSubset objects
+#' @description Get \code{spatialCoords} from a subset.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{spatialCoords} from.
+#' @return The \code{spatialCoords} from input object.
+#' @rdname subsetSpatialCoords
+#' @importMethodsFrom SpatialExperiment spatialCoords
+#' @export
+setGeneric(
+  name = "subsetSpatialCoords",
+  def = function(x, subsetName)
+  {
+    standardGeneric("subsetSpatialCoords")
+  }
+)
+
+#' @title Accessor method for spatialData from subsets in ExperimentSubset objects
+#' @description Get \code{spatialData} from a subset.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{spatialData} from.
+#' @return The \code{spatialData} from input object.
+#' @rdname subsetSpatialData
+#' @importMethodsFrom SpatialExperiment spatialData
+#' @export
+setGeneric(
+  name = "subsetSpatialData",
+  def = function(x, subsetName)
+  {
+    standardGeneric("subsetSpatialData")
+  }
+)
