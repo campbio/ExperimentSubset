@@ -275,7 +275,9 @@ setMethod(
 #' @rdname subsetColData
 setReplaceMethod(
   f = "subsetColData",
-  signature = c(x = "SubsetSpatialExperiment", subsetName = "character", value = "DataFrame"),
+  signature = c(x = "SubsetSpatialExperiment", 
+                subsetName = "character",
+                value = "DataFrame"),
   definition = function(x, subsetName, value)
   {
     .subsetColData(x, subsetName) <- value
@@ -286,7 +288,9 @@ setReplaceMethod(
 #' @rdname subsetRowData
 setReplaceMethod(
   f = "subsetRowData",
-  signature = c(x = "SubsetSpatialExperiment", subsetName = "character", value = "DataFrame"),
+  signature = c(x = "SubsetSpatialExperiment", 
+                subsetName = "character", 
+                value = "DataFrame"),
   definition = function(x, subsetName, value)
   {
     .subsetRowData(x, subsetName) <- value

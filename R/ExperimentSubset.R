@@ -666,6 +666,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   .subsetSpatialData(x, subsetName, parentSpatialData)
 }
 
+#' @importMethodsFrom SpatialExperiment spatialData<-
 '.subsetSpatialData<-' <- function(x, subsetName, value){
   .isSubset(x, subsetName)
   spatialData(.internalAssay(.subsets(x)[[subsetName]])) <- value
