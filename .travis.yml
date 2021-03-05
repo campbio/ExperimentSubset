@@ -1,5 +1,7 @@
 language: r
 r: bioc-release
+r_github_packages:
+  - drighelli/SpatialExperiment
 bioc_packages:
   - SingleCellExperiment
   - TENxPBMCData
