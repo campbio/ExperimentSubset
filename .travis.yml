@@ -1,24 +1,16 @@
 language: r
 r: bioc-
-
-install:
-- R -e 'devtools::install_deps(dep = TRUE, upgrade="never")'
-
 addons:
   apt:
     packages:
       - libv8-dev
       - libgit2-dev
       - libmagick++-dev
-
 r_check_args: "--as-cran"
-
 r_github_packages:
   - drighelli/SpatialExperiment
-  
 bioc_packages:
   - SingleCellExperiment
   - TENxPBMCData
-  
 after_success:
-  - Rscript -e 'covr::codecov()'
+- Rscript -e 'covr::codecov()'
