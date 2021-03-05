@@ -1,5 +1,11 @@
 language: r
 r: bioc-
+addons:
+  apt:
+    packages:
+      - libv8-dev
+      - libgit2-dev
+      - libmagick++-dev
 r_github_packages:
   - drighelli/SpatialExperiment
 bioc_packages:
