@@ -517,6 +517,11 @@ subsetSummary(es)
 43. `subsetSpatialData<-`
 44. `subsetRowLinks`
 45. `subsetColLinks`
+46. `spatialCoords`
+47. `spatialData`
+48. `spatialData<-`
+49. `rowLinks`
+50. `colLinks`
 
 # Implementation Details
 
