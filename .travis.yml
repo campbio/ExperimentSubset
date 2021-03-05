@@ -1,11 +1,13 @@
+language: r
+r:
+  - release
+bioc_required: true
 addons:
   apt:
     packages:
       - libv8-dev
       - libgit2-dev
       - libmagick++-dev
-language: r
-r: bioc-
 r_github_packages:
   - drighelli/SpatialExperiment
 bioc_packages:
