@@ -462,6 +462,14 @@ Show the current condition of the `ExperimentSubset` object:
 subsetSummary(es)
 ```
 
+# Supported Input Object Classes
+
+1. SummarizedExperiment
+2. RangedSummarizedExperiment
+3. SingleCellExperiment
+4. TreeSummarizedExperiment
+5. SpatialExperiment
+
 # Methods for `ExperimentSubset`
 
 1. `ExperimentSubset` constructor
@@ -504,6 +512,11 @@ subsetSummary(es)
 38. `altExps<-`
 39. `altExpNames`
 40. `altExpNames<-`
+41. `subsetSpatialCoords`
+42. `subsetSpatialData`
+43. `subsetSpatialData<-`
+44. `subsetRowLinks`
+45. `subsetColLinks`
 
 # Implementation Details
 
