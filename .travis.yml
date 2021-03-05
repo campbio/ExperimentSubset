@@ -7,5 +7,3 @@ bioc_packages:
   - TENxPBMCData
 after_success:
   - Rscript -e 'covr::codecov()'
-apt_packages:
-  - libmagick++-dev
