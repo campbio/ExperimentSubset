@@ -1,5 +1,7 @@
 language: r
-r: bioc-release
+r: bioc-
+apt_packages:
+- libgraphicsmagick1-dev
 r_github_packages:
   - drighelli/SpatialExperiment
 bioc_packages:
