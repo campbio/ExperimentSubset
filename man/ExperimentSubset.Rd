@@ -5,29 +5,20 @@
 \title{ExperimentSubset constructor}
 \usage{
 ExperimentSubset(
-  object,
+  x,
   subset = list(subsetName = NA, rows = NA, cols = NA, parentAssay = NA)
 )
 }
 \arguments{
-\item{object}{\code{SingleCellExperiment} or \code{SummarizedExperiment}
-Specify the root object.}
+\item{x}{An experiment object if direct conversion is required or a list of slots to pass onto \code{SingleCellExperiment} constructor to generate experiment object from general data.}
 
-\item{subset}{\code{list} Specify if a subset should be created from within
-the constructor. Named parameters in this list should be \code{subsetName},
-\code{rows}, \code{cols} and \code{parentAssay}.}
+\item{subset}{A named \code{list} if a subset should be created from within the constructor. Named parameters in this list should be \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.}
 }
 \value{
 A \code{ExperimentSubset} object.
 }
 \description{
-This constructor function is used to setup the
-  \code{ExperimentSubset} object by passing either a
-  \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or
-  objects inherited by these classes. A subset can also be directly created
-  by passing a named \code{list} to the \code{subset} parameter. This named
-  \code{list} should have parameter values named as \code{subsetName},
-  \code{rows}, \code{cols} and \code{parentAssay}.
+This constructor function is used to setup the \code{ExperimentSubset} object, either through manually specifying the \code{assays}, \code{rowData}, \code{colData} or directly by passing either a \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or objects inherited by these classes. A subset can also be directly created by passing a named \code{list} to the \code{subset} parameter. This named \code{list} should have parameter values named as \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
 }
 \examples{
 data(sce_chcl, package = "scds")

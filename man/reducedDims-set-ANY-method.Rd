@@ -2,28 +2,20 @@
 % Please edit documentation in R/ExperimentSubset.R
 \name{reducedDims<-,ANY-method}
 \alias{reducedDims<-,ANY-method}
-\title{Methods for Reduced Dimensions in ExperimentSubset objects}
+\title{reducedDims<-}
 \usage{
-\S4method{reducedDims}{ANY}(object, subsetName) <- value
+\S4method{reducedDims}{ANY}(x, subsetName) <- value
 }
 \arguments{
-\item{object}{\code{ExperimentSubset} Input \code{ExperimentSubset} object or
-any object supported by \code{reducedDims<-} from
-\link[SingleCellExperiment]{reducedDims} method.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.}
 
-\item{subsetName}{\code{character(1)} Specify the name of the subset to which
-the \code{reducedDims} should be set to. If \code{missing},
-\code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method
-is called on the main object.}
+\item{subsetName}{Specify the name of the subset to which the \code{reducedDims} should be set to. If \code{missing}, \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.}
 
-\item{value}{\code{list()} A \code{list} of values to set to
-\code{reducedDims}.}
+\item{value}{A \code{list} of values to set to \code{reducedDims}.}
 }
 \value{
 Updated input object with \code{reducedDims} set.
 }
 \description{
-A wrapper to the \code{reducedDims<-} from
-  \link[SingleCellExperiment]{reducedDims} method with additional support for
-  subsets.
+A wrapper to the \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 }

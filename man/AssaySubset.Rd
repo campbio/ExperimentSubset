@@ -23,13 +23,13 @@ in the subset.}
 
 \item{parentAssay}{\code{character(1)} Name of the parent of this subset.}
 
-\item{internalAssay}{\code{SummarizedExperiment} An internal object to store
-additional subset data.}
+\item{internalAssay}{An internal Experiment object to store additional
+subset data.}
 }
 \value{
 A \code{AssaySubset} object.
 }
 \description{
 Constructor for creating a experiment object internally by the
-  \code{ExperimentSubset} object.
+  \code{ExperimentSubset} object. Should not be used directly by the user.
 }
