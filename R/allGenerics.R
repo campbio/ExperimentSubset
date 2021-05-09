@@ -230,6 +230,16 @@ setGeneric(
 #' @return The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
 #' @rdname reducedDimNames
 #' @export
+#' @examples 
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1",
+#' rows = c(1:1500), cols = c(1:1500),
+#' parentAssay = "counts")
+#' reducedDims(es, subsetName = "subset1") <- list(
+#' PCA_1 = scater::calculatePCA(assay(es, "subset1")),
+#' PCA_2 = scater::calculatePCA(assay(es, "subset1")))
+#' reducedDimNames(es, subsetName = "subset1")
 setGeneric(
   name = "reducedDimNames",
   def = function(x, ...)
@@ -300,6 +310,15 @@ setGeneric(
 #' @rdname subsetRowData
 #' @importMethodsFrom SingleCellExperiment rowData
 #' @export
+#' @examples 
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es,
+#' "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' subsetRowData(es, "subset1")
 setGeneric(
   name = "subsetRowData",
   def = function(x, subsetName, parentRowData)
@@ -319,6 +338,15 @@ setGeneric(
 #' @rdname subsetColData
 #' @importMethodsFrom SingleCellExperiment colData
 #' @export
+#' @examples 
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es,
+#' "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' subsetColData(es, "subset1")
 setGeneric(
   name = "subsetColData",
   def = function(x, subsetName, parentColData)
@@ -395,6 +423,15 @@ setGeneric(
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname subsetColnames
 #' @export
+#' @examples 
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es,
+#' "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' subsetColnames(es, "subset1")
 setGeneric(
   name = "subsetColnames",
   def = function(x, subsetName)
@@ -426,6 +463,15 @@ setGeneric(
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname subsetRownames
 #' @export
+#' @examples 
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es,
+#' "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' subsetRownames(es, "subset1")
 setGeneric(
   name = "subsetRownames",
   def = function(x, subsetName)
@@ -458,6 +504,15 @@ setGeneric(
 #' @return Subset assay
 #' @importMethodsFrom SummarizedExperiment assay
 #' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es,
+#' "subset1",
+#' rows = c(10,11,50,56,98,99,102,105,109, 200),
+#' cols = c(20,21,40,45,90,99,100,123,166,299),
+#' parentAssay = "counts")
+#' getSubsetAssay(es, "subset1")
 setGeneric(
   name = "getSubsetAssay",
   def = function(x,
@@ -475,6 +530,16 @@ setGeneric(
 #' @return Input object with \code{reducedDimNames<-} set.
 #' @rdname reducedDimNames-set
 #' @export
+#' @examples 
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1",
+#' rows = c(1:1500), cols = c(1:1500),
+#' parentAssay = "counts")
+#' reducedDims(es, subsetName = "subset1") <- list(
+#' PCA_1 = scater::calculatePCA(assay(es, "subset1")),
+#' PCA_2 = scater::calculatePCA(assay(es, "subset1")))
+#' reducedDimNames(es, subsetName = "subset1") <- c("rDim1", "rDim2")
 setGeneric(
   name = "reducedDimNames<-",
   def = function(x, subsetName, value)

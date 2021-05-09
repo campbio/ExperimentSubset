@@ -25,3 +25,14 @@ The \code{reducedDimNames} from the specified subset or same as \code{reducedDim
 \description{
 A wrapper to the \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 }
+\examples{
+data(sce_chcl, package = "scds")
+es <- ExperimentSubset(sce_chcl)
+es <- createSubset(es, "subset1",
+rows = c(1:1500), cols = c(1:1500),
+parentAssay = "counts")
+reducedDims(es, subsetName = "subset1") <- list(
+PCA_1 = scater::calculatePCA(assay(es, "subset1")),
+PCA_2 = scater::calculatePCA(assay(es, "subset1")))
+reducedDimNames(es, subsetName = "subset1")
+}

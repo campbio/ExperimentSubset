@@ -2,6 +2,7 @@ Package: ExperimentSubset
 Type: Package
 Title: Manages subsets of data with Bioconductor Experiment objects
 Version: 1.1.0
+Date: 2021-05-09
 Authors@R: c(person(given="Irzam", family="Sarfraz", email="irzam9095@gmail.com", role=c("aut","cre"),
               comment = c(ORCID = "0000-0001-8121-792X")),
             person(given="Muhammad", family="Asif", email="asif@ntu.edu.pk", role=c("aut","ths"),
