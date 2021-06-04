@@ -19,5 +19,8 @@ library(devtools)
 install_github("campbio/ExperimentSubset")
 ```
 
+Or download the release version from Bioconductor:
+https://bioconductor.org/packages/release/bioc/html/ExperimentSubset.html
+
 ## Citation
 Irzam Sarfraz, Muhammad Asif, Joshua D Campbell, ExperimentSubset: an R package to manage subsets of Bioconductor Experiment objects, Bioinformatics, 2021;, btab179, https://doi.org/10.1093/bioinformatics/btab179
