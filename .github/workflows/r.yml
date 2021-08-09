@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         r-version:
-          - 4.1
+          - release
 
     steps:
       - uses: actions/checkout@v2
