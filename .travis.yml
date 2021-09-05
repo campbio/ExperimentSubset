@@ -1,9 +1,0 @@
-language: r
-r:
-  - release
-bioc_required: true
-bioc_packages:
-  - SingleCellExperiment
-  - TENxPBMCData
-after_success:
-- Rscript -e 'covr::codecov()'
