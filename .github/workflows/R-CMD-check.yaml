@@ -67,6 +67,8 @@ jobs:
         run: |
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
+          install.packages("devtools")
+          devtools::install_github("drighelli/SpatialExperiment")
         shell: Rscript {0}
 
       - name: Check
