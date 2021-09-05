@@ -1,4 +1,5 @@
 # ExperimentSubset
+[![R-CMD-check](https://github.com/campbio/ExperimentSubset/workflows/R-CMD-check/badge.svg)](https://github.com/campbio/ExperimentSubset/actions)
 [![Build Status](https://travis-ci.org/campbio/ExperimentSubset.svg?branch=master)](https://travis-ci.org/campbio/ExperimentSubset)
 [![Codecov test coverage](https://codecov.io/gh/campbio/ExperimentSubset/branch/master/graph/badge.svg)](https://codecov.io/gh/campbio/ExperimentSubset?branch=master)
 
