@@ -1,19 +1,87 @@
-# For help debugging build failures open an issue on the RStudio community with the 'github-actions' tag.
-# https://community.rstudio.com/new-topic?category=Package%20development&tags=github-actions
+# R CMD check.
+#
+# Fast feedback everywhere, full cross-platform matrix only on integration:
+#   - Linux (Bioc-devel and Bioc-release) runs on every push and pull
+#     request, inside the Bioconductor docker images so the R / Bioc
+#     versions and system libraries match the Bioconductor build machines,
+#     and Bioconductor dependencies come prebuilt in the image.
+#   - macOS and Windows run only on push to devel or RELEASE_* (i.e. when a
+#     branch is incorporated) or on manual dispatch.
+#
+# The stable branch (master) is a CI-maintained copy of the current
+# release, so it isn't checked here.
+#
+# NOTE for branch protection: keep the Linux jobs as the required status
+# checks. macOS/Windows do not run on pull_request, so they must NOT be
+# required or PRs can never merge.
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: [devel, 'RELEASE_*']
   pull_request:
-    branches:
-      - main
-      - master
+    branches: [devel, 'RELEASE_*']
+  workflow_dispatch:
 
 name: R-CMD-check
 
+concurrency:
+  group: R-CMD-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  R-CMD-check:
+  linux:
+    runs-on: ubuntu-latest
+    name: ${{ matrix.bioc.name }}
+    container:
+      image: ${{ matrix.bioc.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        bioc:
+          # Bump the RELEASE tag each Bioconductor cycle (~April/October).
+          - {name: bioc-devel,   image: "bioconductor/bioconductor_docker:devel"}
+          - {name: bioc-release, image: "bioconductor/bioconductor_docker:RELEASE_3_23"}
+
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        # Resolve everything through BiocManager so versions stay coherent
+        # with the container's Bioc (remotes only LISTS the deps).
+        run: |
+          BiocManager::install(c("rcmdcheck", "remotes"), update = FALSE, ask = FALSE)
+          deps <- remotes::local_package_deps(dependencies = TRUE)
+          BiocManager::install(deps, update = FALSE, ask = FALSE)
+        shell: Rscript {0}
+
+      - name: R CMD check
+        run: |
+          rcmdcheck::rcmdcheck(
+            args = c("--no-manual", "--as-cran"),
+            build_args = "--no-manual",
+            error_on = "warning",
+            check_dir = "check"
+          )
+        shell: Rscript {0}
+
+      - name: Upload check results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.bioc.name }}-check-results
+          path: check
+
+  windows-macos:
+    # Full cross-platform matrix only when incorporating a branch (push to
+    # devel or RELEASE_*, which the trigger above restricts) or on manual
+    # dispatch -- never on pull_request, to keep PR feedback fast.
+    if: github.event_name != 'pull_request'
     runs-on: ${{ matrix.config.os }}
 
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
@@ -22,74 +90,28 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: macOS-latest, r: 'release'}
-          - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
 
     env:
-      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - uses: r-lib/actions/setup-r@v1
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
         with:
           r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
 
-      - uses: r-lib/actions/setup-pandoc@v1
-
-      - name: Query dependencies
-        run: |
-          install.packages('remotes')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
-        shell: Rscript {0}
-
-      - name: Restore R package cache
-        uses: actions/cache@v2
+      - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+          extra-packages: any::rcmdcheck
+          needs: check
 
-      - name: Install libmagick++
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y libmagick++-dev
-        
-      - name: Install libglpk-dev
-        if: runner.os == 'Linux'
-        run: sudo apt-get install -y libglpk-dev
-          
-      - name: Install system dependencies
-        if: runner.os == 'Linux'
-        run: |
-          while read -r cmd
-          do
-            eval sudo $cmd
-          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
-
-      - name: Install dependencies
-        run: |
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("rcmdcheck")
-          install.packages("devtools")
-          devtools::install_github("drighelli/SpatialExperiment")
-          BiocManager::install("scran")
-        shell: Rscript {0}
-
-      - name: Check
-        env:
-          _R_CHECK_CRAN_INCOMING_REMOTE_: false
-        run: |
-          options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
-        shell: Rscript {0}
-
-      - name: Upload check results
-        if: failure()
-        uses: actions/upload-artifact@main
+      - uses: r-lib/actions/check-r-package@v2
         with:
-          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
-          path: check
+          upload-snapshots: true
