@@ -294,7 +294,7 @@ es <- createSubset(es, subsetName = "subset1", rows = c(1:2), cols = c(1:4))
 assay(
   x = es, 
   i = "subset1", 
-  subsetAssayName = "subset1InternalAssay") <- matrix(rpois(100, lambda = 10), 
+  subsetAssayName = "subset1InternalAssay") <- matrix(rpois(8, lambda = 10), 
                                                       ncol=4, nrow=2)
 ```
 
