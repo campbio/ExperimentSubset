@@ -43,6 +43,9 @@ the build, so there is no version bump and no NEWS entry.
 ## After merge
 
 Push RELEASE_3_23 from Bioconductor to GitHub, cherry-pick the
-stable-workflows commit onto it, and push to trigger the first sync. Then,
+stable-workflows commit onto it, and push to trigger the first sync.
+RELEASE_3_23's `.Rbuildignore` lacks `^\.github$` (it is only on devel),
+so add it in a second commit there; otherwise a later release fix pushed
+to Bioconductor would ship `.github/` in the tarball. Then,
 in the GitHub UI, add a master ruleset (restrict deletions, block force
 pushes) and check the sync run.

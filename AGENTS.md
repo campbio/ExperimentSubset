@@ -32,10 +32,11 @@ apply, including `make site-check`.
 - `R/allGenerics.R`: every package generic, with its roxygen docs and
   examples.
 - `R/ExperimentSubset.R`: the `ExperimentSubset()` constructor, which
-  wraps an input object in the matching `Subset*Experiment` class, plus
-  the shared internal implementations (`.createSubset()`,
-  `.setSubsetAssay()`, `.subsetParent()`, ...) and the internal slot
-  accessors.
+  wraps an input object in the matching `Subset*Experiment` class (a
+  plain list of assays becomes a `SubsetSingleCellExperiment`) and can
+  create a first subset through `subset =`, plus the shared internal
+  implementations (`.createSubset()`, `.setSubsetAssay()`,
+  `.subsetParent()`, ...) and the internal slot accessors.
 - `R/Subset<Class>.R`, one per supported class: thin `setMethod()`
   wrappers that forward to the shared internals. A change to a method
   usually needs the same change in all five files.
@@ -49,10 +50,10 @@ apply, including `make site-check`.
 ## Object model
 
 - `AssaySubset` (internal): one subset. Slots `subsetName`, `rowIndices`
-  and `colIndices` (indices into the parent), `parentAssay` (the assay or
-  subset it was made from, so subsets can chain), and `internalAssay` (a
-  SummarizedExperiment-like object holding the subset's own assays and
-  metadata).
+  and `colIndices` (indices into the parent), `parentAssay` (the name of
+  the assay or subset it was made from, so subsets can chain), and
+  `internalAssay` (a SummarizedExperiment-like object holding the
+  subset's own assays and metadata).
 - `SubsetSummarizedExperiment`, `SubsetRangedSummarizedExperiment`,
   `SubsetSingleCellExperiment`, `SubsetTreeSummarizedExperiment` and
   `SubsetSpatialExperiment`: each extends its Bioconductor class with one
