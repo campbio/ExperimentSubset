@@ -1,5 +1,5 @@
 # ExperimentSubset
-[![Build Status](https://travis-ci.org/campbio/ExperimentSubset.svg?branch=master)](https://travis-ci.org/campbio/ExperimentSubset)
+[![R-CMD-check](https://github.com/campbio/ExperimentSubset/workflows/R-CMD-check/badge.svg)](https://github.com/campbio/ExperimentSubset/actions)
 [![Codecov test coverage](https://codecov.io/gh/campbio/ExperimentSubset/branch/master/graph/badge.svg)](https://codecov.io/gh/campbio/ExperimentSubset?branch=master)
 
 ## Introduction
@@ -18,6 +18,9 @@ To install the latest version of `ExperimentSubset` from GitHub using `devtools`
 library(devtools)
 install_github("campbio/ExperimentSubset")
 ```
+
+Or download the release version from Bioconductor:
+https://bioconductor.org/packages/release/bioc/html/ExperimentSubset.html
 
 ## Citation
 Irzam Sarfraz, Muhammad Asif, Joshua D Campbell, ExperimentSubset: an R package to manage subsets of Bioconductor Experiment objects, Bioinformatics, 2021;, btab179, https://doi.org/10.1093/bioinformatics/btab179
