@@ -5,3 +5,11 @@
 ^codecov\.yml$
 ^\.travis\.yml$
 ^\.github$
+^dev$
+^\.claude$
+^AGENTS\.md$
+^CLAUDE\.md$
+^Makefile$
+^\.lintr$
+^\.worktrees$
+^\.worktreeinclude$
