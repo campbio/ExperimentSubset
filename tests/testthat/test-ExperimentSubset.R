@@ -253,13 +253,23 @@ es <- ExperimentSubset(tenx_pbmc4k)
 colData(es) <- cbind(colData(es), colSums = colSums(assay(es, "counts")))
 rowData(es) <- cbind(rowData(es), rowSums = rowSums(assay(es, "counts")))
 es <- createSubset(es, "filteredAssay", rows = rownames(es), cols = which(colData(es)$colSums > mean(colData(es)$colSums)), parentAssay = "counts")
-assay(es, "filteredAssay", withDimnames = FALSE, subsetAssayName = "filteredAssayNormalized") <- scater::normalizeCounts(assay(es, "filteredAssay"))
-#use the 1000 genes with the largest row sums; any 1000 rows will do here
-normalizedRowSums <- rowSums(assay(es, "filteredAssayNormalized"))
-topRows <- names(sort(normalizedRowSums, decreasing = TRUE))[seq_len(1000)]
-stopifnot(length(topRows) == 1000, !anyNA(topRows))
+#normalize and choose HVGs with scrapper, as in the vignette
+filteredCounts <- assay(es, "filteredAssay")
+filteredSizeFactors <- scrapper::centerSizeFactors(colSums(filteredCounts))
+assay(
+  es, "filteredAssay", withDimnames = FALSE,
+  subsetAssayName = "filteredAssayNormalized"
+) <- scrapper::normalizeCounts(
+  filteredCounts, size.factors = filteredSizeFactors
+)
+geneVariances <- scrapper::modelGeneVariances(
+  assay(es, "filteredAssayNormalized")
+)
+hvgIndices <- scrapper::chooseHighlyVariableGenes(
+  geneVariances$statistics$residuals, top = 1000
+)
 es <- createSubset(
-  es, "hvg1000", rows = topRows, cols = seq_len(1622),
+  es, "hvg1000", rows = hvgIndices, cols = seq_len(1622),
   parentAssay = "filteredAssayNormalized"
 )
 

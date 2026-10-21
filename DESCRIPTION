@@ -31,7 +31,7 @@ Suggests:
     testthat,
     covr,
     stats,
-    scran,
+    scrapper,
     scater,
     scds,
     TENxPBMCData,
