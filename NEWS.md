@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.5 (2026-10-21)
+* The vignette's PBMC workflow now uses `scrapper` for QC, normalization, highly variable genes and PCA, replacing `scran` and `scater` functions that are deprecated
+
 # ExperimentSubset 1.23.1 (2026-10-20)
 * Fixed a vignette example that filled a 2 x 4 matrix with 100 values, which fails `R CMD check --as-cran`
 
