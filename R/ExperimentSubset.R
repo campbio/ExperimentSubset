@@ -378,13 +378,16 @@ ExperimentSubset <- function(x,
 }
 
 #' @importMethodsFrom SingleCellExperiment altExp<-
-'.altExp<-' <- function(x, ..., value){
+'.altExp<-' <- function(x, e, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
     return(callNextMethod())
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  altExp(.internalAssay(.subsets(x)[[subsetName]]), ...) <- value
+  if (missing(e))
+    altExp(.internalAssay(.subsets(x)[[subsetName]]), ...) <- value
+  else
+    altExp(.internalAssay(.subsets(x)[[subsetName]]), e, ...) <- value
   return(x)
 }
 
