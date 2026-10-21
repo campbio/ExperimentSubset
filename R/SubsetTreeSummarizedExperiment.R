@@ -272,6 +272,7 @@ setMethod(
 )
 
 #' @rdname subsetColData
+#' @usage NULL
 setReplaceMethod(
   f = "subsetColData",
   signature = c(x = "SubsetTreeSummarizedExperiment", subsetName = "character", value = "DataFrame"),
@@ -283,6 +284,7 @@ setReplaceMethod(
 )
 
 #' @rdname subsetRowData
+#' @usage NULL
 setReplaceMethod(
   f = "subsetRowData",
   signature = c(x = "SubsetTreeSummarizedExperiment", subsetName = "character", value = "DataFrame"),
