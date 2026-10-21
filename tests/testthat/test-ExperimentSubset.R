@@ -5,7 +5,6 @@ library(ExperimentSubset)
 library(scds)
 library(TENxPBMCData)
 library(scater)
-library(scran)
 library(airway)
 
 #load data once
@@ -255,7 +254,14 @@ colData(es) <- cbind(colData(es), colSums = colSums(assay(es, "counts")))
 rowData(es) <- cbind(rowData(es), rowSums = rowSums(assay(es, "counts")))
 es <- createSubset(es, "filteredAssay", rows = rownames(es), cols = which(colData(es)$colSums > mean(colData(es)$colSums)), parentAssay = "counts")
 assay(es, "filteredAssay", withDimnames = FALSE, subsetAssayName = "filteredAssayNormalized") <- scater::normalizeCounts(assay(es, "filteredAssay"))
-es <- createSubset(es, "hvg1000", rows = scran::getTopHVGs(scran::modelGeneVar(assay(es, "filteredAssayNormalized")), n = 1000), cols = seq(1:1622), parentAssay = "filteredAssayNormalized")
+#use the 1000 genes with the largest row sums; any 1000 rows will do here
+normalizedRowSums <- rowSums(assay(es, "filteredAssayNormalized"))
+topRows <- names(sort(normalizedRowSums, decreasing = TRUE))[seq_len(1000)]
+stopifnot(length(topRows) == 1000, !anyNA(topRows))
+es <- createSubset(
+  es, "hvg1000", rows = topRows, cols = seq_len(1622),
+  parentAssay = "filteredAssayNormalized"
+)
 
 testthat::test_that("Testing reducedDims",{
   set.seed(20)
