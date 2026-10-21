@@ -40,7 +40,6 @@ subsetRowData(x, subsetName) <- value
 
 \S4method{subsetRowData}{SubsetTreeSummarizedExperiment,character}(x, subsetName, parentRowData)
 
-\S4method{subsetRowData}{SubsetTreeSummarizedExperiment,character,DataFrame}(x, subsetName) <- value
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
