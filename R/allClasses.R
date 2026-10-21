@@ -26,7 +26,7 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 #' An S4 class for \code{SummarizedExperiment} objects with added support for
 #'   subsets.
 #' @slot subsets A list of \code{AssaySubset} objects.
-#' @export
+#' @exportClass SubsetSummarizedExperiment
 #' @import methods
 #' @importClassesFrom SummarizedExperiment SummarizedExperiment
 .SubsetSummarizedExperiment <- setClass(
@@ -39,7 +39,7 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 #' An S4 class for \code{RangedSummarizedExperiment} objects with added support for
 #'   subsets.
 #' @slot subsets A list of \code{AssaySubset} objects.
-#' @export
+#' @exportClass SubsetRangedSummarizedExperiment
 #' @import methods
 #' @importClassesFrom SummarizedExperiment RangedSummarizedExperiment
 .SubsetRangedSummarizedExperiment <- setClass(
@@ -52,7 +52,7 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 #' An S4 class for \code{SingleCellExperiment} objects with added support for
 #'   subsets.
 #' @slot subsets A list of \code{AssaySubset} objects.
-#' @export
+#' @exportClass SubsetSingleCellExperiment
 #' @import methods
 #' @importClassesFrom SingleCellExperiment SingleCellExperiment
 .SubsetSingleCellExperiment <- setClass(
@@ -65,7 +65,7 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 #' An S4 class for \code{TreeSummarizedExperiment} objects with added support for
 #'   subsets.
 #' @slot subsets A list of \code{AssaySubset} objects.
-#' @export
+#' @exportClass SubsetTreeSummarizedExperiment
 #' @import methods
 #' @importClassesFrom TreeSummarizedExperiment TreeSummarizedExperiment
 .SubsetTreeSummarizedExperiment <- setClass(
@@ -78,7 +78,7 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 #' An S4 class for \code{SpatialExperiment} objects with added support for
 #'   subsets.
 #' @slot subsets A list of \code{AssaySubset} objects.
-#' @export
+#' @exportClass SubsetSpatialExperiment
 #' @import methods
 #' @importClassesFrom SpatialExperiment SpatialExperiment
 .SubsetSpatialExperiment <- setClass(
