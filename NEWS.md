@@ -1,3 +1,7 @@
+# ExperimentSubset 1.23.6 (2026-10-21)
+* `altExp(x, e, subsetName = )` now returns the altExp named or numbered by `e`; it always returned the first one before
+* `altExp(x, <number>) <- value` now replaces the altExp at that position; with `subsetName` it replaced the first altExp, and without it the call failed
+
 # ExperimentSubset 1.23.5 (2026-10-21)
 * The vignette's PBMC workflow now uses `scrapper` for QC, normalization, highly variable genes and PCA, replacing `scran` and `scater` functions that are deprecated
 * `scrapper` replaces `scran` in Suggests; the tests also use `scrapper` in place of the deprecated functions
