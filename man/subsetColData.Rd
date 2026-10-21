@@ -39,8 +39,6 @@ subsetColData(x, subsetName) <- value
 \S4method{subsetColData}{SubsetSpatialExperiment,character,DataFrame}(x, subsetName) <- value
 
 \S4method{subsetColData}{SubsetTreeSummarizedExperiment,character}(x, subsetName, parentColData)
-
-\S4method{subsetColData}{SubsetTreeSummarizedExperiment,character,DataFrame}(x, subsetName) <- value
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
