@@ -439,8 +439,10 @@ Normalize 'filteredCells' subset using `scrapper` library and store it back. Siz
 ```{r, eval = FALSE}
 filteredCounts <- assay(es, "filteredCells")
 filteredSizeFactors <- centerSizeFactors(colSums(filteredCounts))
-normalizedCounts <- normalizeCounts(filteredCounts, size.factors = filteredSizeFactors)
-assay(es, "filteredCells", subsetAssayName = "filteredCellsNormalized") <- normalizedCounts
+normalizedCounts <- normalizeCounts(filteredCounts,
+                                    size.factors = filteredSizeFactors)
+assay(es, "filteredCells",
+      subsetAssayName = "filteredCellsNormalized") <- normalizedCounts
 subsetSummary(es)
 ```
 
@@ -448,7 +450,8 @@ Find highly variable genes from the normalized assay in the previous step using 
 
 ```{r, eval = FALSE}
 geneVariances <- modelGeneVariances(assay(es, "filteredCellsNormalized"))
-topHVG1000 <- chooseHighlyVariableGenes(geneVariances$statistics$residuals, top = 1000)
+residualVariances <- geneVariances$statistics$residuals
+topHVG1000 <- chooseHighlyVariableGenes(residualVariances, top = 1000)
 es <- createSubset(es, "hvg1000", rows = topHVG1000, parentAssay = "filteredCellsNormalized")
 subsetSummary(es)
 ```
