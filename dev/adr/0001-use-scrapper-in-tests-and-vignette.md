@@ -42,7 +42,8 @@ the vignette, so the suite exercises the workflow the vignette shows.
   top-level object, not a subset, so they don't fit the subset steps.
 - The vignette no longer loads scater, which avoids readers having to
   know that scater's and scrapper's `normalizeCounts()` mask each other.
-- `runPca()` in the vignette is not run by any test.
+- `computeRnaQcMetrics()` and `runPca()` in the vignette are not run by
+  any test.
 
 ## Alternatives considered
 

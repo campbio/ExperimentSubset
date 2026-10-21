@@ -268,8 +268,11 @@ geneVariances <- scrapper::modelGeneVariances(
 hvgIndices <- scrapper::chooseHighlyVariableGenes(
   geneVariances$statistics$residuals, top = 1000
 )
+#pass gene names to keep character rows with a subset parent covered
+hvgNames <- rownames(assay(es, "filteredAssayNormalized"))[hvgIndices]
+stopifnot(length(hvgNames) > 0, !anyNA(hvgNames))
 es <- createSubset(
-  es, "hvg1000", rows = hvgIndices, cols = seq_len(1622),
+  es, "hvg1000", rows = hvgNames, cols = seq_len(1622),
   parentAssay = "filteredAssayNormalized"
 )
 

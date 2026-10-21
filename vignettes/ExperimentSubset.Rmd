@@ -419,12 +419,11 @@ es <- ExperimentSubset(tenx_pbmc4k)
 subsetSummary(es)
 ```
 
-Compute per-cell QC metrics on the `counts` matrix using the `scrapper` library and store the total count (`sum`) and number of detected genes (`detected`) for each cell:
+Compute per-cell QC metrics on the `counts` matrix using the `scrapper` library and store the total count (`sum`) for each cell:
 
 ```{r, eval = FALSE}
 qcMetrics <- computeRnaQcMetrics(assay(es, "counts"), subsets = list())
 colData(es)$sum <- qcMetrics$sum
-colData(es)$detected <- qcMetrics$detected
 ```
 
 Filter cells with low column sum and create a new subset called 'filteredCells':
@@ -439,8 +438,8 @@ Normalize 'filteredCells' subset using `scrapper` library and store it back. Siz
 
 ```{r, eval = FALSE}
 filteredCounts <- assay(es, "filteredCells")
-sizeFactorsFiltered <- centerSizeFactors(colSums(filteredCounts))
-normalizedCounts <- normalizeCounts(filteredCounts, size.factors = sizeFactorsFiltered)
+filteredSizeFactors <- centerSizeFactors(colSums(filteredCounts))
+normalizedCounts <- normalizeCounts(filteredCounts, size.factors = filteredSizeFactors)
 assay(es, "filteredCells", subsetAssayName = "filteredCellsNormalized") <- normalizedCounts
 subsetSummary(es)
 ```
