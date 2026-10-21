@@ -403,13 +403,12 @@ Installing and loading required packages:
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install(version = "3.11", ask = FALSE)
-BiocManager::install(c("TENxPBMCData", "scater", "scran"))
+BiocManager::install(c("TENxPBMCData", "scrapper"))
 ```
 ```{r, eval = FALSE}
 library(ExperimentSubset)
 library(TENxPBMCData)
-library(scater)
-library(scran)
+library(scrapper)
 ```
 
 Load PBMC4K dataset and create `ExperimentSubset` object:
@@ -420,11 +419,11 @@ es <- ExperimentSubset(tenx_pbmc4k)
 subsetSummary(es)
 ```
 
-Compute `perCellQCMetrics` on `counts` matrix:
+Compute per-cell QC metrics on the `counts` matrix using the `scrapper` library and store the total count (`sum`) for each cell:
 
 ```{r, eval = FALSE}
-perCellQCMetrics <- perCellQCMetrics(assay(es, "counts"))
-colData(es) <- cbind(colData(es), perCellQCMetrics)
+qcMetrics <- computeRnaQcMetrics(assay(es, "counts"), subsets = list())
+colData(es)$sum <- qcMetrics$sum
 ```
 
 Filter cells with low column sum and create a new subset called 'filteredCells':
@@ -435,25 +434,34 @@ es <- createSubset(es, "filteredCells", cols = filteredCellsIndices, parentAssay
 subsetSummary(es)
 ```
 
-Normalize 'filteredCells' subset using `scater` library and store it back:
+Normalize 'filteredCells' subset using `scrapper` library and store it back. Size factors are computed from each cell's total count and centered at one:
 
 ```{r, eval = FALSE}
-assay(es, "filteredCells", subsetAssayName = "filteredCellsNormalized") <- normalizeCounts(assay(es, "filteredCells"))
+filteredCounts <- assay(es, "filteredCells")
+filteredSizeFactors <- centerSizeFactors(colSums(filteredCounts))
+normalizedCounts <- normalizeCounts(filteredCounts,
+                                    size.factors = filteredSizeFactors)
+assay(es, "filteredCells",
+      subsetAssayName = "filteredCellsNormalized") <- normalizedCounts
 subsetSummary(es)
 ```
 
-Find highly variable genes from the normalized assay in the previous step using `scran` library against the 'filteredCells' subset only:
+Find highly variable genes from the normalized assay in the previous step using `scrapper` library against the 'filteredCells' subset only:
 
 ```{r, eval = FALSE}
-topHVG1000 <- getTopHVGs(modelGeneVar(assay(es, "filteredCellsNormalized")), n = 1000)
+geneVariances <- modelGeneVariances(assay(es, "filteredCellsNormalized"))
+residualVariances <- geneVariances$statistics$residuals
+topHVG1000 <- chooseHighlyVariableGenes(residualVariances, top = 1000)
 es <- createSubset(es, "hvg1000", rows = topHVG1000, parentAssay = "filteredCellsNormalized")
 subsetSummary(es)
 ```
 
-Run 'PCA' on the highly variable genes computed in the last step using `scater` library against the 'filteredCells' subset only:
+Run 'PCA' on the highly variable genes computed in the last step using `scrapper` library against the 'filteredCells' subset only. `runPca` returns the PCs in rows, so transpose them to put cells in rows:
 
 ```{r, eval = FALSE}
-reducedDim(es, type = "PCA", subsetName = "hvg1000") <- calculatePCA(assay(es, "hvg1000"))
+pcaResult <- runPca(assay(es, "hvg1000"))
+pcaScores <- t(pcaResult$components)
+reducedDim(es, type = "PCA", subsetName = "hvg1000") <- pcaScores
 ```
 
 Show the current condition of the `ExperimentSubset` object:

@@ -5,7 +5,6 @@ library(ExperimentSubset)
 library(scds)
 library(TENxPBMCData)
 library(scater)
-library(scran)
 library(airway)
 
 #load data once
@@ -254,8 +253,28 @@ es <- ExperimentSubset(tenx_pbmc4k)
 colData(es) <- cbind(colData(es), colSums = colSums(assay(es, "counts")))
 rowData(es) <- cbind(rowData(es), rowSums = rowSums(assay(es, "counts")))
 es <- createSubset(es, "filteredAssay", rows = rownames(es), cols = which(colData(es)$colSums > mean(colData(es)$colSums)), parentAssay = "counts")
-assay(es, "filteredAssay", withDimnames = FALSE, subsetAssayName = "filteredAssayNormalized") <- scater::normalizeCounts(assay(es, "filteredAssay"))
-es <- createSubset(es, "hvg1000", rows = scran::getTopHVGs(scran::modelGeneVar(assay(es, "filteredAssayNormalized")), n = 1000), cols = seq(1:1622), parentAssay = "filteredAssayNormalized")
+#normalize and choose HVGs with scrapper, as in the vignette
+filteredCounts <- assay(es, "filteredAssay")
+filteredSizeFactors <- scrapper::centerSizeFactors(colSums(filteredCounts))
+assay(
+  es, "filteredAssay", withDimnames = FALSE,
+  subsetAssayName = "filteredAssayNormalized"
+) <- scrapper::normalizeCounts(
+  filteredCounts, size.factors = filteredSizeFactors
+)
+geneVariances <- scrapper::modelGeneVariances(
+  assay(es, "filteredAssayNormalized")
+)
+hvgIndices <- scrapper::chooseHighlyVariableGenes(
+  geneVariances$statistics$residuals, top = 1000
+)
+#pass gene names to keep character rows with a subset parent covered
+hvgNames <- rownames(assay(es, "filteredAssayNormalized"))[hvgIndices]
+stopifnot(length(hvgNames) > 0, !anyNA(hvgNames))
+es <- createSubset(
+  es, "hvg1000", rows = hvgNames, cols = seq_len(1622),
+  parentAssay = "filteredAssayNormalized"
+)
 
 testthat::test_that("Testing reducedDims",{
   set.seed(20)
