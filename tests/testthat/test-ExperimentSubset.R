@@ -375,6 +375,37 @@ testthat::test_that("Testing altExperiments",{
 } 
 )
 
+testthat::test_that("altExp gets and sets the altExp chosen by name or index", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "small", rows = 1:20, cols = 1:10)
+  # altExps told apart by their number of rows
+  makeAlt <- function(value, nrow, cells) {
+    counts <- matrix(value, nrow, length(cells), dimnames = list(NULL, cells))
+    SingleCellExperiment(list(counts = counts))
+  }
+  subsetCells <- subsetColnames(es, "small")
+  alt1 <- makeAlt(1, 2, subsetCells)
+  alt2 <- makeAlt(2, 3, subsetCells)
+  alt3 <- makeAlt(3, 4, subsetCells)
+  altExp(es, "alt1", subsetName = "small") <- alt1
+  altExp(es, "alt2", subsetName = "small") <- alt2
+
+  testthat::expect_equal(nrow(altExp(es, "alt2", subsetName = "small")), 3L)
+  testthat::expect_equal(nrow(altExp(es, 2, subsetName = "small")), 3L)
+  testthat::expect_equal(nrow(altExp(es, subsetName = "small")), 2L)
+
+  altExp(es, 2, subsetName = "small") <- alt3
+  testthat::expect_equal(nrow(altExp(es, "alt1", subsetName = "small")), 2L)
+  testthat::expect_equal(nrow(altExp(es, "alt2", subsetName = "small")), 4L)
+
+  # same calls on the main object, without subsetName
+  altExp(es, "a1") <- makeAlt(1, 2, colnames(es))
+  altExp(es, "a2") <- makeAlt(2, 3, colnames(es))
+  altExp(es, 2) <- makeAlt(3, 4, colnames(es))
+  testthat::expect_equal(nrow(altExp(es, "a1")), 2L)
+  testthat::expect_equal(nrow(altExp(es, 2)), 4L)
+})
+
 testthat::test_that("Testing createSubset with multiple paramter options",{
   es <- ExperimentSubset(sce_chcl)
   testthat::expect_error(es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "none"), "Input parentAssay does not exist.")

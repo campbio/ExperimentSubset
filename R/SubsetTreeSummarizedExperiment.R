@@ -216,7 +216,7 @@ setReplaceMethod(
   f = "altExp",
   signature = signature(x = "SubsetTreeSummarizedExperiment", e = "numeric"),
   definition = function(x, e,  ..., value) {
-    .altExp(x, ...) <- value
+    .altExp(x, e, ...) <- value
     return(x)
   }
 )

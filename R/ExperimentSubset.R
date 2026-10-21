@@ -341,7 +341,9 @@ ExperimentSubset <- function(x,
     return(callNextMethod())
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  altExp(.internalAssay(.subsets(x)[[subsetName]]))
+  if (missing(e))
+    return(altExp(.internalAssay(.subsets(x)[[subsetName]])))
+  altExp(.internalAssay(.subsets(x)[[subsetName]]), e)
 }
 
 #' @importMethodsFrom SingleCellExperiment altExps
