@@ -17,11 +17,6 @@ AssaySubset <- function(subsetName = "subset",
                         parentAssay = "counts",
                         internalAssay = NULL)
 {
-  if (grepl("\\s+", subsetName)) {
-    subsetName <- gsub("\\s", "", subsetName)
-    warning("Removing spaces from the specified subsetName.")
-  }
-  
   x <- .AssaySubset(
     subsetName = subsetName,
     rowIndices = rowIndices,
@@ -102,14 +97,22 @@ ExperimentSubset <- function(x,
     }
     else{
       out <- assay(x = x, i = i, ...)
-      out <- out[.rowIndices(.subsets(x)[[subsetName]]), .colIndices(.subsets(x)[[subsetName]])]
+      out <- out[.rowIndices(.subsets(x)[[subsetName]]),
+                 .colIndices(.subsets(x)[[subsetName]]), drop = FALSE]
+      # use the subset's own names, which subsetRownames<- may have changed
+      internal <- .internalAssay(.subsets(x)[[subsetName]])
+      if (!is.null(rownames(internal)))
+        rownames(out) <- rownames(internal)
+      if (!is.null(colnames(internal)))
+        colnames(out) <- colnames(internal)
     }
   }
   #look inside subsets
   else{
-    for (j in seq(length(x@subsets))) {
+    for (j in seq_along(.subsets(x))) {
       if (i %in% assayNames(.internalAssay(.subsets(x)[[j]]))) {
-        out <- assay(.internalAssay(.subsets(x)[[j]]), withDimnames = FALSE,  i)
+        # stored subset assays take the subset's row and column names
+        out <- assay(.internalAssay(.subsets(x)[[j]]), i)
       }
     }
   }
@@ -121,7 +124,12 @@ ExperimentSubset <- function(x,
                           rows,
                           cols,
                           parentAssay){
-  
+  # clean the name before the uniqueness check and use it as the key
+  if (is.character(subsetName) && any(grepl("\\s", subsetName))) {
+    subsetName <- gsub("\\s", "", subsetName)
+    warning("Removing spaces from the specified subsetName.")
+  }
+
   .subsetParamsValidity(x,
                  subsetName,
                  rows,
@@ -213,14 +221,35 @@ ExperimentSubset <- function(x,
     stop(subsetName, " does not exist in the subsets slot of the object. 
          You need to create a new subset with createSubset() function. ")
 
-  assay(
-    .internalAssay(.subsets(x)[[subsetName]]),
-    withDimnames = FALSE,
-    subsetAssayName) <- inputMatrix
-  rownames(.internalAssay(.subsets(x)[[subsetName]])) <- rownames(inputMatrix)
-  colnames(.internalAssay(.subsets(x)[[subsetName]])) <- colnames(inputMatrix)
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  if (!identical(as.integer(dim(inputMatrix)), as.integer(dim(internal))))
+    stop("'inputMatrix' must have the same dimensions as subset '",
+         subsetName, "' (", nrow(internal), " x ", ncol(internal), ").")
+  # the subset keeps its own names; inputMatrix may have none or the same
+  .checkInputNames(rownames(inputMatrix), rownames(internal),
+                   "rownames", subsetName)
+  .checkInputNames(colnames(inputMatrix), colnames(internal),
+                   "colnames", subsetName)
+
+  # a subset of an object without names takes the input's names
+  if (is.null(rownames(internal)))
+    rownames(internal) <- rownames(inputMatrix)
+  if (is.null(colnames(internal)))
+    colnames(internal) <- colnames(inputMatrix)
+  assay(internal, withDimnames = FALSE, subsetAssayName) <- inputMatrix
+  .internalAssay(.subsets(x)[[subsetName]]) <- internal
   
   return(x)
+}
+
+# Stops unless inputNames are NULL or the same as the subset's current
+# names, in the same order. what is "rownames" or "colnames".
+.checkInputNames <- function(inputNames, currentNames, what, subsetName) {
+  if (is.null(inputNames) || is.null(currentNames))
+    return(invisible(NULL))
+  if (!identical(as.character(inputNames), as.character(currentNames)))
+    stop("The ", what, " of 'inputMatrix' must be NULL or the same as the ",
+         what, " of subset '", subsetName, "', in the same order.")
 }
 
 '.assay<-' <- function(x, i, ..., subsetAssayName = NULL, value){
