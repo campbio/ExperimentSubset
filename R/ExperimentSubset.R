@@ -146,6 +146,9 @@ ExperimentSubset <- function(x,
 
   rows <- .rows(x, rows, tempAssay)
   cols <- .cols(x, cols, tempAssay)
+  # rows and cols are relative to the parent; names come from the main object
+  rootRows <- .toRootIndices(x, parentAssay, rows, .rowIndices)
+  rootCols <- .toRootIndices(x, parentAssay, cols, .colIndices)
   
   a <- list(Matrix(
     nrow = length(rows),
@@ -156,11 +159,11 @@ ExperimentSubset <- function(x,
   
   internalAssay <- SingleCellExperiment(assays = a)
   if(inherits(x, "SpatialExperiment"))
-    internalAssay$sample_id <- x$sample_id[cols]
+    internalAssay$sample_id <- x$sample_id[rootCols]
   internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
   
-  rownames(internalAssay) <- rownames(x)[rows]
-  colnames(internalAssay) <- colnames(x)[cols]
+  rownames(internalAssay) <- rownames(x)[rootRows]
+  colnames(internalAssay) <- colnames(x)[rootCols]
   
   scs <- AssaySubset(
     subsetName = subsetName,
@@ -421,6 +424,43 @@ ExperimentSubset <- function(x,
   }
 }
 
+# Name of the subset that parentAssay refers to: the subset itself, or the
+# subset storing an assay of that name. Like .assay(), the last match wins.
+# NULL if parentAssay is a main assay or cannot be found.
+.parentSubsetName <- function(x, parentAssay) {
+  if (is.null(parentAssay) || parentAssay %in% assayNames(x))
+    return(NULL)
+  if (parentAssay %in% subsetNames(x))
+    return(parentAssay)
+  holder <- NULL
+  for (name in subsetNames(x)) {
+    if (parentAssay %in% assayNames(.internalAssay(.subsets(x)[[name]])))
+      holder <- name
+  }
+  holder
+}
+
+# Converts indices relative to parentAssay into positions in the main
+# object by following the chain of parent subsets. getIndices is
+# .rowIndices or .colIndices.
+.toRootIndices <- function(x, parentAssay, indices, getIndices) {
+  for (step in seq_len(subsetCount(x) + 1)) {
+    parentName <- .parentSubsetName(x, parentAssay)
+    if (is.null(parentName))
+      return(indices)
+    parent <- .subsets(x)[[parentName]]
+    indices <- getIndices(parent)[indices]
+    parentAssay <- .parentAssay(parent)
+  }
+  stop("The parent chain of the subset does not lead to a main assay.")
+}
+
+# Row or column indices of a subset as positions in the main object
+.rootIndices <- function(x, subsetName, getIndices) {
+  subset <- .subsets(x)[[subsetName]]
+  .toRootIndices(x, .parentAssay(subset), getIndices(subset), getIndices)
+}
+
 .subsetRowData <- function(x, subsetName, parentRowData){
   .isSubset(x, subsetName)
   if(missing(parentRowData)
@@ -428,7 +468,7 @@ ExperimentSubset <- function(x,
     parentRowData = FALSE
   out <- S4Vectors::DataFrame(row.names = seq(subsetDim(x, subsetName)[1]))
   if(parentRowData)
-    out <- rowData(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+    out <- rowData(x)[.rootIndices(x, subsetName, .rowIndices), , drop = FALSE]
   out <- cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
   return(out)
 }
@@ -440,7 +480,7 @@ ExperimentSubset <- function(x,
     parentColData = FALSE
   out <- S4Vectors::DataFrame(row.names = seq(subsetDim(x, subsetName)[2]))
   if(parentColData)
-    out <- colData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+    out <- colData(x)[.rootIndices(x, subsetName, .colIndices), , drop = FALSE]
   out <- cbind(out, colData(.internalAssay(.subsets(x)[[subsetName]])))
   return(out)
 }
@@ -605,7 +645,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     parentLinkRowData = FALSE
   out <- S4Vectors::DataFrame(row.names = seq(subsetDim(x, subsetName)[1]))
   if(parentLinkRowData)
-    out <- rowLinks(x)[.rowIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+    out <- rowLinks(x)[.rootIndices(x, subsetName, .rowIndices), , drop = FALSE]
   subsetLinkData <- rowLinks(.internalAssay(.subsets(x)[[subsetName]])) 
   if(!is.null(subsetLinkData))
     out <- cbind(out, subsetLinkData)
@@ -621,7 +661,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     parentLinkColData = FALSE
   out <- S4Vectors::DataFrame(row.names = seq(subsetDim(x, subsetName)[2]))
   if(parentLinkColData)
-    out <- colLinks(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+    out <- colLinks(x)[.rootIndices(x, subsetName, .colIndices), , drop = FALSE]
   subsetLinkData <- colLinks(.internalAssay(.subsets(x)[[subsetName]])) 
   if(!is.null(subsetLinkData))
     out <- cbind(out, subsetLinkData)
@@ -632,7 +672,8 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 
 .subsetSpatialCoords <- function(x, subsetName){
   .isSubset(x, subsetName)
-  out <- spatialCoords(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+  rootCols <- .rootIndices(x, subsetName, .colIndices)
+  out <- spatialCoords(x)[rootCols, , drop = FALSE]
   return(out)
 }
 
@@ -652,8 +693,10 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
      || is.null(parentSpatialData))
     parentSpatialData = FALSE
   out <- data.frame(row.names = seq(subsetDim(x, subsetName)[2]))
-  if(parentSpatialData)
-    out <- spatialData(x)[.colIndices(.subsets(x)[[subsetName]]), , drop = FALSE]
+  if(parentSpatialData) {
+    rootCols <- .rootIndices(x, subsetName, .colIndices)
+    out <- spatialData(x)[rootCols, , drop = FALSE]
+  }
   subsetSpatialData <- spatialData(.internalAssay(.subsets(x)[[subsetName]]))
   if(ncol(subsetSpatialData) > 0)
     out <- cbind(out, subsetSpatialData)
