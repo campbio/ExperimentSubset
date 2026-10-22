@@ -523,10 +523,14 @@ ExperimentSubset <- function(x,
   if(missing(parentRowData)
      || is.null(parentRowData))
     parentRowData = FALSE
-  out <- S4Vectors::DataFrame(row.names = seq(subsetDim(x, subsetName)[1]))
-  if(parentRowData)
-    out <- rowData(x)[.rootIndices(x, subsetName, .rowIndices), , drop = FALSE]
-  out <- cbind(out, rowData(.internalAssay(.subsets(x)[[subsetName]])))
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  out <- rowData(internal)
+  if (parentRowData) {
+    rootRows <- .rootIndices(x, subsetName, .rowIndices)
+    out <- cbind(rowData(x)[rootRows, , drop = FALSE], out)
+    # the subset's own row names, which subsetRownames<- may have changed
+    rownames(out) <- rownames(internal)
+  }
   return(out)
 }
 
@@ -535,15 +539,22 @@ ExperimentSubset <- function(x,
   if(missing(parentColData)
      || is.null(parentColData))
     parentColData = FALSE
-  out <- S4Vectors::DataFrame(row.names = seq(subsetDim(x, subsetName)[2]))
-  if(parentColData)
-    out <- colData(x)[.rootIndices(x, subsetName, .colIndices), , drop = FALSE]
-  out <- cbind(out, colData(.internalAssay(.subsets(x)[[subsetName]])))
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  out <- colData(internal)
+  if (parentColData) {
+    rootCols <- .rootIndices(x, subsetName, .colIndices)
+    out <- cbind(colData(x)[rootCols, , drop = FALSE], out)
+    # the subset's own column names, which subsetColnames<- may have changed
+    rownames(out) <- colnames(internal)
+  }
   return(out)
 }
 
 '.subsetColData<-' <- function(x, subsetName, value){
   .isSubset(x, subsetName)
+  # colData<- takes the subset's column names from value's rownames
+  value <- .keepSubsetColnames(value, .subsetColnames(x, subsetName),
+                               subsetName)
   colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
@@ -552,6 +563,21 @@ ExperimentSubset <- function(x,
   .isSubset(x, subsetName)
   rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
+}
+
+# Setting a subset's colData must not rename its columns: value's rownames
+# must be NULL, and are then filled in, or the same as the subset's names.
+# A value of the wrong size is left for colData<- to reject.
+.keepSubsetColnames <- function(value, currentNames, subsetName) {
+  if (is.null(rownames(value))) {
+    if (nrow(value) == length(currentNames))
+      rownames(value) <- currentNames
+  } else if (!is.null(currentNames)
+             && !identical(rownames(value), currentNames)) {
+    stop("The rownames of 'value' must be NULL or the column names of ",
+         "subset '", subsetName, "', in the same order.")
+  }
+  value
 }
 
 #' @importMethodsFrom SingleCellExperiment reducedDim
