@@ -424,6 +424,39 @@ testthat::test_that("Subsets of subsets use the right spatial coordinates", {
                          c("A", "A", "B", "B", "B"))
 })
 
+testthat::test_that("Subsets of subsets use the right rowLinks", {
+  data("tinyTree", package = "TreeSummarizedExperiment")
+  counts <- matrix(seq_len(100), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:10)))
+  tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+                                  rowTree = tinyTree)
+  es <- ExperimentSubset(tse)
+  es <- createSubset(es, "s1", rows = 3:8, cols = 1:10)
+  es <- createSubset(es, "s2", rows = 2:4, cols = 1:5, parentAssay = "s1")
+
+  links <- subsetRowLinks(es, "s2", parentRowLinkData = TRUE)
+  testthat::expect_equal(links$nodeLab, rowLinks(tse)$nodeLab[4:6])
+})
+
+testthat::test_that("Parent lookups follow .assay() for ambiguous names", {
+  sce <- sce_chcl
+  colData(sce)$cellIndex <- seq_len(ncol(sce))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s1", rows = 101:200, cols = 501:600)
+  es <- createSubset(es, "t1", rows = 1:10, cols = 1:10)
+  # two subsets store an assay named "dup"; .assay() uses the last one
+  es <- setSubsetAssay(es, "s1", assay(es, "s1"), "dup")
+  es <- setSubsetAssay(es, "t1", assay(es, "t1"), "dup")
+  es <- createSubset(es, "s5", rows = 2:3, cols = 2:3, parentAssay = "dup")
+  testthat::expect_equal(subsetRownames(es, "s5"), rownames(assay(es, "s5")))
+  testthat::expect_equal(subsetRownames(es, "s5"), rownames(sce)[2:3])
+
+  # renaming the main assay must not break subsets made from it
+  assayNames(es)[1] <- "raw"
+  t1ColData <- colData(es, subsetName = "t1", parentColData = TRUE)
+  testthat::expect_equal(t1ColData$cellIndex, 1:10)
+})
+
 testthat::test_that("Testing createSubset with multiple paramter options",{
   es <- ExperimentSubset(sce_chcl)
   testthat::expect_error(es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "none"), "Input parentAssay does not exist.")
