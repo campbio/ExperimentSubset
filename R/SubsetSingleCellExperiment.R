@@ -123,6 +123,7 @@ setMethod(
   signature = c("SubsetSingleCellExperiment", "character"),
   definition = function(x, subsetName)
   {
+    .isSubset(x, subsetName)
     dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
