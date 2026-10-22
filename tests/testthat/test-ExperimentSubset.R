@@ -424,40 +424,63 @@ testthat::test_that("setSubsetAssay keeps the subset's row and column names", {
   cells <- subsetColnames(es, "s1")
   counts <- as.matrix(assay(es, "s1"))
 
-  # input without names: the subset keeps its names
+  # input without names: the subset keeps its names, and so does the assay
   es <- setSubsetAssay(es, "s1", unname(counts), "unnamed")
   testthat::expect_equal(subsetRownames(es, "s1"), genes)
   testthat::expect_equal(subsetColnames(es, "s1"), cells)
+  testthat::expect_equal(dimnames(assay(es, "unnamed")), list(genes, cells))
 
   # input with the same names is accepted
   es <- setSubsetAssay(es, "s1", counts, "named")
   testthat::expect_equal(subsetColnames(es, "s1"), cells)
 
   # input with reordered or different names is rejected
-  testthat::expect_error(
-    setSubsetAssay(es, "s1", counts[, c(2, 1, 3, 4)], "reordered"),
-    regexp = "inputMatrix")
+  reordered <- counts[, c(2, 1, 3, 4)]
+  testthat::expect_error(setSubsetAssay(es, "s1", reordered, "reordered"),
+                         regexp = "inputMatrix")
   renamed <- counts
   rownames(renamed) <- paste0("other", 1:5)
   testthat::expect_error(setSubsetAssay(es, "s1", renamed, "renamed"),
                          regexp = "inputMatrix")
+  testthat::expect_error(assay(es, "s1", subsetAssayName = "x") <- reordered,
+                         regexp = "inputMatrix")
   testthat::expect_equal(subsetColnames(es, "s1"), cells)
+
+  # a matrix of the wrong size gets a dimension error, not a names error
+  testthat::expect_error(setSubsetAssay(es, "s1", counts[1:3, ], "small"),
+                         regexp = "same dimensions")
+
+  # after renaming the subset's cells, its assay round-trips
+  subsetColnames(es, "s1") <- paste0("cell", 1:4)
+  s1Counts <- assay(es, "s1")
+  testthat::expect_equal(colnames(s1Counts), paste0("cell", 1:4))
+  es <- setSubsetAssay(es, "s1", s1Counts, "roundTrip")
+  testthat::expect_equal(colnames(assay(es, "roundTrip")), paste0("cell", 1:4))
+})
+
+testthat::test_that("A subset of an object without names takes the input's", {
+  sce <- SingleCellExperiment(list(counts = matrix(1, 6, 5)))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s1", rows = 1:3, cols = 1:2)
+  counts <- matrix(2, 3, 2, dimnames = list(paste0("g", 1:3), c("a", "b")))
+  es <- setSubsetAssay(es, "s1", counts, "named")
+  testthat::expect_equal(subsetRownames(es, "s1"), paste0("g", 1:3))
+  testthat::expect_equal(subsetColnames(es, "s1"), c("a", "b"))
 })
 
 testthat::test_that("Spaces are removed from a new subset's name", {
   es <- ExperimentSubset(sce_chcl)
-  testthat::expect_warning(
-    es <- createSubset(es, "my subset", rows = 1:5, cols = 1:5),
-    regexp = "Removing spaces")
+  spaced <- "my subset"
+  testthat::expect_warning(es <- createSubset(es, spaced, 1:5, 1:5),
+                           regexp = "Removing spaces")
   testthat::expect_equal(subsetNames(es), "mysubset")
   testthat::expect_equal(subsetDim(es, "mysubset"), c(5L, 5L))
   es <- setSubsetAssay(es, "mysubset", assay(es, "mysubset"), "stored")
   testthat::expect_equal(subsetParent(es, "stored"),
                          list("mysubset", "counts"))
   # the cleaned name can't overwrite an existing subset
-  testthat::expect_error(
-    suppressWarnings(createSubset(es, "my subset", rows = 1:2, cols = 1:2)),
-    regexp = "already exists")
+  testthat::expect_error(suppressWarnings(createSubset(es, spaced, 1:2, 1:2)),
+                         regexp = "already exists")
 })
 
 testthat::test_that("Testing createSubset with multiple paramter options",{
