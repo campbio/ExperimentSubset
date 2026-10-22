@@ -1,3 +1,8 @@
+# ExperimentSubset 1.23.9 (2026-10-21)
+* A subset with a single row or column now returns a one-row or one-column matrix from `assay()`, not a vector, so subsets can be made from it
+* `setSubsetAssay()` (and `assay(x, i) <- value` for a subset) no longer replaces the subset's row and column names with the input matrix's: a matrix without names keeps the subset's names, and a matrix whose names differ from the subset's, or are in another order, is now an error instead of silently relabelling the subset
+* A `subsetName` with spaces is now stored under the name with spaces removed, which the warning already announced; before, the subset was stored under the original name and lookups of its stored assays failed
+
 # ExperimentSubset 1.23.6 (2026-10-21)
 * `altExp(x, e, subsetName = )` now returns the altExp named or numbered by `e`; it always returned the first one before
 * `altExp(x, <number>) <- value` now replaces the altExp at that position; with `subsetName` it replaced the first altExp, and without it the call failed
