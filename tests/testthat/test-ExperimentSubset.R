@@ -457,6 +457,48 @@ testthat::test_that("Subsets of subsets use the right rows and columns", {
   testthat::expect_equal(s3ColData$cellIndex, 504:505)
 })
 
+testthat::test_that("Subset rowData and colData keep the subset's names", {
+  sce <- sce_chcl
+  colData(sce)$cellIndex <- seq_len(ncol(sce))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:8)
+  genes <- rownames(sce)[1:5]
+  cells <- colnames(sce)[1:8]
+
+  # getters return the subset's row and column names
+  testthat::expect_equal(rownames(rowData(es, subsetName = "s1")), genes)
+  testthat::expect_equal(rownames(colData(es, subsetName = "s1")), cells)
+  s1ColData <- subsetColData(es, "s1", parentColData = TRUE)
+  testthat::expect_equal(rownames(s1ColData), cells)
+  testthat::expect_equal(s1ColData$cellIndex, 1:8)
+
+  # get, modify and set back keeps the cell names
+  s1ColData <- subsetColData(es, "s1", parentColData = FALSE)
+  s1ColData$score <- seq_len(8)
+  subsetColData(es, "s1") <- s1ColData
+  testthat::expect_equal(subsetColnames(es, "s1"), cells)
+  testthat::expect_equal(colData(es, subsetName = "s1")$score, 1:8)
+  # so a reducedDim with the cell names can be stored without a warning
+  umap <- matrix(0, 8, 2, dimnames = list(cells, c("U1", "U2")))
+  testthat::expect_warning(reducedDim(es, "umap", subsetName = "s1") <- umap,
+                           NA)
+
+  # a value without rownames takes the subset's names
+  colData(es, subsetName = "s1") <- DataFrame(group = letters[1:8])
+  testthat::expect_equal(subsetColnames(es, "s1"), cells)
+  rowData(es, subsetName = "s1") <- DataFrame(rank = 5:1)
+  testthat::expect_equal(subsetRownames(es, "s1"), genes)
+
+  # a value with other rownames is an error
+  otherCells <- DataFrame(group = letters[1:8], row.names = LETTERS[1:8])
+  testthat::expect_error(subsetColData(es, "s1") <- otherCells,
+                         regexp = "rownames of 'value'")
+  otherGenes <- DataFrame(rank = 5:1, row.names = LETTERS[1:5])
+  testthat::expect_error(rowData(es, subsetName = "s1") <- otherGenes,
+                         regexp = "rownames of 'value'")
+  testthat::expect_equal(subsetColnames(es, "s1"), cells)
+})
+
 testthat::test_that("Subsets of subsets use the right spatial coordinates", {
   spots <- paste0("spot", 1:30)
   counts <- matrix(seq_len(600), nrow = 20,
