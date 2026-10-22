@@ -72,10 +72,10 @@ apply, including `make site-check`.
 - One file, `tests/testthat/test-ExperimentSubset.R` (testthat edition
   2, with `context()`), so `make test-one FILTER=ExperimentSubset` runs
   the whole suite.
-- It's slow on first run: it downloads `TENxPBMCData("pbmc4k")` from
-  ExperimentHub, then reuses the local cache.
-- It loads scds, TENxPBMCData, scater, scran and airway with `library()`
-  at the top, so it fails, rather than skips, when any is missing.
+- It runs offline: a small simulated data set stands in for the PBMC
+  data the vignette downloads.
+- The whole file skips when scds (for `sce_chcl`) is missing; tests that
+  need airway, scrapper or scater skip on their own.
 
 ## Extra make targets
 

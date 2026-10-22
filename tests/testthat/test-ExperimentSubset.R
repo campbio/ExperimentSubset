@@ -2,9 +2,8 @@ library(testthat)
 library(SingleCellExperiment)
 library(SummarizedExperiment)
 library(ExperimentSubset)
-# most tests use data from these Suggests packages; skip without them
+# most tests use sce_chcl from scds (Suggests); skip the file without it
 testthat::skip_if_not_installed("scds")
-testthat::skip_if_not_installed("airway")
 
 #load data once
 data(sce_chcl, package = "scds")
@@ -64,6 +63,7 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
   testthat::expect_equal(ncol(rowData(es, subsetName = "s1")), 1)
   
   
+  testthat::skip_if_not_installed("airway")
   data(airway, package="airway")
   rse <- airway
   testthat::expect_s4_class(es <- ExperimentSubset(rse), "SubsetRangedSummarizedExperiment")
@@ -294,9 +294,15 @@ testthat::test_that("Testing reducedDims",{
   colData(es, subsetName = "hvg1000") <- cbind(colData(es, subsetName = "hvg1000"), cluster = kmeans(t(assay(es, "hvg1000")), 5)$cluster)
   expect_true("cluster" %in% colnames(colData(es, subsetName = "hvg1000")))
 
-  reducedDim(es, type = "PCA", subsetName = "hvg1000") <- scater::calculatePCA(assay(es, "hvg1000"))
+  # writing colData back above renames the subset's cells to "1".."n"
+  # (#3), so these warn; remove expect_warning() once #3 is fixed
+  hvgPca <- scater::calculatePCA(assay(es, "hvg1000"))
+  testthat::expect_warning(reducedDim(es, "PCA", subsetName = "hvg1000") <-
+                             hvgPca, regexp = "rownames")
   expect_true("PCA" %in% reducedDimNames(es, subsetName = "hvg1000"))
-  reducedDims(es, subsetName = "hvg1000") <- list(a = scater::calculatePCA(assay(es, "hvg1000")), b = scater::calculatePCA(assay(es, "hvg1000")))
+  pcaList <- list(a = hvgPca, b = hvgPca)
+  testthat::expect_warning(reducedDims(es, subsetName = "hvg1000") <- pcaList,
+                           regexp = "rownames")
   expect_true(all.equal(reducedDimNames(es, subsetName = "hvg1000"), c("a","b")))
   
   reducedDimNames(es, subsetName = "hvg1000") <- c("PCA_1", "PCA_2")
@@ -494,7 +500,8 @@ testthat::test_that("Subsets of subsets use the right spatial coordinates", {
 })
 
 testthat::test_that("Subsets of subsets use the right rowLinks", {
-  data("tinyTree", package = "TreeSummarizedExperiment")
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
   counts <- matrix(seq_len(100), nrow = 10,
                    dimnames = list(tinyTree$tip.label, paste0("cell", 1:10)))
   tse <- TreeSummarizedExperiment(assays = list(counts = counts),
@@ -558,11 +565,35 @@ checkSharedMethods <- function(es) {
   testthat::expect_equal(altExpNames(es, subsetName = "s1"), "alt")
   testthat::expect_equal(dim(altExp(es, "alt", subsetName = "s1")), c(2L, 4L))
   testthat::expect_equal(names(altExps(es, subsetName = "s1")), "alt")
+
+  # access by position or default, and the remaining setters
+  testthat::expect_equal(reducedDim(es, 1, subsetName = "s1"), pca)
+  reducedDim(es, 1, subsetName = "s1") <- pca * 2
+  testthat::expect_equal(reducedDim(es, "PCA", subsetName = "s1"), pca * 2)
+  testthat::expect_equal(dim(altExp(es, 1, subsetName = "s1")), c(2L, 4L))
+  testthat::expect_equal(dim(altExp(es, subsetName = "s1")), c(2L, 4L))
+  altExp(es, subsetName = "s1") <- alt
+  altExp(es, 1, subsetName = "s1") <- alt
+  altExps(es, subsetName = "s1") <- list(first = alt, second = alt)
+  testthat::expect_equal(altExpNames(es, subsetName = "s1"),
+                         c("first", "second"))
+  altExpNames(es, subsetName = "s1") <- c("x1", "x2")
+  testthat::expect_equal(altExpNames(es, subsetName = "s1"), c("x1", "x2"))
+  tripled <- counts[2:5, 3:6] * 3
+  suppressMessages(assay(es, "s1", subsetAssayName = "tripled") <- tripled)
+  testthat::expect_equal(as.matrix(assay(es, "tripled")), tripled)
+
+  # renaming comes last, since later lookups would see the new names
+  subsetRownames(es, "s1") <- paste0("g", 1:4)
+  subsetColnames(es, "s1") <- paste0("c", 1:4)
+  testthat::expect_equal(subsetRownames(es, "s1"), paste0("g", 1:4))
+  testthat::expect_equal(subsetColnames(es, "s1"), paste0("c", 1:4))
   es
 }
 
 testthat::test_that("TreeSummarizedExperiment subsets support all methods", {
-  data("tinyTree", package = "TreeSummarizedExperiment")
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
   counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
                    dimnames = list(tinyTree$tip.label, paste0("cell", 1:6)))
   tse <- TreeSummarizedExperiment(assays = list(counts = counts),
@@ -573,8 +604,10 @@ testthat::test_that("TreeSummarizedExperiment subsets support all methods", {
 
   links <- subsetRowLinks(es, "s1", parentRowLinkData = TRUE)
   testthat::expect_equal(links$nodeLab, rowLinks(tse)$nodeLab[2:5])
-  # the object has no column tree, so there are no column links
+  # the subset itself stores no links
+  testthat::expect_null(subsetRowLinks(es, "s1", parentRowLinkData = FALSE))
   testthat::expect_null(subsetColLinks(es, "s1", parentColLinkData = FALSE))
+  # parentColLinkData = TRUE errors without a column tree (#44)
 })
 
 testthat::test_that("SpatialExperiment subsets support all methods", {
