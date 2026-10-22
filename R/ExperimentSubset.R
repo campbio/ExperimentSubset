@@ -55,17 +55,21 @@ ExperimentSubset <- function(x,
                              ))
 {
   if (!is.list(x)) {
-    if(is.null(assayNames(x))
-       || "" %in% assayNames(x))
-      stop("Experiment objects with unnamed assays are not supported. Use assayNames<- setter method to set assay names before creating ES object.")
+    .checkAssayNames(x)
     es <- as(x, paste0("Subset", class(x)))
   }
   else{
     sce <- SingleCellExperiment::SingleCellExperiment(x)
+    .checkAssayNames(sce)
     es <- .SubsetSingleCellExperiment(sce)
   }
   
-  if (!anyNA(subset)) {
+  # the default subset is all NA, which means no subset
+  if (!all(is.na(subset))) {
+    if (anyNA(subset))
+      stop("'subset' must not contain NA. Leave out rows, cols or ",
+           "parentAssay, or set them to NULL, to use all rows, all columns ",
+           "or the first assay.")
     es <- createSubset(
       es,
       subsetName = subset$subsetName,
@@ -75,6 +79,15 @@ ExperimentSubset <- function(x,
     )
   }
   es
+}
+
+# Stops if any assay of x has no name
+.checkAssayNames <- function(x) {
+  if (is.null(assayNames(x))
+      || "" %in% assayNames(x))
+    stop("Experiment objects with unnamed assays are not supported. ",
+         "Use assayNames<- setter method to set assay names before ",
+         "creating ES object.")
 }
 
 #' @importMethodsFrom S4Vectors metadata
@@ -107,11 +120,14 @@ ExperimentSubset <- function(x,
   }
   #look inside subsets
   else{
-    for (j in seq(length(x@subsets))) {
+    for (j in seq_along(.subsets(x))) {
       if (i %in% assayNames(.internalAssay(.subsets(x)[[j]]))) {
         out <- assay(.internalAssay(.subsets(x)[[j]]), withDimnames = FALSE,  i)
       }
     }
+    if (is.null(out))
+      stop("'i' must be the name of an assay, a subset or an assay stored ",
+           "in a subset; '", i, "' was not found.")
   }
   out
 }
@@ -221,8 +237,11 @@ ExperimentSubset <- function(x,
 }
 
 '.assay<-' <- function(x, i, ..., subsetAssayName = NULL, value){
-  if ((nrow(value) != nrow(x))
-      || (ncol(value) != ncol(x))) {
+  # a subset name stores the assay inside that subset
+  if (i %in% subsetNames(x)) {
+    if (is.null(subsetAssayName))
+      stop("'subsetAssayName' is needed to store an assay inside subset '",
+           i, "'.")
     message("Storing assay inside subset '", i, "'.")
     setSubsetAssay(
       x = x,
@@ -497,6 +516,7 @@ ExperimentSubset <- function(x,
 #' @export
 setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   if (!missing(subsetName)) {
+    .isSubset(x, subsetName)
     SingleCellExperiment::reducedDims(.internalAssay(.subsets(x)[[subsetName]])) <-
       value
   }
@@ -557,6 +577,8 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     subsetName <- .getParentAssayName(x, subsetName)
     # colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
     colnames(.internalAssay(.subsets(x)[[subsetName]]))
+  } else {
+    stop(subsetName, " subset does not exist.")
   }
 }
 
@@ -569,6 +591,8 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     subsetName <- .getParentAssayName(x, subsetName)
     # colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
     colnames(.internalAssay(.subsets(x)[[subsetName]])) <- value
+  } else {
+    stop(subsetName, " subset does not exist.")
   }
   return(x)
 }
@@ -582,6 +606,8 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     subsetName <- .getParentAssayName(x, subsetName)
     # rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
     rownames(.internalAssay(.subsets(x)[[subsetName]]))
+  } else {
+    stop(subsetName, " subset does not exist.")
   }
 }
 
@@ -594,6 +620,8 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     subsetName <- .getParentAssayName(x, subsetName)
     # rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
     rownames(.internalAssay(.subsets(x)[[subsetName]])) <- value
+  } else {
+    stop(subsetName, " subset does not exist.")
   }
   return(x)
 }
@@ -722,12 +750,17 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
                                   rows,
                                   cols,
                                   parentAssay){
+  if (!is.character(subsetName) || length(subsetName) != 1
+      || is.na(subsetName))
+    stop("'subsetName' parameter must be a unique a character value.")
+
   if(subsetName %in% subsetNames(x))
     stop("A subset with the specified 'subsetName' parameter already exists
          in the object. Subset names must be unique.")
-  
-  if(!is.character(subsetName))
-    stop("'subsetName' parameter must be a unique a character value.")
+
+  if (subsetName %in% c(assayNames(x), subsetAssayNames(x)))
+    stop("'subsetName' must differ from the names of existing assays; '",
+         subsetName, "' is already an assay name.")
   
   testForRows <- is.null(rows) || is.numeric(rows) || is.character(rows)
   if(!testForRows)
@@ -741,7 +774,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
          or a numeric vector or a character vector that specify the columns to 
          include in the subset.")
   
-  testForParentAssay <- is.null(parentAssay) || is.character(parentAssay)
+  testForParentAssay <- is.null(parentAssay) ||
+    (is.character(parentAssay) && length(parentAssay) == 1 &&
+       !is.na(parentAssay))
   if(!testForParentAssay)
     stop("'parentAssay' parameter can either be 'NULL' to use the default
          assay in the input object or a character value that specifies the
@@ -752,6 +787,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 .rows <- function(x, rows, assayName){
   tempRows <- NULL
   if (is.character(rows)) {
+    if (is.null(rownames(assay(x, withDimnames = TRUE, assayName))))
+      stop("'rows' are given as names, but the parent assay has no row ",
+           "names.")
     tempRows <-
       match(rows, rownames(
         assay(x, withDimnames = TRUE, assayName)
@@ -775,6 +813,10 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     stop("Selected rows not available in the specified assay.")
   if(length(tempRows) > dimR)
     stop("Selected rows not available in the specified assay.")
+  if (any(tempRows < 1) || any(tempRows != round(tempRows)))
+    stop("'rows' must be positive whole numbers or row names.")
+  if (anyDuplicated(tempRows))
+    stop("'rows' must not contain duplicates.")
   
   return(tempRows)
 }
@@ -782,6 +824,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 .cols <- function(x, cols, assayName){
   tempCols <- NULL
   if (is.character(cols)) {
+    if (is.null(colnames(assay(x, withDimnames = TRUE, assayName))))
+      stop("'cols' are given as names, but the parent assay has no column ",
+           "names.")
     tempCols <-
       match(cols, colnames(
         assay(x, withDimnames = TRUE, assayName)
@@ -805,6 +850,10 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     stop("Selected columns not available in the specified assay.")
   if(length(tempCols) > dimC)
     stop("Selected columns not available in the specified assay.")
+  if (any(tempCols < 1) || any(tempCols != round(tempCols)))
+    stop("'cols' must be positive whole numbers or column names.")
+  if (anyDuplicated(tempCols))
+    stop("'cols' must not contain duplicates.")
   
   return(tempCols)
 }

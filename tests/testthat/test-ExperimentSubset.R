@@ -427,6 +427,94 @@ testthat::test_that("Accessors on the main object pass extra arguments on", {
                          altCells)
 })
 
+testthat::test_that("createSubset rejects invalid rows and cols", {
+  es <- ExperimentSubset(sce_chcl)
+  testthat::expect_error(createSubset(es, "s1", rows = -1),
+                         regexp = "positive whole numbers")
+  testthat::expect_error(createSubset(es, "s1", rows = c(0, 1, 2)),
+                         regexp = "positive whole numbers")
+  testthat::expect_error(createSubset(es, "s1", cols = 1.5),
+                         regexp = "positive whole numbers")
+  testthat::expect_error(createSubset(es, "s1", rows = c(1, 1)),
+                         regexp = "duplicates")
+  testthat::expect_error(createSubset(es, "s1", cols = c(2, 3, 2)),
+                         regexp = "duplicates")
+
+  # names given for an assay without row or column names
+  unnamedSce <- SingleCellExperiment(list(counts = matrix(1, 6, 5)))
+  unnamed <- ExperimentSubset(unnamedSce)
+  testthat::expect_error(createSubset(unnamed, "s1", rows = c("a", "b")),
+                         regexp = "no row names")
+  testthat::expect_error(createSubset(unnamed, "s1", cols = "a"),
+                         regexp = "no column names")
+})
+
+testthat::test_that("createSubset rejects invalid names", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:5)
+  es <- setSubsetAssay(es, "s1", assay(es, "s1"), "stored")
+
+  testthat::expect_error(createSubset(es, c("a", "b"), rows = 1:2),
+                         regexp = "subsetName")
+  testthat::expect_error(createSubset(es, NA_character_, rows = 1:2),
+                         regexp = "subsetName")
+  # a subset can't share its name with an assay
+  testthat::expect_error(createSubset(es, "counts", rows = 1:2),
+                         regexp = "already an assay name")
+  testthat::expect_error(createSubset(es, "stored", rows = 1:2),
+                         regexp = "already an assay name")
+  twoParents <- c("counts", "s1")
+  testthat::expect_error(createSubset(es, "s2", 1:2, parentAssay = twoParents),
+                         regexp = "parentAssay")
+})
+
+testthat::test_that("ExperimentSubset checks the subset argument and lists", {
+  withNA <- list(subsetName = "s1", rows = 1:10, cols = NA, parentAssay = NA)
+  testthat::expect_error(ExperimentSubset(sce_chcl, subset = withNA),
+                         regexp = "'subset'")
+  testthat::expect_error(ExperimentSubset(list(matrix(1, 3, 3))),
+                         regexp = "unnamed assays")
+
+  # leaving out cols and parentAssay keeps all columns and the first assay
+  es <- ExperimentSubset(sce_chcl, subset = list(subsetName = "s1",
+                                                 rows = 1:10))
+  testthat::expect_equal(subsetDim(es, "s1"), c(10L, ncol(sce_chcl)))
+})
+
+testthat::test_that("Unknown subset names give a clear error", {
+  es <- ExperimentSubset(sce_chcl)
+  # no subsets yet
+  testthat::expect_error(assay(es, "nope"), regexp = "nope")
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:5)
+  testthat::expect_error(assay(es, "nope"), regexp = "nope")
+  testthat::expect_error(subsetDim(es, "nope"),
+                         regexp = "nope subset does not exist")
+  testthat::expect_error(subsetColnames(es, "nope"),
+                         regexp = "nope subset does not exist")
+  testthat::expect_error(subsetRownames(es, "nope"),
+                         regexp = "nope subset does not exist")
+  testthat::expect_error(subsetColnames(es, "nope") <- letters[1:5],
+                         regexp = "nope subset does not exist")
+  testthat::expect_error(subsetRownames(es, "nope") <- letters[1:5],
+                         regexp = "nope subset does not exist")
+  testthat::expect_error(reducedDims(es, subsetName = "nope") <- list(),
+                         regexp = "nope subset does not exist")
+})
+
+testthat::test_that("assay<- stores into a subset chosen by its name", {
+  es <- ExperimentSubset(sce_chcl)
+  # a subset with the same dimensions as the main assay
+  es <- createSubset(es, "all")
+  counts <- assay(es, "counts")
+  suppressMessages(assay(es, "all", subsetAssayName = "copy") <- counts)
+  testthat::expect_true("copy" %in% subsetAssayNames(es))
+  testthat::expect_false("all" %in% assayNames(es))
+
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:5)
+  testthat::expect_error(assay(es, "s1") <- assay(es, "s1"),
+                         regexp = "subsetAssayName")
+})
+
 testthat::test_that("Testing createSubset with multiple paramter options",{
   es <- ExperimentSubset(sce_chcl)
   testthat::expect_error(es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "none"), "Input parentAssay does not exist.")
