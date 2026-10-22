@@ -375,6 +375,55 @@ testthat::test_that("Testing altExperiments",{
 } 
 )
 
+testthat::test_that("Subsets of subsets use the right rows and columns", {
+  sce <- sce_chcl
+  rowData(sce)$geneIndex <- seq_len(nrow(sce))
+  colData(sce)$cellIndex <- seq_len(ncol(sce))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s1", rows = 101:200, cols = 501:600)
+  # s2 is made from the subset s1
+  es <- createSubset(es, "s2", rows = 1:10, cols = 1:10, parentAssay = "s1")
+  # s3 is made from s2, three levels below the main assay
+  es <- createSubset(es, "s3", rows = 2:3, cols = 4:5, parentAssay = "s2")
+  # s4 is made from an assay stored inside s1
+  es <- setSubsetAssay(es, "s1", assay(es, "s1"), "s1copy")
+  es <- createSubset(es, "s4", rows = 5:6, cols = 2:3, parentAssay = "s1copy")
+
+  testthat::expect_equal(rownames(assay(es, "s2")), rownames(sce)[101:110])
+  testthat::expect_equal(subsetRownames(es, "s2"), rownames(sce)[101:110])
+  testthat::expect_equal(subsetColnames(es, "s2"), colnames(sce)[501:510])
+  testthat::expect_equal(subsetRownames(es, "s3"), rownames(sce)[102:103])
+  testthat::expect_equal(subsetColnames(es, "s3"), colnames(sce)[504:505])
+  testthat::expect_equal(subsetRownames(es, "s4"), rownames(sce)[105:106])
+  testthat::expect_equal(subsetColnames(es, "s4"), colnames(sce)[502:503])
+
+  s2RowData <- rowData(es, subsetName = "s2", parentRowData = TRUE)
+  s2ColData <- colData(es, subsetName = "s2", parentColData = TRUE)
+  testthat::expect_equal(s2RowData$geneIndex, 101:110)
+  testthat::expect_equal(s2ColData$cellIndex, 501:510)
+  s3ColData <- colData(es, subsetName = "s3", parentColData = TRUE)
+  testthat::expect_equal(s3ColData$cellIndex, 504:505)
+})
+
+testthat::test_that("Subsets of subsets use the right spatial coordinates", {
+  spots <- paste0("spot", 1:30)
+  counts <- matrix(seq_len(600), nrow = 20,
+                   dimnames = list(paste0("gene", 1:20), spots))
+  coords <- cbind(x = as.numeric(1:30), y = as.numeric(1:30) * 10)
+  spe <- SpatialExperiment(assays = list(counts = counts),
+                           sample_id = rep(c("A", "B"), each = 15),
+                           spatialCoords = coords)
+  es <- ExperimentSubset(spe)
+  es <- createSubset(es, "s1", rows = 1:10, cols = 11:20)
+  es <- createSubset(es, "s2", rows = 1:5, cols = 4:8, parentAssay = "s1")
+
+  testthat::expect_equal(subsetColnames(es, "s2"), spots[14:18])
+  testthat::expect_equal(unname(subsetSpatialCoords(es, "s2")[, "x"]),
+                         as.numeric(14:18))
+  testthat::expect_equal(colData(es, subsetName = "s2")$sample_id,
+                         c("A", "A", "B", "B", "B"))
+})
+
 testthat::test_that("Testing createSubset with multiple paramter options",{
   es <- ExperimentSubset(sce_chcl)
   testthat::expect_error(es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "none"), "Input parentAssay does not exist.")
