@@ -26,23 +26,19 @@ createSubset(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the object from which a subset
-should be created. Input can also be any object inherited from
-\code{SummarizedExperiment} for immediate conversion and subset formation.
-A list of slots can also be passed to directly construct an ES object from
-matrices similar to SE and SCE constructors.}
+should be created. Use \code{ExperimentSubset()} first to convert another
+experiment object.}
 
 \item{subsetName}{\code{character(1)} Specify the name of the subset to
 create.}
 
-\item{rows}{\code{vector("numeric")} Specify the rows to include in this
-subset. If \code{missing} or \code{NULL}, all rows are included in the
-subset. Values can be \code{numeric} or \code{character}. Default
-\code{NULL}.}
+\item{rows}{\code{numeric} or \code{character} vector. Specify the rows to
+include in this subset. If \code{missing} or \code{NULL}, all rows are
+included in the subset. Default \code{NULL}.}
 
-\item{cols}{\code{vector("numeric")} Specify the columns to include in this
-subset. If \code{missing} or \code{NULL}, all columns are included in the
-subset. Values can be \code{numeric} or \code{character}. Default
-\code{NULL}.}
+\item{cols}{\code{numeric} or \code{character} vector. Specify the columns
+to include in this subset. If \code{missing} or \code{NULL}, all columns
+are included in the subset. Default \code{NULL}.}
 
 \item{parentAssay}{\code{character(1)} Specify the parent \code{assay} of the
 subset. This parent \code{assay} must already be available in the

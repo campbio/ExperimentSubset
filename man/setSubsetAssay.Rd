@@ -31,7 +31,8 @@ setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName)
 \item{subsetName}{\code{character(1)} Specify the name of the existing subset
 inside which the new subset \code{assay} should be stored.}
 
-\item{inputMatrix}{\code{dgCMatrix} The input subset \code{assay}.}
+\item{inputMatrix}{A matrix-like object (for example a \code{matrix} or
+\code{dgCMatrix}) to store as an \code{assay} in the subset.}
 
 \item{subsetAssayName}{\code{character(1)} Specify the name of the new
 \code{assay} against the \code{inputMatrix} parameter.}

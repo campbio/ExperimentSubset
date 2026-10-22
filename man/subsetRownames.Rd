@@ -45,19 +45,21 @@ subsetRownames(x, subsetName) <- value
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Name of the subset to set \code{colnames} to.}
+\item{subsetName}{Name of the subset to get \code{rownames} from or set
+them to.}
 
 \item{value}{Specify the rownames values to replace.}
 }
 \value{
-A \code{vector} of \code{colnames}.
+A \code{vector} of \code{rownames}.
 
 Input object with rownames set to a subset.
 }
 \description{
 Get \code{rownames} from a subset in the \code{ExperimentSubset} object.
 
-Set \code{colnames} to a subset in the \code{ExperimentSubset} object.
+Set \code{rownames} to a subset in the
+  \code{ExperimentSubset} object.
 }
 \examples{
 data(sce_chcl, package = "scds")

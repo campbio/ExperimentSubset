@@ -3,20 +3,16 @@
 #'   input \code{ExperimentSubset} object by specifying the rows and columns to
 #'   include in the subset.
 #' @param x \code{ExperimentSubset} Specify the object from which a subset
-#'   should be created. Input can also be any object inherited from
-#'   \code{SummarizedExperiment} for immediate conversion and subset formation.
-#'   A list of slots can also be passed to directly construct an ES object from
-#'   matrices similar to SE and SCE constructors.
+#'   should be created. Use \code{ExperimentSubset()} first to convert another
+#'   experiment object.
 #' @param subsetName \code{character(1)} Specify the name of the subset to
 #'   create.
-#' @param rows \code{vector("numeric")} Specify the rows to include in this
-#'   subset. If \code{missing} or \code{NULL}, all rows are included in the
-#'   subset. Values can be \code{numeric} or \code{character}. Default
-#'   \code{NULL}.
-#' @param cols \code{vector("numeric")} Specify the columns to include in this
-#'   subset. If \code{missing} or \code{NULL}, all columns are included in the
-#'   subset. Values can be \code{numeric} or \code{character}. Default
-#'   \code{NULL}.
+#' @param rows \code{numeric} or \code{character} vector. Specify the rows to
+#'   include in this subset. If \code{missing} or \code{NULL}, all rows are
+#'   included in the subset. Default \code{NULL}.
+#' @param cols \code{numeric} or \code{character} vector. Specify the columns
+#'   to include in this subset. If \code{missing} or \code{NULL}, all columns
+#'   are included in the subset. Default \code{NULL}.
 #' @param parentAssay \code{character(1)} Specify the parent \code{assay} of the
 #'   subset. This parent \code{assay} must already be available in the
 #'   \code{ExperimentSubset} object. If \code{NULL}, the first available main
@@ -104,7 +100,8 @@ setGeneric(
 #' @param x \code{ExperimentSubset} Specify the input object.
 #' @param subsetName \code{character(1)} Specify the name of the existing subset
 #'   inside which the new subset \code{assay} should be stored.
-#' @param inputMatrix \code{dgCMatrix} The input subset \code{assay}.
+#' @param inputMatrix A matrix-like object (for example a \code{matrix} or
+#'   \code{dgCMatrix}) to store as an \code{assay} in the subset.
 #' @param subsetAssayName \code{character(1)} Specify the name of the new
 #'   \code{assay} against the \code{inputMatrix} parameter.
 #' @return Updated \code{ExperimentSubset} object with the new \code{assay}
@@ -226,7 +223,9 @@ setGeneric(
 #' @title reducedDimNames
 #' @description A wrapper to the \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param ... Additional arguments to pass to into the SCE method.
+#' @param ... Additional arguments. Use \code{subsetName} to get the
+#'   \code{reducedDimNames} of a subset; other arguments are passed to the
+#'   SCE method.
 #' @return The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
 #' @rdname reducedDimNames
 #' @export
@@ -234,11 +233,13 @@ setGeneric(
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es <- createSubset(es, "subset1",
-#' rows = c(1:1500), cols = c(1:1500),
+#' rows = c(1:50), cols = c(1:20),
 #' parentAssay = "counts")
-#' reducedDims(es, subsetName = "subset1") <- list(
-#' PCA_1 = scater::calculatePCA(assay(es, "subset1")),
-#' PCA_2 = scater::calculatePCA(assay(es, "subset1")))
+#' # two small reduced dimensions, one row per cell in the subset
+#' set.seed(1)
+#' pca1 <- matrix(rnorm(40), nrow = 20)
+#' pca2 <- matrix(rnorm(40), nrow = 20)
+#' reducedDims(es, subsetName = "subset1") <- list(PCA_1 = pca1, PCA_2 = pca2)
 #' reducedDimNames(es, subsetName = "subset1")
 setGeneric(
   name = "reducedDimNames",
@@ -404,11 +405,13 @@ setGeneric(
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es <- createSubset(es, "subset1",
-#' rows = c(1:1500), cols = c(1:1500),
+#' rows = c(1:50), cols = c(1:20),
 #' parentAssay = "counts")
-#' reducedDims(es, subsetName = "subset1") <- list(
-#' PCA_1 = scater::calculatePCA(assay(es, "subset1")),
-#' PCA_2 = scater::calculatePCA(assay(es, "subset1")))
+#' # two small reduced dimensions, one row per cell in the subset
+#' set.seed(1)
+#' pca1 <- matrix(rnorm(40), nrow = 20)
+#' pca2 <- matrix(rnorm(40), nrow = 20)
+#' reducedDims(es, subsetName = "subset1") <- list(PCA_1 = pca1, PCA_2 = pca2)
 #' reducedDims(es, subsetName = "subset1")
 setGeneric(
   name = "reducedDims<-",
@@ -461,8 +464,9 @@ setGeneric(
 #' @title subsetRownames
 #' @description Get \code{rownames} from a subset in the \code{ExperimentSubset} object.
 #' @param x Input \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset to get \code{colnames} from.
-#' @return A \code{vector} of \code{colnames}.
+#' @param subsetName Name of the subset to get \code{rownames} from or set
+#'   them to.
+#' @return A \code{vector} of \code{rownames}.
 #' @rdname subsetRownames
 #' @export
 #' @examples 
@@ -483,9 +487,11 @@ setGeneric(
 )
 
 #' @title subsetRownames
-#' @description Set \code{colnames} to a subset in the \code{ExperimentSubset} object.
+#' @description Set \code{rownames} to a subset in the
+#'   \code{ExperimentSubset} object.
 #' @param x Input \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset to set \code{colnames} to.
+#' @param subsetName Name of the subset to get \code{rownames} from or set
+#'   them to.
 #' @param value Specify the rownames values to replace.
 #' @return Input object with rownames set to a subset.
 #' @rdname subsetRownames
@@ -536,11 +542,13 @@ setGeneric(
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es <- createSubset(es, "subset1",
-#' rows = c(1:1500), cols = c(1:1500),
+#' rows = c(1:50), cols = c(1:20),
 #' parentAssay = "counts")
-#' reducedDims(es, subsetName = "subset1") <- list(
-#' PCA_1 = scater::calculatePCA(assay(es, "subset1")),
-#' PCA_2 = scater::calculatePCA(assay(es, "subset1")))
+#' # two small reduced dimensions, one row per cell in the subset
+#' set.seed(1)
+#' pca1 <- matrix(rnorm(40), nrow = 20)
+#' pca2 <- matrix(rnorm(40), nrow = 20)
+#' reducedDims(es, subsetName = "subset1") <- list(PCA_1 = pca1, PCA_2 = pca2)
 #' reducedDimNames(es, subsetName = "subset1") <- c("rDim1", "rDim2")
 setGeneric(
   name = "reducedDimNames<-",
@@ -561,6 +569,18 @@ setGeneric(
 #' @rdname subsetRowLinks
 #' @importMethodsFrom TreeSummarizedExperiment rowLinks
 #' @export
+#' @examples
+#' # a small TreeSummarizedExperiment with a tree on both rows and columns
+#' data("tinyTree", package = "TreeSummarizedExperiment")
+#' counts <- matrix(1:100, nrow = 10)
+#' # name rows and columns after the tips of the tree
+#' rownames(counts) <- tinyTree$tip.label
+#' colnames(counts) <- tinyTree$tip.label
+#' tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+#'                                 rowTree = tinyTree, colTree = tinyTree)
+#' es <- ExperimentSubset(tse)
+#' es <- createSubset(es, "subset1", rows = 1:5, cols = 1:5)
+#' subsetRowLinks(es, "subset1", parentRowLinkData = TRUE)
 setGeneric(
   name = "subsetRowLinks",
   def = function(x, subsetName, parentRowLinkData)
@@ -580,6 +600,18 @@ setGeneric(
 #' @rdname subsetColLinks
 #' @importMethodsFrom TreeSummarizedExperiment colLinks
 #' @export
+#' @examples
+#' # a small TreeSummarizedExperiment with a tree on both rows and columns
+#' data("tinyTree", package = "TreeSummarizedExperiment")
+#' counts <- matrix(1:100, nrow = 10)
+#' # name rows and columns after the tips of the tree
+#' rownames(counts) <- tinyTree$tip.label
+#' colnames(counts) <- tinyTree$tip.label
+#' tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+#'                                 rowTree = tinyTree, colTree = tinyTree)
+#' es <- ExperimentSubset(tse)
+#' es <- createSubset(es, "subset1", rows = 1:5, cols = 1:5)
+#' subsetColLinks(es, "subset1", parentColLinkData = TRUE)
 setGeneric(
   name = "subsetColLinks",
   def = function(x, subsetName, parentColLinkData)
@@ -597,6 +629,15 @@ setGeneric(
 #' @rdname subsetSpatialCoords
 #' @importMethodsFrom SpatialExperiment spatialCoords
 #' @export
+#' @examples
+#' # a small SpatialExperiment with six spots
+#' counts <- matrix(1:60, nrow = 10)
+#' coords <- cbind(x = 1:6, y = 6:1)
+#' spe <- SpatialExperiment(assays = list(counts = counts),
+#'                          spatialCoords = coords)
+#' es <- ExperimentSubset(spe)
+#' es <- createSubset(es, "subset1", cols = 2:4)
+#' subsetSpatialCoords(es, "subset1")
 setGeneric(
   name = "subsetSpatialCoords",
   def = function(x, subsetName)

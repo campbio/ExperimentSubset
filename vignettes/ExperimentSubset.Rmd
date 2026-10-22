@@ -1,5 +1,5 @@
 ---
-title: "ExperimentSubset: Manages subsets of data with Bioconductor Experiment objects"
+title: "ExperimentSubset: Manages Subsets of Data with Bioconductor Experiment Objects"
 author:
 - name: Irzam Sarfraz
   affiliation: Department of Computer Science, National Textile University, Faisalabad, Pakistan
@@ -26,11 +26,10 @@ if (!requireNamespace("BiocManager", quietly=TRUE)){
 BiocManager::install("ExperimentSubset")
 ```
 
-To install the latest version from Github, use the following code:
+To install the latest version from GitHub, use the following code:
 
 ```{r, eval = FALSE}
-library(devtools)
-install_github("campbio/ExperimentSubset")
+BiocManager::install("campbio/ExperimentSubset")
 ```
 
 Loading the package:
@@ -63,16 +62,18 @@ users. It does so by creating references to the subset `rows` and `columns`
 instead of storing a new assay whenever possible instead of actually copying
 the redundant data. Functions from `SingleCellExperiment` such as `assay`, 
 `rowData` and `colData` can be used for regular assays as one would normally do,
-as well as with newly created subsets of the data. This allows the users to use 
-the `ExperimentSubset` container simply as if they were using 
-`SingleCellExperiment` container with no change required to the existing code. 
+as well as with newly created subsets of the data. Most code written for the
+input object also works on the `ExperimentSubset` object, and subsets are
+reached through an extra `subsetName` argument and the subset methods described
+below. Subsetting an object that contains subsets with `[` is not supported
+yet.
 
 # Overview of the `ExperimentSubset` class
 The `ExperimentSubset` package is composed of multiple classes that support
 subsets management capability depending upon the class of the input experiment
 object. The currently supported experiment classes which can be used with
-`ExperimentSubset` include `SummarizedExperiment`, `RangedSummarizedExperiment`
-and `SingleCellExperiment`.
+`ExperimentSubset` are `SummarizedExperiment`, `RangedSummarizedExperiment`,
+`SingleCellExperiment`, `TreeSummarizedExperiment` and `SpatialExperiment`.
 
 The `ExperimentSubset` package adds an additional slot `subsets` to the objects
 from these classes which enables support for the creation and management of 
@@ -91,21 +92,23 @@ inside the subset.
 
 # Core methods of `ExperimentSubset` class
 
-While all methods available with `SummarizedExperiment` and
-`SingleCellExperiment` classes have been overridden to support the
-`ExperimentSubset` class with additional support for subsets, some core methods
-for the creation and manipulation of subsets have been provided with the 
-`ExperimentSubset` class.
+Many methods of the `SummarizedExperiment` and `SingleCellExperiment` classes
+accept an additional `subsetName` argument to work on a subset, as described in
+the section on overridden methods below. In addition, some core methods for the
+creation and manipulation of subsets are provided with the `ExperimentSubset`
+class.
 
 ## `ExperimentSubset` constructor
 
 The constructor method allows the creation of an `ExperimentSubset` object from
-an input experiment object as long as it is inherited from 
-`SummarizedExperiment` class. Additionally, if needed, a subset can be directly
+an input experiment object of one of the five supported classes listed above.
+Additionally, if needed, a subset can be directly
 created from within the constructor by providing input a named list to the 
 `subset` parameter.
 
 ```{r}
+#set a seed so the random counts below are reproducible
+set.seed(1)
 counts <- matrix(rpois(100, lambda = 10), ncol=10, nrow=10)
 sce <- SingleCellExperiment(list(counts = counts))
 es <- ExperimentSubset(sce)
@@ -124,11 +127,11 @@ ExperimentSubset(list(counts = counts))
 ## `createSubset`
 
 The `createSubset` method as evident from the name, creates a subset from an
-already available `assay` in the object. The `subsetName` (a `character` string),
-`rowIndices` (a `numeric` or `character` `vector`), `colIndices` (a `numeric` or 
+already available `assay` in the object. The `subsetName` (a `character`
+string), `rows` (a `numeric` or `character` `vector`), `cols` (a `numeric` or
 `character` `vector`) and `parentAssay` (a `character` string) are the standard
-parameters of the `createSubset` method. If `rowIndices` or `colIndices` are
-`missing` or `NULL`, all of the rows or columns are selected from the specified
+parameters of the `createSubset` method. If `rows` or `cols` are `missing` or
+`NULL`, all of the rows or columns are selected from the specified
 `parentAssay`. If `parentAssay` is `missing` or `NULL`, the first available
 assay from the parent object is linked as the parent of this subset. The
 `parentAssay` can be an `assay` in the parent object, a subset or an `assay` 
@@ -146,7 +149,7 @@ es
 ## `setSubsetAssay` and `getSubsetAssay`
 
 The `setSubsetAssay` method should be used when a subset `assay` needs to be 
-stored either in a previously created subset. This is specifically
+stored in a previously created subset. This is specifically
 different from the `createSubset` method which only creates a subset by
 referencing to a defined `parentAssay` where the `internalAssay` of the subset
 has no assays stored. The `setSubsetAssay` method however, is used to store an
@@ -203,22 +206,26 @@ Helper methods have been provided for use by the users during specific
 circumstances while manipulating subsets of data. These helper methods and 
 their short descriptions are given below:
 
-1. `subsetNames` Returns the names of all available subsets (excluding internal subset assays)
-2. `subsetAssayNames` Returns the names of all available subsets (including internal subset assays)
-3. `subsetCount` Returns the total count of the subsets (excluding internal subset assays)
-4. `subsetAssayCount` Returns the total count of the subsets (including internal subset assays)
+1. `subsetNames` Returns the names of all available subsets (excluding
+   internal subset assays)
+2. `subsetAssayNames` Returns the names of all available subsets (including
+   internal subset assays)
+3. `subsetCount` Returns the total count of the subsets (excluding internal
+   subset assays)
+4. `subsetAssayCount` Returns the total count of the subsets (including
+   internal subset assays)
 5. `subsetDim` Returns the dimensions of a specified subset
 6. `subsetColData` Gets or sets colData from/to a subset
 7. `subsetRowData` Gets or sets rowData from/to a subset
 8. `subsetColnames` Gets or sets colnames from/to a subset
 9. `subsetRownames` Gets or sets rownames from/to a subset
-10. `subsetParent` Returns the 'subset-parent` link of a specified subset
+10. `subsetParent` Returns the 'subset-parent' link of a specified subset
 11. `setSubsetAssay` Sets an assay to a subset
 12. `getSubsetAssay` Gets an assay from a subset
 
 ### subsetColData & subsetRowData
 
-Both `subsetColData` and `subsetrowData` getter methods take in an additional 
+Both `subsetColData` and `subsetRowData` getter methods take in an additional 
 logical parameter `parentColData` or `parentRowData` that specifies if the 
 returned 'colData' or 'rowData' should include the 'colData' and 'rowData' 
 from the parent object as well. By default, `parentColData` and `parentRowData` 
@@ -227,17 +234,17 @@ and `colData` methods.
 
 ```{r}
 #store colData to parent object
-colData(es) <- cbind(colData(es), sampleID = seq(1:dim(es)[2]))
+colData(es) <- cbind(colData(es), sampleID = seq_len(dim(es)[2]))
 
 #store colData to 'subset1' using option 1
 colData(es, subsetName = "subset1") <- cbind(
   colData(es, subsetName = "subset1"), 
-  subsetSampleID1 = seq(1:subsetDim(es, "subset1")[2]))
+  subsetSampleID1 = seq_len(subsetDim(es, "subset1")[2]))
 
 #store colData to 'subset1' using option 2
 subsetColData(es, "subset1") <- cbind(
   subsetColData(es, "subset1"), 
-  subsetSampleID2 = seq(1:subsetDim(es, "subset1")[2]))
+  subsetSampleID2 = seq_len(subsetDim(es, "subset1")[2]))
 
 #get colData from 'subset1' without parent colData
 subsetColData(es, "subset1", parentColData = FALSE)
@@ -245,7 +252,8 @@ subsetColData(es, "subset1", parentColData = FALSE)
 #get colData from 'subset1' with parent colData
 subsetColData(es, "subset1", parentColData = TRUE)
 
-#same applies to `colData` and `rowData` methods when using with subsets
+#the same works with the `colData` method (and with `rowData` and the
+#`parentRowData` parameter for row data)
 colData(es, subsetName = "subset1", parentColData = FALSE) #without parent data
 colData(es, subsetName = "subset1", parentColData = TRUE) #with parent data
 
@@ -263,9 +271,10 @@ or from any subset by passing the optional `subsetName` parameter.
 The methods include `rowData`, `rowData<-`, `colData`,
 `colData<-`, `metadata`, `metadata<-`, `reducedDim`, `reducedDim<-`, 
 `reducedDims`, `reducedDims<-`, `reducedDimNames`, `reducedDimNames<-`,
-`altExp`, `altExp<-`, `altExps`, `altExps<-`, `altExpNames` and `altExpNames<-`.
-All of the methods can be used with the subsets by providing the optional 
-`subsetName` parameter.
+`altExp`, `altExp<-`, `altExps`, `altExps<-`, `altExpNames` and
+`altExpNames<-`, and for `SpatialExperiment` objects `spatialCoords` and
+`spatialData`. All of these methods can be used with the subsets by providing
+the optional `subsetName` parameter.
 
 ### assay-get & assay-set inherited methods
 An exception to the above approach is the use of `assay` and `assay<-` methods,
@@ -384,7 +393,7 @@ Store an experiment object in the `altExp` slot of `subset2`:
 ```{r}
 altExp(x = es,
        e = "subset2_alt1",
-       subsetName = "subset2") <- SingleCellExperiment(assay = list(
+       subsetName = "subset2") <- SingleCellExperiment(assays = list(
          counts = assay(es, "subset2")
        ))
 ```
@@ -396,13 +405,12 @@ subsetSummary(es)
 ```
 
 
-# Using the `ExperimentSubset` object: An example with real single cell RNA-seq data
+# Using the `ExperimentSubset` object: an example with real scRNA-seq data
 
 Installing and loading required packages:
 ```{r, eval = FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-BiocManager::install(version = "3.11", ask = FALSE)
 BiocManager::install(c("TENxPBMCData", "scrapper"))
 ```
 ```{r, eval = FALSE}
@@ -419,7 +427,8 @@ es <- ExperimentSubset(tenx_pbmc4k)
 subsetSummary(es)
 ```
 
-Compute per-cell QC metrics on the `counts` matrix using the `scrapper` library and store the total count (`sum`) for each cell:
+Compute per-cell QC metrics on the `counts` matrix using the `scrapper`
+library and store the total count (`sum`) for each cell:
 
 ```{r, eval = FALSE}
 qcMetrics <- computeRnaQcMetrics(assay(es, "counts"), subsets = list())
@@ -430,11 +439,13 @@ Filter cells with low column sum and create a new subset called 'filteredCells':
 
 ```{r, eval = FALSE}
 filteredCellsIndices <- which(colData(es)$sum > 1500)
-es <- createSubset(es, "filteredCells", cols = filteredCellsIndices, parentAssay = "counts")
+es <- createSubset(es, "filteredCells", cols = filteredCellsIndices,
+                   parentAssay = "counts")
 subsetSummary(es)
 ```
 
-Normalize 'filteredCells' subset using `scrapper` library and store it back. Size factors are computed from each cell's total count and centered at one:
+Normalize 'filteredCells' subset using `scrapper` library and store it back.
+Size factors are computed from each cell's total count and centered at one:
 
 ```{r, eval = FALSE}
 filteredCounts <- assay(es, "filteredCells")
@@ -446,17 +457,21 @@ assay(es, "filteredCells",
 subsetSummary(es)
 ```
 
-Find highly variable genes from the normalized assay in the previous step using `scrapper` library against the 'filteredCells' subset only:
+Find highly variable genes from the normalized assay in the previous step
+using `scrapper` library against the 'filteredCells' subset only:
 
 ```{r, eval = FALSE}
 geneVariances <- modelGeneVariances(assay(es, "filteredCellsNormalized"))
 residualVariances <- geneVariances$statistics$residuals
 topHVG1000 <- chooseHighlyVariableGenes(residualVariances, top = 1000)
-es <- createSubset(es, "hvg1000", rows = topHVG1000, parentAssay = "filteredCellsNormalized")
+es <- createSubset(es, "hvg1000", rows = topHVG1000,
+                   parentAssay = "filteredCellsNormalized")
 subsetSummary(es)
 ```
 
-Run 'PCA' on the highly variable genes computed in the last step using `scrapper` library against the 'filteredCells' subset only. `runPca` returns the PCs in rows, so transpose them to put cells in rows:
+Run 'PCA' on the highly variable genes computed in the last step using
+`scrapper` library against the 'hvg1000' subset only. `runPca` returns the PCs
+in rows, so transpose them to put cells in rows:
 
 ```{r, eval = FALSE}
 pcaResult <- runPca(assay(es, "hvg1000"))
@@ -539,12 +554,15 @@ below:
 ## Inherited parent object
 
 The `ExperimentSubset` object during creation is assigned one of the classes
-from `SubsetSummarizedExperiment`, `SubsetRangedSummarizedExperiment` or
-`SubsetSingleCellExperiment` which inherit from the class of the input object.
+`SubsetSummarizedExperiment`, `SubsetRangedSummarizedExperiment`,
+`SubsetSingleCellExperiment`, `SubsetTreeSummarizedExperiment` or
+`SubsetSpatialExperiment`, each of which inherits from the class of the input
+object.
 This ensures that `ExperimentSubset` object can be manipulated in a fashion
 similar to the input object class and so can be used as a drop-in replacement
-for these classes. All methods that are compatible with the input object class
-are compatible with the `ExperimentSubset` objects as well.
+for these classes. Most methods that work on the input object class work on
+the `ExperimentSubset` objects as well; subsetting with `[` is an exception
+for objects that contain subsets.
 
 ## Additional `subsets` slot
 

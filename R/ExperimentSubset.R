@@ -11,6 +11,7 @@
 #' @param internalAssay An internal Experiment object to store additional
 #'   subset data.
 #' @return A \code{AssaySubset} object.
+#' @keywords internal
 AssaySubset <- function(subsetName = "subset",
                         rowIndices = NULL,
                         colIndices = NULL,
@@ -29,8 +30,18 @@ AssaySubset <- function(subsetName = "subset",
 }
 
 #' @title ExperimentSubset constructor
-#' @description This constructor function is used to setup the \code{ExperimentSubset} object, either through manually specifying the \code{assays}, \code{rowData}, \code{colData} or directly by passing either a \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or objects inherited by these classes. A subset can also be directly created by passing a named \code{list} to the \code{subset} parameter. This named \code{list} should have parameter values named as \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
-#' @param x An experiment object if direct conversion is required or a list of slots to pass onto \code{SingleCellExperiment} constructor to generate experiment object from general data.
+#' @description This constructor function sets up an \code{ExperimentSubset}
+#'   object from a \code{SummarizedExperiment},
+#'   \code{RangedSummarizedExperiment}, \code{SingleCellExperiment},
+#'   \code{TreeSummarizedExperiment} or \code{SpatialExperiment} object, or
+#'   from a named \code{list} of assay matrices. A subset can also be created
+#'   directly by passing a named \code{list} to the \code{subset} parameter,
+#'   with elements named \code{subsetName}, \code{rows}, \code{cols} and
+#'   \code{parentAssay}.
+#' @param x An experiment object of one of the five supported classes
+#'   (subclasses of them are not supported), or a named \code{list} of assay
+#'   matrices, which is passed to the \code{SingleCellExperiment} constructor
+#'   as its assays.
 #' @param subset A named \code{list} to create a subset from within the
 #'   constructor, with elements \code{subsetName} and, optionally,
 #'   \code{rows}, \code{cols} and \code{parentAssay}. Leave out
@@ -38,7 +49,9 @@ AssaySubset <- function(subsetName = "subset",
 #'   \code{NULL}, to use all rows, all columns or the first assay. The
 #'   default, a list of \code{NA} values, creates no subset; an \code{NA}
 #'   in a list you supply is an error.
-#' @return A \code{ExperimentSubset} object.
+#' @return An object of the matching \code{Subset*} class, for example a
+#'   \code{SubsetSingleCellExperiment} for a \code{SingleCellExperiment} or
+#'   a list of assays.
 #' @export
 #' @import Matrix
 #' @importFrom SingleCellExperiment SingleCellExperiment

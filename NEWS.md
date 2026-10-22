@@ -1,3 +1,7 @@
+# ExperimentSubset 1.23.13 (2026-10-22)
+* Documentation fixes: the vignette lists all five supported classes, names the `createSubset()` arguments `rows` and `cols`, seeds its random data, drops the pin to Bioconductor 3.11 and installs from GitHub with BiocManager; help pages say which input `ExperimentSubset()` and `createSubset()` accept, fix the `subsetRownames()` page, and add examples for `subsetRowLinks()`, `subsetColLinks()` and `subsetSpatialCoords()`; examples no longer need scater
+* DESCRIPTION gains URL and BugReports fields and drops the stale Date and the unused LazyData; the citation uses `bibentry()`
+
 # ExperimentSubset 1.23.12 (2026-10-22)
 * `rowData()`, `colData()`, `subsetRowData()` and `subsetColData()` for a subset now return the subset's row or column names as rownames (or `NULL` if it has none), instead of `"1".."n"`, so writing the result back no longer renames the subset's cells
 * Setting a subset's colData no longer changes its column names: a value without rownames takes the subset's names, and a value whose rownames differ from them is an error. Rename a subset's columns with `subsetColnames<-`. Subsets whose cells were already renamed to `"1".."n"` this way keep those names; set them back with `subsetColnames<-` or re-create the subset
