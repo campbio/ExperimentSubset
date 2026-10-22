@@ -81,7 +81,7 @@ ExperimentSubset <- function(x,
 .metadata <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   metadata(.internalAssay(.subsets(x)[[subsetName]]))
@@ -232,7 +232,7 @@ ExperimentSubset <- function(x,
     )
   }
   else{
-    callNextMethod(...)
+    callNextMethod(x, i, ..., value = value)
   }
 }
 
@@ -350,7 +350,7 @@ ExperimentSubset <- function(x,
 .altExps <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   altExps(.internalAssay(.subsets(x)[[subsetName]]))
@@ -360,7 +360,7 @@ ExperimentSubset <- function(x,
 .altExpNames <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   altExpNames(.internalAssay(.subsets(x)[[subsetName]]))
@@ -370,7 +370,7 @@ ExperimentSubset <- function(x,
 '.altExpNames<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ..., value = value))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   altExpNames(.internalAssay(.subsets(x)[[subsetName]])) <- value
@@ -395,7 +395,7 @@ ExperimentSubset <- function(x,
 '.altExps<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ..., value = value))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   altExps(.internalAssay(.subsets(x)[[subsetName]])) <- value
@@ -406,7 +406,7 @@ ExperimentSubset <- function(x,
 '.metadata<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ..., value = value))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   metadata(.internalAssay(.subsets(x)[[subsetName]])) <- value
@@ -461,7 +461,7 @@ ExperimentSubset <- function(x,
 .reducedDim <- function(x, type, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, type, ...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   reducedDim(.internalAssay(.subsets(x)[[subsetName]]), type)
@@ -471,7 +471,7 @@ ExperimentSubset <- function(x,
 '.reducedDim<-' <- function(x, type, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, type, ..., value = value))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   reducedDim(.internalAssay(.subsets(x)[[subsetName]]), type, ...) <- value
@@ -482,7 +482,7 @@ ExperimentSubset <- function(x,
 .reducedDims <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   reducedDims(.internalAssay(.subsets(x)[[subsetName]]))
@@ -509,7 +509,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 .rowData <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ...))
   subsetName = arglist[["subsetName"]]
   parentRowData = arglist[["parentRowData"]]
   .isSubset(x, subsetName)
@@ -519,7 +519,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 .colData <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ...))
   subsetName = arglist[["subsetName"]]
   parentColData = arglist[["parentColData"]]
   .isSubset(x, subsetName)
@@ -530,7 +530,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 '.rowData<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ..., value = value))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   .subsetRowData(x, subsetName) <- value
@@ -541,7 +541,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 '.colData<-' <- function(x, ..., value){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ..., value = value))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   .subsetColData(x, subsetName) <- value
@@ -640,7 +640,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 .spatialCoords <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
   .subsetSpatialCoords(x, subsetName)
@@ -664,7 +664,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 .spatialData <- function(x, ...){
   arglist <- list(...)
   if(!"subsetName" %in% names(arglist))
-    return(callNextMethod(...))
+    return(callNextMethod(x, ...))
   subsetName = arglist[["subsetName"]]
   parentSpatialData = arglist[["parentSpatialData"]]
   .isSubset(x, subsetName)

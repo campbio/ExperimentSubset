@@ -406,6 +406,27 @@ testthat::test_that("altExp gets and sets the altExp chosen by name or index", {
   testthat::expect_equal(nrow(altExp(es, 2)), 4L)
 })
 
+testthat::test_that("Accessors on the main object pass extra arguments on", {
+  # withDimnames is passed through the generic's ... for these getters
+  sce <- sce_chcl
+  reducedDim(sce, "PCA") <- matrix(seq_len(ncol(sce) * 2), ncol = 2)
+  # stored altExp colnames differ, so withDimnames changes the result
+  altCells <- paste0("alt_", seq_len(ncol(sce)))
+  counts <- matrix(1, 2, ncol(sce), dimnames = list(NULL, altCells))
+  alt <- SingleCellExperiment(list(counts = counts))
+  altExps(sce, withDimnames = FALSE) <- list(alt1 = alt)
+  es <- ExperimentSubset(sce)
+
+  testthat::expect_equal(reducedDim(es, "PCA", withDimnames = FALSE),
+                         reducedDim(sce, "PCA", withDimnames = FALSE))
+  testthat::expect_equal(reducedDims(es, withDimnames = FALSE),
+                         reducedDims(sce, withDimnames = FALSE))
+  testthat::expect_equal(altExps(es, withDimnames = FALSE),
+                         altExps(sce, withDimnames = FALSE))
+  testthat::expect_equal(colnames(altExps(es, withDimnames = FALSE)[[1]]),
+                         altCells)
+})
+
 testthat::test_that("Testing createSubset with multiple paramter options",{
   es <- ExperimentSubset(sce_chcl)
   testthat::expect_error(es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "none"), "Input parentAssay does not exist.")
