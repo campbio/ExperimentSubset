@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.11 (2026-10-22)
+* The tests no longer download PBMC data from ExperimentHub: a small simulated data set replaces it, the tests skip, rather than fail, when a Suggests package they need is missing, and new tests cover the TreeSummarizedExperiment and SpatialExperiment methods (except `spatialData`, deprecated upstream)
+
 # ExperimentSubset 1.23.10 (2026-10-21)
 * `createSubset()` checks its input more strictly: `rows` and `cols` must select at least one row or column and be positive whole numbers or names, without duplicates (duplicates were accepted in some cases before); names given for an assay without row or column names give a clear error; `subsetName` must be a single non-empty string that is not already the name of an assay or of an assay stored in a subset; `parentAssay` must be a single string
 * `ExperimentSubset()` now stops when `subset` contains NA instead of silently skipping the subset, and rejects a list of assays without names

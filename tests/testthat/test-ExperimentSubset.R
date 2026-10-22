@@ -2,14 +2,17 @@ library(testthat)
 library(SingleCellExperiment)
 library(SummarizedExperiment)
 library(ExperimentSubset)
-library(scds)
-library(TENxPBMCData)
-library(scater)
-library(airway)
+# most tests use sce_chcl from scds (Suggests); skip the file without it
+testthat::skip_if_not_installed("scds")
 
 #load data once
 data(sce_chcl, package = "scds")
-tenx_pbmc4k <- TENxPBMCData(dataset = "pbmc4k")
+# a small simulated count matrix with dimnames, in place of a download
+set.seed(1)
+simCounts <- matrix(rpois(300 * 120, lambda = 1), nrow = 300,
+                    dimnames = list(paste0("gene", 1:300),
+                                    paste0("cell", 1:120)))
+simSce <- SingleCellExperiment(list(counts = simCounts))
 
 context("Testing ExperimentSubset functions")
 
@@ -60,6 +63,7 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
   testthat::expect_equal(ncol(rowData(es, subsetName = "s1")), 1)
   
   
+  testthat::skip_if_not_installed("airway")
   data(airway, package="airway")
   rse <- airway
   testthat::expect_s4_class(es <- ExperimentSubset(rse), "SubsetRangedSummarizedExperiment")
@@ -248,42 +252,53 @@ testthat::test_that("Testing assay function",{
   expect_true(all.equal(assay(es, "counts"), assay(es, "counts2")))
 })
 
-#create es with pbmc4k data, compute colsums and rowsums, create a hvg1000 subset for further testing
-es <- ExperimentSubset(tenx_pbmc4k)
-colData(es) <- cbind(colData(es), colSums = colSums(assay(es, "counts")))
-rowData(es) <- cbind(rowData(es), rowSums = rowSums(assay(es, "counts")))
-es <- createSubset(es, "filteredAssay", rows = rownames(es), cols = which(colData(es)$colSums > mean(colData(es)$colSums)), parentAssay = "counts")
-#normalize and choose HVGs with scrapper, as in the vignette
-filteredCounts <- assay(es, "filteredAssay")
-filteredSizeFactors <- scrapper::centerSizeFactors(colSums(filteredCounts))
-assay(
-  es, "filteredAssay", withDimnames = FALSE,
-  subsetAssayName = "filteredAssayNormalized"
-) <- scrapper::normalizeCounts(
-  filteredCounts, size.factors = filteredSizeFactors
-)
-geneVariances <- scrapper::modelGeneVariances(
-  assay(es, "filteredAssayNormalized")
-)
-hvgIndices <- scrapper::chooseHighlyVariableGenes(
-  geneVariances$statistics$residuals, top = 1000
-)
-#pass gene names to keep character rows with a subset parent covered
-hvgNames <- rownames(assay(es, "filteredAssayNormalized"))[hvgIndices]
-stopifnot(length(hvgNames) > 0, !anyNA(hvgNames))
-es <- createSubset(
-  es, "hvg1000", rows = hvgNames, cols = seq_len(1622),
-  parentAssay = "filteredAssayNormalized"
-)
+# Builds the object the reducedDims, metadata and altExp tests share, as
+# the vignette does: keep cells with more counts than average, normalize
+# and choose highly variable genes with scrapper, then subset those genes
+# by name. The subset keeps its historical name, hvg1000.
+makeHvgFixture <- function() {
+  es <- ExperimentSubset(simSce)
+  colData(es) <- cbind(colData(es), colSums = colSums(assay(es, "counts")))
+  rowData(es) <- cbind(rowData(es), rowSums = rowSums(assay(es, "counts")))
+  keptCells <- which(colData(es)$colSums > mean(colData(es)$colSums))
+  es <- createSubset(es, "filteredAssay", rows = rownames(es),
+                     cols = keptCells, parentAssay = "counts")
+  filteredCounts <- assay(es, "filteredAssay")
+  filteredSizeFactors <- scrapper::centerSizeFactors(colSums(filteredCounts))
+  assay(
+    es, "filteredAssay", withDimnames = FALSE,
+    subsetAssayName = "filteredAssayNormalized"
+  ) <- scrapper::normalizeCounts(
+    filteredCounts, size.factors = filteredSizeFactors
+  )
+  geneVariances <- scrapper::modelGeneVariances(
+    assay(es, "filteredAssayNormalized")
+  )
+  hvgIndices <- scrapper::chooseHighlyVariableGenes(
+    geneVariances$statistics$residuals, top = 50
+  )
+  #pass gene names to keep character rows with a subset parent covered
+  hvgNames <- rownames(assay(es, "filteredAssayNormalized"))[hvgIndices]
+  stopifnot(length(hvgNames) > 0, !anyNA(hvgNames))
+  createSubset(
+    es, "hvg1000", rows = hvgNames, cols = seq_along(keptCells),
+    parentAssay = "filteredAssayNormalized"
+  )
+}
 
 testthat::test_that("Testing reducedDims",{
+  testthat::skip_if_not_installed("scrapper")
+  testthat::skip_if_not_installed("scater")
+  es <- makeHvgFixture()
   set.seed(20)
   colData(es, subsetName = "hvg1000") <- cbind(colData(es, subsetName = "hvg1000"), cluster = kmeans(t(assay(es, "hvg1000")), 5)$cluster)
   expect_true("cluster" %in% colnames(colData(es, subsetName = "hvg1000")))
 
-  reducedDim(es, type = "PCA", subsetName = "hvg1000") <- scater::calculatePCA(assay(es, "hvg1000"))
+  hvgPca <- scater::calculatePCA(assay(es, "hvg1000"))
+  reducedDim(es, "PCA", subsetName = "hvg1000") <- hvgPca
   expect_true("PCA" %in% reducedDimNames(es, subsetName = "hvg1000"))
-  reducedDims(es, subsetName = "hvg1000") <- list(a = scater::calculatePCA(assay(es, "hvg1000")), b = scater::calculatePCA(assay(es, "hvg1000")))
+  pcaList <- list(a = hvgPca, b = hvgPca)
+  reducedDims(es, subsetName = "hvg1000") <- pcaList
   expect_true(all.equal(reducedDimNames(es, subsetName = "hvg1000"), c("a","b")))
   
   reducedDimNames(es, subsetName = "hvg1000") <- c("PCA_1", "PCA_2")
@@ -308,6 +323,8 @@ testthat::test_that("Testing reducedDims",{
 })
 
 testthat::test_that("Testing metadata",{
+  testthat::skip_if_not_installed("scrapper")
+  es <- makeHvgFixture()
   metadata(es, subsetName = "hvg1000") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
   expect_equal(metadata(es, subsetName = "hvg1000")$meta1, "This is testing meta1")
   expect_equal(metadata(es, subsetName = "hvg1000")$meta2, "This is testing meta2")
@@ -324,6 +341,8 @@ testthat::test_that("Testing metadata",{
 })
 
 testthat::test_that("Testing altExperiments",{
+  testthat::skip_if_not_installed("scrapper")
+  es <- makeHvgFixture()
   altExp(es, "alt1", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
   altExp(es, "alt2", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
   expect_true(all.equal(altExpNames(es, subsetName = "hvg1000"), c("alt1", "alt2")))
@@ -336,10 +355,10 @@ testthat::test_that("Testing altExperiments",{
   
   expect_true(!is.null(altExp(es, subsetName = "hvg1000")))
   
-  altExp(es) <- tenx_pbmc4k
+  altExp(es) <- simSce
   expect_true(!is.null(altExp(es)))
 
-  altExp(es, "a1") <- tenx_pbmc4k
+  altExp(es, "a1") <- simSce
   expect_true("a1" %in% altExpNames(es))
   expect_true(!is.null(altExp(es, "a1")))
   
@@ -370,7 +389,7 @@ testthat::test_that("Testing altExperiments",{
   testthat::expect_error(altExps(es, subsetName = "hvg10002"),
                          "hvg10002 subset does not exist.")
   
-  altExps(es) <- list(a = tenx_pbmc4k, b = tenx_pbmc4k)
+  altExps(es) <- list(a = simSce, b = simSce)
   expect_true(all.equal(altExpNames(es), c("a", "b")))
 } 
 )
@@ -477,7 +496,8 @@ testthat::test_that("Subsets of subsets use the right spatial coordinates", {
 })
 
 testthat::test_that("Subsets of subsets use the right rowLinks", {
-  data("tinyTree", package = "TreeSummarizedExperiment")
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
   counts <- matrix(seq_len(100), nrow = 10,
                    dimnames = list(tinyTree$tip.label, paste0("cell", 1:10)))
   tse <- TreeSummarizedExperiment(assays = list(counts = counts),
@@ -488,6 +508,121 @@ testthat::test_that("Subsets of subsets use the right rowLinks", {
 
   links <- subsetRowLinks(es, "s2", parentRowLinkData = TRUE)
   testthat::expect_equal(links$nodeLab, rowLinks(tse)$nodeLab[4:6])
+})
+
+# Runs the methods every Subset*Experiment class shares on es, whose main
+# assay "counts" has row and column names and at least 5 rows and 6
+# columns. Returns es with a subset "s1" and a stored assay "doubled".
+checkSharedMethods <- function(es) {
+  counts <- as.matrix(assay(es, "counts"))
+  es <- createSubset(es, "s1", rows = 2:5, cols = 3:6)
+  testthat::expect_equal(subsetNames(es), "s1")
+  testthat::expect_equal(subsetCount(es), 1L)
+  testthat::expect_equal(subsetDim(es, "s1"), c(4L, 4L))
+  testthat::expect_equal(subsetRownames(es, "s1"), rownames(counts)[2:5])
+  testthat::expect_equal(subsetColnames(es, "s1"), colnames(counts)[3:6])
+  testthat::expect_equal(as.matrix(assay(es, "s1")), counts[2:5, 3:6])
+
+  doubled <- counts[2:5, 3:6] * 2
+  es <- setSubsetAssay(es, "s1", doubled, "doubled")
+  testthat::expect_equal(as.matrix(getSubsetAssay(es, "doubled")), doubled)
+  testthat::expect_equal(subsetAssayNames(es), c("s1", "doubled"))
+  testthat::expect_equal(subsetAssayCount(es), 2L)
+  testthat::expect_equal(subsetParent(es, "doubled"), list("s1", "counts"))
+  testthat::expect_output(show(es), "subsets\\(1\\): s1")
+  testthat::expect_output(subsetSummary(es), "doubled")
+
+  metadata(es, subsetName = "s1") <- list(note = "kept")
+  testthat::expect_equal(metadata(es, subsetName = "s1")$note, "kept")
+
+  genes <- subsetRownames(es, "s1")
+  cells <- subsetColnames(es, "s1")
+  rowData(es, subsetName = "s1") <- DataFrame(score = 1:4, row.names = genes)
+  testthat::expect_equal(rowData(es, subsetName = "s1")$score, 1:4)
+  colData(es, subsetName = "s1") <- DataFrame(group = letters[1:4],
+                                              row.names = cells)
+  testthat::expect_equal(colData(es, subsetName = "s1")$group, letters[1:4])
+  subsetRowData(es, "s1") <- DataFrame(rank = 4:1, row.names = genes)
+  testthat::expect_equal(subsetRowData(es, "s1", FALSE)$rank, 4:1)
+  subsetColData(es, "s1") <- DataFrame(batch = 1:4, row.names = cells)
+  testthat::expect_equal(subsetColData(es, "s1", FALSE)$batch, 1:4)
+  parentCols <- subsetColData(es, "s1", parentColData = TRUE)
+  testthat::expect_equal(rownames(parentCols), colnames(counts)[3:6])
+
+  # reducedDims and altExps, which these classes get from SCE
+  pca <- matrix(as.numeric(1:8), nrow = 4, dimnames = list(cells, NULL))
+  reducedDim(es, "PCA", subsetName = "s1") <- pca
+  testthat::expect_equal(reducedDim(es, "PCA", subsetName = "s1"), pca)
+  testthat::expect_equal(reducedDimNames(es, subsetName = "s1"), "PCA")
+  testthat::expect_equal(names(reducedDims(es, subsetName = "s1")), "PCA")
+  altCounts <- matrix(1, 2, 4, dimnames = list(NULL, cells))
+  alt <- SingleCellExperiment(list(counts = altCounts))
+  altExp(es, "alt", subsetName = "s1") <- alt
+  testthat::expect_equal(altExpNames(es, subsetName = "s1"), "alt")
+  testthat::expect_equal(dim(altExp(es, "alt", subsetName = "s1")), c(2L, 4L))
+  testthat::expect_equal(names(altExps(es, subsetName = "s1")), "alt")
+
+  # access by position or default, and the remaining setters
+  testthat::expect_equal(reducedDim(es, 1, subsetName = "s1"), pca)
+  reducedDim(es, 1, subsetName = "s1") <- pca * 2
+  testthat::expect_equal(reducedDim(es, "PCA", subsetName = "s1"), pca * 2)
+  testthat::expect_equal(dim(altExp(es, 1, subsetName = "s1")), c(2L, 4L))
+  testthat::expect_equal(dim(altExp(es, subsetName = "s1")), c(2L, 4L))
+  altExp(es, subsetName = "s1") <- alt
+  altExp(es, 1, subsetName = "s1") <- alt
+  altExps(es, subsetName = "s1") <- list(first = alt, second = alt)
+  testthat::expect_equal(altExpNames(es, subsetName = "s1"),
+                         c("first", "second"))
+  altExpNames(es, subsetName = "s1") <- c("x1", "x2")
+  testthat::expect_equal(altExpNames(es, subsetName = "s1"), c("x1", "x2"))
+  tripled <- counts[2:5, 3:6] * 3
+  suppressMessages(assay(es, "s1", subsetAssayName = "tripled") <- tripled)
+  testthat::expect_equal(as.matrix(assay(es, "tripled")), tripled)
+
+  # renaming comes last, since later lookups would see the new names
+  subsetRownames(es, "s1") <- paste0("g", 1:4)
+  subsetColnames(es, "s1") <- paste0("c", 1:4)
+  testthat::expect_equal(subsetRownames(es, "s1"), paste0("g", 1:4))
+  testthat::expect_equal(subsetColnames(es, "s1"), paste0("c", 1:4))
+  es
+}
+
+testthat::test_that("TreeSummarizedExperiment subsets support all methods", {
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:6)))
+  tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+                                  rowTree = tinyTree)
+  es <- ExperimentSubset(tse)
+  testthat::expect_s4_class(es, "SubsetTreeSummarizedExperiment")
+  es <- checkSharedMethods(es)
+
+  links <- subsetRowLinks(es, "s1", parentRowLinkData = TRUE)
+  testthat::expect_equal(links$nodeLab, rowLinks(tse)$nodeLab[2:5])
+  # the subset itself stores no links
+  testthat::expect_null(subsetRowLinks(es, "s1", parentRowLinkData = FALSE))
+  testthat::expect_null(subsetColLinks(es, "s1", parentColLinkData = FALSE))
+  # parentColLinkData = TRUE errors without a column tree (#44)
+})
+
+testthat::test_that("SpatialExperiment subsets support all methods", {
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(paste0("gene", 1:10),
+                                   paste0("spot", 1:6)))
+  coords <- cbind(x = as.numeric(1:6), y = as.numeric(1:6) * 10)
+  spe <- SpatialExperiment(assays = list(counts = counts),
+                           sample_id = rep(c("A", "B"), each = 3),
+                           spatialCoords = coords)
+  es <- ExperimentSubset(spe)
+  testthat::expect_s4_class(es, "SubsetSpatialExperiment")
+  es <- checkSharedMethods(es)
+
+  spotCoords <- spatialCoords(es, subsetName = "s1")
+  testthat::expect_equal(unname(spotCoords[, "y"]), c(30, 40, 50, 60))
+  testthat::expect_equal(subsetSpatialCoords(es, "s1"), spotCoords)
+  # the main object's coordinates are unchanged
+  testthat::expect_equal(spatialCoords(es), spatialCoords(spe))
 })
 
 testthat::test_that("Parent lookups follow .assay() for ambiguous names", {
