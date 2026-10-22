@@ -102,7 +102,8 @@ ExperimentSubset <- function(x,
     }
     else{
       out <- assay(x = x, i = i, ...)
-      out <- out[.rowIndices(.subsets(x)[[subsetName]]), .colIndices(.subsets(x)[[subsetName]])]
+      out <- out[.rowIndices(.subsets(x)[[subsetName]]),
+                 .colIndices(.subsets(x)[[subsetName]]), drop = FALSE]
     }
   }
   #look inside subsets
@@ -121,7 +122,12 @@ ExperimentSubset <- function(x,
                           rows,
                           cols,
                           parentAssay){
-  
+  # clean the name before the uniqueness check and use it as the key
+  if (is.character(subsetName) && any(grepl("\\s", subsetName))) {
+    subsetName <- gsub("\\s", "", subsetName)
+    warning("Removing spaces from the specified subsetName.")
+  }
+
   .subsetParamsValidity(x,
                  subsetName,
                  rows,
@@ -210,14 +216,34 @@ ExperimentSubset <- function(x,
     stop(subsetName, " does not exist in the subsets slot of the object. 
          You need to create a new subset with createSubset() function. ")
 
+  # the subset keeps its own names; inputMatrix may have none or the same
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  .checkInputNames(rownames(inputMatrix), rownames(internal),
+                   "rownames", subsetName)
+  .checkInputNames(colnames(inputMatrix), colnames(internal),
+                   "colnames", subsetName)
+
   assay(
     .internalAssay(.subsets(x)[[subsetName]]),
     withDimnames = FALSE,
     subsetAssayName) <- inputMatrix
-  rownames(.internalAssay(.subsets(x)[[subsetName]])) <- rownames(inputMatrix)
-  colnames(.internalAssay(.subsets(x)[[subsetName]])) <- colnames(inputMatrix)
+  # a subset of an object without names takes the input's names
+  if (is.null(rownames(internal)))
+    rownames(.internalAssay(.subsets(x)[[subsetName]])) <- rownames(inputMatrix)
+  if (is.null(colnames(internal)))
+    colnames(.internalAssay(.subsets(x)[[subsetName]])) <- colnames(inputMatrix)
   
   return(x)
+}
+
+# Stops unless inputNames are NULL or the same as the subset's current
+# names, in the same order. what is "rownames" or "colnames".
+.checkInputNames <- function(inputNames, currentNames, what, subsetName) {
+  if (is.null(inputNames) || is.null(currentNames))
+    return(invisible(NULL))
+  if (!identical(as.character(inputNames), as.character(currentNames)))
+    stop("The ", what, " of 'inputMatrix' must be NULL or the same as the ",
+         what, " of subset '", subsetName, "', in the same order.")
 }
 
 '.assay<-' <- function(x, i, ..., subsetAssayName = NULL, value){
