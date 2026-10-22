@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.7 (2026-10-21)
+* Accessors called on the main object without `subsetName` now pass extra arguments on to the base method; for example `reducedDim(x, "PCA", withDimnames = FALSE)`, `reducedDims(x, withDimnames = FALSE)` and `altExps(x, withDimnames = FALSE)` failed with "argument x is missing"
+
 # ExperimentSubset 1.23.5 (2026-10-21)
 * The vignette's PBMC workflow now uses `scrapper` for QC, normalization, highly variable genes and PCA, replacing `scran` and `scater` functions that are deprecated
 * `scrapper` replaces `scran` in Suggests; the tests also use `scrapper` in place of the deprecated functions
