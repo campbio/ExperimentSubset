@@ -495,31 +495,30 @@ ExperimentSubset <- function(x,
 
 '.subsetColData<-' <- function(x, subsetName, value){
   .isSubset(x, subsetName)
-  internal <- .internalAssay(.subsets(x)[[subsetName]])
-  value <- .keepSubsetNames(value, colnames(internal), "column names",
-                            subsetName)
+  # colData<- takes the subset's column names from value's rownames
+  value <- .keepSubsetColnames(value, .subsetColnames(x, subsetName),
+                               subsetName)
   colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
 '.subsetRowData<-' <- function(x, subsetName, value){
   .isSubset(x, subsetName)
-  internal <- .internalAssay(.subsets(x)[[subsetName]])
-  value <- .keepSubsetNames(value, rownames(internal), "row names",
-                            subsetName)
   rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
-# A subset's rowData or colData must not rename it: value's rownames must
-# be NULL, and are then filled in, or the same as the subset's names.
-.keepSubsetNames <- function(value, currentNames, what, subsetName) {
+# Setting a subset's colData must not rename its columns: value's rownames
+# must be NULL, and are then filled in, or the same as the subset's names.
+# A value of the wrong size is left for colData<- to reject.
+.keepSubsetColnames <- function(value, currentNames, subsetName) {
   if (is.null(rownames(value))) {
-    rownames(value) <- currentNames
+    if (nrow(value) == length(currentNames))
+      rownames(value) <- currentNames
   } else if (!is.null(currentNames)
              && !identical(rownames(value), currentNames)) {
-    stop("The rownames of 'value' must be NULL or the ", what,
-         " of subset '", subsetName, "', in the same order.")
+    stop("The rownames of 'value' must be NULL or the column names of ",
+         "subset '", subsetName, "', in the same order.")
   }
   value
 }

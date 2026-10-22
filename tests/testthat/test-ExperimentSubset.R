@@ -489,14 +489,28 @@ testthat::test_that("Subset rowData and colData keep the subset's names", {
   rowData(es, subsetName = "s1") <- DataFrame(rank = 5:1)
   testthat::expect_equal(subsetRownames(es, "s1"), genes)
 
-  # a value with other rownames is an error
+  # colData with other rownames, or of the wrong size, is an error
   otherCells <- DataFrame(group = letters[1:8], row.names = LETTERS[1:8])
   testthat::expect_error(subsetColData(es, "s1") <- otherCells,
                          regexp = "rownames of 'value'")
-  otherGenes <- DataFrame(rank = 5:1, row.names = LETTERS[1:5])
-  testthat::expect_error(rowData(es, subsetName = "s1") <- otherGenes,
+  testthat::expect_error(colData(es, subsetName = "s1") <- otherCells,
                          regexp = "rownames of 'value'")
+  testthat::expect_error(subsetColData(es, "s1") <- DataFrame(a = 1:5),
+                         regexp = "nrow")
   testthat::expect_equal(subsetColnames(es, "s1"), cells)
+  # rowData, like SummarizedExperiment's, ignores value's rownames
+  otherGenes <- DataFrame(rank = 5:1, row.names = LETTERS[1:5])
+  rowData(es, subsetName = "s1") <- otherGenes
+  testthat::expect_equal(subsetRownames(es, "s1"), genes)
+  testthat::expect_equal(rowData(es, subsetName = "s1")$rank, 5:1)
+
+  # with the parent's data, the result has the subset's renamed names
+  subsetColnames(es, "s1") <- paste0("cell", 1:8)
+  subsetRownames(es, "s1") <- paste0("gene", 1:5)
+  s1ColData <- subsetColData(es, "s1", parentColData = TRUE)
+  s1RowData <- subsetRowData(es, "s1", parentRowData = TRUE)
+  testthat::expect_equal(rownames(s1ColData), paste0("cell", 1:8))
+  testthat::expect_equal(rownames(s1RowData), paste0("gene", 1:5))
 })
 
 testthat::test_that("Subsets of subsets use the right spatial coordinates", {
