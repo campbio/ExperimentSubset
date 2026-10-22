@@ -361,7 +361,9 @@ setGeneric(
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to set
 #'   \code{colData} to.
-#' @param value Input \code{DataFrame} to store.
+#' @param value Input \code{DataFrame} to store. Its rownames must be
+#'   \code{NULL} or the subset's column names, in the same order; other
+#'   rownames are an error. Use \code{subsetColnames<-} to rename columns.
 #' @return Input object with \code{colData} stored.
 #' @rdname subsetColData
 #' @importMethodsFrom SingleCellExperiment colData

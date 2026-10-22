@@ -2,6 +2,19 @@
 * Documentation fixes: the vignette lists all five supported classes, names the `createSubset()` arguments `rows` and `cols`, seeds its random data, drops the pin to Bioconductor 3.11 and installs from GitHub with BiocManager; help pages say which input `ExperimentSubset()` and `createSubset()` accept, fix the `subsetRownames()` page, and add examples for `subsetRowLinks()`, `subsetColLinks()` and `subsetSpatialCoords()`; examples no longer need scater
 * DESCRIPTION gains URL and BugReports fields and drops the stale Date and the unused LazyData; the citation uses `bibentry()`
 
+# ExperimentSubset 1.23.12 (2026-10-22)
+* `rowData()`, `colData()`, `subsetRowData()` and `subsetColData()` for a subset now return the subset's row or column names as rownames (or `NULL` if it has none), instead of `"1".."n"`, so writing the result back no longer renames the subset's cells
+* Setting a subset's colData no longer changes its column names: a value without rownames takes the subset's names, and a value whose rownames differ from them is an error. Rename a subset's columns with `subsetColnames<-`. Subsets whose cells were already renamed to `"1".."n"` this way keep those names; set them back with `subsetColnames<-` or re-create the subset
+
+# ExperimentSubset 1.23.11 (2026-10-22)
+* The tests no longer download PBMC data from ExperimentHub: a small simulated data set replaces it, the tests skip, rather than fail, when a Suggests package they need is missing, and new tests cover the TreeSummarizedExperiment and SpatialExperiment methods (except `spatialData`, deprecated upstream)
+
+# ExperimentSubset 1.23.10 (2026-10-21)
+* `createSubset()` checks its input more strictly: `rows` and `cols` must select at least one row or column and be positive whole numbers or names, without duplicates (duplicates were accepted in some cases before); names given for an assay without row or column names give a clear error; `subsetName` must be a single non-empty string that is not already the name of an assay or of an assay stored in a subset; `parentAssay` must be a single string
+* `ExperimentSubset()` now stops when `subset` contains NA instead of silently skipping the subset, and rejects a list of assays without names
+* Unknown subset names now give a clear error in `subsetDim()`, `subsetColnames()`, `subsetRownames()` and their setters, and `reducedDims<-`; `assay(x, i)` and `getSubsetAssay(x, i)` with an unknown name are an error instead of returning `NULL`
+* `assay(x, i) <- value` stores the assay inside the subset whenever `i` is a subset name, and then needs `subsetAssayName` (giving `subsetAssayName` with a name that is not a subset is an error); before, the choice depended on the dimensions of `value`, so a subset with the same dimensions as the main object got a new main assay named after it
+
 # ExperimentSubset 1.23.9 (2026-10-21)
 * A subset with a single row or column now returns a one-row or one-column matrix from `assay()`, not a vector, so subsets can be made from it
 * `setSubsetAssay()` (and `assay(x, i) <- value` for a subset) no longer replaces the subset's row and column names with the input matrix's. A matrix without names is stored under the subset's names; a matrix whose names differ from the subset's, or are in another order, is now an error instead of silently relabelling the subset; a matrix of the wrong size gets an error that says so. `assay(x, subsetName)` now returns the subset's own row and column names, including any set with `subsetRownames<-` or `subsetColnames<-`, so `setSubsetAssay(x, s, assay(x, s), ...)` always works

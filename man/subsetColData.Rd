@@ -49,7 +49,9 @@ subsetColData(x, subsetName) <- value
 \item{parentColData}{\code{logical(1)} Logical value indicating if parent
 colData should be combined or not. Default \code{FALSE}.}
 
-\item{value}{Input \code{DataFrame} to store.}
+\item{value}{Input \code{DataFrame} to store. Its rownames must be
+\code{NULL} or the subset's column names, in the same order; other
+rownames are an error. Use \code{subsetColnames<-} to rename columns.}
 }
 \value{
 The \code{colData} from input object.
