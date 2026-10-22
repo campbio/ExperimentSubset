@@ -28,8 +28,10 @@ Get \code{rowLinks} from a subset.
 \examples{
 # a small TreeSummarizedExperiment with a tree on both rows and columns
 data("tinyTree", package = "TreeSummarizedExperiment")
-counts <- matrix(1:100, nrow = 10,
-                 dimnames = list(tinyTree$tip.label, tinyTree$tip.label))
+counts <- matrix(1:100, nrow = 10)
+# name rows and columns after the tips of the tree
+rownames(counts) <- tinyTree$tip.label
+colnames(counts) <- tinyTree$tip.label
 tse <- TreeSummarizedExperiment(assays = list(counts = counts),
                                 rowTree = tinyTree, colTree = tinyTree)
 es <- ExperimentSubset(tse)

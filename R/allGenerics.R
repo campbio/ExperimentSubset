@@ -8,15 +8,11 @@
 #' @param subsetName \code{character(1)} Specify the name of the subset to
 #'   create.
 #' @param rows \code{numeric} or \code{character} vector. Specify the rows to
-#'   include in this
-#'   subset. If \code{missing} or \code{NULL}, all rows are included in the
-#'   subset. Values can be \code{numeric} or \code{character}. Default
-#'   \code{NULL}.
+#'   include in this subset. If \code{missing} or \code{NULL}, all rows are
+#'   included in the subset. Default \code{NULL}.
 #' @param cols \code{numeric} or \code{character} vector. Specify the columns
-#'   to include in this
-#'   subset. If \code{missing} or \code{NULL}, all columns are included in the
-#'   subset. Values can be \code{numeric} or \code{character}. Default
-#'   \code{NULL}.
+#'   to include in this subset. If \code{missing} or \code{NULL}, all columns
+#'   are included in the subset. Default \code{NULL}.
 #' @param parentAssay \code{character(1)} Specify the parent \code{assay} of the
 #'   subset. This parent \code{assay} must already be available in the
 #'   \code{ExperimentSubset} object. If \code{NULL}, the first available main
@@ -227,7 +223,9 @@ setGeneric(
 #' @title reducedDimNames
 #' @description A wrapper to the \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param ... Additional arguments to pass to into the SCE method.
+#' @param ... Additional arguments. Use \code{subsetName} to get the
+#'   \code{reducedDimNames} of a subset; other arguments are passed to the
+#'   SCE method.
 #' @return The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
 #' @rdname reducedDimNames
 #' @export
@@ -239,9 +237,9 @@ setGeneric(
 #' parentAssay = "counts")
 #' # two small reduced dimensions, one row per cell in the subset
 #' set.seed(1)
-#' reducedDims(es, subsetName = "subset1") <- list(
-#' PCA_1 = matrix(rnorm(40), nrow = 20),
-#' PCA_2 = matrix(rnorm(40), nrow = 20))
+#' pca1 <- matrix(rnorm(40), nrow = 20)
+#' pca2 <- matrix(rnorm(40), nrow = 20)
+#' reducedDims(es, subsetName = "subset1") <- list(PCA_1 = pca1, PCA_2 = pca2)
 #' reducedDimNames(es, subsetName = "subset1")
 setGeneric(
   name = "reducedDimNames",
@@ -409,9 +407,9 @@ setGeneric(
 #' parentAssay = "counts")
 #' # two small reduced dimensions, one row per cell in the subset
 #' set.seed(1)
-#' reducedDims(es, subsetName = "subset1") <- list(
-#' PCA_1 = matrix(rnorm(40), nrow = 20),
-#' PCA_2 = matrix(rnorm(40), nrow = 20))
+#' pca1 <- matrix(rnorm(40), nrow = 20)
+#' pca2 <- matrix(rnorm(40), nrow = 20)
+#' reducedDims(es, subsetName = "subset1") <- list(PCA_1 = pca1, PCA_2 = pca2)
 #' reducedDims(es, subsetName = "subset1")
 setGeneric(
   name = "reducedDims<-",
@@ -464,7 +462,8 @@ setGeneric(
 #' @title subsetRownames
 #' @description Get \code{rownames} from a subset in the \code{ExperimentSubset} object.
 #' @param x Input \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset to get \code{rownames} from.
+#' @param subsetName Name of the subset to get \code{rownames} from or set
+#'   them to.
 #' @return A \code{vector} of \code{rownames}.
 #' @rdname subsetRownames
 #' @export
@@ -489,7 +488,8 @@ setGeneric(
 #' @description Set \code{rownames} to a subset in the
 #'   \code{ExperimentSubset} object.
 #' @param x Input \code{ExperimentSubset} object.
-#' @param subsetName Name of the subset to set \code{rownames} to.
+#' @param subsetName Name of the subset to get \code{rownames} from or set
+#'   them to.
 #' @param value Specify the rownames values to replace.
 #' @return Input object with rownames set to a subset.
 #' @rdname subsetRownames
@@ -544,9 +544,9 @@ setGeneric(
 #' parentAssay = "counts")
 #' # two small reduced dimensions, one row per cell in the subset
 #' set.seed(1)
-#' reducedDims(es, subsetName = "subset1") <- list(
-#' PCA_1 = matrix(rnorm(40), nrow = 20),
-#' PCA_2 = matrix(rnorm(40), nrow = 20))
+#' pca1 <- matrix(rnorm(40), nrow = 20)
+#' pca2 <- matrix(rnorm(40), nrow = 20)
+#' reducedDims(es, subsetName = "subset1") <- list(PCA_1 = pca1, PCA_2 = pca2)
 #' reducedDimNames(es, subsetName = "subset1") <- c("rDim1", "rDim2")
 setGeneric(
   name = "reducedDimNames<-",
@@ -570,8 +570,10 @@ setGeneric(
 #' @examples
 #' # a small TreeSummarizedExperiment with a tree on both rows and columns
 #' data("tinyTree", package = "TreeSummarizedExperiment")
-#' counts <- matrix(1:100, nrow = 10,
-#'                  dimnames = list(tinyTree$tip.label, tinyTree$tip.label))
+#' counts <- matrix(1:100, nrow = 10)
+#' # name rows and columns after the tips of the tree
+#' rownames(counts) <- tinyTree$tip.label
+#' colnames(counts) <- tinyTree$tip.label
 #' tse <- TreeSummarizedExperiment(assays = list(counts = counts),
 #'                                 rowTree = tinyTree, colTree = tinyTree)
 #' es <- ExperimentSubset(tse)
@@ -599,8 +601,10 @@ setGeneric(
 #' @examples
 #' # a small TreeSummarizedExperiment with a tree on both rows and columns
 #' data("tinyTree", package = "TreeSummarizedExperiment")
-#' counts <- matrix(1:100, nrow = 10,
-#'                  dimnames = list(tinyTree$tip.label, tinyTree$tip.label))
+#' counts <- matrix(1:100, nrow = 10)
+#' # name rows and columns after the tips of the tree
+#' rownames(counts) <- tinyTree$tip.label
+#' colnames(counts) <- tinyTree$tip.label
 #' tse <- TreeSummarizedExperiment(assays = list(counts = counts),
 #'                                 rowTree = tinyTree, colTree = tinyTree)
 #' es <- ExperimentSubset(tse)

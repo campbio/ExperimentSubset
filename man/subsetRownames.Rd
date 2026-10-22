@@ -45,7 +45,8 @@ subsetRownames(x, subsetName) <- value
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Name of the subset to set \code{rownames} to.}
+\item{subsetName}{Name of the subset to get \code{rownames} from or set
+them to.}
 
 \item{value}{Specify the rownames values to replace.}
 }

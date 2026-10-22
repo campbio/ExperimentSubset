@@ -17,7 +17,9 @@ reducedDimNames(x, ...)
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.}
 
-\item{...}{Additional arguments to pass to into the SCE method.}
+\item{...}{Additional arguments. Use \code{subsetName} to get the
+\code{reducedDimNames} of a subset; other arguments are passed to the
+SCE method.}
 }
 \value{
 The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
@@ -33,8 +35,8 @@ rows = c(1:50), cols = c(1:20),
 parentAssay = "counts")
 # two small reduced dimensions, one row per cell in the subset
 set.seed(1)
-reducedDims(es, subsetName = "subset1") <- list(
-PCA_1 = matrix(rnorm(40), nrow = 20),
-PCA_2 = matrix(rnorm(40), nrow = 20))
+pca1 <- matrix(rnorm(40), nrow = 20)
+pca2 <- matrix(rnorm(40), nrow = 20)
+reducedDims(es, subsetName = "subset1") <- list(PCA_1 = pca1, PCA_2 = pca2)
 reducedDimNames(es, subsetName = "subset1")
 }

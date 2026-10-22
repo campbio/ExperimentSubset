@@ -33,16 +33,12 @@ experiment object.}
 create.}
 
 \item{rows}{\code{numeric} or \code{character} vector. Specify the rows to
-include in this
-subset. If \code{missing} or \code{NULL}, all rows are included in the
-subset. Values can be \code{numeric} or \code{character}. Default
-\code{NULL}.}
+include in this subset. If \code{missing} or \code{NULL}, all rows are
+included in the subset. Default \code{NULL}.}
 
 \item{cols}{\code{numeric} or \code{character} vector. Specify the columns
-to include in this
-subset. If \code{missing} or \code{NULL}, all columns are included in the
-subset. Values can be \code{numeric} or \code{character}. Default
-\code{NULL}.}
+to include in this subset. If \code{missing} or \code{NULL}, all columns
+are included in the subset. Default \code{NULL}.}
 
 \item{parentAssay}{\code{character(1)} Specify the parent \code{assay} of the
 subset. This parent \code{assay} must already be available in the

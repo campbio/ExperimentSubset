@@ -1,5 +1,5 @@
 ---
-title: "ExperimentSubset: Manages subsets of data with Bioconductor Experiment objects"
+title: "ExperimentSubset: Manages Subsets of Data with Bioconductor Experiment Objects"
 author:
 - name: Irzam Sarfraz
   affiliation: Department of Computer Science, National Textile University, Faisalabad, Pakistan
@@ -62,9 +62,11 @@ users. It does so by creating references to the subset `rows` and `columns`
 instead of storing a new assay whenever possible instead of actually copying
 the redundant data. Functions from `SingleCellExperiment` such as `assay`, 
 `rowData` and `colData` can be used for regular assays as one would normally do,
-as well as with newly created subsets of the data. Code written for the input
-object keeps working on the `ExperimentSubset` object; subsets are reached
-through an extra `subsetName` argument and the subset methods described below.
+as well as with newly created subsets of the data. Most code written for the
+input object also works on the `ExperimentSubset` object, and subsets are
+reached through an extra `subsetName` argument and the subset methods described
+below. Subsetting an object that contains subsets with `[` is not supported
+yet.
 
 # Overview of the `ExperimentSubset` class
 The `ExperimentSubset` package is composed of multiple classes that support
@@ -99,8 +101,8 @@ class.
 ## `ExperimentSubset` constructor
 
 The constructor method allows the creation of an `ExperimentSubset` object from
-an input experiment object as long as it is inherited from 
-`SummarizedExperiment` class. Additionally, if needed, a subset can be directly
+an input experiment object of one of the five supported classes listed above.
+Additionally, if needed, a subset can be directly
 created from within the constructor by providing input a named list to the 
 `subset` parameter.
 
@@ -269,9 +271,10 @@ or from any subset by passing the optional `subsetName` parameter.
 The methods include `rowData`, `rowData<-`, `colData`,
 `colData<-`, `metadata`, `metadata<-`, `reducedDim`, `reducedDim<-`, 
 `reducedDims`, `reducedDims<-`, `reducedDimNames`, `reducedDimNames<-`,
-`altExp`, `altExp<-`, `altExps`, `altExps<-`, `altExpNames` and `altExpNames<-`.
-All of the methods can be used with the subsets by providing the optional 
-`subsetName` parameter.
+`altExp`, `altExp<-`, `altExps`, `altExps<-`, `altExpNames` and
+`altExpNames<-`, and for `SpatialExperiment` objects `spatialCoords` and
+`spatialData`. All of these methods can be used with the subsets by providing
+the optional `subsetName` parameter.
 
 ### assay-get & assay-set inherited methods
 An exception to the above approach is the use of `assay` and `assay<-` methods,
@@ -557,8 +560,9 @@ The `ExperimentSubset` object during creation is assigned one of the classes
 object.
 This ensures that `ExperimentSubset` object can be manipulated in a fashion
 similar to the input object class and so can be used as a drop-in replacement
-for these classes. Methods that work on the input object class work on the
-`ExperimentSubset` objects as well.
+for these classes. Most methods that work on the input object class work on
+the `ExperimentSubset` objects as well; subsetting with `[` is an exception
+for objects that contain subsets.
 
 ## Additional `subsets` slot
 
