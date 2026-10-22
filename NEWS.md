@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.8 (2026-10-21)
+* Subsets created from another subset (`parentAssay` set to a subset, or to an assay stored in one) now take their row and column names, `sample_id`, and the parent rowData, colData, rowLinks, colLinks, spatialCoords and spatialData from the right rows and columns of the main object. Before, the indices relative to the parent subset were applied to the main object, so these came from the wrong features and cells while `assay()` returned the right values
+
 # ExperimentSubset 1.23.5 (2026-10-21)
 * The vignette's PBMC workflow now uses `scrapper` for QC, normalization, highly variable genes and PCA, replacing `scran` and `scater` functions that are deprecated
 * `scrapper` replaces `scran` in Suggests; the tests also use `scrapper` in place of the deprecated functions
