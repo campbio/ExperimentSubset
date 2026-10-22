@@ -372,20 +372,28 @@ testthat::test_that("Testing altExperiments",{
   
   altExps(es) <- list(a = tenx_pbmc4k, b = tenx_pbmc4k)
   expect_true(all.equal(altExpNames(es), c("a", "b")))
-}
+} 
 )
 
 testthat::test_that("Accessors on the main object pass extra arguments on", {
   # withDimnames is passed through the generic's ... for these getters
-  es <- ExperimentSubset(sce_chcl)
-  pca <- matrix(seq_len(ncol(es) * 2), ncol = 2)
-  reducedDim(es, "PCA") <- pca
-  testthat::expect_equal(reducedDim(es, "PCA", withDimnames = FALSE), pca)
-  testthat::expect_equal(reducedDims(es, withDimnames = FALSE)[["PCA"]], pca)
+  sce <- sce_chcl
+  reducedDim(sce, "PCA") <- matrix(seq_len(ncol(sce) * 2), ncol = 2)
+  # stored altExp colnames differ, so withDimnames changes the result
+  altCells <- paste0("alt_", seq_len(ncol(sce)))
+  counts <- matrix(1, 2, ncol(sce), dimnames = list(NULL, altCells))
+  alt <- SingleCellExperiment(list(counts = counts))
+  altExps(sce, withDimnames = FALSE) <- list(alt1 = alt)
+  es <- ExperimentSubset(sce)
 
-  counts <- matrix(1, 2, ncol(es), dimnames = list(NULL, colnames(es)))
-  altExps(es) <- list(alt1 = SingleCellExperiment(list(counts = counts)))
-  testthat::expect_equal(names(altExps(es, withDimnames = FALSE)), "alt1")
+  testthat::expect_equal(reducedDim(es, "PCA", withDimnames = FALSE),
+                         reducedDim(sce, "PCA", withDimnames = FALSE))
+  testthat::expect_equal(reducedDims(es, withDimnames = FALSE),
+                         reducedDims(sce, withDimnames = FALSE))
+  testthat::expect_equal(altExps(es, withDimnames = FALSE),
+                         altExps(sce, withDimnames = FALSE))
+  testthat::expect_equal(colnames(altExps(es, withDimnames = FALSE)[[1]]),
+                         altCells)
 })
 
 testthat::test_that("Testing createSubset with multiple paramter options",{

@@ -1,5 +1,5 @@
 # ExperimentSubset 1.23.7 (2026-10-21)
-* Accessors called on the main object without `subsetName` now pass extra arguments on to the base method; for example `reducedDim(x, "PCA", withDimnames = FALSE)`, `reducedDims(x, withDimnames = FALSE)` and `altExps(x, withDimnames = FALSE)` failed with "argument x is missing"
+* Accessors and replacement methods called on the main object without `subsetName` now pass on arguments that travel in the base generic's `...`; for example `reducedDim(x, "PCA", withDimnames = FALSE)`, `reducedDims(x, withDimnames = FALSE)` and `altExps(x, withDimnames = FALSE)` failed with "argument x is missing". Arguments that are named formals of the base generic, such as `withDimnames` in `assay<-` or `use.names` in `rowData`, are still dropped (#29)
 
 # ExperimentSubset 1.23.5 (2026-10-21)
 * The vignette's PBMC workflow now uses `scrapper` for QC, normalization, highly variable genes and PCA, replacing `scran` and `scater` functions that are deprecated
