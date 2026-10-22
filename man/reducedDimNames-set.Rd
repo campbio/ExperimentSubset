@@ -31,10 +31,12 @@ A wrapper to the \code{reducedDimNames<-} from \link[SingleCellExperiment]{reduc
 data(sce_chcl, package = "scds")
 es <- ExperimentSubset(sce_chcl)
 es <- createSubset(es, "subset1",
-rows = c(1:1500), cols = c(1:1500),
+rows = c(1:50), cols = c(1:20),
 parentAssay = "counts")
+# two small reduced dimensions, one row per cell in the subset
+set.seed(1)
 reducedDims(es, subsetName = "subset1") <- list(
-PCA_1 = scater::calculatePCA(assay(es, "subset1")),
-PCA_2 = scater::calculatePCA(assay(es, "subset1")))
+PCA_1 = matrix(rnorm(40), nrow = 20),
+PCA_2 = matrix(rnorm(40), nrow = 20))
 reducedDimNames(es, subsetName = "subset1") <- c("rDim1", "rDim2")
 }

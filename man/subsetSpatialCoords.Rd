@@ -21,3 +21,13 @@ The \code{spatialCoords} from input object.
 \description{
 Get \code{spatialCoords} from a subset.
 }
+\examples{
+# a small SpatialExperiment with six spots
+counts <- matrix(1:60, nrow = 10)
+coords <- cbind(x = 1:6, y = 6:1)
+spe <- SpatialExperiment(assays = list(counts = counts),
+                         spatialCoords = coords)
+es <- ExperimentSubset(spe)
+es <- createSubset(es, "subset1", cols = 2:4)
+subsetSpatialCoords(es, "subset1")
+}

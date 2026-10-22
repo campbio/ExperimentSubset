@@ -33,3 +33,4 @@ A \code{AssaySubset} object.
 Constructor for creating a experiment object internally by the
   \code{ExperimentSubset} object. Should not be used directly by the user.
 }
+\keyword{internal}

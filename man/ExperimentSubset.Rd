@@ -10,12 +10,17 @@ ExperimentSubset(
 )
 }
 \arguments{
-\item{x}{An experiment object if direct conversion is required or a list of slots to pass onto \code{SingleCellExperiment} constructor to generate experiment object from general data.}
+\item{x}{An experiment object that inherits from
+\code{SummarizedExperiment} (for example a \code{SingleCellExperiment}),
+or a named \code{list} of assay matrices, which is passed to the
+\code{SingleCellExperiment} constructor.}
 
 \item{subset}{A named \code{list} if a subset should be created from within the constructor. Named parameters in this list should be \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.}
 }
 \value{
-A \code{ExperimentSubset} object.
+An object of the matching \code{Subset*} class, for example a
+  \code{SubsetSingleCellExperiment} for a \code{SingleCellExperiment} or
+  a list of assays.
 }
 \description{
 This constructor function is used to setup the \code{ExperimentSubset} object, either through manually specifying the \code{assays}, \code{rowData}, \code{colData} or directly by passing either a \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or objects inherited by these classes. A subset can also be directly created by passing a named \code{list} to the \code{subset} parameter. This named \code{list} should have parameter values named as \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.

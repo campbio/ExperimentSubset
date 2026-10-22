@@ -1,3 +1,7 @@
+# ExperimentSubset 1.23.13 (2026-10-22)
+* Documentation fixes: the vignette lists all five supported classes, names the `createSubset()` arguments `rows` and `cols`, seeds its random data, drops the pin to Bioconductor 3.11 and installs from GitHub with BiocManager; help pages describe `ExperimentSubset()` and `createSubset()` input correctly, fix the `subsetRownames()` page, and add examples for `subsetRowLinks()`, `subsetColLinks()` and `subsetSpatialCoords()`; examples no longer need scater
+* DESCRIPTION gains URL and BugReports fields and drops the stale Date and the unused LazyData; the citation uses `bibentry()`
+
 # ExperimentSubset 1.23.9 (2026-10-21)
 * A subset with a single row or column now returns a one-row or one-column matrix from `assay()`, not a vector, so subsets can be made from it
 * `setSubsetAssay()` (and `assay(x, i) <- value` for a subset) no longer replaces the subset's row and column names with the input matrix's. A matrix without names is stored under the subset's names; a matrix whose names differ from the subset's, or are in another order, is now an error instead of silently relabelling the subset; a matrix of the wrong size gets an error that says so. `assay(x, subsetName)` now returns the subset's own row and column names, including any set with `subsetRownames<-` or `subsetColnames<-`, so `setSubsetAssay(x, s, assay(x, s), ...)` always works
