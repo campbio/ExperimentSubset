@@ -36,7 +36,13 @@ AssaySubset <- function(subsetName = "subset",
 #' @title ExperimentSubset constructor
 #' @description This constructor function is used to setup the \code{ExperimentSubset} object, either through manually specifying the \code{assays}, \code{rowData}, \code{colData} or directly by passing either a \code{SingleCellExperiment} or \code{SummarizedExperiment} objects or objects inherited by these classes. A subset can also be directly created by passing a named \code{list} to the \code{subset} parameter. This named \code{list} should have parameter values named as \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
 #' @param x An experiment object if direct conversion is required or a list of slots to pass onto \code{SingleCellExperiment} constructor to generate experiment object from general data.
-#' @param subset A named \code{list} if a subset should be created from within the constructor. Named parameters in this list should be \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.
+#' @param subset A named \code{list} to create a subset from within the
+#'   constructor, with elements \code{subsetName} and, optionally,
+#'   \code{rows}, \code{cols} and \code{parentAssay}. Leave out
+#'   \code{rows}, \code{cols} or \code{parentAssay}, or set them to
+#'   \code{NULL}, to use all rows, all columns or the first assay. The
+#'   default, a list of \code{NA} values, creates no subset; an \code{NA}
+#'   in a list you supply is an error.
 #' @return A \code{ExperimentSubset} object.
 #' @export
 #' @import Matrix
@@ -126,8 +132,8 @@ ExperimentSubset <- function(x,
       }
     }
     if (is.null(out))
-      stop("'i' must be the name of an assay, a subset or an assay stored ",
-           "in a subset; '", i, "' was not found.")
+      stop("'", i, "' is not the name of an assay, a subset or an assay ",
+           "stored in a subset.")
   }
   out
 }
@@ -251,6 +257,9 @@ ExperimentSubset <- function(x,
     )
   }
   else{
+    if (!is.null(subsetAssayName))
+      stop("'subsetAssayName' is only used when 'i' is a subset name; '",
+           i, "' is not a subset.")
     callNextMethod(x, i, ..., value = value)
   }
 }
@@ -569,60 +578,24 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 }
 
 .subsetColnames <- function(x, subsetName){
-  if (subsetName %in% subsetNames(x)) {
-    # colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
-    colnames(.internalAssay(.subsets(x)[[subsetName]]))
-  }
-  else if (subsetName %in% subsetAssayNames(x)) {
-    subsetName <- .getParentAssayName(x, subsetName)
-    # colnames(x)[.colIndices(.subsets(x)[[subsetName]])]
-    colnames(.internalAssay(.subsets(x)[[subsetName]]))
-  } else {
-    stop(subsetName, " subset does not exist.")
-  }
+  subsetName <- .owningSubset(x, subsetName)
+  colnames(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 '.subsetColnames<-' <- function(x, subsetName, value){
-  if (subsetName %in% subsetNames(x)) {
-    # colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
-    colnames(.internalAssay(.subsets(x)[[subsetName]])) <- value
-  }
-  else if (subsetName %in% subsetAssayNames(x)) {
-    subsetName <- .getParentAssayName(x, subsetName)
-    # colnames(x)[.colIndices(.subsets(x)[[subsetName]])] <- value
-    colnames(.internalAssay(.subsets(x)[[subsetName]])) <- value
-  } else {
-    stop(subsetName, " subset does not exist.")
-  }
+  subsetName <- .owningSubset(x, subsetName)
+  colnames(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
 .subsetRownames <- function(x, subsetName){
-  if (subsetName %in% subsetNames(x)) {
-    # rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
-    rownames(.internalAssay(.subsets(x)[[subsetName]]))
-  }
-  else if (subsetName %in% subsetAssayNames(x)) {
-    subsetName <- .getParentAssayName(x, subsetName)
-    # rownames(x)[.rowIndices(.subsets(x)[[subsetName]])]
-    rownames(.internalAssay(.subsets(x)[[subsetName]]))
-  } else {
-    stop(subsetName, " subset does not exist.")
-  }
+  subsetName <- .owningSubset(x, subsetName)
+  rownames(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
 '.subsetRownames<-' <- function(x, subsetName, value){
-  if (subsetName %in% subsetNames(x)) {
-    # rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
-    rownames(.internalAssay(.subsets(x)[[subsetName]])) <- value
-  }
-  else if (subsetName %in% subsetAssayNames(x)) {
-    subsetName <- .getParentAssayName(x, subsetName)
-    # rownames(x)[.rowIndices(.subsets(x)[[subsetName]])] <- value
-    rownames(.internalAssay(.subsets(x)[[subsetName]])) <- value
-  } else {
-    stop(subsetName, " subset does not exist.")
-  }
+  subsetName <- .owningSubset(x, subsetName)
+  rownames(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
@@ -711,7 +684,18 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 #checks if is a subset
 .isSubset <- function(x, subsetName){
   if(!subsetName %in% subsetNames(x))
-    stop(subsetName," subset does not exist.")
+    stop(subsetName, " subset does not exist. 'subsetName' must be the ",
+         "name of a subset.")
+}
+
+# Name of the subset that holds subsetName: the subset itself, or the
+# subset storing an assay of that name. Stops if there is none.
+.owningSubset <- function(x, subsetName) {
+  if (subsetName %in% subsetNames(x))
+    return(subsetName)
+  if (subsetName %in% subsetAssayNames(x))
+    return(.getParentAssayName(x, subsetName))
+  .isSubset(x, subsetName)
 }
 
 #subsets accessor (ExperimentSubset)
@@ -751,8 +735,8 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
                                   cols,
                                   parentAssay){
   if (!is.character(subsetName) || length(subsetName) != 1
-      || is.na(subsetName))
-    stop("'subsetName' parameter must be a unique a character value.")
+      || is.na(subsetName) || !nzchar(subsetName))
+    stop("'subsetName' must be a single, non-empty character string.")
 
   if(subsetName %in% subsetNames(x))
     stop("A subset with the specified 'subsetName' parameter already exists
@@ -785,27 +769,21 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 }
 
 .rows <- function(x, rows, assayName){
-  tempRows <- NULL
+  parent <- assay(x, withDimnames = TRUE, assayName)
+  dimR <- nrow(parent)
   if (is.character(rows)) {
-    if (is.null(rownames(assay(x, withDimnames = TRUE, assayName))))
+    if (is.null(rownames(parent)))
       stop("'rows' are given as names, but the parent assay has no row ",
            "names.")
-    tempRows <-
-      match(rows, rownames(
-        assay(x, withDimnames = TRUE, assayName)
-      ))
+    tempRows <- match(rows, rownames(parent))
   }
   else if (is.null(rows)) {
-    tempRows <-
-      seq(1, dim(
-        assay(x, withDimnames = FALSE, assayName)
-      )[1])
+    tempRows <- seq_len(dimR)
   }
   else{
     tempRows <- rows
   }
   
-  dimR <- dim(assay(x, withDimnames = FALSE, assayName))[1]
   testRows <- any(tempRows > dimR)
   if(is.na(testRows))
     stop("Selected rows not available in the specified assay.")
@@ -813,6 +791,8 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     stop("Selected rows not available in the specified assay.")
   if(length(tempRows) > dimR)
     stop("Selected rows not available in the specified assay.")
+  if (length(tempRows) == 0)
+    stop("'rows' must select at least one row.")
   if (any(tempRows < 1) || any(tempRows != round(tempRows)))
     stop("'rows' must be positive whole numbers or row names.")
   if (anyDuplicated(tempRows))
@@ -822,27 +802,21 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 }
 
 .cols <- function(x, cols, assayName){
-  tempCols <- NULL
+  parent <- assay(x, withDimnames = TRUE, assayName)
+  dimC <- ncol(parent)
   if (is.character(cols)) {
-    if (is.null(colnames(assay(x, withDimnames = TRUE, assayName))))
+    if (is.null(colnames(parent)))
       stop("'cols' are given as names, but the parent assay has no column ",
            "names.")
-    tempCols <-
-      match(cols, colnames(
-        assay(x, withDimnames = TRUE, assayName)
-      ))
+    tempCols <- match(cols, colnames(parent))
   }
   else if (is.null(cols)) {
-    tempCols <-
-      seq(1, dim(
-        assay(x, withDimnames = FALSE, assayName)
-      )[2])
+    tempCols <- seq_len(dimC)
   }
   else{
     tempCols <- cols
   }
   
-  dimC <- dim(assay(x, withDimnames = FALSE, assayName))[2]
   testCols <- any(tempCols > dimC)
   if(is.na(testCols))
     stop("Selected columns not available in the specified assay.")
@@ -850,6 +824,8 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     stop("Selected columns not available in the specified assay.")
   if(length(tempCols) > dimC)
     stop("Selected columns not available in the specified assay.")
+  if (length(tempCols) == 0)
+    stop("'cols' must select at least one column.")
   if (any(tempCols < 1) || any(tempCols != round(tempCols)))
     stop("'cols' must be positive whole numbers or column names.")
   if (anyDuplicated(tempCols))

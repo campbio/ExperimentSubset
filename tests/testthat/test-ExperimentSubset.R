@@ -102,7 +102,7 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
                          "A subset with the specified 'subsetName' parameter already exists
          in the object. Subset names must be unique.")
   testthat::expect_error(es <- createSubset(es, subsetName = 12, rows = c(1:15)),
-                         "'subsetName' parameter must be a unique a character value.")
+                         "'subsetName' must be a single, non-empty")
   testthat::expect_error(es <- createSubset(es, subsetName = "s3", rows = list()),
                          "'rows' parameter must be either a 'NULL' to include all rows,
          or a numeric vector or a character vector that specify the rows to 
@@ -439,6 +439,11 @@ testthat::test_that("createSubset rejects invalid rows and cols", {
                          regexp = "duplicates")
   testthat::expect_error(createSubset(es, "s1", cols = c(2, 3, 2)),
                          regexp = "duplicates")
+  sameGene <- rownames(sce_chcl)[c(1, 1)]
+  testthat::expect_error(createSubset(es, "s1", rows = sameGene),
+                         regexp = "duplicates")
+  testthat::expect_error(createSubset(es, "s1", rows = integer(0)),
+                         regexp = "at least one")
 
   # names given for an assay without row or column names
   unnamedSce <- SingleCellExperiment(list(counts = matrix(1, 6, 5)))
@@ -457,6 +462,8 @@ testthat::test_that("createSubset rejects invalid names", {
   testthat::expect_error(createSubset(es, c("a", "b"), rows = 1:2),
                          regexp = "subsetName")
   testthat::expect_error(createSubset(es, NA_character_, rows = 1:2),
+                         regexp = "subsetName")
+  testthat::expect_error(createSubset(es, "", rows = 1:2),
                          regexp = "subsetName")
   # a subset can't share its name with an assay
   testthat::expect_error(createSubset(es, "counts", rows = 1:2),
@@ -487,6 +494,7 @@ testthat::test_that("Unknown subset names give a clear error", {
   testthat::expect_error(assay(es, "nope"), regexp = "nope")
   es <- createSubset(es, "s1", rows = 1:5, cols = 1:5)
   testthat::expect_error(assay(es, "nope"), regexp = "nope")
+  testthat::expect_error(getSubsetAssay(es, "nope"), regexp = "nope")
   testthat::expect_error(subsetDim(es, "nope"),
                          regexp = "nope subset does not exist")
   testthat::expect_error(subsetColnames(es, "nope"),
@@ -512,7 +520,11 @@ testthat::test_that("assay<- stores into a subset chosen by its name", {
 
   es <- createSubset(es, "s1", rows = 1:5, cols = 1:5)
   testthat::expect_error(assay(es, "s1") <- assay(es, "s1"),
-                         regexp = "subsetAssayName")
+                         regexp = "is needed to store")
+  # subsetAssayName with a name that is not a subset
+  s1Counts <- assay(es, "s1")
+  testthat::expect_error(assay(es, "s1typo", subsetAssayName = "n") <- s1Counts,
+                         regexp = "not a subset")
 })
 
 testthat::test_that("Testing createSubset with multiple paramter options",{

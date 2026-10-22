@@ -12,7 +12,13 @@ ExperimentSubset(
 \arguments{
 \item{x}{An experiment object if direct conversion is required or a list of slots to pass onto \code{SingleCellExperiment} constructor to generate experiment object from general data.}
 
-\item{subset}{A named \code{list} if a subset should be created from within the constructor. Named parameters in this list should be \code{subsetName}, \code{rows}, \code{cols} and \code{parentAssay}.}
+\item{subset}{A named \code{list} to create a subset from within the
+constructor, with elements \code{subsetName} and, optionally,
+\code{rows}, \code{cols} and \code{parentAssay}. Leave out
+\code{rows}, \code{cols} or \code{parentAssay}, or set them to
+\code{NULL}, to use all rows, all columns or the first assay. The
+default, a list of \code{NA} values, creates no subset; an \code{NA}
+in a list you supply is an error.}
 }
 \value{
 A \code{ExperimentSubset} object.
