@@ -200,6 +200,7 @@ setMethod(
   signature = c("SubsetSummarizedExperiment", "character"),
   definition = function(x, subsetName)
   {
+    .isSubset(x, subsetName)
     dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
