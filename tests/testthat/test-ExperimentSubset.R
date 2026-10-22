@@ -294,15 +294,11 @@ testthat::test_that("Testing reducedDims",{
   colData(es, subsetName = "hvg1000") <- cbind(colData(es, subsetName = "hvg1000"), cluster = kmeans(t(assay(es, "hvg1000")), 5)$cluster)
   expect_true("cluster" %in% colnames(colData(es, subsetName = "hvg1000")))
 
-  # writing colData back above renames the subset's cells to "1".."n"
-  # (#3), so these warn; remove expect_warning() once #3 is fixed
   hvgPca <- scater::calculatePCA(assay(es, "hvg1000"))
-  testthat::expect_warning(reducedDim(es, "PCA", subsetName = "hvg1000") <-
-                             hvgPca, regexp = "rownames")
+  reducedDim(es, "PCA", subsetName = "hvg1000") <- hvgPca
   expect_true("PCA" %in% reducedDimNames(es, subsetName = "hvg1000"))
   pcaList <- list(a = hvgPca, b = hvgPca)
-  testthat::expect_warning(reducedDims(es, subsetName = "hvg1000") <- pcaList,
-                           regexp = "rownames")
+  reducedDims(es, subsetName = "hvg1000") <- pcaList
   expect_true(all.equal(reducedDimNames(es, subsetName = "hvg1000"), c("a","b")))
   
   reducedDimNames(es, subsetName = "hvg1000") <- c("PCA_1", "PCA_2")
