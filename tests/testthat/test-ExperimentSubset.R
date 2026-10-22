@@ -635,6 +635,9 @@ testthat::test_that("createSubset rejects invalid names", {
                          regexp = "subsetName")
   testthat::expect_error(createSubset(es, "", rows = 1:2),
                          regexp = "subsetName")
+  # spaces are removed first, so a name of only spaces is empty
+  testthat::expect_error(suppressWarnings(createSubset(es, "  ", rows = 1:2)),
+                         regexp = "subsetName")
   # a subset can't share its name with an assay
   testthat::expect_error(createSubset(es, "counts", rows = 1:2),
                          regexp = "already an assay name")
