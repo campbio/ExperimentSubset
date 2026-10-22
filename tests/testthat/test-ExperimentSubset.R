@@ -427,6 +427,176 @@ testthat::test_that("Accessors on the main object pass extra arguments on", {
                          altCells)
 })
 
+testthat::test_that("Subsets of subsets use the right rows and columns", {
+  sce <- sce_chcl
+  rowData(sce)$geneIndex <- seq_len(nrow(sce))
+  colData(sce)$cellIndex <- seq_len(ncol(sce))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s1", rows = 101:200, cols = 501:600)
+  # s2 is made from the subset s1
+  es <- createSubset(es, "s2", rows = 1:10, cols = 1:10, parentAssay = "s1")
+  # s3 is made from s2, three levels below the main assay
+  es <- createSubset(es, "s3", rows = 2:3, cols = 4:5, parentAssay = "s2")
+  # s4 is made from an assay stored inside s1
+  es <- setSubsetAssay(es, "s1", assay(es, "s1"), "s1copy")
+  es <- createSubset(es, "s4", rows = 5:6, cols = 2:3, parentAssay = "s1copy")
+
+  testthat::expect_equal(rownames(assay(es, "s2")), rownames(sce)[101:110])
+  testthat::expect_equal(subsetRownames(es, "s2"), rownames(sce)[101:110])
+  testthat::expect_equal(subsetColnames(es, "s2"), colnames(sce)[501:510])
+  testthat::expect_equal(subsetRownames(es, "s3"), rownames(sce)[102:103])
+  testthat::expect_equal(subsetColnames(es, "s3"), colnames(sce)[504:505])
+  testthat::expect_equal(subsetRownames(es, "s4"), rownames(sce)[105:106])
+  testthat::expect_equal(subsetColnames(es, "s4"), colnames(sce)[502:503])
+
+  s2RowData <- rowData(es, subsetName = "s2", parentRowData = TRUE)
+  s2ColData <- colData(es, subsetName = "s2", parentColData = TRUE)
+  testthat::expect_equal(s2RowData$geneIndex, 101:110)
+  testthat::expect_equal(s2ColData$cellIndex, 501:510)
+  s3ColData <- colData(es, subsetName = "s3", parentColData = TRUE)
+  testthat::expect_equal(s3ColData$cellIndex, 504:505)
+})
+
+testthat::test_that("Subsets of subsets use the right spatial coordinates", {
+  spots <- paste0("spot", 1:30)
+  counts <- matrix(seq_len(600), nrow = 20,
+                   dimnames = list(paste0("gene", 1:20), spots))
+  coords <- cbind(x = as.numeric(1:30), y = as.numeric(1:30) * 10)
+  spe <- SpatialExperiment(assays = list(counts = counts),
+                           sample_id = rep(c("A", "B"), each = 15),
+                           spatialCoords = coords)
+  es <- ExperimentSubset(spe)
+  es <- createSubset(es, "s1", rows = 1:10, cols = 11:20)
+  es <- createSubset(es, "s2", rows = 1:5, cols = 4:8, parentAssay = "s1")
+
+  testthat::expect_equal(subsetColnames(es, "s2"), spots[14:18])
+  testthat::expect_equal(unname(subsetSpatialCoords(es, "s2")[, "x"]),
+                         as.numeric(14:18))
+  testthat::expect_equal(colData(es, subsetName = "s2")$sample_id,
+                         c("A", "A", "B", "B", "B"))
+})
+
+testthat::test_that("Subsets of subsets use the right rowLinks", {
+  data("tinyTree", package = "TreeSummarizedExperiment")
+  counts <- matrix(seq_len(100), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:10)))
+  tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+                                  rowTree = tinyTree)
+  es <- ExperimentSubset(tse)
+  es <- createSubset(es, "s1", rows = 3:8, cols = 1:10)
+  es <- createSubset(es, "s2", rows = 2:4, cols = 1:5, parentAssay = "s1")
+
+  links <- subsetRowLinks(es, "s2", parentRowLinkData = TRUE)
+  testthat::expect_equal(links$nodeLab, rowLinks(tse)$nodeLab[4:6])
+})
+
+testthat::test_that("Parent lookups follow .assay() for ambiguous names", {
+  sce <- sce_chcl
+  colData(sce)$cellIndex <- seq_len(ncol(sce))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s1", rows = 101:200, cols = 501:600)
+  es <- createSubset(es, "t1", rows = 1:10, cols = 1:10)
+  # two subsets store an assay named "dup"; .assay() uses the last one
+  es <- setSubsetAssay(es, "s1", assay(es, "s1"), "dup")
+  es <- setSubsetAssay(es, "t1", assay(es, "t1"), "dup")
+  es <- createSubset(es, "s5", rows = 2:3, cols = 2:3, parentAssay = "dup")
+  testthat::expect_equal(subsetRownames(es, "s5"), rownames(assay(es, "s5")))
+  testthat::expect_equal(subsetRownames(es, "s5"), rownames(sce)[2:3])
+
+  # renaming the main assay must not break subsets made from it
+  assayNames(es)[1] <- "raw"
+  t1ColData <- colData(es, subsetName = "t1", parentColData = TRUE)
+  testthat::expect_equal(t1ColData$cellIndex, 1:10)
+})
+
+testthat::test_that("Subsets with one row or column keep their dimensions", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "oneRow", rows = 5, cols = 1:10)
+  es <- createSubset(es, "oneCol", rows = 1:10, cols = 5)
+  testthat::expect_equal(dim(assay(es, "oneRow")), c(1L, 10L))
+  testthat::expect_equal(dim(assay(es, "oneCol")), c(10L, 1L))
+  # a subset made from a one-row subset
+  es <- createSubset(es, "child", rows = 1, cols = 1:3, parentAssay = "oneRow")
+  testthat::expect_equal(dim(assay(es, "child")), c(1L, 3L))
+})
+
+testthat::test_that("setSubsetAssay keeps the subset's row and column names", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
+  genes <- subsetRownames(es, "s1")
+  cells <- subsetColnames(es, "s1")
+  counts <- as.matrix(assay(es, "s1"))
+
+  # input without names: the subset keeps its names, and so does the assay
+  es <- setSubsetAssay(es, "s1", unname(counts), "unnamed")
+  testthat::expect_equal(subsetRownames(es, "s1"), genes)
+  testthat::expect_equal(subsetColnames(es, "s1"), cells)
+  testthat::expect_equal(dimnames(assay(es, "unnamed")), list(genes, cells))
+
+  # input with the same names is accepted
+  es <- setSubsetAssay(es, "s1", counts, "named")
+  testthat::expect_equal(subsetColnames(es, "s1"), cells)
+
+  # input with reordered or different names is rejected
+  reordered <- counts[, c(2, 1, 3, 4)]
+  testthat::expect_error(setSubsetAssay(es, "s1", reordered, "reordered"),
+                         regexp = "inputMatrix")
+  renamed <- counts
+  rownames(renamed) <- paste0("other", 1:5)
+  testthat::expect_error(setSubsetAssay(es, "s1", renamed, "renamed"),
+                         regexp = "inputMatrix")
+  testthat::expect_error(assay(es, "s1", subsetAssayName = "x") <- reordered,
+                         regexp = "inputMatrix")
+  testthat::expect_equal(subsetColnames(es, "s1"), cells)
+
+  # a matrix of the wrong size gets a dimension error, not a names error
+  testthat::expect_error(setSubsetAssay(es, "s1", counts[1:3, ], "small"),
+                         regexp = "same dimensions")
+
+  # after renaming the subset's cells, its assay round-trips
+  subsetColnames(es, "s1") <- paste0("cell", 1:4)
+  s1Counts <- assay(es, "s1")
+  testthat::expect_equal(colnames(s1Counts), paste0("cell", 1:4))
+  es <- setSubsetAssay(es, "s1", s1Counts, "roundTrip")
+  testthat::expect_equal(colnames(assay(es, "roundTrip")), paste0("cell", 1:4))
+})
+
+testthat::test_that("A subset of a subset round-trips through setSubsetAssay", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "p", rows = 5:8, cols = 3:6)
+  es <- createSubset(es, "child", rows = 1:2, cols = 1:2, parentAssay = "p")
+  childCounts <- assay(es, "child")
+  testthat::expect_equal(rownames(childCounts), rownames(sce_chcl)[5:6])
+  testthat::expect_equal(colnames(childCounts), colnames(sce_chcl)[3:4])
+  es <- setSubsetAssay(es, "child", childCounts, "copy")
+  testthat::expect_equal(dimnames(assay(es, "copy")), dimnames(childCounts))
+})
+
+testthat::test_that("A subset of an object without names takes the input's", {
+  sce <- SingleCellExperiment(list(counts = matrix(1, 6, 5)))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s1", rows = 1:3, cols = 1:2)
+  counts <- matrix(2, 3, 2, dimnames = list(paste0("g", 1:3), c("a", "b")))
+  es <- setSubsetAssay(es, "s1", counts, "named")
+  testthat::expect_equal(subsetRownames(es, "s1"), paste0("g", 1:3))
+  testthat::expect_equal(subsetColnames(es, "s1"), c("a", "b"))
+})
+
+testthat::test_that("Spaces are removed from a new subset's name", {
+  es <- ExperimentSubset(sce_chcl)
+  spaced <- "my subset"
+  testthat::expect_warning(es <- createSubset(es, spaced, 1:5, 1:5),
+                           regexp = "Removing spaces")
+  testthat::expect_equal(subsetNames(es), "mysubset")
+  testthat::expect_equal(subsetDim(es, "mysubset"), c(5L, 5L))
+  es <- setSubsetAssay(es, "mysubset", assay(es, "mysubset"), "stored")
+  testthat::expect_equal(subsetParent(es, "stored"),
+                         list("mysubset", "counts"))
+  # the cleaned name can't overwrite an existing subset
+  testthat::expect_error(suppressWarnings(createSubset(es, spaced, 1:2, 1:2)),
+                         regexp = "already exists")
+})
+
 testthat::test_that("createSubset rejects invalid rows and cols", {
   es <- ExperimentSubset(sce_chcl)
   testthat::expect_error(createSubset(es, "s1", rows = -1),
