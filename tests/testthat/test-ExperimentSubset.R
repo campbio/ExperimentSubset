@@ -375,6 +375,58 @@ testthat::test_that("Testing altExperiments",{
 } 
 )
 
+testthat::test_that("altExp gets and sets the altExp chosen by name or index", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "small", rows = 1:20, cols = 1:10)
+  # altExps told apart by their number of rows
+  makeAlt <- function(value, nrow, cells) {
+    counts <- matrix(value, nrow, length(cells), dimnames = list(NULL, cells))
+    SingleCellExperiment(list(counts = counts))
+  }
+  subsetCells <- subsetColnames(es, "small")
+  alt1 <- makeAlt(1, 2, subsetCells)
+  alt2 <- makeAlt(2, 3, subsetCells)
+  alt3 <- makeAlt(3, 4, subsetCells)
+  altExp(es, "alt1", subsetName = "small") <- alt1
+  altExp(es, "alt2", subsetName = "small") <- alt2
+
+  testthat::expect_equal(nrow(altExp(es, "alt2", subsetName = "small")), 3L)
+  testthat::expect_equal(nrow(altExp(es, 2, subsetName = "small")), 3L)
+  testthat::expect_equal(nrow(altExp(es, subsetName = "small")), 2L)
+
+  altExp(es, 2, subsetName = "small") <- alt3
+  testthat::expect_equal(nrow(altExp(es, "alt1", subsetName = "small")), 2L)
+  testthat::expect_equal(nrow(altExp(es, "alt2", subsetName = "small")), 4L)
+
+  # same calls on the main object, without subsetName
+  altExp(es, "a1") <- makeAlt(1, 2, colnames(es))
+  altExp(es, "a2") <- makeAlt(2, 3, colnames(es))
+  altExp(es, 2) <- makeAlt(3, 4, colnames(es))
+  testthat::expect_equal(nrow(altExp(es, "a1")), 2L)
+  testthat::expect_equal(nrow(altExp(es, 2)), 4L)
+})
+
+testthat::test_that("Accessors on the main object pass extra arguments on", {
+  # withDimnames is passed through the generic's ... for these getters
+  sce <- sce_chcl
+  reducedDim(sce, "PCA") <- matrix(seq_len(ncol(sce) * 2), ncol = 2)
+  # stored altExp colnames differ, so withDimnames changes the result
+  altCells <- paste0("alt_", seq_len(ncol(sce)))
+  counts <- matrix(1, 2, ncol(sce), dimnames = list(NULL, altCells))
+  alt <- SingleCellExperiment(list(counts = counts))
+  altExps(sce, withDimnames = FALSE) <- list(alt1 = alt)
+  es <- ExperimentSubset(sce)
+
+  testthat::expect_equal(reducedDim(es, "PCA", withDimnames = FALSE),
+                         reducedDim(sce, "PCA", withDimnames = FALSE))
+  testthat::expect_equal(reducedDims(es, withDimnames = FALSE),
+                         reducedDims(sce, withDimnames = FALSE))
+  testthat::expect_equal(altExps(es, withDimnames = FALSE),
+                         altExps(sce, withDimnames = FALSE))
+  testthat::expect_equal(colnames(altExps(es, withDimnames = FALSE)[[1]]),
+                         altCells)
+})
+
 testthat::test_that("Subsets of subsets use the right rows and columns", {
   sce <- sce_chcl
   rowData(sce)$geneIndex <- seq_len(nrow(sce))

@@ -1,6 +1,13 @@
 # ExperimentSubset 1.23.8 (2026-10-21)
 * Subsets created from another subset (`parentAssay` set to a subset, or to an assay stored in one) now take their row and column names, `sample_id`, and the parent rowData, colData, rowLinks, colLinks, spatialCoords and spatialData from the right rows and columns of the main object. Before, the indices relative to the parent subset were applied to the main object, so these came from the wrong features and cells while `assay()` returned the right values. The parent metadata is looked up on access, so it is now right for existing objects too; the subset's row and column names (and `sample_id`) are stored when the subset is created, so objects saved with an earlier version keep the wrong names for such subsets. Repair them with `subsetRownames(x, "s2") <- rownames(assay(x, "s2"))` and the same for `subsetColnames()`; a wrong SpatialExperiment `sample_id` needs the subset re-created
 
+# ExperimentSubset 1.23.7 (2026-10-21)
+* Accessors and replacement methods called on the main object without `subsetName` now pass on arguments that travel in the base generic's `...`; for example `reducedDim(x, "PCA", withDimnames = FALSE)`, `reducedDims(x, withDimnames = FALSE)` and `altExps(x, withDimnames = FALSE)` failed with "argument x is missing". Arguments that are named formals of the base generic, such as `withDimnames` in `assay<-` or `use.names` in `rowData`, are still dropped (#29)
+
+# ExperimentSubset 1.23.6 (2026-10-21)
+* `altExp(x, e, subsetName = )` now returns the altExp named or numbered by `e`; it always returned the first one before
+* `altExp(x, <number>) <- value` now replaces the altExp at that position; with `subsetName` it replaced the first altExp, and without it the call failed
+
 # ExperimentSubset 1.23.5 (2026-10-21)
 * The vignette's PBMC workflow now uses `scrapper` for QC, normalization, highly variable genes and PCA, replacing `scran` and `scater` functions that are deprecated
 * `scrapper` replaces `scran` in Suggests; the tests also use `scrapper` in place of the deprecated functions
