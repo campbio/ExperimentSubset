@@ -561,6 +561,17 @@ testthat::test_that("setSubsetAssay keeps the subset's row and column names", {
   testthat::expect_equal(colnames(assay(es, "roundTrip")), paste0("cell", 1:4))
 })
 
+testthat::test_that("A subset of a subset round-trips through setSubsetAssay", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "p", rows = 5:8, cols = 3:6)
+  es <- createSubset(es, "child", rows = 1:2, cols = 1:2, parentAssay = "p")
+  childCounts <- assay(es, "child")
+  testthat::expect_equal(rownames(childCounts), rownames(sce_chcl)[5:6])
+  testthat::expect_equal(colnames(childCounts), colnames(sce_chcl)[3:4])
+  es <- setSubsetAssay(es, "child", childCounts, "copy")
+  testthat::expect_equal(dimnames(assay(es, "copy")), dimnames(childCounts))
+})
+
 testthat::test_that("A subset of an object without names takes the input's", {
   sce <- SingleCellExperiment(list(counts = matrix(1, 6, 5)))
   es <- ExperimentSubset(sce)
