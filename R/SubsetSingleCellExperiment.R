@@ -151,7 +151,7 @@ setMethod(
   f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "missing"),
   definition = function(x, e,  ...) {
-    .altExp(x, ...)
+    .altExp(x, e, ...)
   }
 )
 
@@ -207,7 +207,7 @@ setReplaceMethod(
   f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "missing"),
   definition = function(x, e,  ..., value) {
-    .altExp(x, ...) <- value
+    .altExp(x, e, ...) <- value
     return(x)
   }
 )
@@ -217,7 +217,7 @@ setReplaceMethod(
   f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "numeric"),
   definition = function(x, e,  ..., value) {
-    .altExp(x, ...) <- value
+    .altExp(x, e, ...) <- value
     return(x)
   }
 )
