@@ -11,8 +11,8 @@ setMethod(
 setMethod(
   f = "assay",
   signature = signature(x = "SubsetTreeSummarizedExperiment", i = "character"),
-  definition = function(x, i, ...) {
-    .assay(x, i, ...)
+  definition = function(x, i, withDimnames = TRUE, ...) {
+    .assay(x, i, withDimnames = withDimnames, ...)
   }
 )
 
@@ -90,9 +90,10 @@ setReplaceMethod("assay",
                  c("SubsetTreeSummarizedExperiment", "character"),
                  function(x,
                           i,
+                          withDimnames = TRUE,
                           ...,
                           value) {
-                   .assay(x, i, ...) <- value
+                   .assay(x, i, withDimnames = withDimnames, ...) <- value
                    return(x)
                  })
 
@@ -196,8 +197,10 @@ setReplaceMethod(
 setReplaceMethod(
   f = "altExp",
   signature = signature(x = "SubsetTreeSummarizedExperiment", e = "character"),
-  definition = function(x, e,  ..., value) {
-    .altExp(x, e, ...) <- value
+  definition = function(x, e, withDimnames = TRUE, withColData = FALSE, ...,
+                        value) {
+    .altExp(x, e, withDimnames = withDimnames, withColData = withColData,
+            ...) <- value
     return(x)
   }
 )
@@ -206,8 +209,10 @@ setReplaceMethod(
 setReplaceMethod(
   f = "altExp",
   signature = signature(x = "SubsetTreeSummarizedExperiment", e = "missing"),
-  definition = function(x, e,  ..., value) {
-    .altExp(x, e, ...) <- value
+  definition = function(x, e, withDimnames = TRUE, withColData = FALSE, ...,
+                        value) {
+    .altExp(x, e, withDimnames = withDimnames, withColData = withColData,
+            ...) <- value
     return(x)
   }
 )
@@ -216,8 +221,10 @@ setReplaceMethod(
 setReplaceMethod(
   f = "altExp",
   signature = signature(x = "SubsetTreeSummarizedExperiment", e = "numeric"),
-  definition = function(x, e,  ..., value) {
-    .altExp(x, e, ...) <- value
+  definition = function(x, e, withDimnames = TRUE, withColData = FALSE, ...,
+                        value) {
+    .altExp(x, e, withDimnames = withDimnames, withColData = withColData,
+            ...) <- value
     return(x)
   }
 )
@@ -226,8 +233,10 @@ setReplaceMethod(
 setReplaceMethod(
   f = "altExps",
   signature = signature(x = "SubsetTreeSummarizedExperiment"),
-  definition = function(x, ..., value) {
-    .altExps(x, ...) <- value
+  definition = function(x, withDimnames = TRUE, withColData = FALSE, ...,
+                        value) {
+    .altExps(x, withDimnames = withDimnames, withColData = withColData,
+             ...) <- value
     return(x)
   }
 )
@@ -327,8 +336,8 @@ setMethod(
 setReplaceMethod(
   f = "reducedDim",
   signature = signature(x = "SubsetTreeSummarizedExperiment", type = "character"),
-  definition = function(x, type, ..., value) {
-    .reducedDim(x, type, ...) <- value
+  definition = function(x, type, withDimnames = TRUE, ..., value) {
+    .reducedDim(x, type, withDimnames = withDimnames, ...) <- value
     return(x)
   }
 )
@@ -337,8 +346,8 @@ setReplaceMethod(
 setReplaceMethod(
   f = "reducedDim",
   signature = signature(x = "SubsetTreeSummarizedExperiment", type = "missing"),
-  definition = function(x, type, ..., value) {
-    .reducedDim(x, type, ...) <- value
+  definition = function(x, type, withDimnames = TRUE, ..., value) {
+    .reducedDim(x, type, withDimnames = withDimnames, ...) <- value
     return(x)
   }
 )
@@ -347,8 +356,8 @@ setReplaceMethod(
 setReplaceMethod(
   f = "reducedDim",
   signature = signature(x = "SubsetTreeSummarizedExperiment", type = "numeric"),
-  definition = function(x, type, ..., value) {
-    .reducedDim(x, type, ...) <- value
+  definition = function(x, type, withDimnames = TRUE, ..., value) {
+    .reducedDim(x, type, withDimnames = withDimnames, ...) <- value
     return(x)
   }
 )
@@ -366,8 +375,8 @@ setMethod(
 setMethod(
   f = "rowData",
   signature = signature(x = "SubsetTreeSummarizedExperiment"),
-  definition = function(x, ...) {
-    .rowData(x, ...)
+  definition = function(x, use.names = TRUE, ...) {
+    .rowData(x, use.names = use.names, ...)
   }
 )
 
@@ -383,7 +392,7 @@ setMethod(
 #' @rdname rowData<-
 setReplaceMethod(
   f = "rowData",
-  signature = signature(x = "SubsetTreeSummarizedExperiment", value = "DataFrame"),
+  signature = signature(x = "SubsetTreeSummarizedExperiment"),
   definition = function(x, ..., value) {
     .rowData(x, ...) <- value
     return(x)
@@ -394,6 +403,27 @@ setReplaceMethod(
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetTreeSummarizedExperiment", value = "DataFrame"),
+  definition = function(x, ..., value) {
+    .colData(x, ...) <- value
+    return(x)
+  }
+)
+
+#' @rdname colData<-
+setReplaceMethod(
+  f = "colData",
+  signature = signature(x = "SubsetTreeSummarizedExperiment", value = "NULL"),
+  definition = function(x, ..., value) {
+    .colData(x, ...) <- value
+    return(x)
+  }
+)
+
+#' @rdname colData<-
+setReplaceMethod(
+  f = "colData",
+  signature = signature(x = "SubsetTreeSummarizedExperiment",
+                        value = "data.frame"),
   definition = function(x, ..., value) {
     .colData(x, ...) <- value
     return(x)

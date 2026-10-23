@@ -32,7 +32,7 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 .SubsetSummarizedExperiment <- setClass(
   Class = "SubsetSummarizedExperiment",
   slots = representation(subsets = "SimpleList"),
-  prototype = SimpleList(subsets = SimpleList()),
+  prototype = prototype(subsets = SimpleList()),
   contains = "SummarizedExperiment"
 )
 
@@ -45,7 +45,7 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 .SubsetRangedSummarizedExperiment <- setClass(
   Class = "SubsetRangedSummarizedExperiment",
   slots = representation(subsets = "SimpleList"),
-  prototype = SimpleList(subsets = SimpleList()),
+  prototype = prototype(subsets = SimpleList()),
   contains = "RangedSummarizedExperiment"
 )
 
@@ -58,7 +58,7 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 .SubsetSingleCellExperiment <- setClass(
   Class = "SubsetSingleCellExperiment",
   slots = representation(subsets = "SimpleList"),
-  prototype = SimpleList(subsets = SimpleList()),
+  prototype = prototype(subsets = SimpleList()),
   contains = "SingleCellExperiment"
 )
 
@@ -71,7 +71,7 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 .SubsetTreeSummarizedExperiment <- setClass(
   Class = "SubsetTreeSummarizedExperiment",
   slots = representation(subsets = "SimpleList"),
-  prototype = SimpleList(subsets = SimpleList()),
+  prototype = prototype(subsets = SimpleList()),
   contains = "TreeSummarizedExperiment"
 )
 
@@ -84,6 +84,6 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 .SubsetSpatialExperiment <- setClass(
   Class = "SubsetSpatialExperiment",
   slots = representation(subsets = "SimpleList"),
-  prototype = SimpleList(subsets = SimpleList()),
+  prototype = prototype(subsets = SimpleList()),
   contains = "SpatialExperiment"
 )
