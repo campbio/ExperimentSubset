@@ -800,7 +800,7 @@ testthat::test_that("Writing back parent rowData or colData stores no copies", {
   testthat::expect_equal(colnames(rowData(es, subsetName = "s1")), "rank")
 })
 
-testthat::test_that("rowData<- and colData<- with NULL or data.frame stay in the subset", {
+testthat::test_that("Subset data setters take NULL or a data.frame", {
   sce <- sce_chcl
   rowData(sce)$symbol <- rownames(sce)
   colData(sce)$batch <- rep(c("A", "B"), length.out = ncol(sce))
@@ -839,7 +839,7 @@ testthat::test_that("altExps and reducedDims of a subset pass arguments on", {
   es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
   cells <- subsetColnames(es, "s1")
   colData(es, subsetName = "s1") <- DataFrame(group = letters[1:4],
-                                             row.names = cells)
+                                              row.names = cells)
   altCounts <- matrix(1, nrow = 2, ncol = 4, dimnames = list(NULL, cells))
   altExp(es, "alt", subsetName = "s1") <-
     SingleCellExperiment(list(counts = altCounts))

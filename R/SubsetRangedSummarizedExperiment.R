@@ -230,7 +230,8 @@ setReplaceMethod(
 #' @rdname colData<-
 setReplaceMethod(
   f = "colData",
-  signature = signature(x = "SubsetRangedSummarizedExperiment", value = "data.frame"),
+  signature = signature(x = "SubsetRangedSummarizedExperiment",
+                        value = "data.frame"),
   definition = function(x, ..., value) {
     .colData(x, ...) <- value
     return(x)

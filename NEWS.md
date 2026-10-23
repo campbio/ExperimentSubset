@@ -1,5 +1,6 @@
 # ExperimentSubset 1.23.14 (2026-10-22)
-* `withDimnames` (for `assay()`, `assay<-`, `reducedDim<-`, `altExp<-` and `altExps<-`), `withColData` (for `altExp<-` and `altExps<-`) and `use.names` (for `rowData()`) now take effect; they were silently dropped. `reducedDims<-` is unchanged (#26)
+* `withDimnames` (for `assay()`, `assay<-`, `reducedDim<-`, `altExp<-` and `altExps<-`), `withColData` (for `altExp<-` and `altExps<-`) and `use.names` (for `rowData()`) now take effect, on the main object and with `subsetName` (where the `reducedDim()`, `reducedDims()`, `altExp()` and `altExps()` getters also pass them on); they were silently dropped. `reducedDims<-` is unchanged (#26)
+* `rowData(x, subsetName = ) <-` and `colData(x, subsetName = ) <-` with `NULL` or a `data.frame` now change the subset; before, they changed the main object's rowData or colData
 * `reducedDim(x, subsetName = )` without a type now returns, or with `<-` replaces, the subset's first reducedDim instead of failing
 * Writing back rowData or colData read with `parentRowData = TRUE` or `parentColData = TRUE` no longer stores copies of the main object's columns in the subset: those columns are left out, with a message naming them. The getters mark them in the column metadata (`mcols()`) of the result
 * `subsetRowLinks()`, `subsetColLinks()` and `subsetSpatialData()` return the subset's row or column names instead of `"1".."n"`, and asking for the parent's links no longer fails when the main object has no tree for that dimension
