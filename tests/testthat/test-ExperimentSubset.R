@@ -681,6 +681,125 @@ testthat::test_that("SpatialExperiment subsets support all methods", {
   testthat::expect_equal(spatialCoords(es), spatialCoords(spe))
 })
 
+testthat::test_that("reducedDim with subsetName works without a type", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
+  pca <- matrix(1, nrow = 4, ncol = 2)
+  reducedDim(es, "PCA", subsetName = "s1") <- pca
+  testthat::expect_equal(dim(reducedDim(es, subsetName = "s1")), c(4L, 2L))
+  # without a type, the setter replaces the first reducedDim
+  reducedDim(es, subsetName = "s1") <- pca * 2
+  testthat::expect_equal(unname(reducedDim(es, "PCA", subsetName = "s1")),
+                         pca * 2)
+})
+
+testthat::test_that("subsetParent stops on a cycle of reused assay names", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "A", rows = 1:5, cols = 1:4)
+  es <- setSubsetAssay(es, "A", assay(es, "A"), "B")
+  es <- createSubset(es, "C", rows = 1:3, cols = 1:2, parentAssay = "B")
+  # storing "B" in C too makes C's parent resolve to C itself
+  es <- setSubsetAssay(es, "C", assay(es, "C"), "B")
+  testthat::expect_error(subsetParent(es, "C"), regexp = "parent chain")
+})
+
+testthat::test_that("Links and spatialData of a subset keep its names", {
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:6)))
+  # a row tree only, so the main object has no column links
+  tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+                                  rowTree = tinyTree)
+  es <- ExperimentSubset(tse)
+  es <- createSubset(es, "s1", rows = 2:5, cols = 1:3)
+  links <- subsetRowLinks(es, "s1", parentRowLinkData = TRUE)
+  testthat::expect_equal(rownames(links), tinyTree$tip.label[2:5])
+  testthat::expect_null(subsetColLinks(es, "s1", parentColLinkData = TRUE))
+
+  spots <- paste0("spot", 1:6)
+  spe <- SpatialExperiment(assays = list(counts = counts[, 1:6]),
+                           spatialCoords = cbind(x = 1:6, y = 1:6))
+  colnames(spe) <- spots
+  es <- ExperimentSubset(spe)
+  es <- createSubset(es, "s1", cols = 2:4)
+  # spatialData() is deprecated in SpatialExperiment (#34)
+  s1Data <- suppressWarnings(subsetSpatialData(es, "s1",
+                                               parentSpatialData = FALSE))
+  testthat::expect_equal(rownames(s1Data), spots[2:4])
+})
+
+testthat::test_that("withDimnames, withColData and use.names reach SCE", {
+  # names set on the object, not on the stored matrix, so the arguments
+  # change what comes back
+  sce <- SingleCellExperiment(list(counts = matrix(1, 4, 3)))
+  rownames(sce) <- paste0("gene", 1:4)
+  colnames(sce) <- paste0("cell", 1:3)
+  small <- ExperimentSubset(sce)
+  testthat::expect_null(rownames(assay(small, "counts", withDimnames = FALSE)))
+  # SingleCellExperiment keeps row names here; SummarizedExperiment drops them
+  se <- SummarizedExperiment(list(counts = matrix(1, 4, 3)))
+  rownames(se) <- paste0("gene", 1:4)
+  seRowData <- rowData(ExperimentSubset(se), use.names = FALSE)
+  testthat::expect_null(rownames(seRowData))
+
+  es <- ExperimentSubset(sce_chcl)
+  counts <- assay(es, "counts")
+  # values with other dimnames are accepted when withDimnames = FALSE
+  renamed <- counts
+  rownames(renamed) <- paste0("other", seq_len(nrow(renamed)))
+  testthat::expect_error(assay(es, "renamed", withDimnames = FALSE) <- renamed,
+                         NA)
+  otherCells <- paste0("other", seq_len(ncol(es)))
+  pca <- matrix(1, nrow = ncol(es), ncol = 2,
+                dimnames = list(otherCells, NULL))
+  testthat::expect_warning(reducedDim(es, "PCA", withDimnames = FALSE) <- pca,
+                           NA)
+  altCounts <- matrix(1, nrow = 2, ncol = ncol(es),
+                      dimnames = list(NULL, otherCells))
+  alt <- SingleCellExperiment(list(counts = altCounts))
+  testthat::expect_warning(altExp(es, "alt", withDimnames = FALSE) <- alt, NA)
+  altList <- list(alt = alt)
+  testthat::expect_warning(altExps(es, withDimnames = FALSE) <- altList, NA)
+
+  # and on a subset
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
+  subsetPca <- pca[1:4, ]
+  testthat::expect_warning(reducedDim(es, "PCA", subsetName = "s1",
+                                      withDimnames = FALSE) <- subsetPca,
+                           NA)
+  storedPca <- reducedDim(es, "PCA", subsetName = "s1", withDimnames = FALSE)
+  testthat::expect_equal(rownames(storedPca), otherCells[1:4])
+})
+
+testthat::test_that("Writing back parent rowData or colData stores no copies", {
+  sce <- sce_chcl
+  colData(sce)$batch <- rep(c("A", "B"), length.out = ncol(sce))
+  rowData(sce)$symbol <- rownames(sce)
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
+
+  s1ColData <- colData(es, subsetName = "s1", parentColData = TRUE)
+  s1ColData$score <- 1:4
+  testthat::expect_message(colData(es, subsetName = "s1") <- s1ColData,
+                           regexp = "batch")
+  testthat::expect_equal(colnames(colData(es, subsetName = "s1")), "score")
+  withParent <- colData(es, subsetName = "s1", parentColData = TRUE)
+  testthat::expect_equal(sum(colnames(withParent) == "batch"), 1L)
+
+  # a column the user adds with a parent column's name is stored
+  own <- colData(es, subsetName = "s1")
+  own$batch <- letters[1:4]
+  testthat::expect_message(colData(es, subsetName = "s1") <- own, NA)
+  testthat::expect_equal(colData(es, subsetName = "s1")$batch, letters[1:4])
+
+  s1RowData <- rowData(es, subsetName = "s1", parentRowData = TRUE)
+  s1RowData$rank <- 5:1
+  testthat::expect_message(rowData(es, subsetName = "s1") <- s1RowData,
+                           regexp = "symbol")
+  testthat::expect_equal(colnames(rowData(es, subsetName = "s1")), "rank")
+})
+
 testthat::test_that("Parent lookups follow .assay() for ambiguous names", {
   sce <- sce_chcl
   colData(sce)$cellIndex <- seq_len(ncol(sce))

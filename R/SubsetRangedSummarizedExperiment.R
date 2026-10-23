@@ -12,8 +12,8 @@ setMethod(
 setMethod(
   f = "assay",
   signature = signature(x = "SubsetRangedSummarizedExperiment", i = "character"),
-  definition = function(x, i, ...) {
-    .assay(x, i, ...)
+  definition = function(x, i, withDimnames = TRUE, ...) {
+    .assay(x, i, withDimnames = withDimnames, ...)
   }
 )
 
@@ -91,9 +91,10 @@ setReplaceMethod("assay",
                  c("SubsetRangedSummarizedExperiment", "character"),
                  function(x,
                           i,
+                          withDimnames = TRUE,
                           ...,
                           value) {
-                   .assay(x, i, ...) <- value
+                   .assay(x, i, withDimnames = withDimnames, ...) <- value
                    return(x)
                  })
 
@@ -182,8 +183,8 @@ setMethod(
 setMethod(
   f = "rowData",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
-  definition = function(x, ...) {
-    .rowData(x, ...)
+  definition = function(x, use.names = TRUE, ...) {
+    .rowData(x, use.names = use.names, ...)
   }
 )
 
