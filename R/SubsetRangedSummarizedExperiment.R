@@ -200,7 +200,7 @@ setMethod(
 #' @rdname rowData<-
 setReplaceMethod(
   f = "rowData",
-  signature = signature(x = "SubsetRangedSummarizedExperiment", value = "DataFrame"),
+  signature = signature(x = "SubsetRangedSummarizedExperiment"),
   definition = function(x, ..., value) {
     .rowData(x, ...) <- value
     return(x)
@@ -211,6 +211,26 @@ setReplaceMethod(
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetRangedSummarizedExperiment", value = "DataFrame"),
+  definition = function(x, ..., value) {
+    .colData(x, ...) <- value
+    return(x)
+  }
+)
+
+#' @rdname colData<-
+setReplaceMethod(
+  f = "colData",
+  signature = signature(x = "SubsetRangedSummarizedExperiment", value = "NULL"),
+  definition = function(x, ..., value) {
+    .colData(x, ...) <- value
+    return(x)
+  }
+)
+
+#' @rdname colData<-
+setReplaceMethod(
+  f = "colData",
+  signature = signature(x = "SubsetRangedSummarizedExperiment", value = "data.frame"),
   definition = function(x, ..., value) {
     .colData(x, ...) <- value
     return(x)

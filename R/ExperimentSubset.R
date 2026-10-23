@@ -332,6 +332,8 @@ ExperimentSubset <- function(x,
   # longer walk means the chain has a cycle
   for (step in seq_len(subsetCount(x) + 1)) {
     parent <- .parentAssay(.subsets(x)[[current]])
+    if (is.null(parent))
+      return(parentList)
     if (parent %in% assayNames(x))
       return(c(parentList, parent))
     holder <- .parentSubsetName(x, parent)
@@ -434,7 +436,8 @@ ExperimentSubset <- function(x,
     return(callNextMethod(x, ...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  altExps(.internalAssay(.subsets(x)[[subsetName]]))
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  do.call(altExps, c(list(internal), .otherArgs(...)))
 }
 
 #' @importMethodsFrom SingleCellExperiment altExpNames
@@ -468,10 +471,12 @@ ExperimentSubset <- function(x,
   }
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
   if (missing(e))
-    altExp(.internalAssay(.subsets(x)[[subsetName]]), ...) <- value
+    args <- c(list(internal), .otherArgs(...), list(value = value))
   else
-    altExp(.internalAssay(.subsets(x)[[subsetName]]), e, ...) <- value
+    args <- c(list(internal, e), .otherArgs(...), list(value = value))
+  .internalAssay(.subsets(x)[[subsetName]]) <- do.call(`altExp<-`, args)
   return(x)
 }
 
@@ -482,7 +487,9 @@ ExperimentSubset <- function(x,
     return(callNextMethod(x, ..., value = value))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  altExps(.internalAssay(.subsets(x)[[subsetName]]), ...) <- value
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  args <- c(list(internal), .otherArgs(...), list(value = value))
+  .internalAssay(.subsets(x)[[subsetName]]) <- do.call(`altExps<-`, args)
   return(x)
 }
 
@@ -610,6 +617,8 @@ ExperimentSubset <- function(x,
 # Leaves out the columns .tagParentColumns() marked, so writing back a
 # result read with the parent's data stores no copies of it
 .dropParentColumns <- function(value, what) {
+  if (!methods::is(value, "DataFrame"))
+    return(value)
   columnInfo <- S4Vectors::mcols(value)
   if (is.null(columnInfo) || !"fromParentData" %in% colnames(columnInfo))
     return(value)
@@ -618,8 +627,16 @@ ExperimentSubset <- function(x,
     message("Not storing columns that come from the main object's ", what,
             ": ", paste(colnames(value)[fromParent], collapse = ", "),
             ". Change them on the main object with ", what, "(x).")
-  value <- value[, !fromParent, drop = FALSE]
+  .untagParentColumns(value[, !fromParent, drop = FALSE])
+}
+
+# Removes the .tagParentColumns() mark, which is only for the setters
+.untagParentColumns <- function(value) {
+  if (!methods::is(value, "DataFrame"))
+    return(value)
   columnInfo <- S4Vectors::mcols(value)
+  if (is.null(columnInfo) || !"fromParentData" %in% colnames(columnInfo))
+    return(value)
   columnInfo$fromParentData <- NULL
   if (ncol(columnInfo) == 0)
     columnInfo <- NULL
@@ -631,6 +648,8 @@ ExperimentSubset <- function(x,
 # must be NULL, and are then filled in, or the same as the subset's names.
 # A value of the wrong size is left for colData<- to reject.
 .keepSubsetColnames <- function(value, currentNames, subsetName) {
+  if (is.null(value))
+    return(value)
   if (is.null(rownames(value))) {
     if (nrow(value) == length(currentNames))
       rownames(value) <- currentNames
@@ -663,10 +682,12 @@ ExperimentSubset <- function(x,
     return(callNextMethod(x, type, ..., value = value))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
   if (missing(type))
-    reducedDim(.internalAssay(.subsets(x)[[subsetName]]), ...) <- value
+    args <- c(list(internal), .otherArgs(...), list(value = value))
   else
-    reducedDim(.internalAssay(.subsets(x)[[subsetName]]), type, ...) <- value
+    args <- c(list(internal, type), .otherArgs(...), list(value = value))
+  .internalAssay(.subsets(x)[[subsetName]]) <- do.call(`reducedDim<-`, args)
   return(x)
 }
 
@@ -677,7 +698,8 @@ ExperimentSubset <- function(x,
     return(callNextMethod(x, ...))
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  reducedDims(.internalAssay(.subsets(x)[[subsetName]]))
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  do.call(reducedDims, c(list(internal), .otherArgs(...)))
 }
 
 #' @title reducedDims<-
@@ -725,10 +747,14 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 #' @importMethodsFrom SummarizedExperiment rowData<-
 '.rowData<-' <- function(x, ..., value){
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist)) {
+    value <- .untagParentColumns(value)
     return(callNextMethod(x, ..., value = value))
+  }
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
+  if (is.data.frame(value))
+    value <- S4Vectors::DataFrame(value, check.names = FALSE)
   .subsetRowData(x, subsetName) <- value
   return(x)
 }
@@ -736,10 +762,16 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 #' @importMethodsFrom SummarizedExperiment colData<-
 '.colData<-' <- function(x, ..., value){
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist)) {
+    if (is.data.frame(value))
+      stop("'value' must be a DataFrame or NULL.")
+    value <- .untagParentColumns(value)
     return(callNextMethod(x, ..., value = value))
+  }
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
+  if (is.data.frame(value))
+    value <- S4Vectors::DataFrame(value, check.names = FALSE)
   .subsetColData(x, subsetName) <- value
   return(x)
 }
@@ -830,11 +862,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   if(missing(parentSpatialData)
      || is.null(parentSpatialData))
     parentSpatialData = FALSE
-  # the subset's own column names, or positions if it has none
-  spots <- colnames(.internalAssay(.subsets(x)[[subsetName]]))
-  if (is.null(spots))
-    spots <- seq_len(subsetDim(x, subsetName)[2])
-  out <- data.frame(row.names = spots)
+  # a DataFrame, since spot names can repeat across samples
+  nSpots <- subsetDim(x, subsetName)[2]
+  out <- S4Vectors::DataFrame(row.names = as.character(seq_len(nSpots)))
   if(parentSpatialData) {
     rootCols <- .rootIndices(x, subsetName, .colIndices)
     out <- spatialData(x)[rootCols, , drop = FALSE]
@@ -842,6 +872,10 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   subsetSpatialData <- spatialData(.internalAssay(.subsets(x)[[subsetName]]))
   if(ncol(subsetSpatialData) > 0)
     out <- cbind(out, subsetSpatialData)
+  # the subset's own column names, which subsetColnames<- may have changed
+  spots <- colnames(.internalAssay(.subsets(x)[[subsetName]]))
+  if (!is.null(spots))
+    rownames(out) <- spots
   return(out)
 }
 
@@ -865,7 +899,6 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 
 #helpers
 
-#checks if is a subset
 # Arguments in ... other than subsetName, to pass to a subset's internal
 # object, whose methods may not accept subsetName
 .otherArgs <- function(...) {
@@ -875,6 +908,7 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   args[names(args) != "subsetName"]
 }
 
+#checks if is a subset
 .isSubset <- function(x, subsetName){
   if(!subsetName %in% subsetNames(x))
     stop(subsetName, " subset does not exist. 'subsetName' must be the ",

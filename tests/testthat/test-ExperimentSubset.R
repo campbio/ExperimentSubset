@@ -800,6 +800,102 @@ testthat::test_that("Writing back parent rowData or colData stores no copies", {
   testthat::expect_equal(colnames(rowData(es, subsetName = "s1")), "rank")
 })
 
+testthat::test_that("rowData<- and colData<- with NULL or data.frame stay in the subset", {
+  sce <- sce_chcl
+  rowData(sce)$symbol <- rownames(sce)
+  colData(sce)$batch <- rep(c("A", "B"), length.out = ncol(sce))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
+
+  rowData(es, subsetName = "s1") <- data.frame(rank = 5:1)
+  testthat::expect_equal(rowData(es, subsetName = "s1")$rank, 5:1)
+  rowData(es, subsetName = "s1") <- NULL
+  testthat::expect_equal(ncol(rowData(es, subsetName = "s1")), 0L)
+  testthat::expect_equal(rowData(es)$symbol, rownames(sce))
+
+  colData(es, subsetName = "s1") <- data.frame(group = letters[1:4])
+  testthat::expect_equal(colData(es, subsetName = "s1")$group, letters[1:4])
+  colData(es, subsetName = "s1") <- NULL
+  testthat::expect_equal(ncol(colData(es, subsetName = "s1")), 0L)
+  testthat::expect_equal(subsetColnames(es, "s1"), colnames(sce)[1:4])
+  testthat::expect_equal(colData(es)$batch, colData(sce)$batch)
+  # the main object accepts only a DataFrame or NULL, as SummarizedExperiment
+  testthat::expect_error(colData(es) <- data.frame(a = seq_len(ncol(es))),
+                         regexp = "DataFrame or NULL")
+
+  # the parent-column mark is never stored
+  s1RowData <- rowData(es, subsetName = "s1", parentRowData = TRUE)
+  rowData(es) <- rowData(es)
+  testthat::expect_null(S4Vectors::mcols(rowData(es))$fromParentData)
+  s1ColData <- colData(es, subsetName = "s1", parentColData = TRUE)
+  s1ColData$score <- 1:4
+  suppressMessages(colData(es, subsetName = "s1") <- s1ColData)
+  storedInfo <- S4Vectors::mcols(colData(es, subsetName = "s1"))
+  testthat::expect_null(storedInfo$fromParentData)
+})
+
+testthat::test_that("altExps and reducedDims of a subset pass arguments on", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
+  cells <- subsetColnames(es, "s1")
+  colData(es, subsetName = "s1") <- DataFrame(group = letters[1:4],
+                                             row.names = cells)
+  altCounts <- matrix(1, nrow = 2, ncol = 4, dimnames = list(NULL, cells))
+  altExp(es, "alt", subsetName = "s1") <-
+    SingleCellExperiment(list(counts = altCounts))
+  withGroup <- altExps(es, subsetName = "s1", withColData = TRUE)
+  testthat::expect_equal(colData(withGroup$alt)$group, letters[1:4])
+  withoutGroup <- altExps(es, subsetName = "s1")
+  testthat::expect_null(colData(withoutGroup$alt)$group)
+
+  pca <- matrix(1, nrow = 4, ncol = 2,
+                dimnames = list(paste0("other", 1:4), NULL))
+  reducedDim(es, "PCA", subsetName = "s1", withDimnames = FALSE) <- pca
+  storedPcas <- reducedDims(es, subsetName = "s1", withDimnames = FALSE)
+  testthat::expect_equal(rownames(storedPcas$PCA), paste0("other", 1:4))
+})
+
+testthat::test_that("Subset getters use renamed and repeated names", {
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:6)))
+  tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+                                  rowTree = tinyTree)
+  es <- ExperimentSubset(tse)
+  es <- createSubset(es, "s1", rows = 2:5, cols = 1:3)
+  subsetRownames(es, "s1") <- paste0("g", 1:4)
+  links <- subsetRowLinks(es, "s1", parentRowLinkData = TRUE)
+  testthat::expect_equal(rownames(links), paste0("g", 1:4))
+
+  # spot barcodes repeat across the two samples
+  barcodes <- rep(paste0("b", 1:3), 2)
+  spe <- SpatialExperiment(assays = list(counts = counts[, 1:6]),
+                           sample_id = rep(c("A", "B"), each = 3),
+                           spatialCoords = cbind(x = 1:6, y = 1:6))
+  colnames(spe) <- barcodes
+  es <- ExperimentSubset(spe)
+  es <- createSubset(es, "s1", cols = c(1, 2, 4, 5))
+  # spatialData() is deprecated in SpatialExperiment (#34)
+  s1Data <- suppressWarnings(subsetSpatialData(es, "s1", FALSE))
+  testthat::expect_equal(rownames(s1Data), c("b1", "b2", "b1", "b2"))
+  subsetColnames(es, "s1") <- paste0("spot", 1:4)
+  s1Data <- suppressWarnings(subsetSpatialData(es, "s1", TRUE))
+  testthat::expect_equal(rownames(s1Data), paste0("spot", 1:4))
+})
+
+testthat::test_that("subsetParent lists each parent up to the main assay", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "s1", rows = 1:10, cols = 1:10)
+  es <- createSubset(es, "s2", rows = 1:5, cols = 1:5, parentAssay = "s1")
+  testthat::expect_equal(subsetParent(es, "s2"), list("s1", "counts"))
+  es <- setSubsetAssay(es, "s1", assay(es, "s1"), "stored")
+  testthat::expect_equal(subsetParent(es, "stored"), list("s1", "counts"))
+  es <- createSubset(es, "s3", rows = 1:2, cols = 1:2, parentAssay = "stored")
+  testthat::expect_equal(subsetParent(es, "s3"),
+                         list("stored", "s1", "counts"))
+})
+
 testthat::test_that("Parent lookups follow .assay() for ambiguous names", {
   sce <- sce_chcl
   colData(sce)$cellIndex <- seq_len(ncol(sce))
