@@ -477,9 +477,12 @@ setMethod(
     x ="SubsetSingleCellExperiment",
     subsetName = "character"),
   definition = function(x,
-                        subsetName)
+                        subsetName,
+                        subsetAssayName = NULL)
   {
-    assay(x = x, i = subsetName)
+    if (is.null(subsetAssayName))
+      return(assay(x = x, i = subsetName))
+    assay(x = x, i = subsetName, subsetAssayName = subsetAssayName)
   }
 )
 

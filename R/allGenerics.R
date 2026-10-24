@@ -508,7 +508,12 @@ setGeneric(
 #'
 #' @param x Input \code{ExperimentSubset} object.
 #' @param subsetName Specify 'subset name' or 'subset assay name' to fetch the
-#'   assay from.
+#'   assay from. An assay stored in a subset can also be named as
+#'   \code{"subset/assay"}, which is needed when more than one subset stores
+#'   an assay of that name.
+#' @param subsetAssayName \code{character(1)} The name of an assay stored in
+#'   the subset \code{subsetName}, as given to \code{setSubsetAssay}.
+#'   Default \code{NULL}, which returns the subset itself.
 #' @return Subset assay
 #' @importMethodsFrom SummarizedExperiment assay
 #' @export
@@ -521,10 +526,15 @@ setGeneric(
 #' cols = c(20,21,40,45,90,99,100,123,166,299),
 #' parentAssay = "counts")
 #' getSubsetAssay(es, "subset1")
+#' # store a changed copy of the subset's counts inside the subset
+#' subset1Counts <- getSubsetAssay(es, "subset1")
+#' es <- setSubsetAssay(es, "subset1", subset1Counts + 1, "plusOne")
+#' getSubsetAssay(es, "subset1", subsetAssayName = "plusOne")
 setGeneric(
   name = "getSubsetAssay",
   def = function(x,
-                 subsetName)
+                 subsetName,
+                 subsetAssayName = NULL)
   {
     standardGeneric("getSubsetAssay")
   }

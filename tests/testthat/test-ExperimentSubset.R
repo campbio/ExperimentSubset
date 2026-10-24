@@ -693,14 +693,15 @@ testthat::test_that("reducedDim with subsetName works without a type", {
                          pca * 2)
 })
 
-testthat::test_that("subsetParent stops on a cycle of reused assay names", {
+testthat::test_that("subsetParent stops when a parent name is ambiguous", {
   es <- ExperimentSubset(sce_chcl)
   es <- createSubset(es, "A", rows = 1:5, cols = 1:4)
   es <- setSubsetAssay(es, "A", assay(es, "A"), "B")
   es <- createSubset(es, "C", rows = 1:3, cols = 1:2, parentAssay = "B")
-  # storing "B" in C too makes C's parent resolve to C itself
+  # storing "B" in C too makes C's unqualified parent "B" ambiguous (#2),
+  # which used to resolve to C itself and form a cycle
   es <- setSubsetAssay(es, "C", assay(es, "C"), "B")
-  testthat::expect_error(subsetParent(es, "C"), regexp = "parent chain")
+  testthat::expect_error(subsetParent(es, "C"), regexp = "stored in subsets")
 })
 
 testthat::test_that("Links and spatialData of a subset keep its names", {
@@ -896,16 +897,69 @@ testthat::test_that("subsetParent lists each parent up to the main assay", {
                          list("stored", "s1", "counts"))
 })
 
+testthat::test_that("Stored assay names can repeat across subsets", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
+  es <- createSubset(es, "s2", rows = 6:10, cols = 5:8)
+  s1Norm <- as.matrix(assay(es, "s1")) + 1
+  s2Norm <- as.matrix(assay(es, "s2")) + 2
+  es <- setSubsetAssay(es, "s1", s1Norm, "norm")
+  es <- setSubsetAssay(es, "s2", s2Norm, "norm")
+
+  # a qualified name or subsetAssayName picks one
+  testthat::expect_equal(as.matrix(assay(es, "s1/norm")), s1Norm)
+  s2Stored <- assay(es, "s2", subsetAssayName = "norm")
+  testthat::expect_equal(as.matrix(s2Stored), s2Norm)
+  s1Stored <- getSubsetAssay(es, "s1", subsetAssayName = "norm")
+  testthat::expect_equal(as.matrix(s1Stored), s1Norm)
+  testthat::expect_equal(as.matrix(getSubsetAssay(es, "s2/norm")), s2Norm)
+  # an unqualified name stored in two subsets is ambiguous
+  testthat::expect_error(assay(es, "norm"),
+                         regexp = "stored in subsets 's1', 's2'")
+  testthat::expect_error(createSubset(es, "s3", 1:2, parentAssay = "norm"),
+                         regexp = "stored in subsets")
+
+  # a qualified parentAssay makes a subset of that stored assay
+  es <- createSubset(es, "s3", rows = 1:2, cols = 1:2,
+                     parentAssay = "s2/norm")
+  testthat::expect_equal(subsetRownames(es, "s3"), rownames(sce_chcl)[6:7])
+  testthat::expect_equal(as.matrix(assay(es, "s3")), s2Norm[1:2, 1:2])
+  testthat::expect_equal(subsetParent(es, "s3"),
+                         list("s2/norm", "s2", "counts"))
+
+  # a name stored in one subset still works unqualified
+  es <- setSubsetAssay(es, "s1", s1Norm, "onlyInS1")
+  testthat::expect_equal(as.matrix(assay(es, "onlyInS1")), s1Norm)
+})
+
+testthat::test_that("Subset and stored assay names follow the naming rules", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
+  es <- createSubset(es, "s2", rows = 6:10, cols = 5:8)
+  s1Counts <- as.matrix(assay(es, "s1"))
+  testthat::expect_error(createSubset(es, "a/b", rows = 1:2), regexp = "/")
+  testthat::expect_error(setSubsetAssay(es, "s1", s1Counts, "a/b"),
+                         regexp = "/")
+  # a stored assay can't hide a main assay or a subset
+  testthat::expect_error(setSubsetAssay(es, "s1", s1Counts, "counts"),
+                         regexp = "main assay or a subset")
+  testthat::expect_error(setSubsetAssay(es, "s1", s1Counts, "s2"),
+                         regexp = "main assay or a subset")
+})
+
 testthat::test_that("Parent lookups follow .assay() for ambiguous names", {
   sce <- sce_chcl
   colData(sce)$cellIndex <- seq_len(ncol(sce))
   es <- ExperimentSubset(sce)
   es <- createSubset(es, "s1", rows = 101:200, cols = 501:600)
   es <- createSubset(es, "t1", rows = 1:10, cols = 1:10)
-  # two subsets store an assay named "dup"; .assay() uses the last one
+  # two subsets store an assay named "dup", so a plain "dup" is ambiguous
+  # and the parent is named with a qualified name (#2)
   es <- setSubsetAssay(es, "s1", assay(es, "s1"), "dup")
   es <- setSubsetAssay(es, "t1", assay(es, "t1"), "dup")
-  es <- createSubset(es, "s5", rows = 2:3, cols = 2:3, parentAssay = "dup")
+  testthat::expect_error(createSubset(es, "s5", 2:3, 2:3, parentAssay = "dup"),
+                         regexp = "stored in subsets")
+  es <- createSubset(es, "s5", rows = 2:3, cols = 2:3, parentAssay = "t1/dup")
   testthat::expect_equal(subsetRownames(es, "s5"), rownames(assay(es, "s5")))
   testthat::expect_equal(subsetRownames(es, "s5"), rownames(sce)[2:3])
 

@@ -12,23 +12,29 @@
 \alias{getSubsetAssay,SubsetTreeSummarizedExperiment,character-method}
 \title{Get subset assay from an \code{ExperimentSubset} object.}
 \usage{
-getSubsetAssay(x, subsetName)
+getSubsetAssay(x, subsetName, subsetAssayName = NULL)
 
-\S4method{getSubsetAssay}{SubsetRangedSummarizedExperiment,character}(x, subsetName)
+\S4method{getSubsetAssay}{SubsetRangedSummarizedExperiment,character}(x, subsetName, subsetAssayName = NULL)
 
-\S4method{getSubsetAssay}{SubsetSingleCellExperiment,character}(x, subsetName)
+\S4method{getSubsetAssay}{SubsetSingleCellExperiment,character}(x, subsetName, subsetAssayName = NULL)
 
-\S4method{getSubsetAssay}{SubsetSummarizedExperiment,character}(x, subsetName)
+\S4method{getSubsetAssay}{SubsetSummarizedExperiment,character}(x, subsetName, subsetAssayName = NULL)
 
-\S4method{getSubsetAssay}{SubsetSpatialExperiment,character}(x, subsetName)
+\S4method{getSubsetAssay}{SubsetSpatialExperiment,character}(x, subsetName, subsetAssayName = NULL)
 
-\S4method{getSubsetAssay}{SubsetTreeSummarizedExperiment,character}(x, subsetName)
+\S4method{getSubsetAssay}{SubsetTreeSummarizedExperiment,character}(x, subsetName, subsetAssayName = NULL)
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object.}
 
 \item{subsetName}{Specify 'subset name' or 'subset assay name' to fetch the
-assay from.}
+assay from. An assay stored in a subset can also be named as
+\code{"subset/assay"}, which is needed when more than one subset stores
+an assay of that name.}
+
+\item{subsetAssayName}{\code{character(1)} The name of an assay stored in
+the subset \code{subsetName}, as given to \code{setSubsetAssay}.
+Default \code{NULL}, which returns the subset itself.}
 }
 \value{
 Subset assay
@@ -45,4 +51,8 @@ rows = c(10,11,50,56,98,99,102,105,109, 200),
 cols = c(20,21,40,45,90,99,100,123,166,299),
 parentAssay = "counts")
 getSubsetAssay(es, "subset1")
+# store a changed copy of the subset's counts inside the subset
+subset1Counts <- getSubsetAssay(es, "subset1")
+es <- setSubsetAssay(es, "subset1", subset1Counts + 1, "plusOne")
+getSubsetAssay(es, "subset1", subsetAssayName = "plusOne")
 }
