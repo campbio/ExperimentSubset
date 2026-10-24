@@ -56,14 +56,18 @@ silently. `createSubset(parentAssay = )` resolves the same way.
   `subsetParent()`. `/` is the separator because MAMS-style names use dots
   (`clean.variable`). New subset names and stored assay names may not
   contain `/`; `createSubset()` and `setSubsetAssay()` reject them.
-- The getters `assay()` and `getSubsetAssay()` also take `subsetName =`:
-  `assay(es, "lognormalized", subsetName = "tcells")` is the same as
-  `assay(es, "tcells/lognormalized")`.
+- The getters mirror the setters, which already take `subsetAssayName`:
+  `assay(es, "tcells", subsetAssayName = "lognormalized")` and
+  `getSubsetAssay(es, "tcells", subsetAssayName = "lognormalized")` return
+  the assay `lognormalized` stored in subset `tcells`, the same as
+  `assay(es, "tcells/lognormalized")`. Without `subsetAssayName`, both
+  behave as today. (`getSubsetAssay()`'s second argument is already named
+  `subsetName`, so a `subsetName =` form for the assay is not possible.)
 - An **unqualified name that is unique** resolves exactly as today, so
   existing code and saved objects are unaffected. An unqualified name stored
   in more than one subset is an error that names the subsets:
-  `'lognormalized' is stored in subsets 'clean' and 'tcells'; use
-  "clean/lognormalized" or subsetName =.`
+  `'lognormalized' is stored in subsets 'clean', 'tcells'; use a qualified
+  name such as "clean/lognormalized".`
 - A qualified `parentAssay` is stored as the string
   `"filtered/decontaminated"` in the existing `parentAssay` slot. No class
   or slot changes, so no `updateObject()` is needed.
@@ -79,8 +83,8 @@ from coming back.
 **Behaviour change.** Code that relied on a duplicated name silently
 resolving to the last subset now gets an error. NEWS says so.
 
-**Tests.** Duplicates across subsets; qualified and `subsetName =` access
-through `assay()` and `getSubsetAssay()`; the ambiguity error; a qualified
+**Tests.** Duplicates across subsets; qualified and `subsetAssayName =`
+access through `assay()` and `getSubsetAssay()`; the ambiguity error; a qualified
 `parentAssay`, including the names and root indices of a subset made from
 it (#41); `/` rejected in new names; a stored assay named like a main assay
 or a subset rejected; unique unqualified names unchanged.
