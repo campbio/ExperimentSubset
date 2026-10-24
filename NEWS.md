@@ -1,3 +1,7 @@
+# ExperimentSubset 1.23.15 (2026-10-24)
+* Assays stored in subsets can now share a name across subsets. Name a specific one as `"subset/assay"` in `assay()`, `getSubsetAssay()`, `createSubset(parentAssay = )` and `subsetParent()`, or with the new `subsetAssayName` argument of `assay()` and `getSubsetAssay()`, which mirrors `setSubsetAssay()`. A name stored in only one subset still works on its own
+* An unqualified assay name stored in more than one subset is now an error that names the subsets, instead of silently using the last one. Subset names and stored assay names can't contain `/`, and a stored assay can't be named like a main assay or a subset
+
 # ExperimentSubset 1.23.14 (2026-10-22)
 * `withDimnames` (for `assay()`, `assay<-`, `reducedDim<-`, `altExp<-` and `altExps<-`), `withColData` (for `altExp<-` and `altExps<-`) and `use.names` (for `rowData()`) now take effect, on the main object and with `subsetName` (where the `reducedDim()`, `reducedDims()`, `altExp()` and `altExps()` getters also pass them on); they were silently dropped. `reducedDims<-` is unchanged (#26)
 * `rowData(x, subsetName = ) <-` and `colData(x, subsetName = ) <-` with `NULL` or a `data.frame` now change the subset; before, they changed the main object's rowData or colData
