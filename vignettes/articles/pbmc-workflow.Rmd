@@ -143,16 +143,17 @@ The two mostly agree. We keep Cell Ranger's calls, the `filtered` subset,
 for the rest of the analysis.
 
 Droplets without a cell still hold ambient RNA, the free-floating RNA that
-also contaminates the droplets with cells. We keep the droplets that have
-at least 10 counts and that neither method calls a cell as a second
-subset, `background`, to estimate that contamination later.
+also contaminates the droplets with cells. emptyDrops treats droplets with
+at most 100 counts as ambient (its `lower` limit). We keep those with at
+least 10 counts that Cell Ranger didn't call a cell as a second subset,
+`background`, to estimate the contamination later.
 
 ```{r background}
 # total counts per droplet
 dropletTotals <- colData(es)$dropletUtils_emptyDrops_total
 
-# droplets with some RNA that neither method calls a cell
-isBackground <- dropletTotals >= 10 & !cellRangerCell & !emptyDropsCell
+# droplets with 10 to 100 counts and no cell
+isBackground <- dropletTotals >= 10 & dropletTotals <= 100 & !cellRangerCell
 backgroundDroplets <- which(isBackground)
 es <- createSubset(es, "background", cols = backgroundDroplets)
 subsetDim(es, "background")
@@ -243,13 +244,16 @@ keepCells <- enoughGenes & lowMito & lowContamination & singlet
 table(keepCells)
 ```
 
-We also keep only genes detected in at least 10 cells; the others carry
-almost no information.
+We also keep only genes detected in at least 10 of those cells after
+decontamination; the others carry almost no information.
 
 ```{r expressed-genes}
-# number of cells in which each gene is detected
-filteredCounts <- assay(es, "filtered")
-detectedInCell <- filteredCounts > 0
+# decontaminated counts of the cells that pass QC
+cellsToKeep <- which(keepCells)
+keptCounts <- decontaminatedCounts[, cellsToKeep]
+
+# number of those cells in which each gene is detected
+detectedInCell <- keptCounts > 0
 cellsPerGene <- rowSums(detectedInCell)
 keepGenes <- cellsPerGene >= 10
 table(keepGenes)
@@ -260,11 +264,10 @@ The new subset, `clean`, is made from the decontaminated counts: its
 stored in the subset `filtered`.
 
 ```{r clean}
-# positions of the genes and cells that pass QC
+# positions of the genes that pass
 genesToKeep <- which(keepGenes)
-cellsToKeep <- which(keepCells)
 
-# a subset of them, from the decontaminated counts
+# a subset of those genes and cells, from the decontaminated counts
 es <- createSubset(es, "clean",
                    rows = genesToKeep,
                    cols = cellsToKeep,
@@ -294,15 +297,15 @@ lognormalized <- normalizeCounts(cleanCounts, sizeFactors, delayed = FALSE)
 es <- setSubsetAssay(es, "clean", lognormalized, "lognormalized")
 ```
 
-**Variable genes.** We choose the 2,000 genes whose expression varies most
-across the clean cells, and keep them as a subset of rows,
-`clean.variable`.
+**Variable genes.** We choose the 4,000 genes (scrapper's default) whose
+expression varies most across the clean cells, and keep them as a subset
+of rows, `clean.variable`.
 
 ```{r variable-genes}
-# variance of each gene, and the 2,000 most variable
+# variance of each gene, and the 4,000 most variable
 geneVariances <- modelGeneVariances(lognormalized)
 geneResiduals <- geneVariances$statistics$residuals
-variableGenes <- chooseHighlyVariableGenes(geneResiduals, top = 2000)
+variableGenes <- chooseHighlyVariableGenes(geneResiduals)
 ```
 
 **Scaling.** Each gene's log-normalised values are turned into z-scores
@@ -320,10 +323,13 @@ scaled <- t(scaledByColumn)
 # genes with no variation get 0 rather than NaN
 scaled[is.nan(scaled)] <- 0
 es <- setSubsetAssay(es, "clean", scaled, "scaled")
+
+# free the memory of the intermediate copies
+rm(lognormalizedDense, genesByColumn, scaledByColumn)
 ```
 
 The variable-gene subset is made from `"clean/scaled"`, so its assay is
-the z-scores of the 2,000 variable genes.
+the z-scores of the 4,000 variable genes.
 
 ```{r clean-variable}
 # the variable genes, made from the scaled values
@@ -333,7 +339,8 @@ variableScaled <- assay(es, "clean.variable")
 dim(variableScaled)
 ```
 
-**PCA, clusters and UMAP.** We keep the first 20 principal components.
+**PCA, clusters and UMAP.** We keep the first 25 principal components
+(scrapper's default).
 `runPca()` returns them with one column per cell, the layout the other
 scrapper functions take; reduced dimensions are stored with one row per
 cell, so we transpose them for storing. scrapper's PCA, clustering and
@@ -342,7 +349,7 @@ run.
 
 ```{r pca}
 # principal components of the variable genes
-pca <- runPca(variableScaled, number = 20)
+pca <- runPca(variableScaled)
 cellPcs <- t(pca$components)
 reducedDim(es, "reduction.pca", subsetName = "clean") <- cellPcs
 ```
@@ -394,7 +401,7 @@ rowData(es, subsetName = "clean") <- cleanRowData
 
 We take the subset out again to plot it with scater.
 
-```{r plot-clean}
+```{r plot-clean, fig.alt = "UMAP of the clean cells, coloured by cell type"}
 library(scater)
 
 # the clean cells, coloured by cell type
@@ -436,11 +443,11 @@ assayNames(tcells)
 ```
 
 ```{r tcell-variable}
-# the 2,000 genes that vary most among T cells
+# the 4,000 genes that vary most among T cells
 tcellLognormalized <- assay(tcells, "lognormalized")
 tcellVariances <- modelGeneVariances(tcellLognormalized)
 tcellResiduals <- tcellVariances$statistics$residuals
-tcellVariableGenes <- chooseHighlyVariableGenes(tcellResiduals, top = 2000)
+tcellVariableGenes <- chooseHighlyVariableGenes(tcellResiduals)
 ```
 
 ```{r tcell-scale}
@@ -453,14 +460,17 @@ tcellScaled <- t(tcellScaledByColumn)
 # genes with no variation among T cells get 0 rather than NaN
 tcellScaled[is.nan(tcellScaled)] <- 0
 assay(tcells, "scaled") <- tcellScaled
+
+# free the memory of the intermediate copies
+rm(tcellDense, tcellGenesByColumn, tcellScaledByColumn)
 ```
 
 ```{r tcell-cluster}
 # z-scores of the T cells' variable genes
 tcellVariableScaled <- tcellScaled[tcellVariableGenes, ]
 
-# the first 15 principal components, stored with one row per cell
-tcellPca <- runPca(tcellVariableScaled, number = 15)
+# principal components, stored with one row per cell
+tcellPca <- runPca(tcellVariableScaled)
 tcellPcs <- t(tcellPca$components)
 reducedDim(tcells, "reduction.pca") <- tcellPcs
 
@@ -475,9 +485,13 @@ reducedDim(tcells, "embedding.umap") <- tcellUmap
 ```
 
 ```{r tcell-singler}
-# finer T-cell subtypes from the same reference
-tcellPredictions <- SingleR(test = tcellLognormalized, ref = monaco,
-                            labels = monaco$label.fine)
+# the T-cell part of the reference, so every cell gets a T-cell subtype
+isTcellReference <- monaco$label.main %in% tcellLabels
+tcellReference <- monaco[, isTcellReference]
+
+# finer T-cell subtypes
+tcellPredictions <- SingleR(test = tcellLognormalized, ref = tcellReference,
+                            labels = tcellReference$label.fine)
 tcells$subtype <- tcellPredictions$labels
 table(tcells$subtype)
 ```
@@ -498,7 +512,7 @@ es <- createSubset(es, "tcells.variable", rows = tcellVariableGenes,
                    parentAssay = "tcells/scaled")
 ```
 
-```{r plot-tcells}
+```{r plot-tcells, fig.alt = "UMAP of the T cells, coloured by T-cell subtype"}
 # the T cells, coloured by subtype
 tcellCells <- getSubsetExperiment(es, "tcells")
 plotReducedDim(tcellCells, dimred = "embedding.umap", colour_by = "subtype")

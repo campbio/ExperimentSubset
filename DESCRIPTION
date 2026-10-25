@@ -14,7 +14,7 @@ URL: https://campbio.github.io/ExperimentSubset/,
     https://github.com/campbio/ExperimentSubset
 BugReports: https://github.com/campbio/ExperimentSubset/issues
 Config/Needs/website: pkgdown, DropletTestFiles, DropletUtils, scuttle,
-    singleCellTK, scDblFinder, celda, scrapper, SingleR, celldex, scater
+    singleCellTK, scDblFinder, celda, SingleR, celldex
 Encoding: UTF-8
 Depends:
   R (>= 4.0.0),
