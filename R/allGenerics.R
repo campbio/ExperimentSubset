@@ -554,6 +554,83 @@ setGeneric(
   }
 )
 
+#' @title Take a subset out as a standalone experiment object
+#' @description Returns a subset as an object of the main object's class
+#'   (for example a \code{SingleCellExperiment}), so that any tool written
+#'   for that class can be run on the subset. Store what the tool added with
+#'   \code{setSubsetExperiment}.
+#' @param x Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} The name of the subset.
+#' @param parentData \code{logical(1)} Include the main object's rowData and
+#'   colData columns for the subset's rows and columns, as with
+#'   \code{parentRowData} and \code{parentColData}. They are marked so that
+#'   \code{setSubsetExperiment} doesn't store copies of them. Default
+#'   \code{TRUE}.
+#' @return An object of the main object's class with the subset's rows and
+#'   columns and row and column names. Its assays are every assay the subset
+#'   sees, its own and those linked from its parent, under their names, with
+#'   the subset's primary assay first. Its rowData and colData are the
+#'   subset's, after the main object's columns if \code{parentData = TRUE}.
+#'   Its reducedDims, altExps and metadata are the subset's. Row and column
+#'   trees, spatial coordinates and images come from the main object.
+#' @rdname getSubsetExperiment
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = 1:100, cols = 1:50)
+#' subset1 <- getSubsetExperiment(es, "subset1")
+#' subset1
+setGeneric(
+  name = "getSubsetExperiment",
+  def = function(x, subsetName, parentData = TRUE)
+  {
+    standardGeneric("getSubsetExperiment")
+  }
+)
+
+#' @title Store a standalone experiment object back into a subset
+#' @description Stores what a tool added to an object returned by
+#'   \code{getSubsetExperiment}: new assays, rowData and colData columns,
+#'   reducedDims, altExps and metadata.
+#' @param x Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} The name of the subset.
+#' @param value An object of the main object's class with the subset's
+#'   dimensions, and with row and column names that are \code{NULL} or the
+#'   subset's, in the same order. A tool that drops rows or columns is
+#'   followed by \code{createSubset} instead.
+#' @param unlink \code{logical(1)} Store assays of \code{value} that have
+#'   the name of an assay linked from the subset's parent but different
+#'   values, as with \code{setSubsetAssay}. Without it, such an assay is an
+#'   error. Default \code{FALSE}.
+#' @return Updated \code{ExperimentSubset} object. Linked assays that are
+#'   unchanged in \code{value} are not stored, and neither are the main
+#'   object's rowData and colData columns added by \code{getSubsetExperiment}.
+#'   Everything else in \code{value} replaces the subset's own data: an own
+#'   assay, reducedDim, altExp or column that \code{value} no longer has is
+#'   removed from the subset. Row and column trees, spatial coordinates and
+#'   images are not stored.
+#' @rdname setSubsetExperiment
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, "subset1", rows = 1:100, cols = 1:50)
+#' subset1 <- getSubsetExperiment(es, "subset1")
+#' # add a reducedDim and a colData column to the standalone object
+#' reducedDim(subset1, "random") <- matrix(rnorm(100), nrow = 50)
+#' subset1$group <- rep(c("a", "b"), 25)
+#' # and store them in the subset
+#' es <- setSubsetExperiment(es, "subset1", subset1)
+#' reducedDimNames(es, subsetName = "subset1")
+setGeneric(
+  name = "setSubsetExperiment",
+  def = function(x, subsetName, value, unlink = FALSE)
+  {
+    standardGeneric("setSubsetExperiment")
+  }
+)
+
 #' @title reducedDimNames<-
 #' @description A wrapper to the \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method.
