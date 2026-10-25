@@ -18,6 +18,14 @@ vignette: |
 ```{r options, include=FALSE, echo=FALSE}
 knitr::opts_chunk$set(warning=FALSE, error=FALSE, message=FALSE)
 ```
+
+This vignette is a short introduction. The
+[ExperimentSubset website](https://campbio.github.io/ExperimentSubset/)
+has the full reference and longer articles, including an
+[end-to-end single-cell workflow](https://campbio.github.io/ExperimentSubset/articles/pbmc-workflow.html)
+that keeps every subset of a PBMC data set, from empty droplets to T-cell
+subtypes, in one object.
+
 # Installation
 
 ```{r, eval= FALSE}
@@ -619,6 +627,15 @@ object but with the dimensions of the subset. The `internalAssay` is initially
 an empty experiment object with only dimensions set to enable manipulation, but
 can be used to store additional data against a subset such as `assay`, 
 `rowData`, `colData`, `reducedDims`, `altExps` and `metadata`.
+
+# Learn more
+
+- The [ExperimentSubset website](https://campbio.github.io/ExperimentSubset/)
+  documents every function, for the release and for the devel version.
+- The [single-cell workflow article](https://campbio.github.io/ExperimentSubset/articles/pbmc-workflow.html)
+  goes from raw droplets through quality control, decontamination,
+  clustering and annotation to a re-analysis of T cells, keeping all
+  subsets in one object.
 
 # Session Information
 

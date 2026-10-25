@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.18 (2026-10-25)
+* New article on the website: an end-to-end single-cell workflow on 4,000 PBMCs that keeps empty droplets, cells, quality-controlled cells, variable genes and a T-cell re-analysis as subsets of one object, using both `getSubsetExperiment()`/`setSubsetExperiment()` and direct storage. The vignette links to the website and the article
+
 # ExperimentSubset 1.23.17 (2026-10-25)
 * The package has a pkgdown website at <https://campbio.github.io/ExperimentSubset/>, with the release version at the root and the devel version under `/dev/`
 

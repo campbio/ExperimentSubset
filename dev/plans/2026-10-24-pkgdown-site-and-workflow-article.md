@@ -263,11 +263,13 @@ counts                        main assay, all droplets (MAMS processing counts; 
 ├── background                empty droplets used as decontX's ambient profile
 └── filtered                  Cell Ranger cells (obs_subset filtered)
     │  decontaminated         decontX output (processing decontaminated)
-    └── clean                 cells passing QC (obs_subset clean; parent filtered/decontaminated)
+    └── clean                 cells passing QC, genes detected in >= 10 cells
+        │                     (obs_subset clean; parent filtered/decontaminated)
         │  lognormalized      own (processing lognormalized)
-        │  scaled             own (processing scaled)
+        │  scaled             own (processing scaled), dense z-scores
         │  reduction.pca, embedding.umap
-        ├── clean.variable    top variable genes (feature_subset variable)
+        ├── clean.variable    top variable genes (feature_subset variable;
+        │                     parent clean/scaled, the input to PCA)
         └── tcells            T cells (parent clean)
             │  lognormalized  linked from clean: per-cell, so not recomputed
             │  scaled         own, stored with unlink = TRUE: z-scores of T cells only
@@ -293,7 +295,8 @@ reducedDim on the subset).
    contamination; `createSubset(es, "clean", cols = keep,
    parentAssay = "filtered/decontaminated")`.
 6. Clustering, direct style, with scrapper: normalise (`lognormalized`),
-   choose variable genes (`clean.variable`), scale them (`scaled`), PCA
+   z-scores of the expressed genes (`scaled`), variable genes
+   (`clean.variable`, made from `clean/scaled`), PCA of their z-scores
    (`reduction.pca`), SNN graph and clusters (colData), UMAP
    (`embedding.umap`).
 7. Annotation, direct style: SingleR with celldex's Monaco reference, main

@@ -8,6 +8,12 @@ template:
 development:
   mode: auto
 
+articles:
+- title: Workflows
+  navbar: Workflows
+  contents:
+  - articles/pbmc-workflow
+
 reference:
 - title: Constructor and classes
   contents:
