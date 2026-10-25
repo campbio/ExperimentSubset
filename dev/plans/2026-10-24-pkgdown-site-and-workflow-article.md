@@ -81,16 +81,17 @@ must be stored deliberately, as below.
   `assay<-`. (`getSubsetAssay()`'s second argument is already named
   `subsetName`, hence `subsetAssayName`.)
 - A **bare name** means a main assay, or (as today) a subset name. A bare
-  name that is only an assay stored in a subset still resolves for one
-  release with a deprecation warning pointing to `"subset/assay"`, and is an
-  error from the release after (`.Deprecated` then `.Defunct`, per the
-  standards). A bare name stored in more than one subset is an error at
-  once, naming the subsets.
+  name that is only an assay stored in a subset is an error that names the
+  subsets storing it and shows the qualified form. No deprecation cycle:
+  no Bioconductor or CRAN package depends on, imports or suggests
+  ExperimentSubset (checked 2026-10-25), and the maintainer chose to make
+  the change directly.
 - `createSubset(parentAssay = )` accepts a main assay, a subset name, or
   `"subset/assay"`. A child records its parent qualified
   (`"filtered/decontaminated"`), so later assays in other subsets can't
-  change what it points to. Existing objects with bare parents keep working
-  through the deprecation path above.
+  change what it points to. Existing objects whose subsets record a bare
+  stored-assay parent still resolve it when it is stored in exactly one
+  subset, so saved objects keep working.
 
 **Writing.** `setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName,
 unlink = FALSE)` and `assay(x, "s", subsetAssayName = "a", unlink = ) <- m`:
@@ -125,14 +126,14 @@ use them. No new slots and no class changes.
 
 **Behaviour changes.** Storing a name that is linked (for example
 `logcounts` in a subset when the main object has `logcounts`) now needs
-`unlink = TRUE`. Bare stored-assay names are deprecated. Listing output is
+`unlink = TRUE`. Bare stored-assay names are an error. Listing output is
 qualified. NEWS covers all three.
 
 **Tests.** Linked views through one and two levels, matching a slice of the
 source; own assays hiding linked ones only with `unlink = TRUE`, and only
 for that subset and its descendants; siblings storing the same name;
-qualified and `subsetAssayName =` reads and writes; the deprecation warning
-for a bare stored name and the error when it is ambiguous; a child's parent
+qualified and `subsetAssayName =` reads and writes; the error for a bare
+stored name; a child's parent
 recorded qualified and unaffected by later assays elsewhere; `/` rejected;
 the new `subsetAssayNames()` output; existing objects with bare parents.
 
