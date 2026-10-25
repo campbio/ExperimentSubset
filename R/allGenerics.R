@@ -571,8 +571,9 @@ setGeneric(
 #'   sees, its own and those linked from its parent, under their names, with
 #'   the subset's primary assay first. Its rowData and colData are the
 #'   subset's, after the main object's columns if \code{parentData = TRUE}.
-#'   Its reducedDims, altExps and metadata are the subset's. Row and column
-#'   trees, spatial coordinates and images come from the main object.
+#'   Its reducedDims, altExps and metadata are the subset's. Everything else,
+#'   such as row ranges, row and column trees, spatial coordinates, images,
+#'   \code{colPairs} and \code{rowPairs}, comes from the main object.
 #' @rdname getSubsetExperiment
 #' @export
 #' @examples
@@ -595,7 +596,8 @@ setGeneric(
 #'   reducedDims, altExps and metadata.
 #' @param x Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} The name of the subset.
-#' @param value An object of the main object's class with the subset's
+#' @param value An object of the main object's class (not a subclass or a
+#'   parent class) with the subset's
 #'   dimensions, and with row and column names that are \code{NULL} or the
 #'   subset's, in the same order. A tool that drops rows or columns is
 #'   followed by \code{createSubset} instead.
@@ -604,12 +606,15 @@ setGeneric(
 #'   values, as with \code{setSubsetAssay}. Without it, such an assay is an
 #'   error. Default \code{FALSE}.
 #' @return Updated \code{ExperimentSubset} object. Linked assays that are
-#'   unchanged in \code{value} are not stored, and neither are the main
+#'   identical in \code{value} to what the subset sees, ignoring dimnames,
+#'   are not stored, and neither are the main
 #'   object's rowData and colData columns added by \code{getSubsetExperiment}.
 #'   Everything else in \code{value} replaces the subset's own data: an own
 #'   assay, reducedDim, altExp or column that \code{value} no longer has is
-#'   removed from the subset. Row and column trees, spatial coordinates and
-#'   images are not stored.
+#'   removed from the subset, except an assay another subset was made from,
+#'   which is an error. Nothing else is stored: not row ranges, row and
+#'   column trees, spatial coordinates, images, \code{colPairs},
+#'   \code{rowPairs} or \code{mainExpName}.
 #' @rdname setSubsetExperiment
 #' @export
 #' @examples

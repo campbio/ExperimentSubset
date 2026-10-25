@@ -337,7 +337,7 @@ ExperimentSubset <- function(x,
 .setSubsetExperiment <- function(x, subsetName, value, unlink = FALSE) {
   .isSubset(x, subsetName)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
-  if (!methods::is(value, class(internal)))
+  if (!identical(as.character(class(value)), as.character(class(internal))))
     stop("'value' must be a ", class(internal), ", the class of the main ",
          "object, as returned by getSubsetExperiment().")
   if (!identical(as.integer(dim(value)), as.integer(dim(internal))))
@@ -349,9 +349,12 @@ ExperimentSubset <- function(x,
   .checkInputNames(colnames(value), colnames(internal), "colnames",
                    subsetName, "value")
 
-  # own assays that value no longer has are removed
+  # own assays that value no longer has are removed, unless a subset was
+  # made from them
+  x <- .qualifyParents(x)
   owners <- .assayOwners(x, subsetName)
   kept <- assayNames(internal) %in% assayNames(value)
+  .checkNotParents(x, subsetName, assayNames(internal)[!kept])
   assays(internal, withDimnames = FALSE) <-
     assays(internal, withDimnames = FALSE)[kept]
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
@@ -366,13 +369,32 @@ ExperimentSubset <- function(x,
   .subsetRowData(x, subsetName) <- .withoutParentColumns(rowData(value))
   .subsetColData(x, subsetName) <- .withoutParentColumns(colData(value))
   internal <- .internalAssay(.subsets(x)[[subsetName]])
-  if (methods::is(value, "SingleCellExperiment")) {
+  if (methods::is(internal, "SingleCellExperiment")) {
     SingleCellExperiment::reducedDims(internal) <- reducedDims(value)
     altExps(internal) <- altExps(value)
   }
   metadata(internal) <- metadata(value)
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
   x
+}
+
+# Stops if any of subsetName's assays in assayNames is the parent of a
+# subset
+.checkNotParents <- function(x, subsetName, assayNames) {
+  if (length(assayNames) == 0)
+    return(invisible(NULL))
+  parents <- vapply(subsetNames(x), function(name) {
+    parent <- .parentAssay(.subsets(x)[[name]])
+    if (is.null(parent)) "" else parent
+  }, character(1))
+  used <- parents %in% paste0(subsetName, "/", assayNames)
+  if (any(used))
+    stop("'value' has no assay ",
+         paste0("'", unique(sub(".*/", "", parents[used])), "'",
+                collapse = ", "),
+         ", which subsets ", paste0("'", names(parents)[used], "'",
+                                   collapse = ", "),
+         " were made from. Keep it in 'value'.")
 }
 
 # TRUE if two assays hold the same values, whatever their dimnames

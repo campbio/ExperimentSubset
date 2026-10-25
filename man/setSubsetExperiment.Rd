@@ -29,7 +29,8 @@ setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
 \item{subsetName}{\code{character(1)} The name of the subset.}
 
-\item{value}{An object of the main object's class with the subset's
+\item{value}{An object of the main object's class (not a subclass or a
+parent class) with the subset's
 dimensions, and with row and column names that are \code{NULL} or the
 subset's, in the same order. A tool that drops rows or columns is
 followed by \code{createSubset} instead.}
@@ -41,12 +42,15 @@ error. Default \code{FALSE}.}
 }
 \value{
 Updated \code{ExperimentSubset} object. Linked assays that are
-  unchanged in \code{value} are not stored, and neither are the main
+  identical in \code{value} to what the subset sees, ignoring dimnames,
+  are not stored, and neither are the main
   object's rowData and colData columns added by \code{getSubsetExperiment}.
   Everything else in \code{value} replaces the subset's own data: an own
   assay, reducedDim, altExp or column that \code{value} no longer has is
-  removed from the subset. Row and column trees, spatial coordinates and
-  images are not stored.
+  removed from the subset, except an assay another subset was made from,
+  which is an error. Nothing else is stored: not row ranges, row and
+  column trees, spatial coordinates, images, \code{colPairs},
+  \code{rowPairs} or \code{mainExpName}.
 }
 \description{
 Stores what a tool added to an object returned by

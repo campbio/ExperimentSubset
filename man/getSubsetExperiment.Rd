@@ -41,8 +41,9 @@ An object of the main object's class with the subset's rows and
   sees, its own and those linked from its parent, under their names, with
   the subset's primary assay first. Its rowData and colData are the
   subset's, after the main object's columns if \code{parentData = TRUE}.
-  Its reducedDims, altExps and metadata are the subset's. Row and column
-  trees, spatial coordinates and images come from the main object.
+  Its reducedDims, altExps and metadata are the subset's. Everything else,
+  such as row ranges, row and column trees, spatial coordinates, images,
+  \code{colPairs} and \code{rowPairs}, comes from the main object.
 }
 \description{
 Returns a subset as an object of the main object's class

@@ -1353,6 +1353,7 @@ testthat::test_that("Completing test coverage, move this into relevant places la
 })
 # Takes a subset out as a standalone experiment and puts it back unchanged
 checkExperimentRoundTrip <- function(object) {
+  object$batch <- rep(c("a", "b"), 3)
   es <- ExperimentSubset(object)
   es <- createSubset(es, "s1", rows = 2:5, cols = 2:5)
   sub <- getSubsetExperiment(es, "s1")
@@ -1362,6 +1363,7 @@ checkExperimentRoundTrip <- function(object) {
   testthat::expect_equal(colnames(sub), subsetColnames(es, "s1"))
   testthat::expect_equal(as.matrix(assay(sub, "counts")),
                          as.matrix(assay(es, "s1")))
+  testthat::expect_equal(sub$batch, object$batch[2:5])
   # unchanged linked assays and parent columns are not stored
   ownColumns <- colnames(subsetColData(es, "s1", FALSE))
   es <- setSubsetExperiment(es, "s1", sub)
@@ -1495,6 +1497,11 @@ testthat::test_that("setSubsetExperiment checks value against the subset", {
   se <- SummarizedExperiment(list(counts = counts(sub)))
   testthat::expect_error(setSubsetExperiment(es, "s1", se),
                          regexp = "SingleCellExperiment")
+  # an SCE for a SummarizedExperiment main object
+  seEs <- ExperimentSubset(SummarizedExperiment(list(counts = simCounts)))
+  seEs <- createSubset(seEs, "s1", rows = 1:20, cols = 1:10)
+  testthat::expect_error(setSubsetExperiment(seEs, "s1", sub),
+                         regexp = "must be a SummarizedExperiment")
   bad <- sub
   assay(bad, "a/b") <- counts(sub)
   testthat::expect_error(setSubsetExperiment(es, "s1", bad), regexp = "/")
@@ -1514,4 +1521,10 @@ testthat::test_that("Subset experiments of subsets use the subset's assays", {
   testthat::expect_equal(as.matrix(assay(sub)), as.matrix(assay(es, "s2")))
   es <- setSubsetExperiment(es, "s2", sub)
   testthat::expect_equal(subsetAssayNames(es), c("s1", "s2", "s1/scaled"))
+  # s1's scaled can't be dropped while s2 is made from it
+  s1 <- getSubsetExperiment(es, "s1")
+  assay(s1, "scaled") <- NULL
+  testthat::expect_error(setSubsetExperiment(es, "s1", s1),
+                         regexp = "'scaled', which subsets 's2'")
+  testthat::expect_equal(as.matrix(assay(es, "s2")), scaled[1:5, 1:4])
 })
