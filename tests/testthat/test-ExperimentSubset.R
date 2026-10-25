@@ -1528,3 +1528,74 @@ testthat::test_that("Subset experiments of subsets use the subset's assays", {
                          regexp = "'scaled', which subsets 's2'")
   testthat::expect_equal(as.matrix(assay(es, "s2")), scaled[1:5, 1:4])
 })
+
+testthat::test_that("setSubsetExperiment keeps assays that descendants use", {
+  es <- ExperimentSubset(simSce)
+  es <- createSubset(es, "s1", rows = 1:20, cols = 1:10)
+  scaled <- as.matrix(assay(es, "s1")) / 2
+  es <- setSubsetAssay(es, "s1", scaled, "scaled")
+  # child reaches s1's scaled through another subset
+  es <- createSubset(es, "child", rows = 1:10, cols = 1:8, parentAssay = "s1")
+  es <- createSubset(es, "grandchild", rows = 1:5, cols = 1:4,
+                     parentAssay = "child/scaled")
+  s1 <- getSubsetExperiment(es, "s1")
+  assay(s1, "scaled") <- NULL
+  testthat::expect_error(setSubsetExperiment(es, "s1", s1),
+                         regexp = "'scaled', which subsets 'grandchild'")
+
+  # a subset made from s1 uses s1's own counts, stored with unlink = TRUE
+  es <- ExperimentSubset(simSce)
+  es <- createSubset(es, "s1", rows = 1:20, cols = 1:10)
+  ownCounts <- as.matrix(assay(es, "s1")) * 100
+  es <- setSubsetAssay(es, "s1", ownCounts, "counts", unlink = TRUE)
+  es <- createSubset(es, "child", rows = 1:5, cols = 1:4, parentAssay = "s1")
+  s1 <- getSubsetExperiment(es, "s1")
+  assay(s1, "counts") <- NULL
+  testthat::expect_error(setSubsetExperiment(es, "s1", s1),
+                         regexp = "'counts', which subsets 'child'")
+  testthat::expect_equal(as.matrix(assay(es, "child")), ownCounts[1:5, 1:4])
+})
+
+testthat::test_that("Subset experiments keep names a subset was given", {
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:6)))
+  tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+                                  rowTree = tinyTree)
+  es <- ExperimentSubset(tse)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 2:5)
+  subsetRownames(es, "s1") <- paste0("row", 1:5)
+  subsetColnames(es, "s1") <- paste0("col", 1:4)
+  sub <- getSubsetExperiment(es, "s1")
+  testthat::expect_equal(rownames(sub), paste0("row", 1:5))
+  testthat::expect_equal(colnames(sub), paste0("col", 1:4))
+  testthat::expect_equal(rowLinks(sub)$nodeLab, tinyTree$tip.label[1:5])
+  es <- setSubsetExperiment(es, "s1", sub)
+  testthat::expect_equal(subsetRownames(es, "s1"), paste0("row", 1:5))
+})
+
+testthat::test_that("setSubsetExperiment needs the subset's names on value", {
+  es <- ExperimentSubset(simSce)
+  es <- createSubset(es, "s1", rows = 1:20, cols = 1:10)
+  sub <- getSubsetExperiment(es, "s1")
+  noColnames <- sub
+  colnames(noColnames) <- NULL
+  testthat::expect_error(setSubsetExperiment(es, "s1", noColnames),
+                         regexp = "colnames")
+  noRownames <- sub
+  rownames(noRownames) <- NULL
+  testthat::expect_error(setSubsetExperiment(es, "s1", noRownames),
+                         regexp = "rownames")
+})
+
+testthat::test_that("Linked assays with the same values count as unchanged", {
+  es <- ExperimentSubset(simSce)
+  es <- createSubset(es, "s1", rows = 1:20, cols = 1:10)
+  sub <- getSubsetExperiment(es, "s1")
+  # integer counts become double with the same values
+  counts(sub) <- counts(sub) + 0
+  testthat::expect_type(counts(sub), "double")
+  es <- setSubsetExperiment(es, "s1", sub)
+  testthat::expect_equal(subsetAssayNames(es), "s1")
+})

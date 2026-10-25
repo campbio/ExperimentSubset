@@ -296,11 +296,13 @@ ExperimentSubset <- function(x,
 # spatial coordinates and sample_id, with the subset's own names, assays
 # and data
 #' @importMethodsFrom SummarizedExperiment assays assays<-
+#' @importMethodsFrom TreeSummarizedExperiment rownames<- colnames<-
 .getSubsetExperiment <- function(x, subsetName, parentData = TRUE) {
   .isSubset(x, subsetName)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   out <- as(x, class(internal))
-  # the main object's assays and reduced data are replaced, so not cut
+  # the main object's assays and reduced data are replaced, so not cut;
+  # rownames<- and colnames<- are the generics, which keep tree links
   assays(out, withDimnames = FALSE) <- S4Vectors::SimpleList()
   if (methods::is(out, "SingleCellExperiment")) {
     SingleCellExperiment::reducedDims(out) <- list()
@@ -344,10 +346,14 @@ ExperimentSubset <- function(x,
     stop("'value' must have the same dimensions as subset '", subsetName,
          "' (", nrow(internal), " x ", ncol(internal), "). To keep fewer ",
          "rows or columns, create a subset with createSubset().")
-  .checkInputNames(rownames(value), rownames(internal), "rownames",
-                   subsetName, "value")
-  .checkInputNames(colnames(value), colnames(internal), "colnames",
-                   subsetName, "value")
+  # matching names show value's rows and columns weren't reordered
+  for (what in c("rownames", "colnames")) {
+    getNames <- match.fun(what)
+    if (!is.null(getNames(internal))
+        && !identical(getNames(value), getNames(internal)))
+      stop("The ", what, " of 'value' must be the ", what, " of subset '",
+           subsetName, "', in the same order.")
+  }
 
   # own assays that value no longer has are removed, unless a subset was
   # made from them
@@ -378,41 +384,45 @@ ExperimentSubset <- function(x,
   x
 }
 
-# Stops if any of subsetName's assays in assayNames is the parent of a
-# subset
+# Stops if removing subsetName's own assays in assayNames would change or
+# break another subset: one whose primary assay is one of them, reached
+# directly ("s/scaled"), through the subset ("s") or through a descendant
+# ("child/scaled")
 .checkNotParents <- function(x, subsetName, assayNames) {
-  if (length(assayNames) == 0)
-    return(invisible(NULL))
-  parents <- vapply(subsetNames(x), function(name) {
-    parent <- .parentAssay(.subsets(x)[[name]])
-    if (is.null(parent)) "" else parent
-  }, character(1))
-  used <- parents %in% paste0(subsetName, "/", assayNames)
-  if (any(used))
+  used <- character(0)
+  for (name in setdiff(subsetNames(x), subsetName)) {
+    primary <- .primaryAssayName(x, name)
+    owners <- .assayOwners(x, name)
+    if (primary %in% assayNames && primary %in% names(owners)
+        && owners[[primary]] == subsetName)
+      used[name] <- primary
+  }
+  if (length(used) > 0)
     stop("'value' has no assay ",
-         paste0("'", unique(sub(".*/", "", parents[used])), "'",
-                collapse = ", "),
-         ", which subsets ",
-         paste0("'", names(parents)[used], "'", collapse = ", "),
+         paste0("'", unique(used), "'", collapse = ", "),
+         ", which subsets ", paste0("'", names(used), "'", collapse = ", "),
          " were made from. Keep it in 'value'.")
 }
 
-# TRUE if two assays hold the same values, whatever their dimnames
+# TRUE if two assays hold the same values, whatever their dimnames, type
+# (integer or double) or class (for example dense or sparse)
 .sameAssay <- function(a, b) {
   dimnames(a) <- NULL
   dimnames(b) <- NULL
-  identical(a, b)
+  if (identical(a, b))
+    return(TRUE)
+  same <- tryCatch(all.equal(a, b, tolerance = 0, check.attributes = FALSE),
+                   error = function(e) FALSE)
+  isTRUE(same)
 }
 
 # Stops unless inputNames are NULL or the same as the subset's current
-# names, in the same order. what is "rownames" or "colnames"; arg is the
-# argument the names come from.
-.checkInputNames <- function(inputNames, currentNames, what, subsetName,
-                             arg = "inputMatrix") {
+# names, in the same order. what is "rownames" or "colnames".
+.checkInputNames <- function(inputNames, currentNames, what, subsetName) {
   if (is.null(inputNames) || is.null(currentNames))
     return(invisible(NULL))
   if (!identical(as.character(inputNames), as.character(currentNames)))
-    stop("The ", what, " of '", arg, "' must be NULL or the same as the ",
+    stop("The ", what, " of 'inputMatrix' must be NULL or the same as the ",
          what, " of subset '", subsetName, "', in the same order.")
 }
 

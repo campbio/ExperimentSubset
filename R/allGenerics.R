@@ -597,17 +597,16 @@ setGeneric(
 #' @param x Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} The name of the subset.
 #' @param value An object of the main object's class (not a subclass or a
-#'   parent class) with the subset's
-#'   dimensions, and with row and column names that are \code{NULL} or the
-#'   subset's, in the same order. A tool that drops rows or columns is
+#'   parent class) with the subset's dimensions and the subset's row and
+#'   column names, in the same order. A tool that drops rows or columns is
 #'   followed by \code{createSubset} instead.
 #' @param unlink \code{logical(1)} Store assays of \code{value} that have
 #'   the name of an assay linked from the subset's parent but different
 #'   values, as with \code{setSubsetAssay}. Without it, such an assay is an
 #'   error. Default \code{FALSE}.
 #' @return Updated \code{ExperimentSubset} object. Linked assays that are
-#'   identical in \code{value} to what the subset sees, ignoring dimnames,
-#'   are not stored, and neither are the main
+#'   in \code{value} hold the same values as what the subset sees (whatever
+#'   their dimnames, type or class) are not stored, and neither are the main
 #'   object's rowData and colData columns added by \code{getSubsetExperiment}.
 #'   Everything else in \code{value} replaces the subset's own data: an own
 #'   assay, reducedDim, altExp or column that \code{value} no longer has is
