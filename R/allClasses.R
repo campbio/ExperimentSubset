@@ -3,6 +3,8 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 
 #' An S4 class to manage subset representation.
 #'
+#' Used inside the \code{Subset*} classes; not for direct use.
+#' @keywords internal
 #' @slot subsetName \code{character(1)} Name of the subset.
 #' @slot rowIndices \code{vector("numeric")} Indices of the rows to include in
 #'   the subset.

@@ -2,14 +2,16 @@
 #
 #   - devel: the devel version, built into /dev/ on each push to devel and
 #     on manual dispatch from devel. Pull requests to devel that touch the
-#     site's sources only build it. Until master has _pkgdown.yml, the
-#     devel version is also deployed at the root, so the site isn't empty.
+#     site's sources only build it. If the site has no home page yet (no
+#     release site), the first devel deploy adds one that sends readers to
+#     /dev/; the release site replaces it.
 #   - release: the current release, built at the root from master after
 #     "Sync stable branch" updates it, and on manual dispatch from master.
 #     The sync pushes with a bot token, which doesn't start workflows, but
-#     workflow_run does fire. It is skipped when master hasn't changed since
-#     the last deploy; a manual dispatch always rebuilds. workflow_run only runs from the default
-#     branch, so this job starts working once this file is on master.
+#     workflow_run does fire. The build is skipped when master hasn't
+#     changed since the last deploy; a manual dispatch always rebuilds.
+#     workflow_run only runs from the default branch, so this job starts
+#     working once this file is on master.
 #
 # Each site is built in a Bioconductor container with read-only
 # permissions; only the deploy jobs, which run no package code, can write.
@@ -26,8 +28,12 @@ on:
       - 'R/**'
       - 'man/**'
       - 'vignettes/**'
+      - 'inst/**'
       - '_pkgdown.yml'
       - 'DESCRIPTION'
+      - 'README.md'
+      - 'NEWS.md'
+      - '.Rbuildignore'
       - '.github/workflows/pkgdown.yaml'
   workflow_run:
     workflows: ['Sync stable branch']
@@ -48,34 +54,13 @@ jobs:
       image: bioconductor/bioconductor_docker:devel
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-    outputs:
-      root: ${{ steps.root.outputs.root }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check out master, to see whether it has a release site yet
-        if: github.event_name != 'pull_request'
-        uses: actions/checkout@v4
-        with:
-          ref: master
-          path: stable
-
-      - name: Decide whether to build the root too
-        id: root
-        if: github.event_name != 'pull_request'
-        run: |
-          if [ -f stable/_pkgdown.yml ]; then
-            echo "root=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "root=true" >> "$GITHUB_OUTPUT"
-          fi
-          rm -rf stable
-        shell: bash
-
       - name: Install the package and the site's dependencies
+        # Config/Needs/website lists pkgdown and the articles' packages
         run: |
-          BiocManager::install(c("pkgdown", "remotes"), update = FALSE,
-                               ask = FALSE)
+          BiocManager::install("remotes", update = FALSE, ask = FALSE)
           deps <- remotes::local_package_deps(dependencies = TRUE)
           website <- read.dcf("DESCRIPTION", "Config/Needs/website")
           website <- trimws(strsplit(website, ",")[[1]])
@@ -93,16 +78,6 @@ jobs:
                                            install = FALSE)
         shell: Rscript {0}
 
-      - name: Build the devel version at the root of root-site
-        if: steps.root.outputs.root == 'true'
-        env:
-          PKGDOWN_DEV_MODE: release
-        run: |
-          pkgdown::build_site_github_pages(dest_dir = "root-site",
-                                           new_process = FALSE,
-                                           install = FALSE)
-        shell: Rscript {0}
-
       - name: Upload the devel site
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
@@ -111,25 +86,16 @@ jobs:
           path: site/dev
           include-hidden-files: true
 
-      - name: Upload the root site
-        if: >-
-          github.event_name != 'pull_request' &&
-          steps.root.outputs.root == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: root-site
-          path: root-site
-          include-hidden-files: true
-
   devel-deploy:
     needs: devel-build
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    # one group per site: a newer pending job in a group cancels an older
+    # One group per site: a newer pending job in a group cancels an older
     # pending one, which must not drop a release deploy. Pushes to gh-pages
-    # from the two groups are retried by the deploy action.
+    # from the two groups are retried by the deploy action. This job never
+    # replaces the root, so the two can't overwrite each other's files.
     concurrency:
       group: gh-pages-devel
       cancel-in-progress: false
@@ -142,27 +108,48 @@ jobs:
           path: devel-site
 
       - name: Deploy the devel site to /dev/
-        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
+        # v4.9.0
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445
         with:
           branch: gh-pages
           folder: devel-site
           target-folder: dev
           commit-message: Deploy the devel site
 
-      - uses: actions/download-artifact@v4
-        if: needs.devel-build.outputs.root == 'true'
-        with:
-          name: root-site
-          path: root-site
+      - name: Check whether the site has a home page
+        id: home
+        run: |
+          page="https://raw.githubusercontent.com/$REPO/gh-pages/index.html"
+          if curl -fsI "$page" > /dev/null; then
+            echo "missing=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "missing=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          REPO: ${{ github.repository }}
+        shell: bash
 
-      - name: Deploy the devel version at the root until a release site exists
-        if: needs.devel-build.outputs.root == 'true'
-        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
+      - name: Write a home page that sends readers to /dev/
+        if: steps.home.outputs.missing == 'true'
+        run: |
+          mkdir home
+          printf '%s\n' '<!DOCTYPE html>' \
+            '<meta http-equiv="refresh" content="0; url=dev/">' \
+            '<link rel="canonical" href="dev/">' \
+            '<a href="dev/">ExperimentSubset documentation</a>' \
+            > home/index.html
+          touch home/.nojekyll
+        shell: bash
+
+      - name: Add the home page, changing nothing else
+        if: steps.home.outputs.missing == 'true'
+        # v4.9.0
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445
         with:
           branch: gh-pages
-          folder: root-site
-          clean-exclude: dev
-          commit-message: Deploy the devel version at the root
+          folder: home
+          clean: false
+          commit-message: Add a home page that points to /dev/
 
   release-check:
     # Decides on a bare runner whether to build, so the large release image
@@ -186,7 +173,8 @@ jobs:
         id: decide
         run: |
           # the commit the deployed release site was built from, if any
-          last="$(curl -fsSL "https://raw.githubusercontent.com/$REPO/gh-pages/release-sha.txt" || true)"
+          page="https://raw.githubusercontent.com/$REPO/gh-pages/release-sha.txt"
+          last="$(curl -fsSL "$page" || true)"
           if [ ! -f _pkgdown.yml ]; then
             echo "master has no _pkgdown.yml; nothing to build."
             echo "build=false" >> "$GITHUB_OUTPUT"
@@ -218,8 +206,7 @@ jobs:
 
       - name: Install the package and the site's dependencies
         run: |
-          BiocManager::install(c("pkgdown", "remotes"), update = FALSE,
-                               ask = FALSE)
+          BiocManager::install("remotes", update = FALSE, ask = FALSE)
           deps <- remotes::local_package_deps(dependencies = TRUE)
           website <- read.dcf("DESCRIPTION", "Config/Needs/website")
           website <- trimws(strsplit(website, ",")[[1]])
@@ -267,7 +254,8 @@ jobs:
           path: release-site
 
       - name: Deploy the release site to the root, keeping /dev/
-        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
+        # v4.9.0
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445
         with:
           branch: gh-pages
           folder: release-site

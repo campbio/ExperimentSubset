@@ -1,4 +1,4 @@
-# 0002. Publish a pkgdown site on GitHub Pages, release at the root and devel under /dev/
+# 0002. Publish a pkgdown site: release at the root, devel under /dev/
 
 - **Status:** Accepted
 - **Date:** 2026-10-25
@@ -38,14 +38,16 @@ We will publish a pkgdown site on GitHub Pages, deployed to the
   `master` always rebuilds.
 - The devel version is built from `devel` under `/dev/` on each push.
   Pull requests to `devel` that touch the site's sources build it without
-  deploying. Until `master` has `_pkgdown.yml`, the devel build is also
-  deployed at the root.
+  deploying. If the site has no home page yet, because there is no
+  release site, the first devel deploy adds a one-line home page that
+  sends readers to `/dev/`; the release site replaces it. The devel jobs
+  never otherwise write the root.
 - Each site is built in the matching Bioconductor container
   (`bioconductor_docker:devel` and `:RELEASE_X_Y`, bumped each release)
   with read-only permissions. Separate deploy jobs, which run no package
   code, get `contents: write`; each site has its own concurrency group, so
-  a devel deploy can't cancel a pending release deploy. The deploy action is pinned to a commit SHA,
-  and `GITHUB_TOKEN` is the only secret.
+  a devel deploy can't cancel a pending release deploy. The deploy action
+  is pinned to a commit SHA, and `GITHUB_TOKEN` is the only secret.
 - Long articles live in `vignettes/articles/`, which `.Rbuildignore`
   excludes, so Bioconductor never builds them. Their packages go in
   `Config/Needs/website`, which only the site build installs.
