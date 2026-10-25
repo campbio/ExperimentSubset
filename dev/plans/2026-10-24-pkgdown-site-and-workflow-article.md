@@ -63,7 +63,12 @@ different meanings.
 - A subset's *own assays* are the ones stored in it with `setSubsetAssay()`.
 - A subset's *visible assays* are its own assays plus its linked assays not
   hidden by an own assay of the same name. Its *primary* assay, what
-  `assay(x, "subset")` returns, is its slice of `parentAssay`, as today.
+  `assay(x, "subset")` returns, is its visible assay named after what its
+  `parentAssay` refers to (followed through parent subsets). Usually that is
+  its slice of `parentAssay`, as today; if the subset, or a subset on the
+  way, stored its own assay of that name with `unlink = TRUE`, the primary
+  assay is that one, consistent with "hides the linked one for that subset
+  and every subset made from it".
 
 Example: `logcounts` computed on the main object is linked into `filtered`,
 `clean` and `tcells` under the same name, because log-normalisation is
@@ -91,7 +96,12 @@ must be stored deliberately, as below.
   (`"filtered/decontaminated"`), so later assays in other subsets can't
   change what it points to. Existing objects whose subsets record a bare
   stored-assay parent still resolve it when it is stored in exactly one
-  subset, so saved objects keep working.
+  subset, and `createSubset()` and `setSubsetAssay()` first rewrite such
+  parents to `"subset/assay"`, so a later subset or assay with that name
+  can't change or break them.
+- Because stored assays are named `"subset/assay"`, a new subset may share
+  its name with an assay stored in a subset; it may not share the name of a
+  main assay.
 
 **Writing.** `setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName,
 unlink = FALSE)` and `assay(x, "s", subsetAssayName = "a", unlink = ) <- m`:

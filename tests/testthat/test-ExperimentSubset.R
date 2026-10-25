@@ -967,10 +967,116 @@ testthat::test_that("Sibling subsets can store the same assay name", {
                          list("s2/norm", "s2", "counts"))
   testthat::expect_true("s2/norm" %in% subsetAssayNames(es))
 
+  # a later sibling storing "norm" doesn't change what s3 points to
+  es <- createSubset(es, "s4", rows = 11:15, cols = 9:12)
+  es <- setSubsetAssay(es, "s4", as.matrix(assay(es, "s4")), "norm")
+  testthat::expect_equal(as.matrix(assay(es, "s3")), s2Norm[1:2, 1:2])
+
   # assay<- with a qualified name stores into that subset
   assay(es, "s1/extra") <- s1Norm
   testthat::expect_equal(as.matrix(assay(es, "s1", subsetAssayName = "extra")),
                          s1Norm)
+})
+
+testthat::test_that("A subset's own assay is used by it and its descendants", {
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "P", rows = 1:5, cols = 1:4)
+  es <- createSubset(es, "Q", rows = 1:5, cols = 1:4)
+  mainCounts <- as.matrix(assay(es, "counts"))
+  pCounts <- as.matrix(assay(es, "P")) + 100
+  es <- setSubsetAssay(es, "P", pCounts, "counts", unlink = TRUE)
+  # P's primary assay is now its own counts
+  testthat::expect_equal(as.matrix(assay(es, "P")), pCounts)
+  es <- createSubset(es, "C", rows = 1:2, cols = 1:2, parentAssay = "P")
+  testthat::expect_equal(as.matrix(assay(es, "C")), pCounts[1:2, 1:2])
+  testthat::expect_equal(as.matrix(assay(es, "C/counts")), pCounts[1:2, 1:2])
+  # each name is listed once, own or linked
+  testthat::expect_equal(subsetAssayNames(es, "C"), assayNames(es))
+  # the sibling Q still sees the main counts
+  testthat::expect_equal(as.matrix(assay(es, "Q")), mainCounts[1:5, 1:4])
+})
+
+testthat::test_that("assay<- stores linked names only with unlink = TRUE", {
+  es <- ExperimentSubset(sce_chcl)
+  assay(es, "logcounts") <- log1p(assay(es, "counts"))
+  es <- createSubset(es, "filtered", rows = 1:20, cols = 1:10)
+  filteredLog <- as.matrix(assay(es, "filtered/logcounts"))
+  testthat::expect_error(assay(es, "filtered/logcounts") <- filteredLog,
+                         regexp = "unlink = TRUE")
+  assay(es, "filtered/logcounts", unlink = TRUE) <- filteredLog + 1
+  testthat::expect_equal(as.matrix(assay(es, "filtered/logcounts")),
+                         filteredLog + 1)
+  plusTwo <- filteredLog + 2
+  suppressMessages(assay(es, "filtered", subsetAssayName = "logcounts",
+                         unlink = TRUE) <- plusTwo)
+  testthat::expect_equal(as.matrix(assay(es, "filtered/logcounts")),
+                         filteredLog + 2)
+  testthat::expect_output(show(es), "filtered/logcounts")
+
+  # a subset can be made from an assay its parent only links to
+  es <- createSubset(es, "fromLinked", rows = 1:3, cols = 1:3,
+                     parentAssay = "filtered/counts")
+  mainCounts <- as.matrix(assay(es, "counts"))
+  testthat::expect_equal(as.matrix(assay(es, "fromLinked")),
+                         mainCounts[1:3, 1:3])
+  linkedView <- assay(es, "filtered/counts", withDimnames = FALSE)
+  testthat::expect_equal(dim(linkedView), c(20L, 10L))
+
+  # arguments that don't fit the call are errors
+  testthat::expect_error(assay(es, "filtered/x", subsetAssayName = "y") <-
+                           filteredLog, regexp = "already names")
+  testthat::expect_error(assay(es, "counts", unlink = TRUE) <- mainCounts,
+                         regexp = "only applies")
+  testthat::expect_error(setSubsetAssay(es, "filtered", filteredLog, ""),
+                         regexp = "non-empty")
+})
+
+testthat::test_that("Saved objects whose subsets record bare parents work", {
+  # build a subset the way older versions recorded it, with a bare parent
+  .subsets <- ExperimentSubset:::.subsets
+  `.subsets<-` <- ExperimentSubset:::`.subsets<-`
+  es <- ExperimentSubset(sce_chcl)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
+  stored <- as.matrix(assay(es, "s1")) + 1
+  es <- setSubsetAssay(es, "s1", stored, "stored")
+  es <- createSubset(es, "child", rows = 1:2, cols = 1:2,
+                     parentAssay = "s1/stored")
+  child <- .subsets(es)[["child"]]
+  makeAssaySubset <- ExperimentSubset:::AssaySubset
+  childRows <- ExperimentSubset:::.rowIndices(child)
+  childCols <- ExperimentSubset:::.colIndices(child)
+  childData <- ExperimentSubset:::.internalAssay(child)
+  oldChild <- makeAssaySubset(subsetName = "child", rowIndices = childRows,
+                              colIndices = childCols, parentAssay = "stored",
+                              internalAssay = childData)
+  subsetList <- .subsets(es)
+  subsetList[["child"]] <- oldChild
+  .subsets(es) <- subsetList
+
+  testthat::expect_equal(as.matrix(assay(es, "child")), stored[1:2, 1:2])
+  testthat::expect_equal(subsetParent(es, "child"),
+                         list("stored", "s1", "counts"))
+  # a new subset called "stored" doesn't change what the child points to
+  es <- createSubset(es, "stored", rows = 10:20, cols = 10:20)
+  testthat::expect_equal(as.matrix(assay(es, "child")), stored[1:2, 1:2])
+  testthat::expect_equal(subsetParent(es, "child"),
+                         list("s1/stored", "s1", "counts"))
+})
+
+testthat::test_that("getSubsetAssay reads stored assays in SE and RSE", {
+  counts <- matrix(as.numeric(1:20), nrow = 4,
+                   dimnames = list(paste0("g", 1:4), paste0("c", 1:5)))
+  ranges <- GenomicRanges::GRanges("chr1", IRanges::IRanges(1:4, width = 1))
+  se <- SummarizedExperiment(list(counts = counts))
+  rse <- SummarizedExperiment(list(counts = counts), rowRanges = ranges)
+  for (object in list(se, rse)) {
+    es <- ExperimentSubset(object)
+    es <- createSubset(es, "s1", rows = 1:2, cols = 1:3)
+    doubled <- counts[1:2, 1:3] * 2
+    es <- setSubsetAssay(es, "s1", doubled, "doubled")
+    s1Doubled <- getSubsetAssay(es, "s1", subsetAssayName = "doubled")
+    testthat::expect_equal(as.matrix(s1Doubled), doubled)
+  }
 })
 
 testthat::test_that("Qualified names that don't exist give clear errors", {

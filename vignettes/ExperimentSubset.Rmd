@@ -134,8 +134,8 @@ parameters of the `createSubset` method. If `rows` or `cols` are `missing` or
 `NULL`, all of the rows or columns are selected from the specified
 `parentAssay`. If `parentAssay` is `missing` or `NULL`, the first available
 assay from the parent object is linked as the parent of this subset. The
-`parentAssay` can be an `assay` in the parent object, a subset or an `assay` 
-within a subset. 
+`parentAssay` can be an `assay` in the parent object, a subset, or an `assay`
+seen in a subset, written as `"subset/assay"`.
 
 ```{r}
 es <- createSubset(es, 
@@ -326,8 +326,9 @@ Using `assay` getter method is simple, as no additional parameter is required
 unlike in the setter method. 
 
 ```{r}
-#assay getter has parameters 'x' which is the input object, 'i' which can either
-#be a assay name in the parent object, a subset name or a subset assay name
+#assay getter has parameters 'x' which is the input object and 'i' which can
+#be an assay name in the parent object or a subset name; an assay inside a
+#subset is chosen with 'subsetAssayName' or named as "subset/assay"
 
 #getting 'counts' from parent es object
 assay(
@@ -608,7 +609,8 @@ linked parent assay for this subset.
 
 A `character` string that stores the name of the immediate parent to which the
 subset is linked. The `parentAssay` can be an `assay` in the parent
-`ExperimentSubset` object or any subset or any `internalAssay` of a subset.
+`ExperimentSubset` object, any subset, or an assay seen in a subset written as
+`"subset/assay"`.
 
 ### `internalAssay`
 
