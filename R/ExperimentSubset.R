@@ -622,18 +622,13 @@ ExperimentSubset <- function(x,
 # name, or NULL for the main object). getIndices is .rowIndices or
 # .colIndices.
 .indicesIn <- function(x, subsetName, container, getIndices) {
-  subset <- .subsets(x)[[subsetName]]
-  indices <- getIndices(subset)
-  current <- .parentSubsetName(x, .parentAssay(subset))
-  for (step in seq_len(subsetCount(x) + 1)) {
-    if (identical(current, container))
-      return(indices)
-    parent <- .subsets(x)[[current]]
-    indices <- getIndices(parent)[indices]
-    current <- .parentSubsetName(x, .parentAssay(parent))
-  }
-  stop("The parent chain of '", subsetName, "' does not lead to a main ",
-       "assay.")
+  chain <- .subsetChain(x, subsetName)
+  start <- if (is.null(container)) 0L else match(container, chain)
+  below <- chain[seq_along(chain) > start]
+  indices <- getIndices(.subsets(x)[[subsetName]])
+  for (subset in rev(below)[-1])
+    indices <- getIndices(.subsets(x)[[subset]])[indices]
+  indices
 }
 
 # An assay as seen in a subset: its own, or a view of the nearest
@@ -664,26 +659,23 @@ ExperimentSubset <- function(x,
   out
 }
 
-# The values a subset's parentAssay refers to
 # The name of a subset's primary assay: the assay its parentAssay refers
 # to, followed through parent subsets ("filtered" for a subset of subset
 # "clean" whose own parent is "filtered/decontaminated" is
 # "decontaminated")
 .primaryAssayName <- function(x, subsetName) {
-  for (step in seq_len(subsetCount(x) + 1)) {
-    parent <- .parentAssay(.subsets(x)[[subsetName]])
-    if (is.null(parent))
-      return("counts")
-    if (!parent %in% subsetNames(x) || parent %in% assayNames(x)) {
-      parts <- .splitQualified(parent)
-      if (!is.null(parts) && !parent %in% assayNames(x))
-        return(parts[2])
-      return(parent)
-    }
-    subsetName <- parent
+  for (subset in rev(.subsetChain(x, subsetName))) {
+    parent <- .parentAssay(.subsets(x)[[subset]])
+    if (is.null(parent) || !parent %in% subsetNames(x)
+        || parent %in% assayNames(x))
+      break
   }
-  stop("The parent chain of '", subsetName, "' does not lead to a main ",
-       "assay.")
+  if (is.null(parent))
+    return("counts")
+  parts <- .splitQualified(parent)
+  if (is.null(parts) || parent %in% assayNames(x))
+    return(parent)
+  parts[2]
 }
 
 # Rewrites parents recorded as a bare stored-assay name, in objects saved

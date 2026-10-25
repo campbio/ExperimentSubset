@@ -1066,11 +1066,11 @@ testthat::test_that("Saved objects whose subsets record bare parents work", {
 testthat::test_that("getSubsetAssay reads stored assays in SE and RSE", {
   counts <- matrix(as.numeric(1:20), nrow = 4,
                    dimnames = list(paste0("g", 1:4), paste0("c", 1:5)))
-  ranges <- GenomicRanges::GRanges("chr1", IRanges::IRanges(1:4, width = 1))
   se <- SummarizedExperiment(list(counts = counts))
-  rse <- SummarizedExperiment(list(counts = counts), rowRanges = ranges)
+  rse <- as(se, "RangedSummarizedExperiment")
   for (object in list(se, rse)) {
     es <- ExperimentSubset(object)
+    testthat::expect_true(is(es, paste0("Subset", class(object))))
     es <- createSubset(es, "s1", rows = 1:2, cols = 1:3)
     doubled <- counts[1:2, 1:3] * 2
     es <- setSubsetAssay(es, "s1", doubled, "doubled")
