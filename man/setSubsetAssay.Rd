@@ -13,17 +13,17 @@
 \title{Method for storing new assays inside subsets in ExperimentSubset 
   objects}
 \usage{
-setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName)
+setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-\S4method{setSubsetAssay}{SubsetRangedSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
+\S4method{setSubsetAssay}{SubsetRangedSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-\S4method{setSubsetAssay}{SubsetSingleCellExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
+\S4method{setSubsetAssay}{SubsetSingleCellExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-\S4method{setSubsetAssay}{SubsetSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
+\S4method{setSubsetAssay}{SubsetSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-\S4method{setSubsetAssay}{SubsetSpatialExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
+\S4method{setSubsetAssay}{SubsetSpatialExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-\S4method{setSubsetAssay}{SubsetTreeSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName)
+\S4method{setSubsetAssay}{SubsetTreeSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the input object.}
@@ -35,7 +35,15 @@ inside which the new subset \code{assay} should be stored.}
 \code{dgCMatrix}) to store as an \code{assay} in the subset.}
 
 \item{subsetAssayName}{\code{character(1)} Specify the name of the new
-\code{assay} against the \code{inputMatrix} parameter.}
+\code{assay} against the \code{inputMatrix} parameter. It can't contain
+\code{"/"}. A subset sees its parent's assays as linked assays, so a name
+linked from the parent (for example a main \code{assay}) needs
+\code{unlink = TRUE}.}
+
+\item{unlink}{\code{logical(1)} Store the \code{assay} even though the
+subset sees an assay of that name linked from its parent. The subset, and
+subsets made from it, then use this \code{assay} instead; the parent's is
+unchanged. Default \code{FALSE}.}
 }
 \value{
 Updated \code{ExperimentSubset} object with the new \code{assay}

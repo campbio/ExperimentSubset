@@ -178,8 +178,23 @@ To get a subset assay, `getSubsetAssay` method can be used:
 #get assay from 'subset1'
 getSubsetAssay(es, "subset1")
 
-#get internal 'subset1Assay'
-getSubsetAssay(es, "subset1Assay")
+#get 'subset1Assay', stored inside 'subset1'
+getSubsetAssay(es, "subset1", subsetAssayName = "subset1Assay")
+
+#the same assay, named as "subset/assay"
+getSubsetAssay(es, "subset1/subset1Assay")
+```
+
+A subset also sees the assays of its parent, sliced to its rows and columns,
+under the same names: these are *linked* assays, and they are not copied.
+Each subset has its own names, so two subsets made from the same parent can
+store an assay with the same name. Storing an assay with a name the subset
+already sees through its parent needs `unlink = TRUE`, which makes the subset
+(and subsets made from it) use its own version from then on.
+
+```{r}
+#'subset1' sees its own assay and the main 'counts' it was made from
+subsetAssayNames(es, subsetName = "subset1")
 ```
 
 Apart from `setSubsetAssay` and `getSubsetAssay` methods, `assay` and `assay<-`
@@ -329,7 +344,8 @@ assay(
 #getting the 'subset1InternalAssay' from inside the 'subset1'
 assay(
   x = es,
-  i = "subset1InternalAssay"
+  i = "subset1",
+  subsetAssayName = "subset1InternalAssay"
 )
 ```
 
@@ -461,11 +477,12 @@ Find highly variable genes from the normalized assay in the previous step
 using `scrapper` library against the 'filteredCells' subset only:
 
 ```{r, eval = FALSE}
-geneVariances <- modelGeneVariances(assay(es, "filteredCellsNormalized"))
+normalizedCounts <- assay(es, "filteredCells/filteredCellsNormalized")
+geneVariances <- modelGeneVariances(normalizedCounts)
 residualVariances <- geneVariances$statistics$residuals
 topHVG1000 <- chooseHighlyVariableGenes(residualVariances, top = 1000)
 es <- createSubset(es, "hvg1000", rows = topHVG1000,
-                   parentAssay = "filteredCellsNormalized")
+                   parentAssay = "filteredCells/filteredCellsNormalized")
 subsetSummary(es)
 ```
 

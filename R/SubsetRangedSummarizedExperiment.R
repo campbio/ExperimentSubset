@@ -41,9 +41,9 @@ setMethod(
 setMethod(
   f = "subsetAssayNames",
   signature = "SubsetRangedSummarizedExperiment",
-  definition = function(x)
+  definition = function(x, subsetName = NULL)
   {
-    .subsetAssayNames(x)
+    .subsetAssayNames(x, subsetName)
   }
 )
 
@@ -77,12 +77,14 @@ setMethod(
   definition = function(x,
                         subsetName,
                         inputMatrix,
-                        subsetAssayName)
+                        subsetAssayName,
+                        unlink = FALSE)
   {
     .setSubsetAssay(x,
                     subsetName,
                     inputMatrix,
-                    subsetAssayName)
+                    subsetAssayName,
+                    unlink = unlink)
   }
 )
 

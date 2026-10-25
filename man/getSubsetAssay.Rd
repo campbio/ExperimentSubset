@@ -27,14 +27,13 @@ getSubsetAssay(x, subsetName, subsetAssayName = NULL)
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{Specify 'subset name' or 'subset assay name' to fetch the
-assay from. An assay stored in a subset can also be named as
-\code{"subset/assay"}, which is needed when more than one subset stores
-an assay of that name.}
+\item{subsetName}{The name of the subset to fetch the assay from, or an
+assay seen in a subset written as \code{"subset/assay"}.}
 
-\item{subsetAssayName}{\code{character(1)} The name of an assay stored in
-the subset \code{subsetName}, as given to \code{setSubsetAssay}.
-Default \code{NULL}, which returns the subset itself.}
+\item{subsetAssayName}{\code{character(1)} The name of an assay seen in the
+subset \code{subsetName}: one stored with \code{setSubsetAssay}, or one
+linked from its parent. Default \code{NULL}, which returns the subset's
+slice of its \code{parentAssay}.}
 }
 \value{
 Subset assay
