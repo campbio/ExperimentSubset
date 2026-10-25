@@ -22,7 +22,7 @@ knitr::opts_chunk$set(warning=FALSE, error=FALSE, message=FALSE)
 This vignette is a short introduction. The
 [ExperimentSubset website](https://campbio.github.io/ExperimentSubset/)
 has the full reference and longer articles, including an
-[end-to-end single-cell workflow](https://campbio.github.io/ExperimentSubset/articles/pbmc-workflow.html)
+[end-to-end single-cell workflow](https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html)
 that keeps every subset of a PBMC data set, from empty droplets to T-cell
 subtypes, in one object.
 
@@ -632,7 +632,7 @@ can be used to store additional data against a subset such as `assay`,
 
 - The [ExperimentSubset website](https://campbio.github.io/ExperimentSubset/)
   documents every function, for the release and for the devel version.
-- The [single-cell workflow article](https://campbio.github.io/ExperimentSubset/articles/pbmc-workflow.html)
+- The [single-cell workflow article](https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html)
   goes from raw droplets through quality control, decontamination,
   clustering and annotation to a re-analysis of T cells, keeping all
   subsets in one object.

@@ -323,7 +323,10 @@ when the site builds; a failing step fails the build.
 
 **Short vignette.** `vignettes/ExperimentSubset.Rmd` gets a "Learn more"
 note near the top and at the end, with absolute links to the site and to the
-workflow article, so they work from the Bioconductor landing page.
+workflow article, so they work from the Bioconductor landing page. The
+article link points to the devel site (`/dev/articles/...`): the article
+uses functions only devel has, and the release site won't have it until
+the next release. At that release (3.25), the link moves to the root.
 
 **Checks while implementing.** singleCellTK's exact arguments; emptyDrops'
 runtime on about 737k droplets (raise `lower` if needed rather than skip the
