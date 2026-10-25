@@ -33,7 +33,9 @@ We will publish a pkgdown site on GitHub Pages, deployed to the
   `workflow_run` after "Sync stable branch" succeeds, which fires even
   though the sync's push doesn't, and skips the build when `master` hasn't
   changed since the last deploy (the commit is kept in `release-sha.txt`
-  on `gh-pages`).
+  on `gh-pages`). That check runs on a bare runner, so the release image
+  is only pulled when there is something to build. A manual dispatch from
+  `master` always rebuilds.
 - The devel version is built from `devel` under `/dev/` on each push.
   Pull requests to `devel` that touch the site's sources build it without
   deploying. Until `master` has `_pkgdown.yml`, the devel build is also
@@ -41,7 +43,8 @@ We will publish a pkgdown site on GitHub Pages, deployed to the
 - Each site is built in the matching Bioconductor container
   (`bioconductor_docker:devel` and `:RELEASE_X_Y`, bumped each release)
   with read-only permissions. Separate deploy jobs, which run no package
-  code, get `contents: write`. The deploy action is pinned to a commit SHA,
+  code, get `contents: write`; each site has its own concurrency group, so
+  a devel deploy can't cancel a pending release deploy. The deploy action is pinned to a commit SHA,
   and `GITHUB_TOKEN` is the only secret.
 - Long articles live in `vignettes/articles/`, which `.Rbuildignore`
   excludes, so Bioconductor never builds them. Their packages go in
