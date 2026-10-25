@@ -25,7 +25,7 @@ subset to other tools and store the results back.
 
 In this spec, in build order:
 
-0. **#2, per-subset assay names.**
+0. **#2, linked and subset-specific assays.**
 1. **`getSubsetExperiment()` / `setSubsetExperiment()`.**
 2. **pkgdown site and GitHub Pages deployment** (release at the root, devel
    at `/dev/`), with ADR 0002.
@@ -39,55 +39,102 @@ Out of scope: #4 (`[` subsetting), #26 (masked generics), #50 (inherited
 rowData/colData), the #36 refactor beyond the shared name resolver, and the
 lint backlog (#37).
 
-## 0. Per-subset assay names (#2)
+## 0. Linked and subset-specific assays (#2)
 
-**Today.** `assay(x, name)` looks at main assays, then subset names, then
-assays stored inside subsets, and among stored assays the last match wins
-silently. `createSubset(parentAssay = )` resolves the same way.
+Revised with the maintainer on 2026-10-25: each subset gets its own assay
+namespace, made of assays linked from its parent and assays of its own.
 
-**Rules.**
+**Today.** A subset exposes one assay, its slice of `parentAssay`. Assays
+stored in subsets share one flat namespace: `assay(x, name)` looks at main
+assays, then subset names, then stored assays, and the last match wins
+silently. Nothing stops two related subsets from storing the same name with
+different meanings.
 
-- An assay name may be stored in more than one subset (`clean` and `tcells`
-  can both hold `lognormalized`).
-- A stored assay's name may not equal a main assay name or a subset name, so
-  nothing is shadowed. `setSubsetAssay()` and `assay<-` enforce this.
-- **Qualified names** `"subset/assay"` are accepted wherever an assay name
-  is: `assay()`, `getSubsetAssay()`, `createSubset(parentAssay = )` and
-  `subsetParent()`. `/` is the separator because MAMS-style names use dots
-  (`clean.variable`). New subset names and stored assay names may not
-  contain `/`; `createSubset()` and `setSubsetAssay()` reject them.
-- The getters mirror the setters, which already take `subsetAssayName`:
-  `assay(es, "tcells", subsetAssayName = "lognormalized")` and
-  `getSubsetAssay(es, "tcells", subsetAssayName = "lognormalized")` return
-  the assay `lognormalized` stored in subset `tcells`, the same as
-  `assay(es, "tcells/lognormalized")`. Without `subsetAssayName`, both
-  behave as today. (`getSubsetAssay()`'s second argument is already named
-  `subsetName`, so a `subsetName =` form for the assay is not possible.)
-- An **unqualified name that is unique** resolves exactly as today, so
-  existing code and saved objects are unaffected. An unqualified name stored
-  in more than one subset is an error that names the subsets:
-  `'lognormalized' is stored in subsets 'clean', 'tcells'; use a qualified
-  name such as "clean/lognormalized".`
-- A qualified `parentAssay` is stored as the string
-  `"filtered/decontaminated"` in the existing `parentAssay` slot. No class
-  or slot changes, so no `updateObject()` is needed.
+**Terms.**
 
-**One resolver.** A single internal function resolves any assay reference to
-where it lives (main object, or a subset and its stored assay) or stops with
-the messages above. `.assay()`, `.parentSubsetName()`,
-`.getParentAssayName()`, `.owningSubset()`, `.subsetParent()`,
-`.toRootIndices()` and `.rows()`/`.cols()` use it instead of their own
-lookups. This keeps "first match" vs "last match" disagreements (seen in #28)
-from coming back.
+- *Container*: the main object or a subset.
+- A subset's *parent container* is where its `parentAssay` lives: the main
+  object for a main assay, subset `P` for `parentAssay = "P"` or
+  `"P/assay"`.
+- A subset's *linked assays* are all assays visible in its parent container,
+  sliced to the subset's rows and columns. They are views computed on
+  access by walking the parent chain (as `.rootIndices()` does), not copies.
+  For a subset of the main object, these are the main assays.
+- A subset's *own assays* are the ones stored in it with `setSubsetAssay()`.
+- A subset's *visible assays* are its own assays plus its linked assays not
+  hidden by an own assay of the same name. Its *primary* assay, what
+  `assay(x, "subset")` returns, is its slice of `parentAssay`, as today.
 
-**Behaviour change.** Code that relied on a duplicated name silently
-resolving to the last subset now gets an error. NEWS says so.
+Example: `logcounts` computed on the main object is linked into `filtered`,
+`clean` and `tcells` under the same name, because log-normalisation is
+per-cell. `scaled` (z-scores) stored in `filtered` is linked into `clean`
+and `tcells`; a `scaled` computed on the T cells is a different assay and
+must be stored deliberately, as below.
 
-**Tests.** Duplicates across subsets; qualified and `subsetAssayName =`
-access through `assay()` and `getSubsetAssay()`; the ambiguity error; a qualified
-`parentAssay`, including the names and root indices of a subset made from
-it (#41); `/` rejected in new names; a stored assay named like a main assay
-or a subset rejected; unique unqualified names unchanged.
+**Reading.**
+
+- `assay(x, "s")` returns subset `s`'s primary assay (unchanged).
+- `assay(x, "s", subsetAssayName = "a")`,
+  `getSubsetAssay(x, "s", subsetAssayName = "a")` and the qualified name
+  `"s/a"` return assay `a` as visible in subset `s`: its own if it has one,
+  otherwise the linked view. `subsetAssayName` mirrors `setSubsetAssay()` and
+  `assay<-`. (`getSubsetAssay()`'s second argument is already named
+  `subsetName`, hence `subsetAssayName`.)
+- A **bare name** means a main assay, or (as today) a subset name. A bare
+  name that is only an assay stored in a subset still resolves for one
+  release with a deprecation warning pointing to `"subset/assay"`, and is an
+  error from the release after (`.Deprecated` then `.Defunct`, per the
+  standards). A bare name stored in more than one subset is an error at
+  once, naming the subsets.
+- `createSubset(parentAssay = )` accepts a main assay, a subset name, or
+  `"subset/assay"`. A child records its parent qualified
+  (`"filtered/decontaminated"`), so later assays in other subsets can't
+  change what it points to. Existing objects with bare parents keep working
+  through the deprecation path above.
+
+**Writing.** `setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName,
+unlink = FALSE)` and `assay(x, "s", subsetAssayName = "a", unlink = ) <- m`:
+
+- A name that is new to the subset (not own, not linked) is stored.
+- A name the subset already owns is replaced, as today.
+- A name that is linked is an error unless `unlink = TRUE`:
+  `'scaled' in subset 'tcells' is linked to 'filtered/scaled'. Set
+  unlink = TRUE to store a separate 'scaled' computed on the cells of
+  'tcells'.` With `unlink = TRUE` the subset stores its own assay, which
+  hides the linked one for that subset and every subset made from it. The
+  parent's assay is unchanged.
+- Sibling subsets don't see each other's assays, so they can each store the
+  same name (decontX writing `decontXcounts` into several subsets works).
+- `assay(x, "s/a") <- m` stores into subset `s` with the same rules.
+- New subset names and stored assay names may not contain `/`.
+
+**Listing.** `subsetAssayNames(x)` returns the subset names followed by
+every own assay as `"subset/assay"`, so every listed name can be passed
+back to `assay()`; `show()` prints the same. A new optional argument,
+`subsetAssayNames(x, subsetName = "s")`, lists the names visible in subset
+`s` (own and linked). This changes `subsetAssayNames()`'s output for objects
+with stored assays; NEWS says so.
+
+**Implementation.** One resolver maps a reference to a main assay, a subset,
+or (container, assay); one function lists a subset's visible assays with
+where each comes from; one function computes a linked view by composing the
+subset's indices up to the container that owns the assay. `.assay()`,
+`.parentSubsetName()`, `.owningSubset()`, `.subsetParent()`,
+`.toRootIndices()`, `.rows()`/`.cols()` and `createSubset`'s parent check
+use them. No new slots and no class changes.
+
+**Behaviour changes.** Storing a name that is linked (for example
+`logcounts` in a subset when the main object has `logcounts`) now needs
+`unlink = TRUE`. Bare stored-assay names are deprecated. Listing output is
+qualified. NEWS covers all three.
+
+**Tests.** Linked views through one and two levels, matching a slice of the
+source; own assays hiding linked ones only with `unlink = TRUE`, and only
+for that subset and its descendants; siblings storing the same name;
+qualified and `subsetAssayName =` reads and writes; the deprecation warning
+for a bare stored name and the error when it is ambiguous; a child's parent
+recorded qualified and unaffected by later assays elsewhere; `/` rejected;
+the new `subsetAssayNames()` output; existing objects with bare parents.
 
 ## 1. `getSubsetExperiment()` / `setSubsetExperiment()`
 
@@ -99,23 +146,26 @@ standalone object of the main object's class (SummarizedExperiment,
 RangedSummarizedExperiment, SingleCellExperiment, TreeSummarizedExperiment
 or SpatialExperiment) for the subset:
 
-- Assays: the subset's slice of its parent assay, named after the main assay
-  it ultimately comes from (`counts` for `filtered`), followed by every
-  assay stored in the subset.
+- Assays: every assay visible in the subset (section 0): linked views under
+  their source names (so `clean`'s primary assay is `decontaminated`, not
+  `counts`) and its own assays.
 - rowData and colData: the subset's own columns, plus with
   `parentData = TRUE` the main object's columns tagged as parent data (the
   `fromParentData` mark from #46).
 - reducedDims, altExps and metadata: the subset's.
 - Row and column names: the subset's own.
 
-**`setSubsetExperiment(x, subsetName, value)`** stores what a tool produced:
+**`setSubsetExperiment(x, subsetName, value, unlink = FALSE)`** stores
+what a tool produced:
 
 - `value` must have the subset's dimensions and the same row and column
   names, in the same order; otherwise it is an error. Tools that drop cells
   or genes are followed by `createSubset()` instead.
-- Each assay in `value` other than the parent-derived one is stored with
-  `setSubsetAssay()` (added or replaced). If the parent-derived assay was
-  changed, it is an error, because the main object owns it.
+- Each assay in `value` is compared with what the subset sees. Linked
+  assays that are unchanged are skipped, so nothing is copied. New names are
+  stored and own assays replaced, through `setSubsetAssay()`. A linked assay
+  that the tool changed (for example a tool rewriting `scaled`) is an error
+  unless `unlink = TRUE`, which stores it as the subset's own.
 - rowData and colData replace the subset's own, without the tagged parent
   columns. reducedDims, altExps and metadata replace the subset's.
 - Replacement, not merge: what was removed from `value` is removed from the
@@ -123,8 +173,9 @@ or SpatialExperiment) for the subset:
   the expected behaviour; the help page says so.
 
 **Tests.** A round trip for each of the five classes; a new assay,
-reducedDim and colData column stored; the parent-derived assay changed,
-wrong dimensions, and reordered names each error; parent columns not
+reducedDim and colData column stored; unchanged linked assays not copied; a
+changed linked assay erroring without `unlink = TRUE` and stored with it;
+wrong dimensions and reordered names each error; parent columns not
 stored; a subset made from another subset.
 
 ## 2. pkgdown site and GitHub Pages
@@ -200,11 +251,14 @@ counts                        main assay, all droplets (MAMS processing counts; 
 └── filtered                  Cell Ranger cells (obs_subset filtered)
     │  decontaminated         decontX output (processing decontaminated)
     └── clean                 cells passing QC (obs_subset clean; parent filtered/decontaminated)
-        │  lognormalized      (processing lognormalized)
+        │  lognormalized      own (processing lognormalized)
+        │  scaled             own (processing scaled)
         │  reduction.pca, embedding.umap
         ├── clean.variable    top variable genes (feature_subset variable)
-        └── tcells            T cells
-            │  lognormalized, reduction.pca, embedding.umap
+        └── tcells            T cells (parent clean)
+            │  lognormalized  linked from clean: per-cell, so not recomputed
+            │  scaled         own, stored with unlink = TRUE: z-scores of T cells only
+            │  reduction.pca, embedding.umap
             └── tcells.variable
 ```
 
@@ -226,13 +280,17 @@ reducedDim on the subset).
    contamination; `createSubset(es, "clean", cols = keep,
    parentAssay = "filtered/decontaminated")`.
 6. Clustering, direct style, with scrapper: normalise (`lognormalized`),
-   choose variable genes (`clean.variable`), PCA (`reduction.pca`), SNN graph
-   and clusters (colData), UMAP (`embedding.umap`).
+   choose variable genes (`clean.variable`), scale them (`scaled`), PCA
+   (`reduction.pca`), SNN graph and clusters (colData), UMAP
+   (`embedding.umap`).
 7. Annotation, direct style: SingleR with celldex's Monaco reference, main
    labels into colData; marker genes flagged in rowData.
-8. T cells, experiment style: `createSubset(es, "tcells", ...)`, then
-   normalisation, variable genes, PCA, clustering and UMAP on the T cells;
-   SingleR fine labels.
+8. T cells, experiment style: `createSubset(es, "tcells", ...)` with parent
+   `clean`. `lognormalized` is linked from `clean` and reused, since
+   log-normalisation is per-cell. Variable genes (`tcells.variable`),
+   `scaled` (z-scores across T cells only, so stored with `unlink = TRUE`,
+   with a short explanation of linked vs own assays), PCA, clustering and
+   UMAP on the T cells; SingleR fine labels.
 9. `subsetSummary(es)`; UMAPs of `clean` and `tcells` with scater, from
    `getSubsetExperiment()`; a note on memory compared with separate objects;
    `sessionInfo()`.
@@ -275,7 +333,7 @@ devel with the article.
 Separate PRs to `devel`, in order, each on its own branch from `devel` and
 with tests, NEWS and a z bump:
 
-1. `feature/subset-assay-scoping`: #2 and the shared resolver.
+1. `feature/subset-assay-scoping`: #2, linked and subset-specific assays.
 2. `feature/subset-experiment`: `getSubsetExperiment()` /
    `setSubsetExperiment()`.
 3. `feature/pkgdown-site`: site, deployment workflow, ADR 0002, AGENTS.md,
