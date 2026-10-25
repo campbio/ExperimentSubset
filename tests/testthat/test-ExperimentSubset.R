@@ -1459,7 +1459,7 @@ testthat::test_that("setSubsetExperiment replaces the subset's own data", {
   testthat::expect_equal(reducedDimNames(es, subsetName = "s1"), character(0))
 })
 
-testthat::test_that("setSubsetExperiment stores changed linked assays only with unlink", {
+testthat::test_that("Changed linked assays are stored only with unlink", {
   sce <- simSce
   logcounts(sce) <- log1p(counts(sce))
   es <- ExperimentSubset(sce)
