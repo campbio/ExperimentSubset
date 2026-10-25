@@ -392,8 +392,8 @@ ExperimentSubset <- function(x,
     stop("'value' has no assay ",
          paste0("'", unique(sub(".*/", "", parents[used])), "'",
                 collapse = ", "),
-         ", which subsets ", paste0("'", names(parents)[used], "'",
-                                   collapse = ", "),
+         ", which subsets ",
+         paste0("'", names(parents)[used], "'", collapse = ", "),
          " were made from. Keep it in 'value'.")
 }
 
