@@ -1,0 +1,50 @@
+url: https://campbio.github.io/ExperimentSubset/
+
+template:
+  bootstrap: 5
+
+# In CI, PKGDOWN_DEV_MODE overrides this: the release site is built at the
+# root and the devel site in /dev/ (see .github/workflows/pkgdown.yaml).
+development:
+  mode: auto
+
+reference:
+- title: Constructor and classes
+  contents:
+  - ExperimentSubset
+  - ends_with("-class")
+- title: Creating and managing subsets
+  contents:
+  - createSubset
+  - subsetNames
+  - subsetCount
+  - subsetDim
+  - subsetParent
+  - subsetSummary
+  - subsetAssayNames
+  - subsetAssayCount
+- title: Getting and setting subset data
+  contents:
+  - getSubsetAssay
+  - setSubsetAssay
+  - getSubsetExperiment
+  - setSubsetExperiment
+  - subsetRowData
+  - subsetColData
+  - subsetRownames
+  - subsetColnames
+- title: Class-specific accessors
+  desc: >
+    Tree links of a TreeSummarizedExperiment and spatial data of a
+    SpatialExperiment, for a subset.
+  contents:
+  - subsetRowLinks
+  - subsetColLinks
+  - subsetSpatialCoords
+  - subsetSpatialData
+- title: Methods that take subsetName
+  desc: >
+    Methods of Bioconductor generics that read or set a subset's data when
+    given subsetName, and otherwise act on the main object.
+  contents:
+  - starts_with("reducedDim")

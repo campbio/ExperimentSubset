@@ -9,3 +9,6 @@ Meta
 # Claude Code: agent worktrees and per-user settings
 .worktrees/
 .claude
+
+# pkgdown site, built by CI and deployed to the gh-pages branch
+docs/

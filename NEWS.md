@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.17 (2026-10-25)
+* The package has a pkgdown website at <https://campbio.github.io/ExperimentSubset/>, with the release version at the root and the devel version under `/dev/`
+
 # ExperimentSubset 1.23.16 (2026-10-25)
 * New `getSubsetExperiment()` returns a subset as a standalone object of the main object's class (for example a `SingleCellExperiment`), with every assay the subset sees, its rowData and colData (after the main object's columns, with `parentData = TRUE`), reducedDims, altExps and metadata, so tools written for that class can run on the subset. `setSubsetExperiment()` stores the result back: its assays, rowData, colData, reducedDims, altExps and metadata replace the subset's own, so an own assay or column missing from it is removed, while unchanged linked assays and the main object's columns are not stored. A linked assay the tool changed needs `unlink = TRUE`, and removing an assay another subset was made from is an error
 

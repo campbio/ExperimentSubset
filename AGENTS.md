@@ -23,8 +23,13 @@ rowData, colData, reducedDims, and so on) live inside one object instead
 of separate copies. Supported classes are SummarizedExperiment,
 RangedSummarizedExperiment, SingleCellExperiment, TreeSummarizedExperiment
 and SpatialExperiment. Distributed through Bioconductor since 3.12. There
-is no Shiny app and no pkgdown site, so those parts of the standards don't
-apply, including `make site-check`.
+is no Shiny app, so that part of the standards doesn't apply.
+
+The pkgdown site is at https://campbio.github.io/ExperimentSubset/: the
+release version at the root, the devel version under `/dev/`. CI builds
+and deploys both (`.github/workflows/pkgdown.yaml`, ADR 0002); never build
+or deploy the site locally. Add new exports to `_pkgdown.yml` and run
+`make site-check`.
 
 ## Layout
 
@@ -42,7 +47,12 @@ apply, including `make site-check`.
   usually needs the same change in all five files.
 - `Collate:` in DESCRIPTION fixes the load order (classes, then
   generics, then the rest). Add new R files there too.
-- `vignettes/ExperimentSubset.Rmd`, with the figure `es_structure.png`.
+- `vignettes/ExperimentSubset.Rmd`, with the figure `es_structure.png`:
+  the short Bioconductor vignette, which is the site's "Get started" page.
+- `vignettes/articles/`: longer pkgdown-only articles, not in the
+  Bioconductor build (`.Rbuildignore`). Their packages go in
+  `Config/Needs/website` in DESCRIPTION, not Suggests. Render one with
+  `make article FILTER=<name>`, which needs the package installed.
 - Style: the code uses **2-space indentation**, set in `.lintr`
   (`indentation_linter(indent = 2L)`). Converting to 4 spaces would be a
   separate maintainer decision and its own PR.

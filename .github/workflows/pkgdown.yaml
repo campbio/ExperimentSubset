@@ -1,0 +1,262 @@
+# Builds the pkgdown site and deploys it to the gh-pages branch.
+#
+#   - devel: the devel version, built into /dev/ on each push to devel and
+#     on manual dispatch from devel. Pull requests to devel that touch the
+#     site's sources only build it. Until master has _pkgdown.yml, the
+#     devel version is also deployed at the root, so the site isn't empty.
+#   - release: the current release, built at the root from master after
+#     "Sync stable branch" updates it, and on manual dispatch from master.
+#     The sync pushes with a bot token, which doesn't start workflows, but
+#     workflow_run does fire. workflow_run only runs from the default
+#     branch, so this job starts working once this file is on master.
+#
+# Each site is built in a Bioconductor container with read-only
+# permissions; only the deploy jobs, which run no package code, can write.
+# After the first deploy, enable GitHub Pages in the repository settings
+# with source gh-pages.
+name: pkgdown
+
+on:
+  push:
+    branches: [devel]
+  pull_request:
+    branches: [devel]
+    paths:
+      - 'R/**'
+      - 'man/**'
+      - 'vignettes/**'
+      - '_pkgdown.yml'
+      - 'DESCRIPTION'
+      - '.github/workflows/pkgdown.yaml'
+  workflow_run:
+    workflows: ['Sync stable branch']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  devel-build:
+    if: >-
+      github.event_name == 'push' || github.event_name == 'pull_request' ||
+      (github.event_name == 'workflow_dispatch' &&
+       github.ref == 'refs/heads/devel')
+    runs-on: ubuntu-latest
+    container:
+      image: bioconductor/bioconductor_docker:devel
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      root: ${{ steps.root.outputs.root }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out master, to see whether it has a release site yet
+        if: github.event_name != 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          path: stable
+
+      - name: Decide whether to build the root too
+        id: root
+        if: github.event_name != 'pull_request'
+        run: |
+          if [ -f stable/_pkgdown.yml ]; then
+            echo "root=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "root=true" >> "$GITHUB_OUTPUT"
+          fi
+          rm -rf stable
+        shell: bash
+
+      - name: Install the package and the site's dependencies
+        run: |
+          BiocManager::install(c("pkgdown", "remotes"), update = FALSE,
+                               ask = FALSE)
+          deps <- remotes::local_package_deps(dependencies = TRUE)
+          website <- read.dcf("DESCRIPTION", "Config/Needs/website")
+          website <- trimws(strsplit(website, ",")[[1]])
+          website <- website[!is.na(website) & nzchar(website)]
+          BiocManager::install(c(deps, website), update = FALSE, ask = FALSE)
+          remotes::install_local(".", dependencies = FALSE, upgrade = "never")
+        shell: Rscript {0}
+
+      - name: Build the devel site into site/dev
+        env:
+          PKGDOWN_DEV_MODE: devel
+        run: |
+          pkgdown::build_site_github_pages(dest_dir = "site",
+                                           new_process = FALSE,
+                                           install = FALSE)
+        shell: Rscript {0}
+
+      - name: Build the devel version at the root of root-site
+        if: steps.root.outputs.root == 'true'
+        env:
+          PKGDOWN_DEV_MODE: release
+        run: |
+          pkgdown::build_site_github_pages(dest_dir = "root-site",
+                                           new_process = FALSE,
+                                           install = FALSE)
+        shell: Rscript {0}
+
+      - name: Upload the devel site
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: devel-site
+          path: site/dev
+
+      - name: Upload the root site
+        if: >-
+          github.event_name != 'pull_request' &&
+          steps.root.outputs.root == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: root-site
+          path: root-site
+
+  devel-deploy:
+    needs: devel-build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: devel-site
+          path: devel-site
+
+      - name: Deploy the devel site to /dev/
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
+        with:
+          branch: gh-pages
+          folder: devel-site
+          target-folder: dev
+          commit-message: Deploy the devel site
+
+      - uses: actions/download-artifact@v4
+        if: needs.devel-build.outputs.root == 'true'
+        with:
+          name: root-site
+          path: root-site
+
+      - name: Deploy the devel version at the root until a release site exists
+        if: needs.devel-build.outputs.root == 'true'
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
+        with:
+          branch: gh-pages
+          folder: root-site
+          clean-exclude: dev
+          commit-message: Deploy the devel version at the root
+
+  release-build:
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'workflow_dispatch' &&
+       github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    container:
+      # Bump the RELEASE tag each Bioconductor cycle, as in R-CMD-check.yaml.
+      image: bioconductor/bioconductor_docker:RELEASE_3_24
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      build: ${{ steps.decide.outputs.build }}
+      sha: ${{ steps.master.outputs.commit }}
+    steps:
+      - uses: actions/checkout@v4
+        id: master
+        with:
+          ref: master
+
+      - name: Decide whether to build
+        id: decide
+        run: |
+          # the commit the deployed release site was built from, if any
+          last="$(curl -fsSL "https://raw.githubusercontent.com/$REPO/gh-pages/release-sha.txt" || true)"
+          if [ ! -f _pkgdown.yml ]; then
+            echo "master has no _pkgdown.yml; nothing to build."
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          elif [ "$EVENT" != "workflow_dispatch" ] && [ "$last" = "$SHA" ]; then
+            echo "The release site is already built from $SHA."
+            echo "build=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "build=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          EVENT: ${{ github.event_name }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ steps.master.outputs.commit }}
+        shell: bash
+
+      - name: Install the package and the site's dependencies
+        if: steps.decide.outputs.build == 'true'
+        run: |
+          BiocManager::install(c("pkgdown", "remotes"), update = FALSE,
+                               ask = FALSE)
+          deps <- remotes::local_package_deps(dependencies = TRUE)
+          website <- read.dcf("DESCRIPTION", "Config/Needs/website")
+          website <- trimws(strsplit(website, ",")[[1]])
+          website <- website[!is.na(website) & nzchar(website)]
+          BiocManager::install(c(deps, website), update = FALSE, ask = FALSE)
+          remotes::install_local(".", dependencies = FALSE, upgrade = "never")
+        shell: Rscript {0}
+
+      - name: Build the release site
+        if: steps.decide.outputs.build == 'true'
+        env:
+          PKGDOWN_DEV_MODE: release
+        run: |
+          pkgdown::build_site_github_pages(dest_dir = "site",
+                                           new_process = FALSE,
+                                           install = FALSE)
+        shell: Rscript {0}
+
+      - name: Record the commit the site was built from
+        if: steps.decide.outputs.build == 'true'
+        run: echo "$SHA" > site/release-sha.txt
+        env:
+          SHA: ${{ steps.master.outputs.commit }}
+        shell: bash
+
+      - name: Upload the release site
+        if: steps.decide.outputs.build == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-site
+          path: site
+
+  release-deploy:
+    needs: release-build
+    if: needs.release-build.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: gh-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-site
+          path: release-site
+
+      - name: Deploy the release site to the root, keeping /dev/
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
+        with:
+          branch: gh-pages
+          folder: release-site
+          clean-exclude: dev
+          commit-message: Deploy the release site
