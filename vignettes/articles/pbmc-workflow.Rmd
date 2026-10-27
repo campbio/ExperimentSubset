@@ -1,9 +1,9 @@
 ---
 title: "A single-cell workflow with every subset in one object"
 description: >
-  From raw droplets to T-cell subtypes in 4,000 PBMCs, keeping empty
-  droplets, cells, quality-controlled cells and T cells as subsets of one
-  ExperimentSubset object.
+  From raw droplets to T-cell subtypes in 4,000 PBMCs, keeping three sets
+  of cell calls, high-quality cells, variable genes and T cells as subsets
+  of one ExperimentSubset object.
 ---
 
 ```{r setup, include = FALSE}
@@ -23,8 +23,14 @@ versions as a **subset** of one `ExperimentSubset` object. A subset stores
 which rows and columns of its parent it uses, plus anything computed for
 it. It sees its parent's assays without copying them.
 
-The analysis takes about 15 minutes, downloads about 200 MB the first
-time it runs, and needs about 8 GB of memory.
+The purpose of this article is to show how a whole analysis fits in one
+object, not to give a complete or definitive annotation of PBMCs. The
+quality-control thresholds and the cell-type labels are simple, common
+choices; a careful annotation would need more work, such as checking
+marker genes for each cluster.
+
+The analysis takes about 15 minutes and downloads about 200 MB the first
+time it runs.
 
 We store results in two ways, and each step says which it uses:
 
@@ -100,7 +106,7 @@ es <- ExperimentSubset(raw)
 
 # the droplets Cell Ranger called as cells
 cellBarcodes <- colnames(filtered)
-es <- createSubset(es, "filtered", cols = cellBarcodes)
+es <- createSubset(es, subsetName = "filtered", cols = cellBarcodes)
 es
 ```
 
@@ -111,12 +117,13 @@ object's counts when asked.
 # Finding cells among the droplets
 
 *On the main object.* `es` is itself a `SingleCellExperiment`, so tools
-can run on it directly. singleCellTK's `runDropletQC()` runs two methods
-from DropletUtils on every droplet: `emptyDrops`, which tests each droplet
-against the ambient RNA profile, and `barcodeRanks`, which finds the knee
-in the curve of total counts. We leave out its third method, per-droplet
-QC metrics, which is slow on 737,280 droplets; we compute QC metrics for
-the cells below. emptyDrops uses random sampling, so we set a seed first.
+can run on it directly. singleCellTK's `runDropletQC()` runs two other
+methods from DropletUtils on every droplet: `emptyDrops`, which tests each
+droplet against the ambient RNA profile, and `barcodeRanks`, which finds
+the knee in the curve of total counts. We leave out its third method,
+per-droplet QC metrics, which is slow on 737,280 droplets; we compute QC
+metrics for the cells below. emptyDrops uses random sampling, so we set a
+seed first.
 
 ```{r droplet-qc}
 library(singleCellTK)
@@ -126,38 +133,47 @@ set.seed(100)
 es <- runDropletQC(es, algorithms = c("emptyDrops", "barcodeRanks"))
 ```
 
-We compare emptyDrops' calls, at a false discovery rate of 1%, with Cell
-Ranger's.
+Each method gives its own set of cells: emptyDrops' calls at a false
+discovery rate of 1%, and the droplets above barcodeRanks' knee.
 
-```{r droplet-compare}
+```{r droplet-calls}
 # droplets that emptyDrops calls as cells
 dropletFdr <- colData(es)$dropletUtils_emptyDrops_fdr
 emptyDropsCell <- !is.na(dropletFdr) & dropletFdr <= 0.01
+
+# droplets above the knee of the barcode-rank curve
+kneeCell <- colData(es)$dropletUtils_BarcodeRank_Knee == 1
 
 # droplets that Cell Ranger called as cells
 cellRangerCell <- colnames(es) %in% cellBarcodes
 table(emptyDrops = emptyDropsCell, cellRanger = cellRangerCell)
 ```
 
-The two mostly agree. We keep Cell Ranger's calls, the `filtered` subset,
-for the rest of the analysis.
+We keep each set of calls as a subset next to Cell Ranger's `filtered`. A
+subset stores only the positions of its droplets, so the object barely
+grows.
 
-Droplets without a cell still hold ambient RNA, the free-floating RNA that
-also contaminates the droplets with cells. emptyDrops treats droplets with
-at most 100 counts as ambient (its `lower` limit). We keep those with at
-least 10 counts that Cell Ranger didn't call a cell as a second subset,
-`background`, to estimate the contamination later.
+```{r droplet-subsets}
+# size of the object before
+format(object.size(es), units = "MB")
 
-```{r background}
-# total counts per droplet
-dropletTotals <- colData(es)$dropletUtils_emptyDrops_total
+# emptyDrops' and barcodeRanks' cells as two more subsets
+emptyDropsPositions <- which(emptyDropsCell)
+kneePositions <- which(kneeCell)
+es <- createSubset(es, subsetName = "emptydrops", cols = emptyDropsPositions)
+es <- createSubset(es, subsetName = "barcoderanks", cols = kneePositions)
 
-# droplets with 10 to 100 counts and no cell
-isBackground <- dropletTotals >= 10 & dropletTotals <= 100 & !cellRangerCell
-backgroundDroplets <- which(isBackground)
-es <- createSubset(es, "background", cols = backgroundDroplets)
-subsetDim(es, "background")
+# size of the object after
+format(object.size(es), units = "MB")
+
+# the number of genes and cells in each set of calls
+subsetDim(es, "filtered")
+subsetDim(es, "emptydrops")
+subsetDim(es, "barcoderanks")
 ```
+
+The three mostly agree. We continue with Cell Ranger's calls, the
+`filtered` subset; the others stay in the object for comparison.
 
 # Quality control of the cells
 
@@ -197,19 +213,18 @@ colnames(colData(es, subsetName = "filtered"))
 # Removing ambient RNA
 
 *Direct style.* celda's `decontX()` estimates how much of each cell's
-counts comes from ambient RNA and removes it. We give it the counts of the
-cells and, as the ambient profile, the counts of the `background`
-droplets. Like `runCellQC()`, `decontX()` sets its own seed by default.
+counts comes from ambient RNA, the free-floating RNA in every droplet, and
+removes it. It estimates the ambient profile from the cells themselves.
+Like `runCellQC()`, `decontX()` sets its own seed by default.
 
 ```{r decontx}
 library(celda)
 
-# counts of the cells and of the empty droplets
+# counts of the cells
 cellCounts <- assay(es, "filtered")
-backgroundCounts <- assay(es, "background")
 
 # estimate and remove the ambient RNA
-decontamination <- decontX(cellCounts, background = backgroundCounts)
+decontamination <- decontX(cellCounts)
 ```
 
 The decontaminated counts become an assay of the `filtered` subset, and
@@ -221,18 +236,20 @@ decontaminatedCounts <- decontamination$decontXcounts
 es <- setSubsetAssay(es, "filtered", decontaminatedCounts, "decontaminated")
 
 # store each cell's contamination with its other QC columns
-filteredData <- colData(es, subsetName = "filtered")
-filteredData$contamination <- decontamination$contamination
-colData(es, subsetName = "filtered") <- filteredData
+colData(es, subsetName = "filtered")$contamination <-
+  decontamination$contamination
 ```
 
-# Keeping good cells and expressed genes
+# Keeping high-quality cells
 
 We keep cells that have at least 300 detected genes, at most 10% of
 counts from mitochondrial genes, at most 30% contamination, and that
 scDblFinder calls singlets.
 
 ```{r filter}
+# the QC columns of the filtered cells
+filteredData <- colData(es, subsetName = "filtered")
+
 # each QC rule
 enoughGenes <- filteredData$detected >= 300
 lowMito <- filteredData$mito_percent <= 10
@@ -244,33 +261,14 @@ keepCells <- enoughGenes & lowMito & lowContamination & singlet
 table(keepCells)
 ```
 
-We also keep only genes detected in at least 10 of those cells after
-decontamination; the others carry almost no information.
-
-```{r expressed-genes}
-# decontaminated counts of the cells that pass QC
-cellsToKeep <- which(keepCells)
-keptCounts <- decontaminatedCounts[, cellsToKeep]
-
-# number of those cells in which each gene is detected
-detectedInCell <- keptCounts > 0
-cellsPerGene <- rowSums(detectedInCell)
-keepGenes <- cellsPerGene >= 10
-table(keepGenes)
-```
-
 The new subset, `clean`, is made from the decontaminated counts: its
 `parentAssay` is `"filtered/decontaminated"`, the assay `decontaminated`
 stored in the subset `filtered`.
 
 ```{r clean}
-# positions of the genes that pass
-genesToKeep <- which(keepGenes)
-
-# a subset of those genes and cells, from the decontaminated counts
-es <- createSubset(es, "clean",
-                   rows = genesToKeep,
-                   cols = cellsToKeep,
+# the high-quality cells, from the decontaminated counts
+cellsToKeep <- which(keepCells)
+es <- createSubset(es, subsetName = "clean", cols = cellsToKeep,
                    parentAssay = "filtered/decontaminated")
 subsetDim(es, "clean")
 ```
@@ -278,7 +276,8 @@ subsetDim(es, "clean")
 # Clustering
 
 *Direct style.* We follow a standard workflow with the scrapper package,
-storing each result in the `clean` subset.
+storing each result in the `clean` subset or in its subset of variable
+genes.
 
 **Normalisation.** Counts are divided by each cell's size factor and
 log-transformed. `delayed = FALSE` computes the values now, rather than
@@ -297,50 +296,42 @@ lognormalized <- normalizeCounts(cleanCounts, sizeFactors, delayed = FALSE)
 es <- setSubsetAssay(es, "clean", lognormalized, "lognormalized")
 ```
 
-**Variable genes.** We choose the 4,000 genes (scrapper's default) whose
-expression varies most across the clean cells, and keep them as a subset
-of rows, `clean.variable`.
+**Variable genes.** We choose the 2,000 genes whose expression varies
+most across the clean cells, and keep them as a subset of rows,
+`clean.variable`, made from the log-normalised values.
 
 ```{r variable-genes}
-# variance of each gene, and the 4,000 most variable
+# variance of each gene, and the 2,000 most variable
 geneVariances <- modelGeneVariances(lognormalized)
 geneResiduals <- geneVariances$statistics$residuals
-variableGenes <- chooseHighlyVariableGenes(geneResiduals)
+variableGenes <- chooseHighlyVariableGenes(geneResiduals, top = 2000)
+
+# the variable genes as a subset of rows
+es <- createSubset(es, subsetName = "clean.variable", rows = variableGenes,
+                   parentAssay = "clean/lognormalized")
+variableLognormalized <- assay(es, "clean.variable")
+dim(variableLognormalized)
 ```
 
-**Scaling.** Each gene's log-normalised values are turned into z-scores
-across the clean cells: mean 0 and standard deviation 1. The z-scores
-depend on which cells are included, which matters later.
+**Scaling.** Each variable gene's log-normalised values are turned into
+z-scores across the clean cells: mean 0 and standard deviation 1. Only
+the variable genes are scaled: only they go into the PCA, and z-scores,
+which are rarely zero, take far more memory than the sparse log-normalised
+values. The z-scores are stored in the `clean.variable` subset.
 
 ```{r scale}
-# z-scores of each gene across the clean cells; scale() works on columns,
-# so we transpose to one column per gene and back
-lognormalizedDense <- as.matrix(lognormalized)
-genesByColumn <- t(lognormalizedDense)
+# z-scores of each variable gene; scale() works on columns, so we
+# transpose to one column per gene and back
+variableDense <- as.matrix(variableLognormalized)
+genesByColumn <- t(variableDense)
 scaledByColumn <- scale(genesByColumn)
 scaled <- t(scaledByColumn)
-
-# genes with no variation get 0 rather than NaN
-scaled[is.nan(scaled)] <- 0
-es <- setSubsetAssay(es, "clean", scaled, "scaled")
-
-# free the memory of the intermediate copies
-rm(lognormalizedDense, genesByColumn, scaledByColumn)
-```
-
-The variable-gene subset is made from `"clean/scaled"`, so its assay is
-the z-scores of the 4,000 variable genes.
-
-```{r clean-variable}
-# the variable genes, made from the scaled values
-es <- createSubset(es, "clean.variable", rows = variableGenes,
-                   parentAssay = "clean/scaled")
-variableScaled <- assay(es, "clean.variable")
-dim(variableScaled)
+es <- setSubsetAssay(es, "clean.variable", scaled, "scaled")
 ```
 
 **PCA, clusters and UMAP.** We keep the first 25 principal components
-(scrapper's default).
+(scrapper's default) of the z-scores. They describe the clean cells, so
+we store them, the clusters and the UMAP in the `clean` subset.
 `runPca()` returns them with one column per cell, the layout the other
 scrapper functions take; reduced dimensions are stored with one row per
 cell, so we transpose them for storing. scrapper's PCA, clustering and
@@ -348,8 +339,8 @@ UMAP use fixed seeds by default, so they give the same results on every
 run.
 
 ```{r pca}
-# principal components of the variable genes
-pca <- runPca(variableScaled)
+# principal components of the z-scores of the variable genes
+pca <- runPca(scaled)
 cellPcs <- t(pca$components)
 reducedDim(es, "reduction.pca", subsetName = "clean") <- cellPcs
 ```
@@ -385,18 +376,15 @@ known marker genes are flagged in its rowData.
 
 ```{r store-labels}
 # clusters and labels in the subset's colData
-cleanData <- colData(es, subsetName = "clean")
-cleanData$cluster <- clusters$membership
-cleanData$label <- predictions$labels
-colData(es, subsetName = "clean") <- cleanData
-table(cleanData$label)
+colData(es, subsetName = "clean")$cluster <- clusters$membership
+colData(es, subsetName = "clean")$label <- predictions$labels
+table(predictions$labels)
 
 # marker genes flagged in the subset's rowData
 markers <- c("CD3E", "CD4", "CD8A", "MS4A1", "CD14", "FCGR3A", "NKG7",
              "LYZ", "PPBP")
-cleanRowData <- rowData(es, subsetName = "clean")
-cleanRowData$marker <- rownames(cleanRowData) %in% markers
-rowData(es, subsetName = "clean") <- cleanRowData
+cleanGenes <- subsetRownames(es, "clean")
+rowData(es, subsetName = "clean")$marker <- cleanGenes %in% markers
 ```
 
 We take the subset out again to plot it with scater.
@@ -417,14 +405,15 @@ of `clean`, then repeat the analysis on them alone.
 ```{r tcells}
 # the clean cells labelled as T cells
 tcellLabels <- c("CD4+ T cells", "CD8+ T cells", "T cells")
-isTcell <- cleanData$label %in% tcellLabels
+isTcell <- predictions$labels %in% tcellLabels
 tcellPositions <- which(isTcell)
-es <- createSubset(es, "tcells", cols = tcellPositions, parentAssay = "clean")
+es <- createSubset(es, subsetName = "tcells", cols = tcellPositions,
+                   parentAssay = "clean")
 subsetDim(es, "tcells")
 ```
 
-The new subset already sees the assays of `clean`, linked rather than
-copied:
+The new subset already sees the assays of `clean`, and those `clean` sees
+in turn, linked rather than copied:
 
 ```{r tcell-assays}
 subsetAssayNames(es, subsetName = "tcells")
@@ -432,9 +421,8 @@ subsetAssayNames(es, subsetName = "tcells")
 
 A cell's log-normalised values depend on its own counts and size factor,
 so the T cells reuse `lognormalized` from `clean`, as subclustering
-usually does. The z-scores depend on all the cells: a gene's mean and
-standard deviation across T cells differ from those across all clean
-cells, so `scaled` has to be computed again on the T cells.
+usually does. The variable genes and their z-scores depend on which cells
+are included, so we compute them again on the T cells.
 
 ```{r get-tcells}
 # the T cells as a SingleCellExperiment, with the linked assays
@@ -443,34 +431,25 @@ assayNames(tcells)
 ```
 
 ```{r tcell-variable}
-# the 4,000 genes that vary most among T cells
+# the 2,000 genes that vary most among T cells
 tcellLognormalized <- assay(tcells, "lognormalized")
 tcellVariances <- modelGeneVariances(tcellLognormalized)
 tcellResiduals <- tcellVariances$statistics$residuals
-tcellVariableGenes <- chooseHighlyVariableGenes(tcellResiduals)
+tcellVariableGenes <- chooseHighlyVariableGenes(tcellResiduals, top = 2000)
 ```
 
 ```{r tcell-scale}
-# z-scores of each gene across the T cells only
-tcellDense <- as.matrix(tcellLognormalized)
+# z-scores of the T cells' variable genes, across the T cells only
+tcellVariableLognormalized <- tcellLognormalized[tcellVariableGenes, ]
+tcellDense <- as.matrix(tcellVariableLognormalized)
 tcellGenesByColumn <- t(tcellDense)
 tcellScaledByColumn <- scale(tcellGenesByColumn)
 tcellScaled <- t(tcellScaledByColumn)
-
-# genes with no variation among T cells get 0 rather than NaN
-tcellScaled[is.nan(tcellScaled)] <- 0
-assay(tcells, "scaled") <- tcellScaled
-
-# free the memory of the intermediate copies
-rm(tcellDense, tcellGenesByColumn, tcellScaledByColumn)
 ```
 
 ```{r tcell-cluster}
-# z-scores of the T cells' variable genes
-tcellVariableScaled <- tcellScaled[tcellVariableGenes, ]
-
 # principal components, stored with one row per cell
-tcellPca <- runPca(tcellVariableScaled)
+tcellPca <- runPca(tcellScaled)
 tcellPcs <- t(tcellPca$components)
 reducedDim(tcells, "reduction.pca") <- tcellPcs
 
@@ -496,21 +475,33 @@ tcells$subtype <- tcellPredictions$labels
 table(tcells$subtype)
 ```
 
-Now we store the results. The T cells' `scaled` has the same name as the
-`scaled` they see linked from `clean`, but different values.
-`setSubsetExperiment()` refuses to replace a linked assay unless we say
-so with `unlink = TRUE`; the T cells then keep their own `scaled`, while
-`clean` keeps its own. The other linked assays are unchanged, so they
-stay linked and are not copied.
+`setSubsetExperiment()` stores the reduced dimensions and colData columns
+we added in the `tcells` subset. The assays are unchanged, so they stay
+linked and nothing is copied.
 
 ```{r set-tcells}
-# store the T-cell results, with their own z-scores
-es <- setSubsetExperiment(es, "tcells", tcells, unlink = TRUE)
-
-# the T cells' variable genes, made from their own z-scores
-es <- createSubset(es, "tcells.variable", rows = tcellVariableGenes,
-                   parentAssay = "tcells/scaled")
+# store the T-cell results
+es <- setSubsetExperiment(es, "tcells", tcells)
 ```
+
+As for the clean cells, the T cells' variable genes become a subset of
+rows, `tcells.variable`, which stores their z-scores.
+
+```{r tcells-variable}
+# the T cells' variable genes, and their z-scores
+es <- createSubset(es, subsetName = "tcells.variable",
+                   rows = tcellVariableGenes,
+                   parentAssay = "tcells/lognormalized")
+es <- setSubsetAssay(es, "tcells.variable", tcellScaled, "scaled")
+```
+
+`clean.variable` and `tcells.variable` each store their own `scaled`: an
+assay stored in one subset doesn't clash with one of the same name in
+another. A subset can't store an assay under a name it already sees
+linked from its parent, though; replacing, say, the T cells'
+`lognormalized` with values computed on the T cells alone would need
+`unlink = TRUE`, after which `tcells` and the subsets made from it use
+their own version.
 
 ```{r plot-tcells, fig.alt = "UMAP of the T cells, coloured by T-cell subtype"}
 # the T cells, coloured by subtype
@@ -528,30 +519,24 @@ subsetSummary(es)
 ```
 
 All of this lives in one object. The subsets store row and column
-positions, and only the assays computed for them: `decontaminated` in
-`filtered`, `lognormalized` and `scaled` in `clean`, and the T cells' own
-`scaled`. Every assay is stored once; a linked assay, such as the T
-cells' `lognormalized`, is only built when it is read.
+positions, and only what was computed for them: `decontaminated` in
+`filtered`, `lognormalized` in `clean`, `scaled` in the two variable-gene
+subsets, and the colData, rowData and reduced dimensions added along the
+way. A linked assay, such as the T cells' `lognormalized`, is only built
+when it is read.
 
 ```{r size}
 # the whole object
 format(object.size(es), units = "MB")
 
-# the counts of all 737,280 droplets
+# the counts of all 737,280 droplets, stored once
 allCounts <- assay(es, "counts")
 format(object.size(allCounts), units = "MB")
-
-# the z-scores, which are rarely zero, so stored as dense matrices
-cleanScaled <- assay(es, "clean/scaled")
-format(object.size(cleanScaled), units = "MB")
-tcellScaledStored <- assay(es, "tcells/scaled")
-format(object.size(tcellScaledStored), units = "MB")
 ```
 
-Most of the object is the counts of every droplet and the two dense
-z-score matrices. Kept as separate objects instead, the filtered cells,
-the clean cells and the T cells would each carry their own copy of the
-counts, and the T cells another copy of the log-normalised values.
+Kept as separate objects instead, the three sets of cell calls, the clean
+cells and the T cells would each carry their own copy of the counts, and
+the T cells another copy of the log-normalised values.
 
 # How this maps to MAMS
 
@@ -559,13 +544,13 @@ counts, and the T cells another copy of the log-normalised values.
 Metadata Standards) describes the matrices and annotations a single-cell
 analysis produces. The names used here follow its suggested values where
 it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
-`scaled`, `reduction`, `embedding`); `background` and `tcells` are our own
-names for subsets.
+`scaled`, `reduction`, `embedding`); `emptydrops`, `barcoderanks` and
+`tcells` are our own names for subsets.
 
 | In this article | ExperimentSubset | MAMS |
 |---|---|---|
-| `filtered`, `clean`, `tcells`, `background` | subsets of columns | `obs_subset` |
-| `clean.variable`, `tcells.variable`; the genes kept in `clean` | subsets of rows | `feature_subset` (`variable`, `detected`) |
+| `filtered`, `emptydrops`, `barcoderanks`, `clean`, `tcells` | subsets of columns | `obs_subset` |
+| `clean.variable`, `tcells.variable` | subsets of rows | `feature_subset` (`variable`) |
 | `counts`, `decontaminated`, `lognormalized`, `scaled` | assays | `processing` |
 | `reduction.pca`, `embedding.umap` | reducedDims | `processing` (`reduction`, `embedding`) |
 | `parentAssay`, e.g. `"filtered/decontaminated"` | the assay or subset a subset was made from | `parent_id` |
