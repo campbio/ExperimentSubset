@@ -209,6 +209,31 @@ Apart from `setSubsetAssay` and `getSubsetAssay` methods, `assay` and `assay<-`
 methods can also be used for the same purpose. Their usage has been described
 in the overridden methods section below.
 
+## `getSubsetExperiment` and `setSubsetExperiment`
+
+`getSubsetExperiment` returns a subset as a standalone object of the main
+object's class, here a `SingleCellExperiment`, with the assays the subset
+sees (its own and the linked ones), its colData, rowData, reducedDims and
+metadata. Any tool written for that class can then be run on it.
+`setSubsetExperiment` stores the result back in the subset: what the object
+holds replaces the subset's own data, while linked assays that are
+unchanged are not copied.
+
+```{r}
+#take 'subset1' out as a SingleCellExperiment
+subset1 <- getSubsetExperiment(es, "subset1")
+subset1
+
+#add a colData column and a reducedDim, as a tool might
+subset1$group <- c("a", "a", "b", "b", "b")
+reducedDim(subset1, "example") <- matrix(1:10, nrow = 5)
+
+#store them back in 'subset1'
+es <- setSubsetExperiment(es, "subset1", subset1)
+colData(es, subsetName = "subset1")
+reducedDimNames(es, subsetName = "subset1")
+```
+
 ## `subsetSummary`
 
 The `subsetSummary` method displays an overall summary of the 
@@ -245,6 +270,8 @@ their short descriptions are given below:
 10. `subsetParent` Returns the 'subset-parent' link of a specified subset
 11. `setSubsetAssay` Sets an assay to a subset
 12. `getSubsetAssay` Gets an assay from a subset
+13. `getSubsetExperiment` Returns a subset as a standalone experiment object
+14. `setSubsetExperiment` Stores a standalone experiment object in a subset
 
 ### subsetColData & subsetRowData
 
@@ -256,18 +283,17 @@ parameters are set to `FALSE`. Same applies to the usage of inherited `rowData`
 and `colData` methods.
 
 ```{r}
-#store colData to parent object
-colData(es) <- cbind(colData(es), sampleID = seq_len(dim(es)[2]))
+#number of columns in 'subset1'
+subset1Columns <- subsetDim(es, "subset1")[2]
 
-#store colData to 'subset1' using option 1
-colData(es, subsetName = "subset1") <- cbind(
-  colData(es, subsetName = "subset1"), 
-  subsetSampleID1 = seq_len(subsetDim(es, "subset1")[2]))
+#store a colData column in the parent object
+colData(es)$sampleID <- seq_len(ncol(es))
 
-#store colData to 'subset1' using option 2
-subsetColData(es, "subset1") <- cbind(
-  subsetColData(es, "subset1"), 
-  subsetSampleID2 = seq_len(subsetDim(es, "subset1")[2]))
+#store a colData column in 'subset1' using option 1
+colData(es, subsetName = "subset1")$subsetSampleID1 <- seq_len(subset1Columns)
+
+#store a colData column in 'subset1' using option 2
+subsetColData(es, "subset1")$subsetSampleID2 <- seq_len(subset1Columns)
 
 #get colData from 'subset1' without parent colData
 subsetColData(es, "subset1", parentColData = FALSE)
@@ -432,6 +458,12 @@ subsetSummary(es)
 
 # Using the `ExperimentSubset` object: an example with real scRNA-seq data
 
+This short example on the PBMC 4k data set isn't run when the vignette is
+built. For a complete, runnable workflow on the same data, from raw
+droplets through quality control, decontamination, clustering and
+annotation to a re-analysis of the T cells, see the
+[single-cell workflow article](https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html).
+
 Installing and loading required packages:
 ```{r, eval = FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
@@ -464,8 +496,8 @@ Filter cells with low column sum and create a new subset called 'filteredCells':
 
 ```{r, eval = FALSE}
 filteredCellsIndices <- which(colData(es)$sum > 1500)
-es <- createSubset(es, "filteredCells", cols = filteredCellsIndices,
-                   parentAssay = "counts")
+es <- createSubset(es, subsetName = "filteredCells",
+                   cols = filteredCellsIndices, parentAssay = "counts")
 subsetSummary(es)
 ```
 
@@ -489,20 +521,20 @@ using `scrapper` library against the 'filteredCells' subset only:
 normalizedCounts <- assay(es, "filteredCells/filteredCellsNormalized")
 geneVariances <- modelGeneVariances(normalizedCounts)
 residualVariances <- geneVariances$statistics$residuals
-topHVG1000 <- chooseHighlyVariableGenes(residualVariances, top = 1000)
-es <- createSubset(es, "hvg1000", rows = topHVG1000,
+topHVG2000 <- chooseHighlyVariableGenes(residualVariances, top = 2000)
+es <- createSubset(es, subsetName = "hvg2000", rows = topHVG2000,
                    parentAssay = "filteredCells/filteredCellsNormalized")
 subsetSummary(es)
 ```
 
 Run 'PCA' on the highly variable genes computed in the last step using
-`scrapper` library against the 'hvg1000' subset only. `runPca` returns the PCs
+`scrapper` library against the 'hvg2000' subset only. `runPca` returns the PCs
 in rows, so transpose them to put cells in rows:
 
 ```{r, eval = FALSE}
-pcaResult <- runPca(assay(es, "hvg1000"))
+pcaResult <- runPca(assay(es, "hvg2000"))
 pcaScores <- t(pcaResult$components)
-reducedDim(es, type = "PCA", subsetName = "hvg1000") <- pcaScores
+reducedDim(es, type = "PCA", subsetName = "hvg2000") <- pcaScores
 ```
 
 Show the current condition of the `ExperimentSubset` object:
@@ -525,52 +557,54 @@ subsetSummary(es)
 2. `createSubset`
 3. `setSubsetAssay`
 4. `getSubsetAssay`
-5. `subsetSummary`
-6. `subsetParent`
-7. `subsetCount`
-8. `subsetAssayCount`
-9. `subsetNames`
-10. `subsetAssayNames`
-11. `subsetDim`
-12. `subsetRowData`
-13. `subsetColData`
-14. `subsetColnames`
-15. `subsetRownames`
-16. `subsetRowData<-`
-17. `subsetColData<-`
-18. `subsetColnames<-`
-19. `subsetRownames<-`
-20. `show`
-21. `assay`
-22. `assay<-`
-23. `rowData` 
-24. `rowData<-`
-25. `colData`
-26. `colData<-`
-27. `metadata`
-28. `metadata<-`
-29. `reducedDim`
-30. `reducedDim<-`
-31. `reducedDims`
-32. `reducedDims<-`
-33. `reducedDimNames`
-34. `reducedDimNames<-`
-35. `altExp`
-36. `altExp<-`
-37. `altExps`
-38. `altExps<-`
-39. `altExpNames`
-40. `altExpNames<-`
-41. `subsetSpatialCoords`
-42. `subsetSpatialData`
-43. `subsetSpatialData<-`
-44. `subsetRowLinks`
-45. `subsetColLinks`
-46. `spatialCoords`
-47. `spatialData`
-48. `spatialData<-`
-49. `rowLinks`
-50. `colLinks`
+5. `getSubsetExperiment`
+6. `setSubsetExperiment`
+7. `subsetSummary`
+8. `subsetParent`
+9. `subsetCount`
+10. `subsetAssayCount`
+11. `subsetNames`
+12. `subsetAssayNames`
+13. `subsetDim`
+14. `subsetRowData`
+15. `subsetColData`
+16. `subsetColnames`
+17. `subsetRownames`
+18. `subsetRowData<-`
+19. `subsetColData<-`
+20. `subsetColnames<-`
+21. `subsetRownames<-`
+22. `show`
+23. `assay`
+24. `assay<-`
+25. `rowData` 
+26. `rowData<-`
+27. `colData`
+28. `colData<-`
+29. `metadata`
+30. `metadata<-`
+31. `reducedDim`
+32. `reducedDim<-`
+33. `reducedDims`
+34. `reducedDims<-`
+35. `reducedDimNames`
+36. `reducedDimNames<-`
+37. `altExp`
+38. `altExp<-`
+39. `altExps`
+40. `altExps<-`
+41. `altExpNames`
+42. `altExpNames<-`
+43. `subsetSpatialCoords`
+44. `subsetSpatialData`
+45. `subsetSpatialData<-`
+46. `subsetRowLinks`
+47. `subsetColLinks`
+48. `spatialCoords`
+49. `spatialData`
+50. `spatialData<-`
+51. `rowLinks`
+52. `colLinks`
 
 # Implementation Details
 
