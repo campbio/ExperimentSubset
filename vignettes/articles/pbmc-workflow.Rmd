@@ -167,9 +167,9 @@ es <- createSubset(es, subsetName = "barcoderanks", cols = kneePositions)
 format(object.size(es), units = "MB")
 
 # the number of genes and cells in each set of calls
-subsetDim(es, "filtered")
-subsetDim(es, "emptydrops")
-subsetDim(es, "barcoderanks")
+subsetDim(es, subsetName = "filtered")
+subsetDim(es, subsetName = "emptydrops")
+subsetDim(es, subsetName = "barcoderanks")
 ```
 
 The three mostly agree. We continue with Cell Ranger's calls, the
@@ -183,7 +183,7 @@ columns (the droplet QC above) included.
 
 ```{r get-filtered}
 # the filtered cells as a SingleCellExperiment
-filteredCells <- getSubsetExperiment(es, "filtered")
+filteredCells <- getSubsetExperiment(es, subsetName = "filtered")
 filteredCells
 ```
 
@@ -206,7 +206,7 @@ the main object's colData columns.
 
 ```{r set-filtered}
 # store the QC results in the subset
-es <- setSubsetExperiment(es, "filtered", filteredCells)
+es <- setSubsetExperiment(es, subsetName = "filtered", value = filteredCells)
 colnames(colData(es, subsetName = "filtered"))
 ```
 
@@ -233,7 +233,9 @@ the estimated contamination becomes a colData column.
 ```{r store-decontx}
 # store the decontaminated counts in the subset
 decontaminatedCounts <- decontamination$decontXcounts
-es <- setSubsetAssay(es, "filtered", decontaminatedCounts, "decontaminated")
+es <- setSubsetAssay(es, subsetName = "filtered",
+                     inputMatrix = decontaminatedCounts,
+                     subsetAssayName = "decontaminated")
 
 # store each cell's contamination with its other QC columns
 colData(es, subsetName = "filtered")$contamination <-
@@ -270,7 +272,7 @@ stored in the subset `filtered`.
 cellsToKeep <- which(keepCells)
 es <- createSubset(es, subsetName = "clean", cols = cellsToKeep,
                    parentAssay = "filtered/decontaminated")
-subsetDim(es, "clean")
+subsetDim(es, subsetName = "clean")
 ```
 
 # Clustering
@@ -293,7 +295,9 @@ cleanCounts <- assay(es, "clean")
 cellTotals <- colSums(cleanCounts)
 sizeFactors <- centerSizeFactors(cellTotals)
 lognormalized <- normalizeCounts(cleanCounts, sizeFactors, delayed = FALSE)
-es <- setSubsetAssay(es, "clean", lognormalized, "lognormalized")
+es <- setSubsetAssay(es, subsetName = "clean",
+                     inputMatrix = lognormalized,
+                     subsetAssayName = "lognormalized")
 ```
 
 **Variable genes.** We choose the 2,000 genes whose expression varies
@@ -326,7 +330,9 @@ variableDense <- as.matrix(variableLognormalized)
 genesByColumn <- t(variableDense)
 scaledByColumn <- scale(genesByColumn)
 scaled <- t(scaledByColumn)
-es <- setSubsetAssay(es, "clean.variable", scaled, "scaled")
+es <- setSubsetAssay(es, subsetName = "clean.variable",
+                     inputMatrix = scaled,
+                     subsetAssayName = "scaled")
 ```
 
 **PCA, clusters and UMAP.** We keep the first 25 principal components
@@ -383,7 +389,7 @@ table(predictions$labels)
 # marker genes flagged in the subset's rowData
 markers <- c("CD3E", "CD4", "CD8A", "MS4A1", "CD14", "FCGR3A", "NKG7",
              "LYZ", "PPBP")
-cleanGenes <- subsetRownames(es, "clean")
+cleanGenes <- subsetRownames(es, subsetName = "clean")
 rowData(es, subsetName = "clean")$marker <- cleanGenes %in% markers
 ```
 
@@ -393,7 +399,7 @@ We take the subset out again to plot it with scater.
 library(scater)
 
 # the clean cells, coloured by cell type
-cleanCells <- getSubsetExperiment(es, "clean")
+cleanCells <- getSubsetExperiment(es, subsetName = "clean")
 plotReducedDim(cleanCells, dimred = "embedding.umap", colour_by = "label")
 ```
 
@@ -409,7 +415,7 @@ isTcell <- predictions$labels %in% tcellLabels
 tcellPositions <- which(isTcell)
 es <- createSubset(es, subsetName = "tcells", cols = tcellPositions,
                    parentAssay = "clean")
-subsetDim(es, "tcells")
+subsetDim(es, subsetName = "tcells")
 ```
 
 The new subset already sees the assays of `clean`, and those `clean` sees
@@ -426,7 +432,7 @@ are included, so we compute them again on the T cells.
 
 ```{r get-tcells}
 # the T cells as a SingleCellExperiment, with the linked assays
-tcells <- getSubsetExperiment(es, "tcells")
+tcells <- getSubsetExperiment(es, subsetName = "tcells")
 assayNames(tcells)
 ```
 
@@ -481,7 +487,7 @@ linked and nothing is copied.
 
 ```{r set-tcells}
 # store the T-cell results
-es <- setSubsetExperiment(es, "tcells", tcells)
+es <- setSubsetExperiment(es, subsetName = "tcells", value = tcells)
 ```
 
 As for the clean cells, the T cells' variable genes become a subset of
@@ -492,7 +498,9 @@ rows, `tcells.variable`, which stores their z-scores.
 es <- createSubset(es, subsetName = "tcells.variable",
                    rows = tcellVariableGenes,
                    parentAssay = "tcells/lognormalized")
-es <- setSubsetAssay(es, "tcells.variable", tcellScaled, "scaled")
+es <- setSubsetAssay(es, subsetName = "tcells.variable",
+                     inputMatrix = tcellScaled,
+                     subsetAssayName = "scaled")
 ```
 
 `clean.variable` and `tcells.variable` each store their own `scaled`: an
@@ -505,7 +513,7 @@ their own version.
 
 ```{r plot-tcells, fig.alt = "UMAP of the T cells, coloured by T-cell subtype"}
 # the T cells, coloured by subtype
-tcellCells <- getSubsetExperiment(es, "tcells")
+tcellCells <- getSubsetExperiment(es, subsetName = "tcells")
 plotReducedDim(tcellCells, dimred = "embedding.umap", colour_by = "subtype")
 ```
 

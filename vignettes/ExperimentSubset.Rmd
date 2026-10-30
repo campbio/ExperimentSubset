@@ -184,13 +184,13 @@ To get a subset assay, `getSubsetAssay` method can be used:
 
 ```{r}
 #get assay from 'subset1'
-getSubsetAssay(es, "subset1")
+getSubsetAssay(es, subsetName = "subset1")
 
 #get 'subset1Assay', stored inside 'subset1'
-getSubsetAssay(es, "subset1", subsetAssayName = "subset1Assay")
+getSubsetAssay(es, subsetName = "subset1", subsetAssayName = "subset1Assay")
 
 #the same assay, named as "subset/assay"
-getSubsetAssay(es, "subset1/subset1Assay")
+getSubsetAssay(es, subsetName = "subset1/subset1Assay")
 ```
 
 A subset also sees the assays of its parent, sliced to its rows and columns,
@@ -221,7 +221,7 @@ unchanged are not copied.
 
 ```{r}
 #take 'subset1' out as a SingleCellExperiment
-subset1 <- getSubsetExperiment(es, "subset1")
+subset1 <- getSubsetExperiment(es, subsetName = "subset1")
 subset1
 
 #add a colData column and a reducedDim, as a tool might
@@ -229,7 +229,7 @@ subset1$group <- c("a", "a", "b", "b", "b")
 reducedDim(subset1, "example") <- matrix(1:10, nrow = 5)
 
 #store them back in 'subset1'
-es <- setSubsetExperiment(es, "subset1", subset1)
+es <- setSubsetExperiment(es, subsetName = "subset1", value = subset1)
 colData(es, subsetName = "subset1")
 reducedDimNames(es, subsetName = "subset1")
 ```
@@ -284,7 +284,7 @@ and `colData` methods.
 
 ```{r}
 #number of columns in 'subset1'
-subset1Columns <- subsetDim(es, "subset1")[2]
+subset1Columns <- subsetDim(es, subsetName = "subset1")[2]
 
 #store a colData column in the parent object
 colData(es)$sampleID <- seq_len(ncol(es))
@@ -293,13 +293,14 @@ colData(es)$sampleID <- seq_len(ncol(es))
 colData(es, subsetName = "subset1")$subsetSampleID1 <- seq_len(subset1Columns)
 
 #store a colData column in 'subset1' using option 2
-subsetColData(es, "subset1")$subsetSampleID2 <- seq_len(subset1Columns)
+subsetColData(es, subsetName = "subset1")$subsetSampleID2 <-
+  seq_len(subset1Columns)
 
 #get colData from 'subset1' without parent colData
-subsetColData(es, "subset1", parentColData = FALSE)
+subsetColData(es, subsetName = "subset1", parentColData = FALSE)
 
 #get colData from 'subset1' with parent colData
-subsetColData(es, "subset1", parentColData = TRUE)
+subsetColData(es, subsetName = "subset1", parentColData = TRUE)
 
 #the same works with the `colData` method (and with `rowData` and the
 #`parentRowData` parameter for row data)
