@@ -14,9 +14,10 @@
 #'   to include in this subset. If \code{missing} or \code{NULL}, all columns
 #'   are included in the subset. Default \code{NULL}.
 #' @param parentAssay \code{character(1)} Specify the parent \code{assay} of the
-#'   subset. This parent \code{assay} must already be available in the
-#'   \code{ExperimentSubset} object. If \code{NULL}, the first available main
-#'   \code{assay} will be marked as parent. Default \code{NULL}.
+#'   subset: the name of a main \code{assay}, of a subset, or of an assay seen
+#'   in a subset written as \code{"subset/assay"}. If \code{NULL}, the first
+#'   available main \code{assay} will be marked as parent. Default
+#'   \code{NULL}.
 #' @return An \code{ExperimentSubset} object that now contains the newly created
 #'   subset.
 #' @rdname createSubset
@@ -46,8 +47,12 @@ setGeneric(
 #' @description Retrieves the names of all the subsets as well as the subset
 #'   assays.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
-#' @return A \code{vector} containing the names of the subsets and the subset
-#'   assays available in the input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} If given, list the assays seen in
+#'   this subset instead: its own assays and those linked from its parent.
+#'   Default \code{NULL}.
+#' @return A \code{vector} containing the names of the subsets followed by
+#'   each assay stored in a subset as \code{"subset/assay"}, or, with
+#'   \code{subsetName}, the names of the assays seen in that subset.
 #' @rdname subsetAssayNames
 #' @importMethodsFrom SummarizedExperiment assayNames
 #' @export
@@ -61,9 +66,10 @@ setGeneric(
 #' assay(es, "subset1",
 #' subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
 #' subsetAssayNames(es)
+#' subsetAssayNames(es, subsetName = "subset1")
 setGeneric(
   name = "subsetAssayNames",
-  def = function(x)
+  def = function(x, subsetName = NULL)
   {
     standardGeneric("subsetAssayNames")
   }
@@ -103,7 +109,14 @@ setGeneric(
 #' @param inputMatrix A matrix-like object (for example a \code{matrix} or
 #'   \code{dgCMatrix}) to store as an \code{assay} in the subset.
 #' @param subsetAssayName \code{character(1)} Specify the name of the new
-#'   \code{assay} against the \code{inputMatrix} parameter.
+#'   \code{assay} against the \code{inputMatrix} parameter. It can't contain
+#'   \code{"/"}. A subset sees its parent's assays as linked assays, so a name
+#'   linked from the parent (for example a main \code{assay}) needs
+#'   \code{unlink = TRUE}.
+#' @param unlink \code{logical(1)} Store the \code{assay} even though the
+#'   subset sees an assay of that name linked from its parent. The subset, and
+#'   subsets made from it, then use this \code{assay} instead; the parent's is
+#'   unchanged. Default \code{FALSE}.
 #' @return Updated \code{ExperimentSubset} object with the new \code{assay}
 #'   stored inside the specified subset.
 #' @rdname setSubsetAssay
@@ -125,7 +138,8 @@ setGeneric(
   def = function(x,
                  subsetName,
                  inputMatrix,
-                 subsetAssayName)
+                 subsetAssayName,
+                 unlink = FALSE)
   {
     standardGeneric("setSubsetAssay")
   }
@@ -135,8 +149,9 @@ setGeneric(
 #' @description Retrieves a complete 'subset to parent' link from a specified
 #'   subset.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
-#' @param subsetName \code{character(1)} Specify the name of the subset against
-#'   which the 'subset to parent link' should be retrieved.
+#' @param subsetName \code{character(1)} Specify the name of the subset, or an
+#'   assay stored in a subset as \code{"subset/assay"}, against which the
+#'   'subset to parent link' should be retrieved.
 #' @return A \code{list} containing the 'subset to parent' link.
 #' @rdname subsetParent
 #' @importMethodsFrom SummarizedExperiment assayNames
@@ -150,7 +165,7 @@ setGeneric(
 #' parentAssay = "counts")
 #' assay(es, "subset1",
 #' subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
-#' subsetParent(es, "subset1pAssay")
+#' subsetParent(es, "subset1/subset1pAssay")
 setGeneric(
   name = "subsetParent",
   def = function(x, subsetName)
@@ -507,8 +522,12 @@ setGeneric(
 #' Get subset assay from an \code{ExperimentSubset} object.
 #'
 #' @param x Input \code{ExperimentSubset} object.
-#' @param subsetName Specify 'subset name' or 'subset assay name' to fetch the
-#'   assay from.
+#' @param subsetName The name of the subset to fetch the assay from, or an
+#'   assay seen in a subset written as \code{"subset/assay"}.
+#' @param subsetAssayName \code{character(1)} The name of an assay seen in the
+#'   subset \code{subsetName}: one stored with \code{setSubsetAssay}, or one
+#'   linked from its parent. Default \code{NULL}, which returns the subset's
+#'   slice of its \code{parentAssay}.
 #' @return Subset assay
 #' @importMethodsFrom SummarizedExperiment assay
 #' @export
@@ -521,10 +540,15 @@ setGeneric(
 #' cols = c(20,21,40,45,90,99,100,123,166,299),
 #' parentAssay = "counts")
 #' getSubsetAssay(es, "subset1")
+#' # store a changed copy of the subset's counts inside the subset
+#' subset1Counts <- getSubsetAssay(es, "subset1")
+#' es <- setSubsetAssay(es, "subset1", subset1Counts + 1, "plusOne")
+#' getSubsetAssay(es, "subset1", subsetAssayName = "plusOne")
 setGeneric(
   name = "getSubsetAssay",
   def = function(x,
-                 subsetName)
+                 subsetName,
+                 subsetAssayName = NULL)
   {
     standardGeneric("getSubsetAssay")
   }

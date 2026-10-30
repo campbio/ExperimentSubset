@@ -41,9 +41,10 @@ to include in this subset. If \code{missing} or \code{NULL}, all columns
 are included in the subset. Default \code{NULL}.}
 
 \item{parentAssay}{\code{character(1)} Specify the parent \code{assay} of the
-subset. This parent \code{assay} must already be available in the
-\code{ExperimentSubset} object. If \code{NULL}, the first available main
-\code{assay} will be marked as parent. Default \code{NULL}.}
+subset: the name of a main \code{assay}, of a subset, or of an assay seen
+in a subset written as \code{"subset/assay"}. If \code{NULL}, the first
+available main \code{assay} will be marked as parent. Default
+\code{NULL}.}
 }
 \value{
 An \code{ExperimentSubset} object that now contains the newly created

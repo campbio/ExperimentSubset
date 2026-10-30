@@ -13,24 +13,29 @@
 \title{Name retrieval method for all subset assays in ExperimentSubset
   objects}
 \usage{
-subsetAssayNames(x)
+subsetAssayNames(x, subsetName = NULL)
 
-\S4method{subsetAssayNames}{SubsetRangedSummarizedExperiment}(x)
+\S4method{subsetAssayNames}{SubsetRangedSummarizedExperiment}(x, subsetName = NULL)
 
-\S4method{subsetAssayNames}{SubsetSingleCellExperiment}(x)
+\S4method{subsetAssayNames}{SubsetSingleCellExperiment}(x, subsetName = NULL)
 
-\S4method{subsetAssayNames}{SubsetSummarizedExperiment}(x)
+\S4method{subsetAssayNames}{SubsetSummarizedExperiment}(x, subsetName = NULL)
 
-\S4method{subsetAssayNames}{SubsetSpatialExperiment}(x)
+\S4method{subsetAssayNames}{SubsetSpatialExperiment}(x, subsetName = NULL)
 
-\S4method{subsetAssayNames}{SubsetTreeSummarizedExperiment}(x)
+\S4method{subsetAssayNames}{SubsetTreeSummarizedExperiment}(x, subsetName = NULL)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
+
+\item{subsetName}{\code{character(1)} If given, list the assays seen in
+this subset instead: its own assays and those linked from its parent.
+Default \code{NULL}.}
 }
 \value{
-A \code{vector} containing the names of the subsets and the subset
-  assays available in the input \code{ExperimentSubset} object.
+A \code{vector} containing the names of the subsets followed by
+  each assay stored in a subset as \code{"subset/assay"}, or, with
+  \code{subsetName}, the names of the assays seen in that subset.
 }
 \description{
 Retrieves the names of all the subsets as well as the subset
@@ -46,4 +51,5 @@ parentAssay = "counts")
 assay(es, "subset1",
 subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
 subsetAssayNames(es)
+subsetAssayNames(es, subsetName = "subset1")
 }

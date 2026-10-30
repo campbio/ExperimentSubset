@@ -134,8 +134,8 @@ parameters of the `createSubset` method. If `rows` or `cols` are `missing` or
 `NULL`, all of the rows or columns are selected from the specified
 `parentAssay`. If `parentAssay` is `missing` or `NULL`, the first available
 assay from the parent object is linked as the parent of this subset. The
-`parentAssay` can be an `assay` in the parent object, a subset or an `assay` 
-within a subset. 
+`parentAssay` can be an `assay` in the parent object, a subset, or an `assay`
+seen in a subset, written as `"subset/assay"`.
 
 ```{r}
 es <- createSubset(es, 
@@ -178,8 +178,23 @@ To get a subset assay, `getSubsetAssay` method can be used:
 #get assay from 'subset1'
 getSubsetAssay(es, "subset1")
 
-#get internal 'subset1Assay'
-getSubsetAssay(es, "subset1Assay")
+#get 'subset1Assay', stored inside 'subset1'
+getSubsetAssay(es, "subset1", subsetAssayName = "subset1Assay")
+
+#the same assay, named as "subset/assay"
+getSubsetAssay(es, "subset1/subset1Assay")
+```
+
+A subset also sees the assays of its parent, sliced to its rows and columns,
+under the same names: these are *linked* assays, and they are not copied.
+Each subset has its own names, so two subsets made from the same parent can
+store an assay with the same name. Storing an assay with a name the subset
+already sees through its parent needs `unlink = TRUE`, which makes the subset
+(and subsets made from it) use its own version from then on.
+
+```{r}
+#'subset1' sees its own assay and the main 'counts' it was made from
+subsetAssayNames(es, subsetName = "subset1")
 ```
 
 Apart from `setSubsetAssay` and `getSubsetAssay` methods, `assay` and `assay<-`
@@ -311,8 +326,9 @@ Using `assay` getter method is simple, as no additional parameter is required
 unlike in the setter method. 
 
 ```{r}
-#assay getter has parameters 'x' which is the input object, 'i' which can either
-#be a assay name in the parent object, a subset name or a subset assay name
+#assay getter has parameters 'x' which is the input object and 'i' which can
+#be an assay name in the parent object or a subset name; an assay inside a
+#subset is chosen with 'subsetAssayName' or named as "subset/assay"
 
 #getting 'counts' from parent es object
 assay(
@@ -329,7 +345,8 @@ assay(
 #getting the 'subset1InternalAssay' from inside the 'subset1'
 assay(
   x = es,
-  i = "subset1InternalAssay"
+  i = "subset1",
+  subsetAssayName = "subset1InternalAssay"
 )
 ```
 
@@ -461,11 +478,12 @@ Find highly variable genes from the normalized assay in the previous step
 using `scrapper` library against the 'filteredCells' subset only:
 
 ```{r, eval = FALSE}
-geneVariances <- modelGeneVariances(assay(es, "filteredCellsNormalized"))
+normalizedCounts <- assay(es, "filteredCells/filteredCellsNormalized")
+geneVariances <- modelGeneVariances(normalizedCounts)
 residualVariances <- geneVariances$statistics$residuals
 topHVG1000 <- chooseHighlyVariableGenes(residualVariances, top = 1000)
 es <- createSubset(es, "hvg1000", rows = topHVG1000,
-                   parentAssay = "filteredCellsNormalized")
+                   parentAssay = "filteredCells/filteredCellsNormalized")
 subsetSummary(es)
 ```
 
@@ -591,7 +609,8 @@ linked parent assay for this subset.
 
 A `character` string that stores the name of the immediate parent to which the
 subset is linked. The `parentAssay` can be an `assay` in the parent
-`ExperimentSubset` object or any subset or any `internalAssay` of a subset.
+`ExperimentSubset` object, any subset, or an assay seen in a subset written as
+`"subset/assay"`.
 
 ### `internalAssay`
 

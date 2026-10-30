@@ -40,9 +40,9 @@ setMethod(
 setMethod(
   f = "subsetAssayNames",
   signature = "SubsetTreeSummarizedExperiment",
-  definition = function(x)
+  definition = function(x, subsetName = NULL)
   {
-    .subsetAssayNames(x)
+    .subsetAssayNames(x, subsetName)
   }
 )
 
@@ -76,12 +76,14 @@ setMethod(
   definition = function(x,
                         subsetName,
                         inputMatrix,
-                        subsetAssayName)
+                        subsetAssayName,
+                        unlink = FALSE)
   {
     .setSubsetAssay(x,
                     subsetName,
                     inputMatrix,
-                    subsetAssayName)
+                    subsetAssayName,
+                    unlink = unlink)
   }
 )
 
@@ -479,9 +481,12 @@ setMethod(
     x ="SubsetTreeSummarizedExperiment",
     subsetName = "character"),
   definition = function(x,
-                        subsetName)
+                        subsetName,
+                        subsetAssayName = NULL)
   {
-    assay(x = x, i = subsetName)
+    if (is.null(subsetAssayName))
+      return(assay(x = x, i = subsetName))
+    assay(x = x, i = subsetName, subsetAssayName = subsetAssayName)
   }
 )
 

@@ -27,8 +27,9 @@ subsetParent(x, subsetName)
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
-\item{subsetName}{\code{character(1)} Specify the name of the subset against
-which the 'subset to parent link' should be retrieved.}
+\item{subsetName}{\code{character(1)} Specify the name of the subset, or an
+assay stored in a subset as \code{"subset/assay"}, against which the
+'subset to parent link' should be retrieved.}
 }
 \value{
 A \code{list} containing the 'subset to parent' link.
@@ -46,5 +47,5 @@ cols = c(20,21,40,45,90,99,100,123,166,299),
 parentAssay = "counts")
 assay(es, "subset1",
 subsetAssayName = "subset1pAssay") <- assay(es, "subset1")[,] + 1
-subsetParent(es, "subset1pAssay")
+subsetParent(es, "subset1/subset1pAssay")
 }

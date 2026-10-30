@@ -115,45 +115,35 @@ ExperimentSubset <- function(x,
 }
 
 .assay <- function(x, i, ...){
-  out <- NULL
-  withDimnames <- !isFALSE(list(...)$withDimnames)
+  args <- list(...)
+  withDimnames <- !isFALSE(args$withDimnames)
+  # assay(x, "subset", subsetAssayName = "a") means "subset/a"
+  if (!is.null(args$subsetAssayName)) {
+    if (!is.character(args$subsetAssayName)
+        || length(args$subsetAssayName) != 1)
+      stop("'subsetAssayName' must be a single character string.")
+    .isSubset(x, i)
+    i <- paste0(i, "/", args$subsetAssayName)
+  }
+  ref <- .resolveAssay(x, i)
+  if (is.null(ref))
+    stop("'", i, "' is not the name of an assay, a subset or an assay ",
+         "seen in a subset.")
   #look at main assays
-  if (i %in% assayNames(x)) {
-    out <- callNextMethod(x, i, ...)
+  if (ref$kind == "main")
+    return(callNextMethod(x, i, ...))
+  #an assay as seen in a subset, its own or linked
+  if (ref$kind == "visible")
+    return(.subsetAssayView(x, ref$subset, ref$assay, withDimnames))
+  #a subset: its view of the assay its parentAssay refers to, which is
+  #its own if it, or a subset on the way, stored one with unlink = TRUE
+  subsetName <- ref$subset
+  if (is.null(.parentAssay(.subsets(x)[[subsetName]]))) {
+    internal <- .internalAssay(.subsets(x)[[subsetName]])
+    return(assay(x = internal, i = "counts", ...))
   }
-  #look at subsets
-  else if (i %in% subsetNames(x)) {
-    subsetName <- i
-    i <- .parentAssay(.subsets(x)[[subsetName]]) 
-    if (is.null(i)) {
-      out <- assay(x = .internalAssay(.subsets(x)[[subsetName]]) , i = "counts", ...)
-    }
-    else{
-      out <- assay(x = x, i = i, ...)
-      out <- out[.rowIndices(.subsets(x)[[subsetName]]),
-                 .colIndices(.subsets(x)[[subsetName]]), drop = FALSE]
-      # use the subset's own names, which subsetRownames<- may have changed
-      internal <- .internalAssay(.subsets(x)[[subsetName]])
-      if (withDimnames && !is.null(rownames(internal)))
-        rownames(out) <- rownames(internal)
-      if (withDimnames && !is.null(colnames(internal)))
-        colnames(out) <- colnames(internal)
-    }
-  }
-  #look inside subsets
-  else{
-    for (j in seq_along(.subsets(x))) {
-      if (i %in% assayNames(.internalAssay(.subsets(x)[[j]]))) {
-        # stored subset assays take the subset's row and column names
-        out <- assay(.internalAssay(.subsets(x)[[j]]), i,
-                     withDimnames = withDimnames)
-      }
-    }
-    if (is.null(out))
-      stop("'", i, "' is not the name of an assay, a subset or an assay ",
-           "stored in a subset.")
-  }
-  out
+  .subsetAssayView(x, subsetName, .primaryAssayName(x, subsetName),
+                   withDimnames)
 }
 
 .createSubset <- function(x,
@@ -161,6 +151,7 @@ ExperimentSubset <- function(x,
                           rows,
                           cols,
                           parentAssay){
+  x <- .qualifyParents(x)
   # clean the name before the uniqueness check and use it as the key
   if (is.character(subsetName) && any(grepl("\\s", subsetName))) {
     subsetName <- gsub("\\s", "", subsetName)
@@ -179,9 +170,8 @@ ExperimentSubset <- function(x,
     parentAssay <- tempAssay
   }
   else{
-    test <- parentAssay %in% assayNames(x) || 
-      parentAssay %in% subsetAssayNames(x)
-    if (test) {
+    # stops if parentAssay is a bare name of an assay stored in a subset
+    if (!is.null(.resolveAssay(x, parentAssay))) {
       tempAssay <- parentAssay
     }
     else{
@@ -225,16 +215,18 @@ ExperimentSubset <- function(x,
   return(x)
 }
 
-.subsetAssayNames <- function(x){
+.subsetAssayNames <- function(x, subsetName = NULL) {
+  # the assays seen in one subset, own and linked
+  if (!is.null(subsetName)) {
+    .isSubset(x, subsetName)
+    return(names(.assayOwners(x, subsetName)))
+  }
+  # the subsets, then every subset's own assays as "subset/assay"
   tempNames <- names(.subsets(x))
-  if (length(.subsets(x)) > 0) {
-    for (i in seq(length(.subsets(x)))) {
-      tempNames <-
-        c(
-          tempNames,
-          assayNames(.internalAssay(.subsets(x)[[i]]))
-        )
-    }
+  for (subset in names(.subsets(x))) {
+    own <- assayNames(.internalAssay(.subsets(x)[[subset]]))
+    if (length(own) > 0)
+      tempNames <- c(tempNames, paste0(subset, "/", own))
   }
   return(tempNames)
 }
@@ -252,11 +244,31 @@ ExperimentSubset <- function(x,
 .setSubsetAssay <- function(x,
                          subsetName,
                          inputMatrix,
-                         subsetAssayName = NULL){
+                         subsetAssayName = NULL,
+                         unlink = FALSE) {
 
   if (!subsetName %in% subsetNames(x))
     stop(subsetName, " does not exist in the subsets slot of the object. 
          You need to create a new subset with createSubset() function. ")
+  x <- .qualifyParents(x)
+  if (!is.character(subsetAssayName) || length(subsetAssayName) != 1
+      || is.na(subsetAssayName) || !nzchar(subsetAssayName))
+    stop("'subsetAssayName' must be a single, non-empty character string.")
+  if (grepl("/", subsetAssayName, fixed = TRUE))
+    stop("'subsetAssayName' can't contain '/', which separates a subset ",
+         "from an assay name.")
+  # a name linked from the parent is protected unless unlink = TRUE
+  owners <- .assayOwners(x, subsetName)
+  if (subsetAssayName %in% names(owners)
+      && owners[[subsetAssayName]] != subsetName && !isTRUE(unlink)) {
+    owner <- owners[[subsetAssayName]]
+    source <- paste0("'", owner, "/", subsetAssayName, "'")
+    if (owner == "")
+      source <- paste0("the main assay '", subsetAssayName, "'")
+    stop("'", subsetAssayName, "' in subset '", subsetName, "' is linked ",
+         "to ", source, ". Set unlink = TRUE to store a separate '",
+         subsetAssayName, "' computed on the cells of '", subsetName, "'.")
+  }
 
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   if (!identical(as.integer(dim(inputMatrix)), as.integer(dim(internal))))
@@ -290,6 +302,17 @@ ExperimentSubset <- function(x,
 }
 
 '.assay<-' <- function(x, i, ..., subsetAssayName = NULL, value){
+  unlink <- isTRUE(list(...)$unlink)
+  # "subset/assay" stores into that subset
+  if (grepl("/", i, fixed = TRUE) && !i %in% assayNames(x)) {
+    parts <- .splitQualified(i)
+    if (is.null(parts) || !parts[1] %in% subsetNames(x))
+      stop("'", i, "' is not \"subset/assay\" for an existing subset.")
+    if (!is.null(subsetAssayName))
+      stop("'subsetAssayName' can't be used with \"subset/assay\"; '", i,
+           "' already names the assay.")
+    return(setSubsetAssay(x, parts[1], value, parts[2], unlink = unlink))
+  }
   # a subset name stores the assay inside that subset
   if (i %in% subsetNames(x)) {
     if (is.null(subsetAssayName))
@@ -300,53 +323,48 @@ ExperimentSubset <- function(x,
       x = x,
       subsetName = i,
       inputMatrix = value,
-      subsetAssayName = subsetAssayName
+      subsetAssayName = subsetAssayName,
+      unlink = unlink
     )
   }
   else{
     if (!is.null(subsetAssayName))
       stop("'subsetAssayName' is only used when 'i' is a subset name; '",
            i, "' is not a subset.")
+    if (unlink)
+      stop("'unlink' only applies when storing an assay in a subset.")
     callNextMethod(x, i, ..., value = value)
   }
 }
 
 .subsetParent <- function(x, subsetName){
-  if (!subsetName %in% subsetAssayNames(x)) {
+  ref <- .resolveAssay(x, subsetName)
+  if (is.null(ref) || ref$kind == "main") {
     stop(subsetName,
          " does not exist in the subsets slot of the object.")
   }
-  test <- !is.null(.subsets(x)[[subsetName]]) &&
-    is.null(.parentAssay(.subsets(x)[[subsetName]]))
-  if (test) {
-    return(NULL)
-  }
+  current <- ref$subset
   parentList <- list()
-  current <- subsetName
-  # an assay stored in a subset has that subset as its first parent
-  if (is.null(.subsets(x)[[current]])) {
-    current <- .parentSubsetName(x, current)
+  # an assay seen in a subset has that subset as its first parent
+  if (ref$kind == "visible")
     parentList <- c(parentList, current)
-  }
-  # names resolve as in .assay(); each step moves up one subset, so a
-  # longer walk means the chain has a cycle
+  else if (is.null(.parentAssay(.subsets(x)[[current]])))
+    return(NULL)
+  # each step moves up one subset, so a longer walk means a cycle
   for (step in seq_len(subsetCount(x) + 1)) {
     parent <- .parentAssay(.subsets(x)[[current]])
     if (is.null(parent))
       return(parentList)
-    if (parent %in% assayNames(x))
+    container <- .parentSubsetName(x, parent)
+    if (is.null(container))
       return(c(parentList, parent))
-    holder <- .parentSubsetName(x, parent)
-    if (is.null(holder))
-      stop("The parent '", parent, "' of '", current, "' cannot be found.")
-    if (parent != holder)
+    if (parent != container)
       parentList <- c(parentList, parent)
-    parentList <- c(parentList, holder)
-    current <- holder
+    parentList <- c(parentList, container)
+    current <- container
   }
   stop("The parent chain of '", subsetName, "' does not lead to a main ",
-       "assay; an assay name stored in more than one subset can cause ",
-       "this.")
+       "assay.")
 }
 
 .subsetSummary <- function(x){
@@ -364,7 +382,7 @@ ExperimentSubset <- function(x,
     AltExperiments <- list()
     
     for (i in seq(length(subsetNames(x)))) {
-      parent <- subsetParent(x, subsetAssayNames(x)[i])
+      parent <- subsetParent(x, subsetNames(x)[i])
       Name[[i]] <- subsetNames(x)[i]
       Parent[[i]] <-
         paste(unlist(parent), collapse = ' -> ')
@@ -504,28 +522,184 @@ ExperimentSubset <- function(x,
   return(x)
 }
 
-.getParentAssayName <- function(x, childAssayName) {
-  for (i in seq(length(.subsets(x)))) {
-    if (childAssayName %in% SummarizedExperiment::assayNames(.internalAssay(.subsets(x)[[i]]))) {
-      return(.subsetName(.subsets(x)[[i]]))
-    }
-  }
+# Splits "subset/assay" into its two names; NULL if name isn't of that form
+.splitQualified <- function(name) {
+  if (!grepl("/", name, fixed = TRUE))
+    return(NULL)
+  parts <- strsplit(name, "/", fixed = TRUE)[[1]]
+  if (length(parts) != 2 || !all(nzchar(parts)) || endsWith(name, "/"))
+    return(NULL)
+  parts
 }
 
-# Name of the subset that parentAssay refers to: the subset itself, or the
-# subset storing an assay of that name. Like .assay(), the last match wins.
-# NULL if parentAssay is a main assay or cannot be found.
+# Where a reference points: a main assay (kind "main"), a subset (kind
+# "subset"), or an assay as seen in a subset, named "subset/assay" (kind
+# "visible", either the subset's own or linked from its parent). Returns
+# NULL if nothing matches. A bare name that is only stored in a subset is
+# an error that shows the qualified form.
+.resolveAssay <- function(x, name) {
+  if (name %in% assayNames(x))
+    return(list(kind = "main", subset = NULL, assay = name))
+  if (name %in% subsetNames(x))
+    return(list(kind = "subset", subset = name, assay = NULL))
+  if (grepl("/", name, fixed = TRUE)) {
+    parts <- .splitQualified(name)
+    found <- !is.null(parts) && parts[1] %in% subsetNames(x)
+    if (found && parts[2] %in% names(.assayOwners(x, parts[1])))
+      return(list(kind = "visible", subset = parts[1], assay = parts[2]))
+    return(NULL)
+  }
+  holders <- .assayHolders(x, name)
+  if (length(holders) > 0)
+    stop("'", name, "' is stored in subset ",
+         paste0("'", holders, "'", collapse = ", "), ", not in the main ",
+         "object; name it as \"", holders[1], "/", name, "\" (assay() and ",
+         "getSubsetAssay() also take subsetAssayName =).")
+  NULL
+}
+
+# Names of the subsets that store an assay called name
+.assayHolders <- function(x, name) {
+  holders <- character(0)
+  for (subset in subsetNames(x)) {
+    if (name %in% assayNames(.internalAssay(.subsets(x)[[subset]])))
+      holders <- c(holders, subset)
+  }
+  holders
+}
+
+# The container a parentAssay points into: NULL for the main object, or a
+# subset name for a subset ("P") or an assay seen in a subset ("P/assay").
+# Objects saved before parents were qualified may hold a bare stored-assay
+# name; it resolves when one subset stores it. NULL if nothing matches.
 .parentSubsetName <- function(x, parentAssay) {
   if (is.null(parentAssay) || parentAssay %in% assayNames(x))
     return(NULL)
   if (parentAssay %in% subsetNames(x))
     return(parentAssay)
-  holder <- NULL
-  for (name in subsetNames(x)) {
-    if (parentAssay %in% assayNames(.internalAssay(.subsets(x)[[name]])))
-      holder <- name
+  if (grepl("/", parentAssay, fixed = TRUE)) {
+    parts <- .splitQualified(parentAssay)
+    if (!is.null(parts) && parts[1] %in% subsetNames(x))
+      return(parts[1])
+    return(NULL)
   }
-  holder
+  holders <- .assayHolders(x, parentAssay)
+  if (length(holders) > 1)
+    stop("The parent '", parentAssay, "' is stored in subsets ",
+         paste0("'", holders, "'", collapse = ", "), ".")
+  if (length(holders) == 1)
+    return(holders)
+  NULL
+}
+
+# Subset names from the outermost container down to subsetName
+.subsetChain <- function(x, subsetName) {
+  chain <- subsetName
+  for (step in seq_len(subsetCount(x) + 1)) {
+    parent <- .parentSubsetName(x, .parentAssay(.subsets(x)[[chain[1]]]))
+    if (is.null(parent))
+      return(chain)
+    chain <- c(parent, chain)
+  }
+  stop("The parent chain of '", subsetName, "' does not lead to a main ",
+       "assay.")
+}
+
+# Assays visible in a subset: a named vector from assay name to where it is
+# stored, "" for the main object or a subset name. Each subset's own
+# assays hide those of the same name linked from further up the chain.
+.assayOwners <- function(x, subsetName) {
+  owners <- rep("", length(assayNames(x)))
+  names(owners) <- assayNames(x)
+  for (subset in .subsetChain(x, subsetName)) {
+    own <- assayNames(.internalAssay(.subsets(x)[[subset]]))
+    owners[own] <- subset
+  }
+  owners
+}
+
+# Indices of a subset within the rows or columns of container (a subset
+# name, or NULL for the main object). getIndices is .rowIndices or
+# .colIndices.
+.indicesIn <- function(x, subsetName, container, getIndices) {
+  chain <- .subsetChain(x, subsetName)
+  start <- if (is.null(container)) 0L else match(container, chain)
+  below <- chain[seq_along(chain) > start]
+  indices <- getIndices(.subsets(x)[[subsetName]])
+  for (subset in rev(below)[-1])
+    indices <- getIndices(.subsets(x)[[subset]])[indices]
+  indices
+}
+
+# An assay as seen in a subset: its own, or a view of the nearest
+# container up the chain that stores it, sliced to the subset
+.subsetAssayView <- function(x, subsetName, assayName, withDimnames = TRUE) {
+  owners <- .assayOwners(x, subsetName)
+  if (!assayName %in% names(owners))
+    stop("'", assayName, "' is not an assay of subset '", subsetName, "'.")
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  owner <- owners[[assayName]]
+  if (owner == subsetName)
+    return(assay(internal, assayName, withDimnames = withDimnames))
+  if (owner == "") {
+    container <- NULL
+    source <- assay(x, assayName, withDimnames = FALSE)
+  } else {
+    container <- owner
+    ownerInternal <- .internalAssay(.subsets(x)[[owner]])
+    source <- assay(ownerInternal, assayName, withDimnames = FALSE)
+  }
+  rows <- .indicesIn(x, subsetName, container, .rowIndices)
+  cols <- .indicesIn(x, subsetName, container, .colIndices)
+  out <- source[rows, cols, drop = FALSE]
+  if (withDimnames && !is.null(rownames(internal)))
+    rownames(out) <- rownames(internal)
+  if (withDimnames && !is.null(colnames(internal)))
+    colnames(out) <- colnames(internal)
+  out
+}
+
+# The name of a subset's primary assay: the assay its parentAssay refers
+# to, followed through parent subsets ("filtered" for a subset of subset
+# "clean" whose own parent is "filtered/decontaminated" is
+# "decontaminated")
+.primaryAssayName <- function(x, subsetName) {
+  for (subset in rev(.subsetChain(x, subsetName))) {
+    parent <- .parentAssay(.subsets(x)[[subset]])
+    if (is.null(parent) || !parent %in% subsetNames(x)
+        || parent %in% assayNames(x))
+      break
+  }
+  if (is.null(parent))
+    return("counts")
+  parts <- .splitQualified(parent)
+  if (is.null(parts) || parent %in% assayNames(x))
+    return(parent)
+  parts[2]
+}
+
+# Rewrites parents recorded as a bare stored-assay name, in objects saved
+# before parents were qualified, to "subset/assay", so that later subsets
+# or assays with that name can't change what they point to
+.qualifyParents <- function(x) {
+  for (name in subsetNames(x)) {
+    subset <- .subsets(x)[[name]]
+    parent <- .parentAssay(subset)
+    bare <- !is.null(parent) && !parent %in% c(assayNames(x), subsetNames(x))
+    if (!bare || grepl("/", parent, fixed = TRUE))
+      next
+    holders <- .assayHolders(x, parent)
+    if (length(holders) != 1)
+      next
+    .subsets(x)[[name]] <- AssaySubset(
+      subsetName = .subsetName(subset),
+      rowIndices = .rowIndices(subset),
+      colIndices = .colIndices(subset),
+      parentAssay = paste0(holders, "/", parent),
+      internalAssay = .internalAssay(subset)
+    )
+  }
+  x
 }
 
 # Converts indices relative to parentAssay into positions in the main
@@ -920,8 +1094,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 .owningSubset <- function(x, subsetName) {
   if (subsetName %in% subsetNames(x))
     return(subsetName)
-  if (subsetName %in% subsetAssayNames(x))
-    return(.getParentAssayName(x, subsetName))
+  ref <- .resolveAssay(x, subsetName)
+  if (!is.null(ref) && ref$kind == "visible")
+    return(ref$subset)
   .isSubset(x, subsetName)
 }
 
@@ -969,7 +1144,11 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     stop("A subset with the specified 'subsetName' parameter already exists
          in the object. Subset names must be unique.")
 
-  if (subsetName %in% c(assayNames(x), subsetAssayNames(x)))
+  if (grepl("/", subsetName, fixed = TRUE))
+    stop("'subsetName' can't contain '/', which separates a subset from an ",
+         "assay name.")
+
+  if (subsetName %in% assayNames(x))
     stop("'subsetName' must differ from the names of existing assays; '",
          subsetName, "' is already an assay name.")
   
