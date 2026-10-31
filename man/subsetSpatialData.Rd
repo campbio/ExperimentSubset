@@ -4,8 +4,8 @@
 \alias{subsetSpatialData}
 \alias{subsetSpatialData<-}
 \alias{subsetSpatialData,SubsetSpatialExperiment,character-method}
-\alias{subsetSpatialData<-,SubsetSpatialExperiment,character,data.frame-method}
-\title{Accessor method for spatialData from subsets in ExperimentSubset objects}
+\alias{subsetSpatialData<-,SubsetSpatialExperiment,character-method}
+\title{Deprecated: spatialData of subsets in ExperimentSubset objects}
 \usage{
 subsetSpatialData(x, subsetName, parentSpatialData)
 
@@ -13,7 +13,7 @@ subsetSpatialData(x, subsetName) <- value
 
 \S4method{subsetSpatialData}{SubsetSpatialExperiment,character}(x, subsetName, parentSpatialData)
 
-\S4method{subsetSpatialData}{SubsetSpatialExperiment,character,data.frame}(x, subsetName) <- value
+\S4method{subsetSpatialData}{SubsetSpatialExperiment,character}(x, subsetName) <- value
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
@@ -24,15 +24,23 @@ subsetSpatialData(x, subsetName) <- value
 \item{parentSpatialData}{\code{logical(1)} Logical value indicating if parent
 spatialData should be combined or not. Default \code{FALSE}.}
 
-\item{value}{Input \code{data.frame} to store.}
+\item{value}{Ignored: the setter is defunct.}
 }
 \value{
-The \code{spatialData} from input object.
-
-Input object with \code{spatialData} stored.
+The \code{spatialData} from input object, with a deprecation
+  warning. The setter fails with an error.
 }
 \description{
-Get \code{spatialData} from a subset.
-
-Set \code{spatialData} to a subset.
+\code{subsetSpatialData()} and
+  \code{spatialData(x, subsetName =)} are deprecated, and
+  \code{subsetSpatialData<-} is defunct, because
+  \code{spatialData()} and \code{spatialData<-} are deprecated in
+  SpatialExperiment, which now keeps these columns in \code{colData}.
+  Use \code{subsetColData(x, subsetName, parentColData = TRUE)} to get
+  them, and \code{subsetColData(x, subsetName) <- value} to store a
+  subset's own columns. The getters will be defunct in the next
+  release.
+}
+\seealso{
+\code{\link{subsetColData}}
 }

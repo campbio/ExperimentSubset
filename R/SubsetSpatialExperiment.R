@@ -600,7 +600,8 @@ setMethod(
 #' @rdname subsetSpatialData
 setReplaceMethod(
   f = "subsetSpatialData",
-  signature = c(x = "SubsetSpatialExperiment", subsetName = "character", value = "data.frame"),
+  signature = c(x = "SubsetSpatialExperiment", subsetName = "character",
+                value = "ANY"),
   definition = function(x, subsetName, value)
   {
     .subsetSpatialData(x, subsetName) <- value
