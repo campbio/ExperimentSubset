@@ -1449,6 +1449,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 .rows <- function(x, rows, assayName){
   parent <- assay(x, withDimnames = TRUE, assayName)
   dimR <- nrow(parent)
+  if (dimR == 0)
+    stop("Parent '", assayName, "' has no rows, so a subset can't be made ",
+         "from it.")
   if (is.character(rows)) {
     if (is.null(rownames(parent)))
       stop("'rows' are given as names, but the parent assay has no row ",
@@ -1482,6 +1485,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 .cols <- function(x, cols, assayName){
   parent <- assay(x, withDimnames = TRUE, assayName)
   dimC <- ncol(parent)
+  if (dimC == 0)
+    stop("Parent '", assayName, "' has no columns, so a subset can't be ",
+         "made from it.")
   if (is.character(cols)) {
     if (is.null(colnames(parent)))
       stop("'cols' are given as names, but the parent assay has no column ",

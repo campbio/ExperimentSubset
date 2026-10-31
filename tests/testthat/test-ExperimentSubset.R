@@ -1865,3 +1865,25 @@ testthat::test_that("[ remaps subsets made from a stored assay (#4)", {
   testthat::expect_equal(as.matrix(assay(kept, "fromDoubled")),
                          example$counts[3:5, 2:4] * 2)
 })
+
+testthat::test_that("createSubset says when the parent is empty (#68)", {
+  example <- bracketExample()
+  es <- example$es
+
+  noRows <- es[6:10, ]
+  testthat::expect_error(createSubset(noRows, "child", parentAssay = "s1"),
+                         "Parent 's1' has no rows")
+  testthat::expect_error(createSubset(noRows, "child", rows = 1,
+                                      parentAssay = "s1"),
+                         "Parent 's1' has no rows")
+  testthat::expect_error(createSubset(noRows, "child", rows = "g1",
+                                      parentAssay = "s1"),
+                         "Parent 's1' has no rows")
+
+  noCols <- es[, 9:20]
+  testthat::expect_error(createSubset(noCols, "child", parentAssay = "s1"),
+                         "Parent 's1' has no columns")
+  testthat::expect_error(createSubset(noCols, "child", cols = 1,
+                                      parentAssay = "s1"),
+                         "Parent 's1' has no columns")
+})
