@@ -32,8 +32,9 @@ getSubsetExperiment(x, subsetName, parentData = TRUE)
 \item{parentData}{\code{logical(1)} Include the main object's rowData and
 colData columns for the subset's rows and columns, as with
 \code{parentRowData} and \code{parentColData}. They are marked so that
-\code{setSubsetExperiment} doesn't store copies of them. Default
-\code{TRUE}.}
+\code{setSubsetExperiment} doesn't store copies of them. A subset's own
+column hides the main object's column of the same name, with a message
+if their values differ. Default \code{TRUE}.}
 }
 \value{
 An object of the main object's class with the subset's rows and

@@ -321,7 +321,9 @@ setGeneric(
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{rowData} from.
 #' @param parentRowData \code{logical(1)} Logical value indicating if parent
-#'   rowData should be combined or not. Default \code{FALSE}.
+#'   rowData should be combined or not. A subset's own column hides the
+#'   main object's column of the same name, with a message if their values
+#'   differ. Default \code{FALSE}.
 #' @return The \code{rowData} from input object.
 #' @rdname subsetRowData
 #' @importMethodsFrom SingleCellExperiment rowData
@@ -349,7 +351,9 @@ setGeneric(
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{colData} from.
 #' @param parentColData \code{logical(1)} Logical value indicating if parent
-#'   colData should be combined or not. Default \code{FALSE}.
+#'   colData should be combined or not. A subset's own column hides the
+#'   main object's column of the same name, with a message if their values
+#'   differ. Default \code{FALSE}.
 #' @return The \code{colData} from input object.
 #' @rdname subsetColData
 #' @importMethodsFrom SingleCellExperiment colData
@@ -564,8 +568,9 @@ setGeneric(
 #' @param parentData \code{logical(1)} Include the main object's rowData and
 #'   colData columns for the subset's rows and columns, as with
 #'   \code{parentRowData} and \code{parentColData}. They are marked so that
-#'   \code{setSubsetExperiment} doesn't store copies of them. Default
-#'   \code{TRUE}.
+#'   \code{setSubsetExperiment} doesn't store copies of them. A subset's own
+#'   column hides the main object's column of the same name, with a message
+#'   if their values differ. Default \code{TRUE}.
 #' @return An object of the main object's class with the subset's rows and
 #'   columns and row and column names. Its assays are every assay the subset
 #'   sees, its own and those linked from its parent, under their names, with
