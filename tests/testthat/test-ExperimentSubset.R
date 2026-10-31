@@ -714,6 +714,16 @@ testthat::test_that("Subset spatialData is deprecated, its setter defunct", {
   testthat::expect_equal(s1Data$region, letters[2:5])
   # the main object's spatialData is SpatialExperiment's, with no warning
   testthat::expect_warning(suppressMessages(spatialData(es)), NA)
+  # one warning, without SpatialExperiment's own notes as well
+  testthat::expect_message(
+    suppressWarnings(subsetSpatialData(es, "s1", parentSpatialData = TRUE)),
+    NA
+  )
+  # a missing subset is an error, before any deprecation warning
+  testthat::expect_warning(
+    testthat::expect_error(subsetSpatialData(es, "s9"), "does not exist"),
+    NA
+  )
 
   # the setter fails clearly, for both kinds of data frame
   testthat::expect_error(
@@ -722,6 +732,11 @@ testthat::test_that("Subset spatialData is deprecated, its setter defunct", {
   )
   testthat::expect_error(
     subsetSpatialData(es, "s1") <- DataFrame(region = letters[1:4]),
+    "defunct"
+  )
+  # and for a subset given by number
+  testthat::expect_error(
+    subsetSpatialData(es, 1) <- data.frame(region = letters[1:4]),
     "defunct"
   )
 })

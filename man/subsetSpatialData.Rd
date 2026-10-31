@@ -4,7 +4,7 @@
 \alias{subsetSpatialData}
 \alias{subsetSpatialData<-}
 \alias{subsetSpatialData,SubsetSpatialExperiment,character-method}
-\alias{subsetSpatialData<-,SubsetSpatialExperiment,character-method}
+\alias{subsetSpatialData<-,SubsetSpatialExperiment-method}
 \title{Deprecated: spatialData of subsets in ExperimentSubset objects}
 \usage{
 subsetSpatialData(x, subsetName, parentSpatialData)
@@ -13,7 +13,7 @@ subsetSpatialData(x, subsetName) <- value
 
 \S4method{subsetSpatialData}{SubsetSpatialExperiment,character}(x, subsetName, parentSpatialData)
 
-\S4method{subsetSpatialData}{SubsetSpatialExperiment,character}(x, subsetName) <- value
+\S4method{subsetSpatialData}{SubsetSpatialExperiment}(x, subsetName) <- value
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
@@ -36,10 +36,11 @@ The \code{spatialData} from input object, with a deprecation
   \code{subsetSpatialData<-} is defunct, because
   \code{spatialData()} and \code{spatialData<-} are deprecated in
   SpatialExperiment, which now keeps these columns in \code{colData}.
-  Use \code{subsetColData(x, subsetName)} to get them, with
-  \code{parentColData = TRUE} to include the main object's columns, and
-  \code{subsetColData(x, subsetName) <- DataFrame(value)} to store a
-  subset's own columns. The getters will be defunct in the next
+  Use \code{subsetColData(x, subsetName)} to get them, which returns
+  all of the subset's colData columns, with
+  \code{parentColData = TRUE} to include the main object's, and
+  \code{colData(x, subsetName = "name")$column <- values} to add a
+  column to a subset. The getters will be defunct in the next
   release.
 }
 \seealso{

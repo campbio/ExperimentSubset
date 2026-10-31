@@ -1306,15 +1306,15 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 # Used by both subsetSpatialData() and spatialData(x, subsetName =), which
 # are deprecated in step with SpatialExperiment's spatialData() (#34)
 .subsetSpatialData <- function(x, subsetName, parentSpatialData){
+  .isSubset(x, subsetName)
   msg <- paste0(
     "subsetSpatialData() and spatialData(x, subsetName =) are deprecated, ",
     "as is spatialData() in SpatialExperiment, which keeps these columns ",
-    "in colData. Use subsetColData(x, subsetName) instead, with ",
-    "parentColData = TRUE to include the main object's columns.\n",
-    "See help(\"Deprecated\")"
+    "in colData. Use subsetColData(x, subsetName) instead, which returns ",
+    "all of the subset's colData columns, with parentColData = TRUE to ",
+    "include the main object's.\nSee help(\"Deprecated\")"
   )
   .Deprecated(msg = msg)
-  .isSubset(x, subsetName)
   if(missing(parentSpatialData)
      || is.null(parentSpatialData))
     parentSpatialData = FALSE
@@ -1323,9 +1323,11 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   out <- S4Vectors::DataFrame(row.names = as.character(seq_len(nSpots)))
   if(parentSpatialData) {
     rootCols <- .rootIndices(x, subsetName, .colIndices)
-    out <- spatialData(x)[rootCols, , drop = FALSE]
+    # SpatialExperiment's note repeats the warning above
+    out <- suppressMessages(spatialData(x))[rootCols, , drop = FALSE]
   }
-  subsetSpatialData <- spatialData(.internalAssay(.subsets(x)[[subsetName]]))
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  subsetSpatialData <- suppressMessages(spatialData(internal))
   if(ncol(subsetSpatialData) > 0)
     out <- cbind(out, subsetSpatialData)
   # the subset's own column names, which subsetColnames<- may have changed
@@ -1353,8 +1355,8 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 '.subsetSpatialData<-' <- function(x, subsetName, value){
   msg <- paste0(
     "subsetSpatialData<- is defunct, as spatialData<- is deprecated in ",
-    "SpatialExperiment. Store the columns in the subset's colData with ",
-    "subsetColData(x, subsetName) <- DataFrame(value) instead.\n",
+    "SpatialExperiment. Add each column to the subset's colData instead, ",
+    "with colData(x, subsetName = \"name\")$column <- values.\n",
     "See help(\"Defunct\")"
   )
   .Defunct(msg = msg)
