@@ -40,7 +40,9 @@ getSubsetExperiment(x, subsetName, parentData = TRUE)
   `logical(1)` Include the main object's rowData and colData columns for
   the subset's rows and columns, as with `parentRowData` and
   `parentColData`. They are marked so that `setSubsetExperiment` doesn't
-  store copies of them. Default `TRUE`.
+  store copies of them. A subset's own column hides the main object's
+  column of the same name, with a message if their values differ.
+  Default `TRUE`.
 
 ## Value
 

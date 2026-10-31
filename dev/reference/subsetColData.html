@@ -9,7 +9,7 @@ Set colData to a subset."><meta name="robots" content="noindex"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.20</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.21</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,7 +96,9 @@ Set colData to a subset."><meta name="robots" content="noindex"></head><body>
 
 <dt id="arg-parentcoldata">parentColData<a class="anchor" aria-label="anchor" href="#arg-parentcoldata"></a></dt>
 <dd><p><code>logical(1)</code> Logical value indicating if parent
-colData should be combined or not. Default <code>FALSE</code>.</p></dd>
+colData should be combined or not. A subset's own column hides the
+main object's column of the same name, with a message if their values
+differ. Default <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>

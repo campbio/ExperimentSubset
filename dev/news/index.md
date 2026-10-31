@@ -1,5 +1,20 @@
 # Changelog
 
+## ExperimentSubset 1.23.21 (2026-10-31)
+
+- `rowData(x, subsetName = , parentRowData = TRUE)`,
+  `colData(x, subsetName = , parentColData = TRUE)`,
+  [`subsetRowData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetRowData.md),
+  [`subsetColData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md)
+  and `getSubsetExperiment(parentData = TRUE)` no longer return two
+  columns with the same name when a subset has its own column with the
+  name of a main-object column, of which `$` and `[[` returned the main
+  object’s. The subset’s column now hides the main object’s, and comes
+  after the main object’s columns, with a message if their values
+  differ. A SpatialExperiment subset has one `sample_id` column, the
+  main object’s current one
+  ([\#57](https://github.com/campbio/ExperimentSubset/issues/57))
+
 ## ExperimentSubset 1.23.20 (2026-10-31)
 
 - `stats` is no longer listed in Suggests: it is a base package that R

@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.20</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.21</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -89,8 +89,9 @@
 <dd><p><code>logical(1)</code> Include the main object's rowData and
 colData columns for the subset's rows and columns, as with
 <code>parentRowData</code> and <code>parentColData</code>. They are marked so that
-<code>setSubsetExperiment</code> doesn't store copies of them. Default
-<code>TRUE</code>.</p></dd>
+<code>setSubsetExperiment</code> doesn't store copies of them. A subset's own
+column hides the main object's column of the same name, with a message
+if their values differ. Default <code>TRUE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

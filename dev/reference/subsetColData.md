@@ -52,7 +52,9 @@ subsetColData(x, subsetName, parentColData)
 - parentColData:
 
   `logical(1)` Logical value indicating if parent colData should be
-  combined or not. Default `FALSE`.
+  combined or not. A subset's own column hides the main object's column
+  of the same name, with a message if their values differ. Default
+  `FALSE`.
 
 - value:
 
