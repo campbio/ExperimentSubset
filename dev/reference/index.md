@@ -61,6 +61,12 @@
   objects
 - [`subsetAssayCount()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetAssayCount.md)
   : Count method for subset assays in ExperimentSubset objects
+- [`` `[`( ``*`<SubsetRangedSummarizedExperiment>`*`,`*`<ANY>`*`,`*`<ANY>`*`,`*`<ANY>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-subsetting.md)
+  [`` `[`( ``*`<SubsetSingleCellExperiment>`*`,`*`<ANY>`*`,`*`<ANY>`*`,`*`<ANY>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-subsetting.md)
+  [`` `[`( ``*`<SubsetSummarizedExperiment>`*`,`*`<ANY>`*`,`*`<ANY>`*`,`*`<ANY>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-subsetting.md)
+  [`` `[`( ``*`<SubsetSpatialExperiment>`*`,`*`<ANY>`*`,`*`<ANY>`*`,`*`<ANY>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-subsetting.md)
+  [`` `[`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<ANY>`*`,`*`<ANY>`*`,`*`<ANY>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-subsetting.md)
+  : Subset an ExperimentSubset object by rows or columns
 
 ## Getting and setting subset data
 
