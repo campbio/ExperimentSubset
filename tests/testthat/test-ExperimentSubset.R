@@ -1731,3 +1731,137 @@ testthat::test_that("Linked assays with the same values count as unchanged", {
   es <- setSubsetExperiment(es, "s1", sub)
   testthat::expect_equal(subsetAssayNames(es), "s1")
 })
+
+# A 10 x 20 object with subsets "s1" (rows 1:5, cols 1:8), "s2" (rows 6:10,
+# cols 9:20) and "s1a" (rows 2:4, cols 3:6 of s1), where s1 stores
+# "doubled", a colData column "tag" and a reducedDim "PCA"
+bracketExample <- function() {
+  counts <- matrix(as.numeric(seq_len(200)), nrow = 10,
+                   dimnames = list(paste0("g", 1:10), paste0("c", 1:20)))
+  es <- ExperimentSubset(SingleCellExperiment(list(counts = counts)))
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:8)
+  es <- createSubset(es, "s2", rows = 6:10, cols = 9:20)
+  es <- createSubset(es, "s1a", rows = 2:4, cols = 3:6, parentAssay = "s1")
+  es <- setSubsetAssay(es, "s1", counts[1:5, 1:8] * 2, "doubled")
+  colData(es, subsetName = "s1")$tag <- paste0("t", 1:8)
+  pca <- matrix(as.numeric(1:16), nrow = 8,
+                dimnames = list(paste0("c", 1:8), c("PC1", "PC2")))
+  reducedDim(es, "PCA", subsetName = "s1") <- pca
+  list(es = es, counts = counts, pca = pca)
+}
+
+testthat::test_that("[ keeps the rows of subsets that remain (#4)", {
+  example <- bracketExample()
+  es <- example$es
+  counts <- example$counts
+
+  kept <- es[3:10, ]
+  testthat::expect_equal(as.matrix(assay(kept, "s1")), counts[3:5, 1:8])
+  testthat::expect_equal(as.matrix(assay(kept, "s1/doubled")),
+                         counts[3:5, 1:8] * 2)
+  testthat::expect_equal(as.matrix(assay(kept, "s1a")), counts[3:4, 3:6])
+  testthat::expect_equal(as.matrix(assay(kept, "s2")), counts[6:10, 9:20])
+  testthat::expect_equal(subsetRownames(kept, "s1"), paste0("g", 3:5))
+
+  # logical, negative and name subscripts select the same rows
+  rowsKept <- rep(c(FALSE, TRUE), c(2, 8))
+  testthat::expect_equal(assay(es[rowsKept, ], "s1a"), assay(kept, "s1a"))
+  testthat::expect_equal(assay(es[-(1:2), ], "s1a"), assay(kept, "s1a"))
+  testthat::expect_equal(assay(es[paste0("g", 3:10), ], "s1a"),
+                         assay(kept, "s1a"))
+
+  # with no subscripts nothing changes
+  testthat::expect_equal(es[, ], es)
+
+  # a subset keeps its own order when the main object is reordered
+  reversed <- es[10:1, ]
+  testthat::expect_equal(as.matrix(assay(reversed, "s1")), counts[1:5, 1:8])
+  testthat::expect_equal(as.matrix(assay(reversed, "s1a")), counts[2:4, 3:6])
+  testthat::expect_equal(as.matrix(assay(reversed[1:3, ], "s1")),
+                         counts[character(0), 1:8, drop = FALSE])
+})
+
+testthat::test_that("[ keeps the columns of subsets that remain (#4)", {
+  example <- bracketExample()
+  es <- example$es
+  counts <- example$counts
+
+  kept <- es[, c(2, 5, 9, 10)]
+  testthat::expect_equal(as.matrix(assay(kept, "s1")), counts[1:5, c(2, 5)])
+  testthat::expect_equal(as.matrix(assay(kept, "s1/doubled")),
+                         counts[1:5, c(2, 5)] * 2)
+  testthat::expect_equal(as.matrix(assay(kept, "s1a")),
+                         counts[2:4, 5, drop = FALSE])
+  testthat::expect_equal(as.matrix(assay(kept, "s2")), counts[6:10, 9:10])
+  testthat::expect_equal(colData(kept, subsetName = "s1")$tag, c("t2", "t5"))
+  testthat::expect_equal(reducedDim(kept, "PCA", subsetName = "s1"),
+                         example$pca[c(2, 5), ])
+
+  both <- es[3:10, c(2, 5, 9, 10)]
+  testthat::expect_equal(as.matrix(assay(both, "s1")), counts[3:5, c(2, 5)])
+  testthat::expect_equal(subsetDim(both, "s1a"), c(2L, 1L))
+})
+
+testthat::test_that("[ keeps subsets left with no rows or columns (#4)", {
+  example <- bracketExample()
+  es <- example$es
+
+  firstRows <- es[1:4, ]
+  testthat::expect_equal(subsetNames(firstRows), subsetNames(es))
+  testthat::expect_equal(dim(assay(firstRows, "s2")), c(0L, 12L))
+  testthat::expect_equal(subsetDim(firstRows, "s2"), c(0L, 12L))
+  testthat::expect_equal(dim(assay(firstRows, "s1a")), c(3L, 4L))
+
+  lastCols <- es[, 9:20]
+  testthat::expect_equal(dim(assay(lastCols, "s1")), c(5L, 0L))
+  testthat::expect_equal(dim(assay(lastCols, "s1a")), c(3L, 0L))
+  testthat::expect_equal(dim(assay(lastCols, "s2")), c(5L, 12L))
+})
+
+testthat::test_that("[ remaps subsets in every Subset class (#4)", {
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:6)))
+  se <- SummarizedExperiment(list(counts = counts))
+  experiments <- list(
+    se,
+    as(se, "RangedSummarizedExperiment"),
+    TreeSummarizedExperiment(assays = list(counts = counts),
+                             rowTree = tinyTree),
+    SpatialExperiment(assays = list(counts = counts),
+                      sample_id = rep(c("A", "B"), each = 3),
+                      spatialCoords = cbind(x = 1:6, y = 1:6))
+  )
+  for (experiment in experiments) {
+    es <- ExperimentSubset(experiment)
+    es <- createSubset(es, "s1", rows = 2:5, cols = 1:3)
+    kept <- es[3:10, 2:6]
+    testthat::expect_s4_class(kept, class(es))
+    testthat::expect_equal(as.matrix(assay(kept, "s1")), counts[3:5, 2:3])
+    # spatial coordinates of the subset follow its columns
+    if (is(experiment, "SpatialExperiment"))
+      testthat::expect_equal(unname(subsetSpatialCoords(kept, "s1")[, "x"]),
+                             c(2, 3))
+  }
+})
+
+testthat::test_that("[ keeps one copy of repeated rows in subsets (#4)", {
+  example <- bracketExample()
+  repeated <- example$es[c(3, 3, 4, 1), ]
+  testthat::expect_equal(subsetRownames(repeated, "s1"),
+                         paste0("g", c(1, 3, 4)))
+  testthat::expect_equal(as.matrix(assay(repeated, "s1")),
+                         example$counts[c(1, 3, 4), 1:8])
+  testthat::expect_equal(as.matrix(assay(repeated, "s1a")),
+                         example$counts[3:4, 3:6])
+})
+
+testthat::test_that("[ remaps subsets made from a stored assay (#4)", {
+  example <- bracketExample()
+  es <- createSubset(example$es, "fromDoubled", rows = 2:5, cols = 1:4,
+                     parentAssay = "s1/doubled")
+  kept <- es[3:10, 2:20]
+  testthat::expect_equal(as.matrix(assay(kept, "fromDoubled")),
+                         example$counts[3:5, 2:4] * 2)
+})

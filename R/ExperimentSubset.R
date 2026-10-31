@@ -848,6 +848,103 @@ ExperimentSubset <- function(x,
   .toRootIndices(x, .parentAssay(subset), getIndices(subset), getIndices)
 }
 
+#' @title Subset an ExperimentSubset object by rows or columns
+#' @description \code{x[i, j]} keeps rows \code{i} and columns \code{j} of
+#'   the main object, as for the class it extends, and also updates every
+#'   subset. Each subset keeps the rows and columns that remain, in its own
+#'   order, together with its own assays, rowData, colData, reducedDims and
+#'   altExps. A subset none of whose rows or columns remain is kept with no
+#'   rows or no columns. If \code{i} or \code{j} repeats a row or column,
+#'   subsets keep one copy of it.
+#' @param x An \code{ExperimentSubset} object.
+#' @param i,j Rows and columns to keep: positions, names or logical vectors,
+#'   as for the class \code{x} extends. Leave one out to keep all rows or
+#'   all columns.
+#' @param ... Passed on to the method of the class \code{x} extends.
+#' @param drop Ignored, as for \code{SummarizedExperiment}. Default
+#'   \code{TRUE}.
+#' @return An object of the same class as \code{x}.
+#' @name ExperimentSubset-subsetting
+#' @examples
+#' # an object with 10 genes and 20 cells
+#' set.seed(1)
+#' counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts) <- paste0("gene", 1:10)
+#' colnames(counts) <- paste0("cell", 1:20)
+#' es <- ExperimentSubset(list(counts = counts))
+#' # a subset of the first 5 genes and the first 8 cells
+#' es <- createSubset(es, subsetName = "first", rows = 1:5, cols = 1:8)
+#' # keep genes 3 to 10 of the main object
+#' esSmaller <- es[3:10, ]
+#' # the subset keeps genes 3 to 5
+#' subsetRownames(esSmaller, subsetName = "first")
+NULL
+
+# Updates the subsets of out, the result of x[i, j], to the rows and
+# columns that remain; i or j may be missing. Subsets are visited parents
+# first, so each is matched against what remains of its parent.
+.remapSubsets <- function(x, out, i, j) {
+  if (missing(i) && missing(j))
+    return(out)
+  rows <- NULL
+  if (!missing(i)) {
+    positions <- seq_len(nrow(x))
+    names(positions) <- rownames(x)
+    rows <- S4Vectors::normalizeSingleBracketSubscript(i, positions)
+  }
+  cols <- NULL
+  if (!missing(j)) {
+    positions <- seq_len(ncol(x))
+    names(positions) <- colnames(x)
+    cols <- S4Vectors::normalizeSingleBracketSubscript(j, positions)
+  }
+  x <- .qualifyParents(x)
+  chains <- lapply(subsetNames(x), function(name) .subsetChain(x, name))
+  names(chains) <- subsetNames(x)
+  depth <- vapply(chains, length, integer(1))
+  # positions in each subset's old rows and columns that remain, in order;
+  # NULL when all remain
+  keptRows <- list()
+  keptCols <- list()
+  for (name in names(chains)[order(depth)]) {
+    subset <- .subsets(x)[[name]]
+    chain <- chains[[name]]
+    container <- if (length(chain) > 1) chain[length(chain) - 1] else NULL
+    parentRows <- if (is.null(container)) rows else keptRows[[container]]
+    parentCols <- if (is.null(container)) cols else keptCols[[container]]
+    newRows <- .keepIndices(.rowIndices(subset), parentRows)
+    newCols <- .keepIndices(.colIndices(subset), parentCols)
+    keptRows[name] <- list(newRows$kept)
+    keptCols[name] <- list(newCols$kept)
+    internal <- .internalAssay(subset)
+    internalRows <- newRows$kept
+    if (is.null(internalRows))
+      internalRows <- seq_len(nrow(internal))
+    internalCols <- newCols$kept
+    if (is.null(internalCols))
+      internalCols <- seq_len(ncol(internal))
+    .subsets(out)[[name]] <- AssaySubset(
+      subsetName = .subsetName(subset),
+      rowIndices = newRows$indices,
+      colIndices = newCols$indices,
+      parentAssay = .parentAssay(subset),
+      internalAssay = internal[internalRows, internalCols]
+    )
+  }
+  out
+}
+
+# Remaps indices into a container whose remaining positions, in their new
+# order, are parentKept (NULL when all remain in place). Returns the new
+# indices and the positions in indices that remain (NULL when all do).
+.keepIndices <- function(indices, parentKept) {
+  if (is.null(parentKept))
+    return(list(indices = indices, kept = NULL))
+  newIndices <- match(indices, parentKept)
+  kept <- which(!is.na(newIndices))
+  list(indices = newIndices[kept], kept = kept)
+}
+
 .subsetRowData <- function(x, subsetName, parentRowData){
   .isSubset(x, subsetName)
   if(missing(parentRowData)

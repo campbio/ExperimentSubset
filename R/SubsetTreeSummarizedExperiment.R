@@ -576,3 +576,13 @@ setMethod(
     .subsetColLinkData(x, subsetName, parentColLinkData)
   }
 )
+
+#' @rdname ExperimentSubset-subsetting
+setMethod(
+  f = "[",
+  signature = signature(x = "SubsetTreeSummarizedExperiment"),
+  definition = function(x, i, j, ..., drop = TRUE) {
+    out <- callNextMethod()
+    .remapSubsets(x, out, i, j)
+  }
+)

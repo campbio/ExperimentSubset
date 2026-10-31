@@ -348,3 +348,13 @@ setMethod(
     .setSubsetExperiment(x, subsetName, value, unlink = unlink)
   }
 )
+
+#' @rdname ExperimentSubset-subsetting
+setMethod(
+  f = "[",
+  signature = signature(x = "SubsetRangedSummarizedExperiment"),
+  definition = function(x, i, j, ..., drop = TRUE) {
+    out <- callNextMethod()
+    .remapSubsets(x, out, i, j)
+  }
+)

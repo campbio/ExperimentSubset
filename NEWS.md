@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.22 (2026-10-31)
+* `x[i, j]` now updates the subsets of `x`: each keeps the rows and columns of the main object that remain, in its own order, with its own assays, rowData, colData, reducedDims and altExps, and subsets of subsets follow what remains of their parent. A subset none of whose rows or columns remain is kept with no rows or no columns. Before, subsets kept their old row and column positions, so reading one failed with "subscript out of bounds" or, when the positions were still in range, silently returned the wrong rows or columns under the subset's names (#4)
+
 # ExperimentSubset 1.23.21 (2026-10-31)
 * `rowData(x, subsetName = , parentRowData = TRUE)`, `colData(x, subsetName = , parentColData = TRUE)`, `subsetRowData()`, `subsetColData()` and `getSubsetExperiment(parentData = TRUE)` no longer return two columns with the same name when a subset has its own column with the name of a main-object column, of which `$` and `[[` returned the main object's. The subset's column now hides the main object's, and comes after the main object's columns, with a message if their values differ. A SpatialExperiment subset has one `sample_id` column, the main object's current one (#57)
 
