@@ -217,8 +217,10 @@ Bioconductor build never installs these packages or sees the article.
   `_pkgdown.yml` or DESCRIPTION. Runs in
   `bioconductor/bioconductor_docker:devel`, installs the package and
   `Config/Needs/website`, builds with `PKGDOWN_DEV_MODE=devel` into `/dev/`,
-  and deploys with `target-folder: dev`. Until `master` has `_pkgdown.yml`
-  (below), it also builds the root, so the site isn't empty.
+  and deploys with `target-folder: dev`. If the site has no home page yet
+  (no release site, below), the first deploy adds a one-line home page that
+  sends readers to `/dev/`, so the root isn't empty; the release site
+  replaces it.
 - `release-site`: on `workflow_run` when "Sync stable branch" completes
   successfully, and on `workflow_dispatch`. The sync updates `master` with
   the bot token, and pushes made with it don't start workflows, but
@@ -329,7 +331,9 @@ step); whether `getSubsetExperiment()` output is accepted as-is by
 
 After 3.24 is released and the site work is merged to `devel`, a
 release-branch PR (base `RELEASE_3_24`) carries only site and documentation
-files: `_pkgdown.yml` (without the workflow article in its article list),
+files: `_pkgdown.yml` (without the workflow article in its article list,
+and without `getSubsetExperiment`/`setSubsetExperiment` in the reference
+index, since the release branch doesn't have them),
 `.github/workflows/pkgdown.yaml`, the `.Rbuildignore`/`.gitignore` entries,
 DESCRIPTION's `URL`, and the short vignette's "Learn more" links. No R code.
 The release version's z is bumped; the sync workflow updates `master`; the

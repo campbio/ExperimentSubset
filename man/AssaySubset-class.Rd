@@ -6,7 +6,7 @@
 \alias{.AssaySubset}
 \title{An S4 class to manage subset representation.}
 \description{
-An S4 class to manage subset representation.
+Used inside the \code{Subset*} classes; not for direct use.
 }
 \section{Slots}{
 
@@ -25,3 +25,4 @@ in the subset.}
 to store additional subset data.}
 }}
 
+\keyword{internal}
