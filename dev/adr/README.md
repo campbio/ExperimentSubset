@@ -38,4 +38,3 @@ why, is the point.
 |---|---|---|---|
 | [0001](0001-use-scrapper-in-tests-and-vignette.md) | Use scrapper in place of deprecated scran and scuttle functions | Accepted | 2026-10-21 |
 | [0002](0002-pkgdown-site-on-github-pages.md) | Publish a pkgdown site: release at the root, devel under /dev/ | Accepted | 2026-10-25 |
-| [0003](0003-drop-stats-from-suggests.md) | Drop stats from Suggests | Proposed | 2026-10-31 |
