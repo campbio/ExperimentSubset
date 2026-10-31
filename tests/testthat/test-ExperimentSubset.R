@@ -794,6 +794,72 @@ testthat::test_that("Writing back parent rowData or colData stores no copies", {
   testthat::expect_equal(colnames(rowData(es, subsetName = "s1")), "rank")
 })
 
+testthat::test_that("A subset's own column hides the main object's (#57)", {
+  sce <- simSce
+  colData(sce)$score <- 0
+  colData(sce)$batch <- rep(c("A", "B"), length.out = ncol(sce))
+  rowData(sce)$rank <- 0
+  rowData(sce)$symbol <- rownames(sce)
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:8,
+                     parentAssay = "counts")
+  colData(es, subsetName = "s1") <- DataFrame(score = 1:8)
+  rowData(es, subsetName = "s1") <- DataFrame(rank = 5:1)
+
+  # different values: one column, the subset's, with a message
+  testthat::expect_message(
+    s1ColData <- colData(es, subsetName = "s1", parentColData = TRUE),
+    regexp = "score"
+  )
+  testthat::expect_equal(colnames(s1ColData), c("batch", "score"))
+  testthat::expect_equal(s1ColData$score, 1:8)
+  testthat::expect_equal(s1ColData$batch, colData(sce)$batch[1:8])
+  testthat::expect_message(
+    s1RowData <- rowData(es, subsetName = "s1", parentRowData = TRUE),
+    regexp = "rank"
+  )
+  testthat::expect_equal(colnames(s1RowData), c("symbol", "rank"))
+  testthat::expect_equal(s1RowData$rank, 5:1)
+
+  # the extracted object has the same columns
+  s1 <- suppressMessages(getSubsetExperiment(es, "s1"))
+  testthat::expect_equal(colnames(colData(s1)), c("batch", "score"))
+  testthat::expect_equal(s1$score, 1:8)
+  testthat::expect_equal(colnames(rowData(s1)), c("symbol", "rank"))
+
+  # writing back keeps the subset's values
+  suppressMessages(colData(es, subsetName = "s1") <- s1ColData)
+  testthat::expect_equal(colData(es, subsetName = "s1")$score, 1:8)
+  testthat::expect_equal(colData(es)$score, rep(0, ncol(sce)))
+
+  # the same values: one column, and no message
+  colData(es, subsetName = "s1") <- DataFrame(score = rep(0, 8))
+  testthat::expect_message(
+    s1ColData <- colData(es, subsetName = "s1", parentColData = TRUE),
+    NA
+  )
+  testthat::expect_equal(sum(colnames(s1ColData) == "score"), 1L)
+})
+
+testthat::test_that("SpatialExperiment subsets have one sample_id (#57)", {
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(paste0("gene", 1:10),
+                                   paste0("spot", 1:6)))
+  spe <- SpatialExperiment(assays = list(counts = counts),
+                           sample_id = rep(c("A", "B"), each = 3),
+                           spatialCoords = cbind(x = 1:6, y = 1:6))
+  es <- ExperimentSubset(spe)
+  es <- createSubset(es, "s1", cols = 2:5)
+  testthat::expect_message(
+    s1ColData <- colData(es, subsetName = "s1", parentColData = TRUE),
+    NA
+  )
+  testthat::expect_equal(sum(colnames(s1ColData) == "sample_id"), 1L)
+  testthat::expect_equal(s1ColData$sample_id, c("A", "A", "B", "B"))
+  s1 <- getSubsetExperiment(es, "s1")
+  testthat::expect_equal(sum(colnames(colData(s1)) == "sample_id"), 1L)
+})
+
 testthat::test_that("Subset data setters take NULL or a data.frame", {
   sce <- sce_chcl
   rowData(sce)$symbol <- rownames(sce)

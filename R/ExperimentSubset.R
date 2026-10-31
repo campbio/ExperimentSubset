@@ -858,6 +858,7 @@ ExperimentSubset <- function(x,
   if (parentRowData) {
     rootRows <- .rootIndices(x, subsetName, .rowIndices)
     parentRows <- rowData(x)[rootRows, , drop = FALSE]
+    parentRows <- .hideParentColumns(parentRows, out, subsetName, "rowData")
     out <- .tagParentColumns(cbind(parentRows, out), ncol(parentRows))
     # the subset's own row names, which subsetRownames<- may have changed
     rownames(out) <- rownames(internal)
@@ -875,6 +876,7 @@ ExperimentSubset <- function(x,
   if (parentColData) {
     rootCols <- .rootIndices(x, subsetName, .colIndices)
     parentCols <- colData(x)[rootCols, , drop = FALSE]
+    parentCols <- .hideParentColumns(parentCols, out, subsetName, "colData")
     out <- .tagParentColumns(cbind(parentCols, out), ncol(parentCols))
     # the subset's own column names, which subsetColnames<- may have changed
     rownames(out) <- colnames(internal)
@@ -897,6 +899,34 @@ ExperimentSubset <- function(x,
   value <- .dropParentColumns(value, "rowData")
   rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
+}
+
+# The main object's columns without those the subset also has: a subset's
+# own column hides the main object's column of the same name (#57). A
+# message names the hidden columns whose values differ from the subset's,
+# but not exact copies such as a SpatialExperiment's sample_id
+.hideParentColumns <- function(parentData, own, subsetName, what) {
+  shared <- intersect(colnames(parentData), colnames(own))
+  differs <- vapply(shared, function(name) {
+    !.sameColumn(parentData[[name]], own[[name]])
+  }, logical(1))
+  if (any(differs))
+    message("Using subset '", subsetName, "''s own ", what, " columns, ",
+            "not the main object's, for: ",
+            paste(shared[differs], collapse = ", "),
+            ". Their values differ; the main object's are in ", what,
+            "(x).")
+  parentData[, !colnames(parentData) %in% shared, drop = FALSE]
+}
+
+# Whether two columns hold the same values, ignoring the names of atomic
+# vectors
+.sameColumn <- function(a, b) {
+  if (is.atomic(a))
+    a <- unname(a)
+  if (is.atomic(b))
+    b <- unname(b)
+  identical(a, b)
 }
 
 # Marks the first nParent columns of a subset's rowData or colData as
