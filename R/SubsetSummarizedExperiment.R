@@ -347,3 +347,13 @@ setReplaceMethod(
     return(x)
   }
 )
+
+#' @rdname ExperimentSubset-subsetting
+setMethod(
+  f = "[",
+  signature = signature(x = "SubsetSummarizedExperiment"),
+  definition = function(x, i, j, ..., drop = TRUE) {
+    out <- callNextMethod()
+    .remapSubsets(x, out, i, j)
+  }
+)

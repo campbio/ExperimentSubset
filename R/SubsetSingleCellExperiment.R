@@ -554,3 +554,13 @@ setMethod(
     SingleCellExperiment::reducedDimNames(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
+
+#' @rdname ExperimentSubset-subsetting
+setMethod(
+  f = "[",
+  signature = signature(x = "SubsetSingleCellExperiment"),
+  definition = function(x, i, j, ..., drop = TRUE) {
+    out <- callNextMethod()
+    .remapSubsets(x, out, i, j)
+  }
+)
