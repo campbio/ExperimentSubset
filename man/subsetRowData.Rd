@@ -47,7 +47,9 @@ subsetRowData(x, subsetName) <- value
 \code{rowData} to.}
 
 \item{parentRowData}{\code{logical(1)} Logical value indicating if parent
-rowData should be combined or not. Default \code{FALSE}.}
+rowData should be combined or not. A subset's own column hides the
+main object's column of the same name, with a message if their values
+differ. Default \code{FALSE}.}
 
 \item{value}{Input \code{DataFrame} to store.}
 }
