@@ -762,8 +762,9 @@ setGeneric(
 #'   \code{subsetSpatialData<-} is defunct, because
 #'   \code{spatialData()} and \code{spatialData<-} are deprecated in
 #'   SpatialExperiment, which now keeps these columns in \code{colData}.
-#'   Use \code{subsetColData(x, subsetName, parentColData = TRUE)} to get
-#'   them, and \code{subsetColData(x, subsetName) <- value} to store a
+#'   Use \code{subsetColData(x, subsetName)} to get them, with
+#'   \code{parentColData = TRUE} to include the main object's columns, and
+#'   \code{subsetColData(x, subsetName) <- DataFrame(value)} to store a
 #'   subset's own columns. The getters will be defunct in the next
 #'   release.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.

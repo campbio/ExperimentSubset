@@ -1309,8 +1309,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   msg <- paste0(
     "subsetSpatialData() and spatialData(x, subsetName =) are deprecated, ",
     "as is spatialData() in SpatialExperiment, which keeps these columns ",
-    "in colData. Use subsetColData(x, subsetName, parentColData = TRUE) ",
-    "instead.\nSee help(\"Deprecated\")"
+    "in colData. Use subsetColData(x, subsetName) instead, with ",
+    "parentColData = TRUE to include the main object's columns.\n",
+    "See help(\"Deprecated\")"
   )
   .Deprecated(msg = msg)
   .isSubset(x, subsetName)
@@ -1346,14 +1347,14 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 }
 
 # Defunct without a deprecation release: it failed for every value, since
-# SpatialExperiment's spatialData<- takes neither a data.frame nor, here,
-# a DataFrame (#34)
+# SpatialExperiment's spatialData<- takes no data.frame, and the method
+# took no DataFrame (#34)
 #' @importMethodsFrom SpatialExperiment spatialData<-
 '.subsetSpatialData<-' <- function(x, subsetName, value){
   msg <- paste0(
     "subsetSpatialData<- is defunct, as spatialData<- is deprecated in ",
     "SpatialExperiment. Store the columns in the subset's colData with ",
-    "subsetColData(x, subsetName) <- value instead.\n",
+    "subsetColData(x, subsetName) <- DataFrame(value) instead.\n",
     "See help(\"Defunct\")"
   )
   .Defunct(msg = msg)
