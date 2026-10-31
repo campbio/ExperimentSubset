@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.23 (2026-10-31)
+* `createSubset()` from a parent with no rows or no columns, such as a subset none of whose rows remain after `x[i, j]`, now says that the parent is empty ("Parent 's1' has no rows, so a subset can't be made from it."). Before, the error blamed the `rows` or `cols` argument, even when it was left at its default (#68)
+
 # ExperimentSubset 1.23.22 (2026-10-31)
 * `x[i, j]` now updates the subsets of `x`: each keeps the rows and columns of the main object that remain, in its own order, with its own assays, rowData, colData, reducedDims and altExps, and subsets of subsets follow what remains of their parent. A subset none of whose rows or columns remain is kept with no rows or no columns. Before, subsets kept their old row and column positions, so reading one failed with "subscript out of bounds" or, when the positions were still in range, silently returned the wrong rows or columns under the subset's names (#4)
 
