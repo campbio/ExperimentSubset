@@ -700,13 +700,17 @@ testthat::test_that("Subset spatialData is deprecated, its setter defunct", {
   # the getters warn, then return the main object's columns as before
   testthat::expect_warning(
     s1Data <- suppressMessages(
-      subsetSpatialData(es, "s1", parentSpatialData = TRUE)),
-    "deprecated")
+      subsetSpatialData(es, "s1", parentSpatialData = TRUE)
+    ),
+    "deprecated"
+  )
   testthat::expect_equal(s1Data$region, letters[2:5])
   testthat::expect_warning(
     s1Data <- suppressMessages(
-      spatialData(es, subsetName = "s1", parentSpatialData = TRUE)),
-    "deprecated")
+      spatialData(es, subsetName = "s1", parentSpatialData = TRUE)
+    ),
+    "deprecated"
+  )
   testthat::expect_equal(s1Data$region, letters[2:5])
   # the main object's spatialData is SpatialExperiment's, with no warning
   testthat::expect_warning(suppressMessages(spatialData(es)), NA)
@@ -714,10 +718,12 @@ testthat::test_that("Subset spatialData is deprecated, its setter defunct", {
   # the setter fails clearly, for both kinds of data frame
   testthat::expect_error(
     subsetSpatialData(es, "s1") <- data.frame(region = letters[1:4]),
-    "defunct")
+    "defunct"
+  )
   testthat::expect_error(
     subsetSpatialData(es, "s1") <- DataFrame(region = letters[1:4]),
-    "defunct")
+    "defunct"
+  )
 })
 
 testthat::test_that("reducedDim with subsetName works without a type", {
@@ -755,7 +761,8 @@ testthat::test_that("Links and spatialData of a subset keep its names", {
   # subsetSpatialData() is deprecated (#34)
   testthat::expect_warning(
     s1Data <- subsetSpatialData(es, "s1", parentSpatialData = FALSE),
-    "deprecated")
+    "deprecated"
+  )
   testthat::expect_equal(rownames(s1Data), spots[2:4])
 })
 
