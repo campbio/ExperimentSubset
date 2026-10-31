@@ -29,6 +29,7 @@ reference:
   - subsetSummary
   - subsetAssayNames
   - subsetAssayCount
+  - ExperimentSubset-subsetting
 - title: Getting and setting subset data
   contents:
   - getSubsetAssay
