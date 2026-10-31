@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.22</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.23</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,11 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.23" id="experimentsubset-12323-2026-10-31">ExperimentSubset 1.23.23 (2026-10-31)<a class="anchor" aria-label="anchor" href="#experimentsubset-12323-2026-10-31"></a></h2>
+<ul><li>
+<code><a href="../reference/createSubset.html">createSubset()</a></code> from a parent with no rows or no columns, such as a subset none of whose rows remain after <code>x[i, j]</code>, now says that the parent is empty (“Parent ‘s1’ has no rows, so a subset can’t be made from it.”). Before, the error blamed the <code>rows</code> or <code>cols</code> argument, even when it was left at its default (<a href="https://github.com/campbio/ExperimentSubset/issues/68" class="external-link">#68</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.22" id="experimentsubset-12322-2026-10-31">ExperimentSubset 1.23.22 (2026-10-31)<a class="anchor" aria-label="anchor" href="#experimentsubset-12322-2026-10-31"></a></h2>
 <ul><li>

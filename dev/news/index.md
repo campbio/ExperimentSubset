@@ -1,5 +1,15 @@
 # Changelog
 
+## ExperimentSubset 1.23.23 (2026-10-31)
+
+- [`createSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)
+  from a parent with no rows or no columns, such as a subset none of
+  whose rows remain after `x[i, j]`, now says that the parent is empty
+  (“Parent ‘s1’ has no rows, so a subset can’t be made from it.”).
+  Before, the error blamed the `rows` or `cols` argument, even when it
+  was left at its default
+  ([\#68](https://github.com/campbio/ExperimentSubset/issues/68))
+
 ## ExperimentSubset 1.23.22 (2026-10-31)
 
 - `x[i, j]` now updates the subsets of `x`: each keeps the rows and
