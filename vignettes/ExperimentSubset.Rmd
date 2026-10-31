@@ -598,7 +598,7 @@ subsetSummary(es)
 42. `altExpNames<-`
 43. `subsetSpatialCoords`
 44. `subsetSpatialData` (deprecated; use `subsetColData`)
-45. `subsetSpatialData<-` (defunct; use `subsetColData<-`)
+45. `subsetSpatialData<-` (defunct; use `colData` with `subsetName`)
 46. `subsetRowLinks`
 47. `subsetColLinks`
 48. `spatialCoords`
