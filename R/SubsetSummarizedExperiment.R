@@ -79,6 +79,35 @@ setMethod(
   }
 )
 
+#' @rdname getSubsetExperiment
+setMethod(
+  f = "getSubsetExperiment",
+  signature = c(
+    x = "SubsetSummarizedExperiment",
+    subsetName = "character"),
+  definition = function(x,
+                        subsetName,
+                        parentData = TRUE)
+  {
+    .getSubsetExperiment(x, subsetName, parentData = parentData)
+  }
+)
+
+#' @rdname setSubsetExperiment
+setMethod(
+  f = "setSubsetExperiment",
+  signature = c(
+    x = "SubsetSummarizedExperiment",
+    subsetName = "character"),
+  definition = function(x,
+                        subsetName,
+                        value,
+                        unlink = FALSE)
+  {
+    .setSubsetExperiment(x, subsetName, value, unlink = unlink)
+  }
+)
+
 #' @rdname metadata
 setMethod(
   f = "metadata",

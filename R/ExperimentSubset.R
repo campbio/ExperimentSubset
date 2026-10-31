@@ -291,6 +291,131 @@ ExperimentSubset <- function(x,
   return(x)
 }
 
+# A subset as a standalone object of the main object's class: the main
+# object cut to the subset's rows and columns, which keeps trees, ranges,
+# spatial coordinates and sample_id, with the subset's own names, assays
+# and data
+#' @importMethodsFrom SummarizedExperiment assays assays<-
+#' @importMethodsFrom TreeSummarizedExperiment rownames<- colnames<-
+.getSubsetExperiment <- function(x, subsetName, parentData = TRUE) {
+  .isSubset(x, subsetName)
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  out <- as(x, class(internal))
+  # the main object's assays and reduced data are replaced, so not cut;
+  # rownames<- and colnames<- are the generics, which keep tree links
+  assays(out, withDimnames = FALSE) <- S4Vectors::SimpleList()
+  if (methods::is(out, "SingleCellExperiment")) {
+    SingleCellExperiment::reducedDims(out) <- list()
+    altExps(out) <- list()
+  }
+  out <- out[.rootIndices(x, subsetName, .rowIndices),
+             .rootIndices(x, subsetName, .colIndices)]
+  rownames(out) <- rownames(internal)
+  colnames(out) <- colnames(internal)
+
+  # every assay the subset sees, its primary assay first
+  assayOrder <- names(.assayOwners(x, subsetName))
+  primary <- intersect(.primaryAssayName(x, subsetName), assayOrder)
+  assayOrder <- c(primary, setdiff(assayOrder, primary))
+  views <- lapply(assayOrder, function(name) {
+    .subsetAssayView(x, subsetName, name, withDimnames = FALSE)
+  })
+  names(views) <- assayOrder
+  assays(out, withDimnames = FALSE) <- S4Vectors::SimpleList(views)
+
+  rowData(out) <- .subsetRowData(x, subsetName, isTRUE(parentData))
+  colData(out) <- .subsetColData(x, subsetName, isTRUE(parentData))
+  if (methods::is(out, "SingleCellExperiment")) {
+    SingleCellExperiment::reducedDims(out) <- reducedDims(internal)
+    altExps(out) <- altExps(internal)
+  }
+  metadata(out) <- metadata(internal)
+  out
+}
+
+# Stores what a tool added to an object from .getSubsetExperiment(); value
+# replaces the subset's own data, and unchanged linked assays and the main
+# object's tagged columns are left out
+.setSubsetExperiment <- function(x, subsetName, value, unlink = FALSE) {
+  .isSubset(x, subsetName)
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  if (!identical(as.character(class(value)), as.character(class(internal))))
+    stop("'value' must be a ", class(internal), ", the class of the main ",
+         "object, as returned by getSubsetExperiment().")
+  if (!identical(as.integer(dim(value)), as.integer(dim(internal))))
+    stop("'value' must have the same dimensions as subset '", subsetName,
+         "' (", nrow(internal), " x ", ncol(internal), "). To keep fewer ",
+         "rows or columns, create a subset with createSubset().")
+  # matching names show value's rows and columns weren't reordered
+  for (what in c("rownames", "colnames")) {
+    getNames <- match.fun(what)
+    if (!is.null(getNames(internal))
+        && !identical(getNames(value), getNames(internal)))
+      stop("The ", what, " of 'value' must be the ", what, " of subset '",
+           subsetName, "', in the same order.")
+  }
+
+  # own assays that value no longer has are removed, unless a subset was
+  # made from them
+  x <- .qualifyParents(x)
+  owners <- .assayOwners(x, subsetName)
+  kept <- assayNames(internal) %in% assayNames(value)
+  .checkNotParents(x, subsetName, assayNames(internal)[!kept])
+  assays(internal, withDimnames = FALSE) <-
+    assays(internal, withDimnames = FALSE)[kept]
+  .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  for (name in assayNames(value)) {
+    input <- assay(value, name)
+    linked <- name %in% names(owners) && owners[[name]] != subsetName
+    if (linked && .sameAssay(input, .subsetAssayView(x, subsetName, name)))
+      next
+    x <- .setSubsetAssay(x, subsetName, input, name, unlink = unlink)
+  }
+
+  .subsetRowData(x, subsetName) <- .withoutParentColumns(rowData(value))
+  .subsetColData(x, subsetName) <- .withoutParentColumns(colData(value))
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  if (methods::is(internal, "SingleCellExperiment")) {
+    SingleCellExperiment::reducedDims(internal) <- reducedDims(value)
+    altExps(internal) <- altExps(value)
+  }
+  metadata(internal) <- metadata(value)
+  .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  x
+}
+
+# Stops if removing subsetName's own assays in assayNames would change or
+# break another subset: one whose primary assay is one of them, reached
+# directly ("s/scaled"), through the subset ("s") or through a descendant
+# ("child/scaled")
+.checkNotParents <- function(x, subsetName, assayNames) {
+  used <- character(0)
+  for (name in setdiff(subsetNames(x), subsetName)) {
+    primary <- .primaryAssayName(x, name)
+    owners <- .assayOwners(x, name)
+    if (primary %in% assayNames && primary %in% names(owners)
+        && owners[[primary]] == subsetName)
+      used[name] <- primary
+  }
+  if (length(used) > 0)
+    stop("'value' has no assay ",
+         paste0("'", unique(used), "'", collapse = ", "),
+         ", which subsets ", paste0("'", names(used), "'", collapse = ", "),
+         " were made from. Keep it in 'value'.")
+}
+
+# TRUE if two assays hold the same values, whatever their dimnames, type
+# (integer or double) or class (for example dense or sparse)
+.sameAssay <- function(a, b) {
+  dimnames(a) <- NULL
+  dimnames(b) <- NULL
+  if (identical(a, b))
+    return(TRUE)
+  same <- tryCatch(all.equal(a, b, tolerance = 0, check.attributes = FALSE),
+                   error = function(e) FALSE)
+  isTRUE(same)
+}
+
 # Stops unless inputNames are NULL or the same as the subset's current
 # names, in the same order. what is "rownames" or "colnames".
 .checkInputNames <- function(inputNames, currentNames, what, subsetName) {
@@ -791,17 +916,30 @@ ExperimentSubset <- function(x,
 # Leaves out the columns .tagParentColumns() marked, so writing back a
 # result read with the parent's data stores no copies of it
 .dropParentColumns <- function(value, what) {
-  if (!methods::is(value, "DataFrame"))
-    return(value)
-  columnInfo <- S4Vectors::mcols(value)
-  if (is.null(columnInfo) || !"fromParentData" %in% colnames(columnInfo))
-    return(value)
-  fromParent <- columnInfo$fromParentData %in% TRUE
+  fromParent <- .parentColumns(value)
   if (any(fromParent))
     message("Not storing columns that come from the main object's ", what,
             ": ", paste(colnames(value)[fromParent], collapse = ", "),
             ". Change them on the main object with ", what, "(x).")
-  .untagParentColumns(value[, !fromParent, drop = FALSE])
+  .withoutParentColumns(value)
+}
+
+# Which columns of value .tagParentColumns() marked
+.parentColumns <- function(value) {
+  if (!methods::is(value, "DataFrame"))
+    return(logical(0))
+  columnInfo <- S4Vectors::mcols(value)
+  if (is.null(columnInfo) || !"fromParentData" %in% colnames(columnInfo))
+    return(rep(FALSE, ncol(value)))
+  columnInfo$fromParentData %in% TRUE
+}
+
+# value without the columns .tagParentColumns() marked, and without the mark
+.withoutParentColumns <- function(value) {
+  fromParent <- .parentColumns(value)
+  if (any(fromParent))
+    value <- value[, !fromParent, drop = FALSE]
+  .untagParentColumns(value)
 }
 
 # Removes the .tagParentColumns() mark, which is only for the setters

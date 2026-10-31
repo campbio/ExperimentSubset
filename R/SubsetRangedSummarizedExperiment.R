@@ -319,3 +319,32 @@ setMethod(
     assay(x = x, i = subsetName, subsetAssayName = subsetAssayName)
   }
 )
+
+#' @rdname getSubsetExperiment
+setMethod(
+  f = "getSubsetExperiment",
+  signature = c(
+    x = "SubsetRangedSummarizedExperiment",
+    subsetName = "character"),
+  definition = function(x,
+                        subsetName,
+                        parentData = TRUE)
+  {
+    .getSubsetExperiment(x, subsetName, parentData = parentData)
+  }
+)
+
+#' @rdname setSubsetExperiment
+setMethod(
+  f = "setSubsetExperiment",
+  signature = c(
+    x = "SubsetRangedSummarizedExperiment",
+    subsetName = "character"),
+  definition = function(x,
+                        subsetName,
+                        value,
+                        unlink = FALSE)
+  {
+    .setSubsetExperiment(x, subsetName, value, unlink = unlink)
+  }
+)
