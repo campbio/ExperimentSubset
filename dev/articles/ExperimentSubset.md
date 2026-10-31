@@ -1,5 +1,12 @@
 # ExperimentSubset: Manages Subsets of Data with Bioconductor Experiment Objects
 
+This vignette is a short introduction. The [ExperimentSubset
+website](https://campbio.github.io/ExperimentSubset/) has the full
+reference and longer articles, including an [end-to-end single-cell
+workflow](https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html)
+that keeps every subset of a PBMC data set, from empty droplets to
+T-cell subtypes, in one object.
+
 ## Installation
 
 \
@@ -214,7 +221,7 @@ To get a subset assay, `getSubsetAssay` method can be used:
 
 \
 `#get assay from 'subset1'`\
-[`getSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetAssay.md)`(``es``, ``"subset1"``)`
+[`getSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetAssay.md)`(``es``, subsetName ``=`` ``"subset1"``)`
 
     ##      [,1] [,2] [,3] [,4] [,5]
     ## [1,]    8    8    3    5    5
@@ -222,7 +229,7 @@ To get a subset assay, `getSubsetAssay` method can be used:
 
 \
 `#get 'subset1Assay', stored inside 'subset1'`\
-[`getSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetAssay.md)`(``es``, ``"subset1"``, subsetAssayName ``=`` ``"subset1Assay"``)`
+[`getSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetAssay.md)`(``es``, subsetName ``=`` ``"subset1"``, subsetAssayName ``=`` ``"subset1Assay"``)`
 
     ##      [,1] [,2] [,3] [,4] [,5]
     ## [1,]    9    9    4    6    6
@@ -230,7 +237,7 @@ To get a subset assay, `getSubsetAssay` method can be used:
 
 \
 `#the same assay, named as "subset/assay"`\
-[`getSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetAssay.md)`(``es``, ``"subset1/subset1Assay"``)`
+[`getSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetAssay.md)`(``es``, subsetName ``=`` ``"subset1/subset1Assay"``)`
 
     ##      [,1] [,2] [,3] [,4] [,5]
     ## [1,]    9    9    4    6    6
@@ -254,6 +261,56 @@ Apart from `setSubsetAssay` and `getSubsetAssay` methods, `assay` and
 `assay<-` methods can also be used for the same purpose. Their usage has
 been described in the overridden methods section below.
 
+### `getSubsetExperiment` and `setSubsetExperiment`
+
+`getSubsetExperiment` returns a subset as a standalone object of the
+main object’s class, here a `SingleCellExperiment`, with the assays the
+subset sees (its own and the linked ones), its colData, rowData,
+reducedDims and metadata. Any tool written for that class can then be
+run on it. `setSubsetExperiment` stores the result back in the subset:
+what the object holds replaces the subset’s own data, while linked
+assays that are unchanged are not copied.
+
+\
+`#take 'subset1' out as a SingleCellExperiment`\
+`subset1`` ``<-`` `[`getSubsetExperiment`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md)`(``es``, subsetName ``=`` ``"subset1"``)`\
+`subset1`
+
+    ## class: SingleCellExperiment 
+    ## dim: 2 5 
+    ## metadata(0):
+    ## assays(2): counts subset1Assay
+    ## rownames: NULL
+    ## rowData names(0):
+    ## colnames: NULL
+    ## colData names(0):
+    ## reducedDimNames(0):
+    ## mainExpName: NULL
+    ## altExpNames(0):
+
+\
+`#add a colData column and a reducedDim, as a tool might`\
+`subset1``$``group`` ``<-`` `[`c`](https://rdrr.io/r/base/c.html)`(``"a"``, ``"a"``, ``"b"``, ``"b"``, ``"b"``)`\
+[`reducedDim`](https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html)`(``subset1``, ``"example"``)`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(``1``:``10``, nrow ``=`` ``5``)`\
+\
+`#store them back in 'subset1'`\
+`es`` ``<-`` `[`setSubsetExperiment`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md)`(``es``, subsetName ``=`` ``"subset1"``, value ``=`` ``subset1``)`\
+[`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, subsetName ``=`` ``"subset1"``)`
+
+    ## DataFrame with 5 rows and 1 column
+    ##         group
+    ##   <character>
+    ## 1           a
+    ## 2           a
+    ## 3           b
+    ## 4           b
+    ## 5           b
+
+\
+[`reducedDimNames`](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames.md)`(``es``, subsetName ``=`` ``"subset1"``)`
+
+    ## [1] "example"
+
 ### `subsetSummary`
 
 The `subsetSummary` method displays an overall summary of the
@@ -271,8 +328,8 @@ of information displayed by this method is the hierarchical
     ##  counts 
     ## 
     ## Subset(s):
-    ##      Name  Dim Parent       Assays
-    ## 1 subset1 2, 5 counts subset1Assay
+    ##      Name  Dim Parent       Assays ReducedDims
+    ## 1 subset1 2, 5 counts subset1Assay     example
 
 ### Additional helper methods
 
@@ -297,6 +354,10 @@ and their short descriptions are given below:
     subset
 11. `setSubsetAssay` Sets an assay to a subset
 12. `getSubsetAssay` Gets an assay from a subset
+13. `getSubsetExperiment` Returns a subset as a standalone experiment
+    object
+14. `setSubsetExperiment` Stores a standalone experiment object in a
+    subset
 
 #### subsetColData & subsetRowData
 
@@ -308,69 +369,69 @@ specifies if the returned ‘colData’ or ‘rowData’ should include the
 applies to the usage of inherited `rowData` and `colData` methods.
 
 \
-`#store colData to parent object`\
-[`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``)`` ``<-`` `[`cbind`](https://rdrr.io/r/base/cbind.html)`(`[`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``)``, sampleID ``=`` `[`seq_len`](https://rdrr.io/r/base/seq.html)`(`[`dim`](https://rdrr.io/r/base/dim.html)`(``es``)``[``2``]``)``)`\
+`#number of columns in 'subset1'`\
+`subset1Columns`` ``<-`` `[`subsetDim`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.md)`(``es``, subsetName ``=`` ``"subset1"``)``[``2``]`\
 \
-`#store colData to 'subset1' using option 1`\
-[`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, subsetName ``=`` ``"subset1"``)`` ``<-`` `[`cbind`](https://rdrr.io/r/base/cbind.html)`(`\
-`  `[`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, subsetName ``=`` ``"subset1"``)``, `\
-`  subsetSampleID1 ``=`` `[`seq_len`](https://rdrr.io/r/base/seq.html)`(`[`subsetDim`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.md)`(``es``, ``"subset1"``)``[``2``]``)``)`\
+`#store a colData column in the parent object`\
+[`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``)``$``sampleID`` ``<-`` `[`seq_len`](https://rdrr.io/r/base/seq.html)`(`[`ncol`](https://rdrr.io/r/base/nrow.html)`(``es``)``)`\
 \
-`#store colData to 'subset1' using option 2`\
-[`subsetColData`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md)`(``es``, ``"subset1"``)`` ``<-`` `[`cbind`](https://rdrr.io/r/base/cbind.html)`(`\
-`  `[`subsetColData`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md)`(``es``, ``"subset1"``)``, `\
-`  subsetSampleID2 ``=`` `[`seq_len`](https://rdrr.io/r/base/seq.html)`(`[`subsetDim`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.md)`(``es``, ``"subset1"``)``[``2``]``)``)`\
+`#store a colData column in 'subset1' using option 1`\
+[`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, subsetName ``=`` ``"subset1"``)``$``subsetSampleID1`` ``<-`` `[`seq_len`](https://rdrr.io/r/base/seq.html)`(``subset1Columns``)`\
+\
+`#store a colData column in 'subset1' using option 2`\
+[`subsetColData`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md)`(``es``, subsetName ``=`` ``"subset1"``)``$``subsetSampleID2`` ``<-`\
+`  `[`seq_len`](https://rdrr.io/r/base/seq.html)`(``subset1Columns``)`\
 \
 `#get colData from 'subset1' without parent colData`\
-[`subsetColData`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md)`(``es``, ``"subset1"``, parentColData ``=`` ``FALSE``)`
+[`subsetColData`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md)`(``es``, subsetName ``=`` ``"subset1"``, parentColData ``=`` ``FALSE``)`
 
-    ## DataFrame with 5 rows and 2 columns
-    ##   subsetSampleID1 subsetSampleID2
-    ##         <integer>       <integer>
-    ## 1               1               1
-    ## 2               2               2
-    ## 3               3               3
-    ## 4               4               4
-    ## 5               5               5
+    ## DataFrame with 5 rows and 3 columns
+    ##         group subsetSampleID1 subsetSampleID2
+    ##   <character>       <integer>       <integer>
+    ## 1           a               1               1
+    ## 2           a               2               2
+    ## 3           b               3               3
+    ## 4           b               4               4
+    ## 5           b               5               5
 
 \
 `#get colData from 'subset1' with parent colData`\
-[`subsetColData`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md)`(``es``, ``"subset1"``, parentColData ``=`` ``TRUE``)`
+[`subsetColData`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md)`(``es``, subsetName ``=`` ``"subset1"``, parentColData ``=`` ``TRUE``)`
 
-    ## DataFrame with 5 rows and 3 columns
-    ##    sampleID subsetSampleID1 subsetSampleID2
-    ##   <integer>       <integer>       <integer>
-    ## 1         1               1               1
-    ## 2         2               2               2
-    ## 3         3               3               3
-    ## 4         4               4               4
-    ## 5         5               5               5
+    ## DataFrame with 5 rows and 4 columns
+    ##    sampleID       group subsetSampleID1 subsetSampleID2
+    ##   <integer> <character>       <integer>       <integer>
+    ## 1         1           a               1               1
+    ## 2         2           a               2               2
+    ## 3         3           b               3               3
+    ## 4         4           b               4               4
+    ## 5         5           b               5               5
 
 \
 `` #the same works with the `colData` method (and with `rowData` and the ``\
 `` #`parentRowData` parameter for row data) ``\
 [`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, subsetName ``=`` ``"subset1"``, parentColData ``=`` ``FALSE``)`` ``#without parent data`
 
-    ## DataFrame with 5 rows and 2 columns
-    ##   subsetSampleID1 subsetSampleID2
-    ##         <integer>       <integer>
-    ## 1               1               1
-    ## 2               2               2
-    ## 3               3               3
-    ## 4               4               4
-    ## 5               5               5
+    ## DataFrame with 5 rows and 3 columns
+    ##         group subsetSampleID1 subsetSampleID2
+    ##   <character>       <integer>       <integer>
+    ## 1           a               1               1
+    ## 2           a               2               2
+    ## 3           b               3               3
+    ## 4           b               4               4
+    ## 5           b               5               5
 
 \
 [`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, subsetName ``=`` ``"subset1"``, parentColData ``=`` ``TRUE``)`` ``#with parent data`
 
-    ## DataFrame with 5 rows and 3 columns
-    ##    sampleID subsetSampleID1 subsetSampleID2
-    ##   <integer>       <integer>       <integer>
-    ## 1         1               1               1
-    ## 2         2               2               2
-    ## 3         3               3               3
-    ## 4         4               4               4
-    ## 5         5               5               5
+    ## DataFrame with 5 rows and 4 columns
+    ##    sampleID       group subsetSampleID1 subsetSampleID2
+    ##   <integer> <character>       <integer>       <integer>
+    ## 1         1           a               1               1
+    ## 2         2           a               2               2
+    ## 3         3           b               3               3
+    ## 4         4           b               4               4
+    ## 5         5           b               5               5
 
 ### Overridden methods for `ExperimentSubset` class
 
@@ -578,6 +639,13 @@ Show the current condition of `ExperimentSubset` object:
 
 ## Using the `ExperimentSubset` object: an example with real scRNA-seq data
 
+This short example on the PBMC 4k data set isn’t run when the vignette
+is built. For a complete, runnable workflow on the same data, from raw
+droplets through quality control, decontamination, clustering and
+annotation to a re-analysis of the T cells, see the [single-cell
+workflow
+article](https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html).
+
 Installing and loading required packages:
 
 \
@@ -609,8 +677,8 @@ Filter cells with low column sum and create a new subset called
 
 \
 `filteredCellsIndices`` ``<-`` `[`which`](https://rdrr.io/r/base/which.html)`(`[`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``)``$``sum`` ``>`` ``1500``)`\
-`es`` ``<-`` `[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)`(``es``, ``"filteredCells"``, cols ``=`` ``filteredCellsIndices``,`\
-`                   parentAssay ``=`` ``"counts"``)`\
+`es`` ``<-`` `[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)`(``es``, subsetName ``=`` ``"filteredCells"``,`\
+`                   cols ``=`` ``filteredCellsIndices``, parentAssay ``=`` ``"counts"``)`\
 [`subsetSummary`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSummary.md)`(``es``)`
 
 Normalize ‘filteredCells’ subset using `scrapper` library and store it
@@ -633,19 +701,19 @@ step using `scrapper` library against the ‘filteredCells’ subset only:
 `normalizedCounts`` ``<-`` `[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"filteredCells/filteredCellsNormalized"``)`\
 `geneVariances`` ``<-`` `[`modelGeneVariances`](https://rdrr.io/pkg/scrapper/man/modelGeneVariances.html)`(``normalizedCounts``)`\
 `residualVariances`` ``<-`` ``geneVariances``$``statistics``$``residuals`\
-`topHVG1000`` ``<-`` `[`chooseHighlyVariableGenes`](https://rdrr.io/pkg/scrapper/man/chooseHighlyVariableGenes.html)`(``residualVariances``, top ``=`` ``1000``)`\
-`es`` ``<-`` `[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)`(``es``, ``"hvg1000"``, rows ``=`` ``topHVG1000``,`\
+`topHVG2000`` ``<-`` `[`chooseHighlyVariableGenes`](https://rdrr.io/pkg/scrapper/man/chooseHighlyVariableGenes.html)`(``residualVariances``, top ``=`` ``2000``)`\
+`es`` ``<-`` `[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)`(``es``, subsetName ``=`` ``"hvg2000"``, rows ``=`` ``topHVG2000``,`\
 `                   parentAssay ``=`` ``"filteredCells/filteredCellsNormalized"``)`\
 [`subsetSummary`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSummary.md)`(``es``)`
 
 Run ‘PCA’ on the highly variable genes computed in the last step using
-`scrapper` library against the ‘hvg1000’ subset only. `runPca` returns
+`scrapper` library against the ‘hvg2000’ subset only. `runPca` returns
 the PCs in rows, so transpose them to put cells in rows:
 
 \
-`pcaResult`` ``<-`` `[`runPca`](https://rdrr.io/pkg/scrapper/man/runPca.html)`(`[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"hvg1000"``)``)`\
+`pcaResult`` ``<-`` `[`runPca`](https://rdrr.io/pkg/scrapper/man/runPca.html)`(`[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"hvg2000"``)``)`\
 `pcaScores`` ``<-`` `[`t`](https://rdrr.io/r/base/t.html)`(``pcaResult``$``components``)`\
-[`reducedDim`](https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html)`(``es``, type ``=`` ``"PCA"``, subsetName ``=`` ``"hvg1000"``)`` ``<-`` ``pcaScores`
+[`reducedDim`](https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html)`(``es``, type ``=`` ``"PCA"``, subsetName ``=`` ``"hvg2000"``)`` ``<-`` ``pcaScores`
 
 Show the current condition of the `ExperimentSubset` object:
 
@@ -666,52 +734,54 @@ Show the current condition of the `ExperimentSubset` object:
 2.  `createSubset`
 3.  `setSubsetAssay`
 4.  `getSubsetAssay`
-5.  `subsetSummary`
-6.  `subsetParent`
-7.  `subsetCount`
-8.  `subsetAssayCount`
-9.  `subsetNames`
-10. `subsetAssayNames`
-11. `subsetDim`
-12. `subsetRowData`
-13. `subsetColData`
-14. `subsetColnames`
-15. `subsetRownames`
-16. `subsetRowData<-`
-17. `subsetColData<-`
-18. `subsetColnames<-`
-19. `subsetRownames<-`
-20. `show`
-21. `assay`
-22. `assay<-`
-23. `rowData`
-24. `rowData<-`
-25. `colData`
-26. `colData<-`
-27. `metadata`
-28. `metadata<-`
-29. `reducedDim`
-30. `reducedDim<-`
-31. `reducedDims`
-32. `reducedDims<-`
-33. `reducedDimNames`
-34. `reducedDimNames<-`
-35. `altExp`
-36. `altExp<-`
-37. `altExps`
-38. `altExps<-`
-39. `altExpNames`
-40. `altExpNames<-`
-41. `subsetSpatialCoords`
-42. `subsetSpatialData`
-43. `subsetSpatialData<-`
-44. `subsetRowLinks`
-45. `subsetColLinks`
-46. `spatialCoords`
-47. `spatialData`
-48. `spatialData<-`
-49. `rowLinks`
-50. `colLinks`
+5.  `getSubsetExperiment`
+6.  `setSubsetExperiment`
+7.  `subsetSummary`
+8.  `subsetParent`
+9.  `subsetCount`
+10. `subsetAssayCount`
+11. `subsetNames`
+12. `subsetAssayNames`
+13. `subsetDim`
+14. `subsetRowData`
+15. `subsetColData`
+16. `subsetColnames`
+17. `subsetRownames`
+18. `subsetRowData<-`
+19. `subsetColData<-`
+20. `subsetColnames<-`
+21. `subsetRownames<-`
+22. `show`
+23. `assay`
+24. `assay<-`
+25. `rowData`
+26. `rowData<-`
+27. `colData`
+28. `colData<-`
+29. `metadata`
+30. `metadata<-`
+31. `reducedDim`
+32. `reducedDim<-`
+33. `reducedDims`
+34. `reducedDims<-`
+35. `reducedDimNames`
+36. `reducedDimNames<-`
+37. `altExp`
+38. `altExp<-`
+39. `altExps`
+40. `altExps<-`
+41. `altExpNames`
+42. `altExpNames<-`
+43. `subsetSpatialCoords`
+44. `subsetSpatialData`
+45. `subsetSpatialData<-`
+46. `subsetRowLinks`
+47. `subsetColLinks`
+48. `spatialCoords`
+49. `spatialData`
+50. `spatialData<-`
+51. `rowLinks`
+52. `colLinks`
 
 ## Implementation Details
 
@@ -771,6 +841,17 @@ enable manipulation, but can be used to store additional data against a
 subset such as `assay`, `rowData`, `colData`, `reducedDims`, `altExps`
 and `metadata`.
 
+## Learn more
+
+- The [ExperimentSubset
+  website](https://campbio.github.io/ExperimentSubset/) documents every
+  function, for the release and for the devel version.
+- The [single-cell workflow
+  article](https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html)
+  goes from raw droplets through quality control, decontamination,
+  clustering and annotation to a re-analysis of T cells, keeping all
+  subsets in one object.
+
 ## Session Information
 
 \
@@ -800,7 +881,7 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.17        TreeSummarizedExperiment_2.21.0
+    ##  [1] ExperimentSubset_1.23.18        TreeSummarizedExperiment_2.21.0
     ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
     ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
     ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 

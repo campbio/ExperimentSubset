@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.17</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.18</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,14 @@
       <ul class="navbar-nav me-auto">
 <li class="active nav-item"><a class="nav-link" href="../articles/ExperimentSubset.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
+    <li><a class="dropdown-item" href="../articles/pbmc-workflow.html">A single-cell workflow with every subset in one object</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -76,6 +84,10 @@ Boston, MA, United States<br><small class="dont-index">Source: <a href="https://
 
     
     
+<p>This vignette is a short introduction. The <a href="https://campbio.github.io/ExperimentSubset/">ExperimentSubset
+website</a> has the full reference and longer articles, including an <a href="https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html">end-to-end
+single-cell workflow</a> that keeps every subset of a PBMC data set,
+from empty droplets to T-cell subtypes, in one object.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -296,19 +308,19 @@ new assay.</p>
 used:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#get assay from 'subset1'</span></span>
-<span><span class="fu"><a href="../reference/getSubsetAssay.html">getSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset1"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/getSubsetAssay.html">getSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      [,1] [,2] [,3] [,4] [,5]</span></span>
 <span><span class="co">## [1,]    8    8    3    5    5</span></span>
 <span><span class="co">## [2,]   10    2   11   13   12</span></span></code></pre>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#get 'subset1Assay', stored inside 'subset1'</span></span>
-<span><span class="fu"><a href="../reference/getSubsetAssay.html">getSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset1"</span>, subsetAssayName <span class="op">=</span> <span class="st">"subset1Assay"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/getSubsetAssay.html">getSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span>, subsetAssayName <span class="op">=</span> <span class="st">"subset1Assay"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      [,1] [,2] [,3] [,4] [,5]</span></span>
 <span><span class="co">## [1,]    9    9    4    6    6</span></span>
 <span><span class="co">## [2,]   11    3   12   14   13</span></span></code></pre>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#the same assay, named as "subset/assay"</span></span>
-<span><span class="fu"><a href="../reference/getSubsetAssay.html">getSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset1/subset1Assay"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/getSubsetAssay.html">getSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1/subset1Assay"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##      [,1] [,2] [,3] [,4] [,5]</span></span>
 <span><span class="co">## [1,]    9    9    4    6    6</span></span>
 <span><span class="co">## [2,]   11    3   12   14   13</span></span></code></pre>
@@ -330,6 +342,54 @@ Their usage has been described in the overridden methods section
 below.</p>
 </div>
 <div class="section level3">
+<h3 id="getsubsetexperiment-and-setsubsetexperiment">
+<code>getSubsetExperiment</code> and
+<code>setSubsetExperiment</code><a class="anchor" aria-label="anchor" href="#getsubsetexperiment-and-setsubsetexperiment"></a>
+</h3>
+<p><code>getSubsetExperiment</code> returns a subset as a standalone
+object of the main object’s class, here a
+<code>SingleCellExperiment</code>, with the assays the subset sees (its
+own and the linked ones), its colData, rowData, reducedDims and
+metadata. Any tool written for that class can then be run on it.
+<code>setSubsetExperiment</code> stores the result back in the subset:
+what the object holds replaces the subset’s own data, while linked
+assays that are unchanged are not copied.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#take 'subset1' out as a SingleCellExperiment</span></span>
+<span><span class="va">subset1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getSubsetExperiment.html">getSubsetExperiment</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span></span>
+<span><span class="va">subset1</span></span></code></pre></div>
+<pre><code><span><span class="co">## class: SingleCellExperiment </span></span>
+<span><span class="co">## dim: 2 5 </span></span>
+<span><span class="co">## metadata(0):</span></span>
+<span><span class="co">## assays(2): counts subset1Assay</span></span>
+<span><span class="co">## rownames: NULL</span></span>
+<span><span class="co">## rowData names(0):</span></span>
+<span><span class="co">## colnames: NULL</span></span>
+<span><span class="co">## colData names(0):</span></span>
+<span><span class="co">## reducedDimNames(0):</span></span>
+<span><span class="co">## mainExpName: NULL</span></span>
+<span><span class="co">## altExpNames(0):</span></span></code></pre>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#add a colData column and a reducedDim, as a tool might</span></span>
+<span><span class="va">subset1</span><span class="op">$</span><span class="va">group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"b"</span>, <span class="st">"b"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">subset1</span>, <span class="st">"example"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, nrow <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#store them back in 'subset1'</span></span>
+<span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/setSubsetExperiment.html">setSubsetExperiment</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span>, value <span class="op">=</span> <span class="va">subset1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 5 rows and 1 column</span></span>
+<span><span class="co">##         group</span></span>
+<span><span class="co">##   &lt;character&gt;</span></span>
+<span><span class="co">## 1           a</span></span>
+<span><span class="co">## 2           a</span></span>
+<span><span class="co">## 3           b</span></span>
+<span><span class="co">## 4           b</span></span>
+<span><span class="co">## 5           b</span></span></code></pre>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/reducedDimNames.html">reducedDimNames</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] "example"</span></span></code></pre>
+</div>
+<div class="section level3">
 <h3 id="subsetsummary">
 <code>subsetSummary</code><a class="anchor" aria-label="anchor" href="#subsetsummary"></a>
 </h3>
@@ -340,14 +400,14 @@ dimensions, alt experiments and other supplementary information that may
 help the users understand the current condition of the object. The most
 important piece of information displayed by this method is the
 hierarchical ‘parent-subset’ link against each subset in the object.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/subsetSummary.html">subsetSummary</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Main assay(s):</span></span>
 <span><span class="co">##  counts </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## Subset(s):</span></span>
-<span><span class="co">##      Name  Dim Parent       Assays</span></span>
-<span><span class="co">## 1 subset1 2, 5 counts subset1Assay</span></span></code></pre>
+<span><span class="co">##      Name  Dim Parent       Assays ReducedDims</span></span>
+<span><span class="co">## 1 subset1 2, 5 counts subset1Assay     example</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="additional-helper-methods">Additional helper methods<a class="anchor" aria-label="anchor" href="#additional-helper-methods"></a>
@@ -390,6 +450,12 @@ specified subset</li>
 <code>setSubsetAssay</code> Sets an assay to a subset</li>
 <li>
 <code>getSubsetAssay</code> Gets an assay from a subset</li>
+<li>
+<code>getSubsetExperiment</code> Returns a subset as a standalone
+experiment object</li>
+<li>
+<code>setSubsetExperiment</code> Stores a standalone experiment
+object in a subset</li>
 </ol>
 <div class="section level4">
 <h4 id="subsetcoldata-subsetrowdata">subsetColData &amp; subsetRowData<a class="anchor" aria-label="anchor" href="#subsetcoldata-subsetrowdata"></a>
@@ -402,63 +468,63 @@ if the returned ‘colData’ or ‘rowData’ should include the ‘colData’ 
 <code>parentColData</code> and <code>parentRowData</code> parameters are
 set to <code>FALSE</code>. Same applies to the usage of inherited
 <code>rowData</code> and <code>colData</code> methods.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#store colData to parent object</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span>, sampleID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#number of columns in 'subset1'</span></span>
+<span><span class="va">subset1Columns</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subsetDim.html">subsetDim</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co">#store colData to 'subset1' using option 1</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span>, </span>
-<span>  subsetSampleID1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="../reference/subsetDim.html">subsetDim</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset1"</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#store a colData column in the parent object</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span><span class="op">$</span><span class="va">sampleID</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">#store colData to 'subset1' using option 2</span></span>
-<span><span class="fu"><a href="../reference/subsetColData.html">subsetColData</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset1"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span></span>
-<span>  <span class="fu"><a href="../reference/subsetColData.html">subsetColData</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset1"</span><span class="op">)</span>, </span>
-<span>  subsetSampleID2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="../reference/subsetDim.html">subsetDim</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset1"</span><span class="op">)</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#store a colData column in 'subset1' using option 1</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span><span class="op">$</span><span class="va">subsetSampleID1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">subset1Columns</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#store a colData column in 'subset1' using option 2</span></span>
+<span><span class="fu"><a href="../reference/subsetColData.html">subsetColData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span><span class="op">$</span><span class="va">subsetSampleID2</span> <span class="op">&lt;-</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="va">subset1Columns</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">#get colData from 'subset1' without parent colData</span></span>
-<span><span class="fu"><a href="../reference/subsetColData.html">subsetColData</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset1"</span>, parentColData <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##   subsetSampleID1 subsetSampleID2</span></span>
-<span><span class="co">##         &lt;integer&gt;       &lt;integer&gt;</span></span>
-<span><span class="co">## 1               1               1</span></span>
-<span><span class="co">## 2               2               2</span></span>
-<span><span class="co">## 3               3               3</span></span>
-<span><span class="co">## 4               4               4</span></span>
-<span><span class="co">## 5               5               5</span></span></code></pre>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co">#get colData from 'subset1' with parent colData</span></span>
-<span><span class="fu"><a href="../reference/subsetColData.html">subsetColData</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset1"</span>, parentColData <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/subsetColData.html">subsetColData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span>, parentColData <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 3 columns</span></span>
-<span><span class="co">##    sampleID subsetSampleID1 subsetSampleID2</span></span>
-<span><span class="co">##   &lt;integer&gt;       &lt;integer&gt;       &lt;integer&gt;</span></span>
-<span><span class="co">## 1         1               1               1</span></span>
-<span><span class="co">## 2         2               2               2</span></span>
-<span><span class="co">## 3         3               3               3</span></span>
-<span><span class="co">## 4         4               4               4</span></span>
-<span><span class="co">## 5         5               5               5</span></span></code></pre>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<span><span class="co">##         group subsetSampleID1 subsetSampleID2</span></span>
+<span><span class="co">##   &lt;character&gt;       &lt;integer&gt;       &lt;integer&gt;</span></span>
+<span><span class="co">## 1           a               1               1</span></span>
+<span><span class="co">## 2           a               2               2</span></span>
+<span><span class="co">## 3           b               3               3</span></span>
+<span><span class="co">## 4           b               4               4</span></span>
+<span><span class="co">## 5           b               5               5</span></span></code></pre>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co">#get colData from 'subset1' with parent colData</span></span>
+<span><span class="fu"><a href="../reference/subsetColData.html">subsetColData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span>, parentColData <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 5 rows and 4 columns</span></span>
+<span><span class="co">##    sampleID       group subsetSampleID1 subsetSampleID2</span></span>
+<span><span class="co">##   &lt;integer&gt; &lt;character&gt;       &lt;integer&gt;       &lt;integer&gt;</span></span>
+<span><span class="co">## 1         1           a               1               1</span></span>
+<span><span class="co">## 2         2           a               2               2</span></span>
+<span><span class="co">## 3         3           b               3               3</span></span>
+<span><span class="co">## 4         4           b               4               4</span></span>
+<span><span class="co">## 5         5           b               5               5</span></span></code></pre>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#the same works with the `colData` method (and with `rowData` and the</span></span>
 <span><span class="co">#`parentRowData` parameter for row data)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span>, parentColData <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="co">#without parent data</span></span></code></pre></div>
-<pre><code><span><span class="co">## DataFrame with 5 rows and 2 columns</span></span>
-<span><span class="co">##   subsetSampleID1 subsetSampleID2</span></span>
-<span><span class="co">##         &lt;integer&gt;       &lt;integer&gt;</span></span>
-<span><span class="co">## 1               1               1</span></span>
-<span><span class="co">## 2               2               2</span></span>
-<span><span class="co">## 3               3               3</span></span>
-<span><span class="co">## 4               4               4</span></span>
-<span><span class="co">## 5               5               5</span></span></code></pre>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span>, parentColData <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co">#with parent data</span></span></code></pre></div>
 <pre><code><span><span class="co">## DataFrame with 5 rows and 3 columns</span></span>
-<span><span class="co">##    sampleID subsetSampleID1 subsetSampleID2</span></span>
-<span><span class="co">##   &lt;integer&gt;       &lt;integer&gt;       &lt;integer&gt;</span></span>
-<span><span class="co">## 1         1               1               1</span></span>
-<span><span class="co">## 2         2               2               2</span></span>
-<span><span class="co">## 3         3               3               3</span></span>
-<span><span class="co">## 4         4               4               4</span></span>
-<span><span class="co">## 5         5               5               5</span></span></code></pre>
+<span><span class="co">##         group subsetSampleID1 subsetSampleID2</span></span>
+<span><span class="co">##   &lt;character&gt;       &lt;integer&gt;       &lt;integer&gt;</span></span>
+<span><span class="co">## 1           a               1               1</span></span>
+<span><span class="co">## 2           a               2               2</span></span>
+<span><span class="co">## 3           b               3               3</span></span>
+<span><span class="co">## 4           b               4               4</span></span>
+<span><span class="co">## 5           b               5               5</span></span></code></pre>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span>, parentColData <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="co">#with parent data</span></span></code></pre></div>
+<pre><code><span><span class="co">## DataFrame with 5 rows and 4 columns</span></span>
+<span><span class="co">##    sampleID       group subsetSampleID1 subsetSampleID2</span></span>
+<span><span class="co">##   &lt;integer&gt; &lt;character&gt;       &lt;integer&gt;       &lt;integer&gt;</span></span>
+<span><span class="co">## 1         1           a               1               1</span></span>
+<span><span class="co">## 2         2           a               2               2</span></span>
+<span><span class="co">## 3         3           b               3               3</span></span>
+<span><span class="co">## 4         4           b               4               4</span></span>
+<span><span class="co">## 5         5           b               5               5</span></span></code></pre>
 </div>
 </div>
 <div class="section level3">
@@ -494,7 +560,7 @@ subset needs to store the assay inside the subset, we need to specify
 the subset name inside which the assay should be stored as
 <code>i</code> parameter and define the new name of the subset assay as
 the additional <code>subsetAssayName</code> parameter.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#creating a dummy ES object</span></span>
 <span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">10</span>, nrow<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
@@ -516,7 +582,7 @@ the additional <code>subsetAssayName</code> parameter.</p>
 <span>                                                      ncol<span class="op">=</span><span class="fl">4</span>, nrow<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p>Using <code>assay</code> getter method is simple, as no additional
 parameter is required unlike in the setter method.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#assay getter has parameters 'x' which is the input object and 'i' which can</span></span>
 <span><span class="co">#be an assay name in the parent object or a subset name; an assay inside a</span></span>
 <span><span class="co">#subset is chosen with 'subsetAssayName' or named as "subset/assay"</span></span>
@@ -537,7 +603,7 @@ parameter is required unlike in the setter method.</p>
 <span><span class="co">##  [8,]   10    9   15   13    5    9    5   14   10     9</span></span>
 <span><span class="co">##  [9,]    7   12   10    2   11    9   10   12    7    14</span></span>
 <span><span class="co">## [10,]    6   13    8    9   13   12    8    4   12    10</span></span></code></pre>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#getting just the 'subset1' from es object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="va">es</span>,</span>
@@ -546,7 +612,7 @@ parameter is required unlike in the setter method.</p>
 <pre><code><span><span class="co">##      [,1] [,2] [,3] [,4]</span></span>
 <span><span class="co">## [1,]   11    8    2    6</span></span>
 <span><span class="co">## [2,]   15    9    7    8</span></span></code></pre>
-<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#getting the 'subset1InternalAssay' from inside the 'subset1'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="va">es</span>,</span>
@@ -565,7 +631,7 @@ parameter is required unlike in the setter method.</p>
 <p>Creating the <code>ExperimentSubset</code> object is as simple as
 passing an experiment object to the <code>ExperimentSubset</code>
 constructor:</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">10</span>, nrow<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ExperimentSubset.html">ExperimentSubset</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
@@ -576,7 +642,7 @@ constructor:</p>
 <span><span class="co">## Subset(s):</span></span>
 <span><span class="co">## NULL</span></span></code></pre>
 <p>Create a subset that includes the first 5 rows and columns only:</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, </span>
 <span>                   subsetName <span class="op">=</span> <span class="st">"subset1"</span>,</span>
 <span>                   rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,</span>
@@ -591,7 +657,7 @@ constructor:</p>
 <span><span class="co">## 1 subset1 5, 5 counts</span></span></code></pre>
 <p>Create another subset from <code>subset1</code> by only keeping the
 first two rows:</p>
-<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, </span>
 <span>                   subsetName <span class="op">=</span> <span class="st">"subset2"</span>,</span>
 <span>                   rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>,</span>
@@ -607,12 +673,12 @@ first two rows:</p>
 <span><span class="co">## 2 subset2 2, 5 subset1 -&gt; counts</span></span></code></pre>
 <p>Get <code>assay</code> from <code>subset2</code> and update
 values:</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subset2Assay</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset2"</span><span class="op">)</span></span>
 <span><span class="va">subset2Assay</span><span class="op">[</span>,<span class="op">]</span> <span class="op">&lt;-</span> <span class="va">subset2Assay</span><span class="op">[</span>,<span class="op">]</span> <span class="op">+</span> <span class="fl">1</span></span></code></pre></div>
 <p>Store the updated <code>assay</code> back to <code>subset2</code>
 using one of the two approaches:</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#approach 1</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/setSubsetAssay.html">setSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>, </span>
 <span>                  subsetName <span class="op">=</span> <span class="st">"subset2"</span>, </span>
@@ -631,7 +697,7 @@ using one of the two approaches:</p>
 <span><span class="co">## 2 subset2 2, 5 subset1 -&gt; counts subset2Assay_a1, subset2Assay_a2</span></span></code></pre>
 <p>Store an experiment object in the <code>altExp</code> slot of
 <code>subset2</code>:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html" class="external-link">altExp</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">es</span>,</span>
 <span>       e <span class="op">=</span> <span class="st">"subset2_alt1"</span>,</span>
 <span>       subsetName <span class="op">=</span> <span class="st">"subset2"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
@@ -639,7 +705,7 @@ using one of the two approaches:</p>
 <span>       <span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Show the current condition of <code>ExperimentSubset</code>
 object:</p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/subsetSummary.html">subsetSummary</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Main assay(s):</span></span>
 <span><span class="co">##  counts </span></span>
@@ -656,38 +722,43 @@ object:</p>
 <h2 id="using-the-experimentsubset-object-an-example-with-real-scrna-seq-data">Using the <code>ExperimentSubset</code> object: an example with real
 scRNA-seq data<a class="anchor" aria-label="anchor" href="#using-the-experimentsubset-object-an-example-with-real-scrna-seq-data"></a>
 </h2>
+<p>This short example on the PBMC 4k data set isn’t run when the
+vignette is built. For a complete, runnable workflow on the same data,
+from raw droplets through quality control, decontamination, clustering
+and annotation to a re-analysis of the T cells, see the <a href="https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html">single-cell
+workflow article</a>.</p>
 <p>Installing and loading required packages:</p>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
 <span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"TENxPBMCData"</span>, <span class="st">"scrapper"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://campbio.github.io/ExperimentSubset/">ExperimentSubset</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">TENxPBMCData</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/libscran/scrapper" class="external-link">scrapper</a></span><span class="op">)</span></span></code></pre></div>
 <p>Load PBMC4K dataset and create <code>ExperimentSubset</code>
 object:</p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tenx_pbmc4k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/TENxPBMCData/man/TENxPBMCData.html" class="external-link">TENxPBMCData</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">"pbmc4k"</span><span class="op">)</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ExperimentSubset.html">ExperimentSubset</a></span><span class="op">(</span><span class="va">tenx_pbmc4k</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/subsetSummary.html">subsetSummary</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span></span></code></pre></div>
 <p>Compute per-cell QC metrics on the <code>counts</code> matrix using
 the <code>scrapper</code> library and store the total count
 (<code>sum</code>) for each cell:</p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">qcMetrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/rna_quality_control.html" class="external-link">computeRnaQcMetrics</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"counts"</span><span class="op">)</span>, subsets <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span><span class="op">$</span><span class="va">sum</span> <span class="op">&lt;-</span> <span class="va">qcMetrics</span><span class="op">$</span><span class="va">sum</span></span></code></pre></div>
 <p>Filter cells with low column sum and create a new subset called
 ‘filteredCells’:</p>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">filteredCellsIndices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span><span class="op">$</span><span class="va">sum</span> <span class="op">&gt;</span> <span class="fl">1500</span><span class="op">)</span></span>
-<span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"filteredCells"</span>, cols <span class="op">=</span> <span class="va">filteredCellsIndices</span>,</span>
-<span>                   parentAssay <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span>
+<span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"filteredCells"</span>,</span>
+<span>                   cols <span class="op">=</span> <span class="va">filteredCellsIndices</span>, parentAssay <span class="op">=</span> <span class="st">"counts"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/subsetSummary.html">subsetSummary</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span></span></code></pre></div>
 <p>Normalize ‘filteredCells’ subset using <code>scrapper</code> library
 and store it back. Size factors are computed from each cell’s total
 count and centered at one:</p>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">filteredCounts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"filteredCells"</span><span class="op">)</span></span>
 <span><span class="va">filteredSizeFactors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/centerSizeFactors.html" class="external-link">centerSizeFactors</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">filteredCounts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">normalizedCounts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/normalizeCounts.html" class="external-link">normalizeCounts</a></span><span class="op">(</span><span class="va">filteredCounts</span>,</span>
@@ -698,25 +769,25 @@ count and centered at one:</p>
 <p>Find highly variable genes from the normalized assay in the previous
 step using <code>scrapper</code> library against the ‘filteredCells’
 subset only:</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">normalizedCounts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"filteredCells/filteredCellsNormalized"</span><span class="op">)</span></span>
 <span><span class="va">geneVariances</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/modelGeneVariances.html" class="external-link">modelGeneVariances</a></span><span class="op">(</span><span class="va">normalizedCounts</span><span class="op">)</span></span>
 <span><span class="va">residualVariances</span> <span class="op">&lt;-</span> <span class="va">geneVariances</span><span class="op">$</span><span class="va">statistics</span><span class="op">$</span><span class="va">residuals</span></span>
-<span><span class="va">topHVG1000</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/chooseHighlyVariableGenes.html" class="external-link">chooseHighlyVariableGenes</a></span><span class="op">(</span><span class="va">residualVariances</span>, top <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span>
-<span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"hvg1000"</span>, rows <span class="op">=</span> <span class="va">topHVG1000</span>,</span>
+<span><span class="va">topHVG2000</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/chooseHighlyVariableGenes.html" class="external-link">chooseHighlyVariableGenes</a></span><span class="op">(</span><span class="va">residualVariances</span>, top <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span></span>
+<span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"hvg2000"</span>, rows <span class="op">=</span> <span class="va">topHVG2000</span>,</span>
 <span>                   parentAssay <span class="op">=</span> <span class="st">"filteredCells/filteredCellsNormalized"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/subsetSummary.html">subsetSummary</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span></span></code></pre></div>
 <p>Run ‘PCA’ on the highly variable genes computed in the last step
-using <code>scrapper</code> library against the ‘hvg1000’ subset only.
+using <code>scrapper</code> library against the ‘hvg2000’ subset only.
 <code>runPca</code> returns the PCs in rows, so transpose them to put
 cells in rows:</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pcaResult</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/runPca.html" class="external-link">runPca</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"hvg1000"</span><span class="op">)</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pcaResult</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/runPca.html" class="external-link">runPca</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"hvg2000"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">pcaScores</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">pcaResult</span><span class="op">$</span><span class="va">components</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">es</span>, type <span class="op">=</span> <span class="st">"PCA"</span>, subsetName <span class="op">=</span> <span class="st">"hvg1000"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">pcaScores</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">es</span>, type <span class="op">=</span> <span class="st">"PCA"</span>, subsetName <span class="op">=</span> <span class="st">"hvg2000"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">pcaScores</span></span></code></pre></div>
 <p>Show the current condition of the <code>ExperimentSubset</code>
 object:</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/subsetSummary.html">subsetSummary</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -739,6 +810,8 @@ object:</p>
 <li><code>createSubset</code></li>
 <li><code>setSubsetAssay</code></li>
 <li><code>getSubsetAssay</code></li>
+<li><code>getSubsetExperiment</code></li>
+<li><code>setSubsetExperiment</code></li>
 <li><code>subsetSummary</code></li>
 <li><code>subsetParent</code></li>
 <li><code>subsetCount</code></li>
@@ -865,9 +938,22 @@ additional data against a subset such as <code>assay</code>,
 </div>
 </div>
 <div class="section level2">
+<h2 id="learn-more">Learn more<a class="anchor" aria-label="anchor" href="#learn-more"></a>
+</h2>
+<ul>
+<li>The <a href="https://campbio.github.io/ExperimentSubset/">ExperimentSubset
+website</a> documents every function, for the release and for the devel
+version.</li>
+<li>The <a href="https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html">single-cell
+workflow article</a> goes from raw droplets through quality control,
+decontamination, clustering and annotation to a re-analysis of T cells,
+keeping all subsets in one object.</li>
+</ul>
+</div>
+<div class="section level2">
 <h2 id="session-information">Session Information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>
@@ -893,7 +979,7 @@ additional data against a subset such as <code>assay</code>,
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] ExperimentSubset_1.23.17        TreeSummarizedExperiment_2.21.0</span></span>
+<span><span class="co">##  [1] ExperimentSubset_1.23.18        TreeSummarizedExperiment_2.21.0</span></span>
 <span><span class="co">##  [3] Biostrings_2.81.9               XVector_0.53.0                 </span></span>
 <span><span class="co">##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    </span></span>
 <span><span class="co">##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 </span></span>
