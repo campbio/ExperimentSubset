@@ -69,9 +69,10 @@ or deploy the site locally. Add new exports to `_pkgdown.yml` and run
   `SubsetSpatialExperiment`: each extends its Bioconductor class with one
   slot, `subsets`, a SimpleList of `AssaySubset`.
 - `R/allClasses.R` exports each of these classes with
-  `@exportClass <Name>`, not `@export`. Since roxygen2 7.3, `@export` on
-  `.Foo <- setClass("Foo")` also exports the dot-prefixed generator.
-  Follow the same pattern for any new class.
+  `@exportClass <Name>`, not `@export`. Since roxygen2 7.2.1, `@export`
+  on `.Foo <- setClass("Foo")` also exports the generator, which would
+  add dot-prefixed exports to NAMESPACE. Follow the same pattern for any
+  new class.
 - Never use `@`. Inside the package, use the internal accessors in
   `R/ExperimentSubset.R` (`.subsets()`, `.subsets<-`, `.subsetName()`,
   `.rowIndices()`, `.colIndices()`, `.parentAssay()`, `.internalAssay()`,
