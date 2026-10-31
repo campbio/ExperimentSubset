@@ -259,21 +259,29 @@ matrix (about 737k barcodes) and the filtered matrix, read with
 (<https://github.com/single-cell-mams/mams>) suggested categories:
 
 ```
-counts                        main assay, all droplets (MAMS processing counts; obs/feature_subset full)
-├── background                empty droplets used as decontX's ambient profile
-└── filtered                  Cell Ranger cells (obs_subset filtered)
-    │  decontaminated         decontX output (processing decontaminated)
-    └── clean                 cells passing QC (obs_subset clean; parent filtered/decontaminated)
-        │  lognormalized      own (processing lognormalized)
-        │  scaled             own (processing scaled)
-        │  reduction.pca, embedding.umap
-        ├── clean.variable    top variable genes (feature_subset variable)
-        └── tcells            T cells (parent clean)
-            │  lognormalized  linked from clean: per-cell, so not recomputed
-            │  scaled         own, stored with unlink = TRUE: z-scores of T cells only
-            │  reduction.pca, embedding.umap
-            └── tcells.variable
+counts                        main assay, all droplets (MAMS processing counts)
+├── filtered                  Cell Ranger's cells (obs_subset filtered)
+│   │  decontaminated         decontX output, no background (processing)
+│   └── clean                 high-quality cells (obs_subset clean;
+│       │                     parent filtered/decontaminated)
+│       │  lognormalized      own (processing lognormalized)
+│       │  reduction.pca, embedding.umap
+│       ├── clean.variable    2,000 variable genes (feature_subset variable;
+│       │     scaled          parent clean/lognormalized); own z-scores
+│       └── tcells            T cells (parent clean); lognormalized linked
+│           │  reduction.pca, embedding.umap
+│           └── tcells.variable  T cells' 2,000 variable genes; own scaled
+├── emptydrops                emptyDrops' cells (FDR <= 1%)
+└── barcoderanks              droplets above the barcode-rank knee
 ```
+
+Revised on 2026-10-26 at the developer's request: emptyDrops' and
+barcodeRanks' calls are subsets too (with the object's size before and
+after), decontX runs without a background, there is no gene filter, only
+the variable genes (2,000) are scaled, and there's a disclaimer that the
+article is about keeping an analysis in one object rather than a definitive
+PBMC annotation. With z-scores only in the variable-gene subsets, no step
+needs `unlink = TRUE`; the article explains it in prose.
 
 **Steps.** Each step says which of two styles it uses: *experiment*
 (`getSubsetExperiment()`, run a tool, `setSubsetExperiment()`) or *direct*
@@ -293,7 +301,8 @@ reducedDim on the subset).
    contamination; `createSubset(es, "clean", cols = keep,
    parentAssay = "filtered/decontaminated")`.
 6. Clustering, direct style, with scrapper: normalise (`lognormalized`),
-   choose variable genes (`clean.variable`), scale them (`scaled`), PCA
+   z-scores of the expressed genes (`scaled`), variable genes
+   (`clean.variable`, made from `clean/scaled`), PCA of their z-scores
    (`reduction.pca`), SNN graph and clusters (colData), UMAP
    (`embedding.umap`).
 7. Annotation, direct style: SingleR with celldex's Monaco reference, main
@@ -320,7 +329,10 @@ when the site builds; a failing step fails the build.
 
 **Short vignette.** `vignettes/ExperimentSubset.Rmd` gets a "Learn more"
 note near the top and at the end, with absolute links to the site and to the
-workflow article, so they work from the Bioconductor landing page.
+workflow article, so they work from the Bioconductor landing page. The
+article link points to the devel site (`/dev/articles/...`): the article
+uses functions only devel has, and the release site won't have it until
+the next release. At that release (3.25), the link moves to the root.
 
 **Checks while implementing.** singleCellTK's exact arguments; emptyDrops'
 runtime on about 737k droplets (raise `lower` if needed rather than skip the

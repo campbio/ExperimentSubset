@@ -1,7 +1,7 @@
 Package: ExperimentSubset
 Type: Package
 Title: Manages Subsets of Data with Bioconductor Experiment Objects
-Version: 1.23.17
+Version: 1.23.18
 Authors@R: c(person(given="Irzam", family="Sarfraz", email="irzam9095@gmail.com", role=c("aut","cre"),
               comment = c(ORCID = "0000-0001-8121-792X")),
             person(given="Muhammad", family="Asif", email="asif@ntu.edu.pk", role=c("aut","ths"),
@@ -13,7 +13,8 @@ License: MIT + file LICENSE
 URL: https://campbio.github.io/ExperimentSubset/,
     https://github.com/campbio/ExperimentSubset
 BugReports: https://github.com/campbio/ExperimentSubset/issues
-Config/Needs/website: pkgdown
+Config/Needs/website: pkgdown, DropletTestFiles, DropletUtils, scuttle,
+    singleCellTK, scDblFinder, celda, SingleR, celldex
 Encoding: UTF-8
 Depends:
   R (>= 4.0.0),
