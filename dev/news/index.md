@@ -1,5 +1,10 @@
 # Changelog
 
+## ExperimentSubset 1.23.20 (2026-10-31)
+
+- `stats` is no longer listed in Suggests: it is a base package that R
+  attaches by default, including in `R CMD check`
+
 ## ExperimentSubset 1.23.19 (2026-10-31)
 
 - Joshua D. Campbell is now the maintainer, taking over from Irzam
