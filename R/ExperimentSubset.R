@@ -1351,7 +1351,6 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 # Defunct without a deprecation release: it failed for every value, since
 # SpatialExperiment's spatialData<- takes no data.frame, and the method
 # took no DataFrame (#34)
-#' @importMethodsFrom SpatialExperiment spatialData<-
 '.subsetSpatialData<-' <- function(x, subsetName, value){
   msg <- paste0(
     "subsetSpatialData<- is defunct, as spatialData<- is deprecated in ",
