@@ -57,6 +57,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Leave the agent instruction files out of the site
+        # pkgdown renders every top-level .md file, and has no setting to
+        # skip one; these are notes for coding agents, not documentation
+        run: rm -f AGENTS.md CLAUDE.md
+        shell: bash
+
       - name: Install the package and the site's dependencies
         # Config/Needs/website lists pkgdown and the articles' packages
         run: |
@@ -203,6 +209,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.release-check.outputs.sha }}
+
+      - name: Leave the agent instruction files out of the site
+        # pkgdown renders every top-level .md file, and has no setting to
+        # skip one; these are notes for coding agents, not documentation
+        run: rm -f AGENTS.md CLAUDE.md
+        shell: bash
 
       - name: Install the package and the site's dependencies
         run: |
