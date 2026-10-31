@@ -68,6 +68,10 @@ or deploy the site locally. Add new exports to `_pkgdown.yml` and run
   `SubsetSingleCellExperiment`, `SubsetTreeSummarizedExperiment` and
   `SubsetSpatialExperiment`: each extends its Bioconductor class with one
   slot, `subsets`, a SimpleList of `AssaySubset`.
+- `R/allClasses.R` exports each of these classes with
+  `@exportClass <Name>`, not `@export`. Since roxygen2 7.3, `@export` on
+  `.Foo <- setClass("Foo")` also exports the dot-prefixed generator.
+  Follow the same pattern for any new class.
 - Never use `@`. Inside the package, use the internal accessors in
   `R/ExperimentSubset.R` (`.subsets()`, `.subsets<-`, `.subsetName()`,
   `.rowIndices()`, `.colIndices()`, `.parentAssay()`, `.internalAssay()`,
@@ -95,9 +99,11 @@ None.
 
 - Install every package in Suggests (`devtools::install_dev_deps()`);
   checks don't relax missing Suggests.
-- DESCRIPTION has `RoxygenNote: 7.1.1`. `make docs` with a current
-  roxygen2 rewrites every file in `man/` and updates that field. Keep
-  such a refresh in its own PR rather than mixing it into a functional
+- DESCRIPTION records the roxygen2 version in
+  `Config/roxygen2/version: 8.1.0`. With roxygen2 8.1.0, `make docs`
+  changes only the Rd files whose roxygen comments changed. If a newer
+  roxygen2 rewrites many files in `man/` and updates that field, keep
+  that refresh in its own PR rather than mixing it into a functional
   change.
 
 ## Related packages
