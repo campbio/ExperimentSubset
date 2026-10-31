@@ -1,8 +1,8 @@
-# NNNN. Drop stats from Suggests
+# 0003. Drop stats from Suggests
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-31
-- **Deciders:** (pending maintainer approval)
+- **Deciders:** Joshua D. Campbell
 
 ## Context
 
