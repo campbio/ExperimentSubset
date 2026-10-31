@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.19 (2026-10-31)
+* Joshua D. Campbell is now the maintainer, taking over from Irzam Sarfraz, who remains an author
+
 # ExperimentSubset 1.23.18 (2026-10-25)
 * New article on the website: an end-to-end single-cell workflow on 4,000 PBMCs that keeps empty droplets, cells, quality-controlled cells, variable genes and a T-cell re-analysis as subsets of one object, using both `getSubsetExperiment()`/`setSubsetExperiment()` and direct storage. The vignette links to the website and the article, shows `getSubsetExperiment()`/`setSubsetExperiment()`, and sets subset colData columns directly with `colData(x, subsetName = )$column <-`
 
