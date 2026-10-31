@@ -49,9 +49,9 @@ An object of the same class as \code{x}.
 \examples{
 # an object with 10 genes and 20 cells
 set.seed(1)
-counts <- matrix(rpois(200, 5), nrow = 10,
-                 dimnames = list(paste0("gene", 1:10),
-                                 paste0("cell", 1:20)))
+counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+rownames(counts) <- paste0("gene", 1:10)
+colnames(counts) <- paste0("cell", 1:20)
 es <- ExperimentSubset(list(counts = counts))
 # a subset of the first 5 genes and the first 8 cells
 es <- createSubset(es, subsetName = "first", rows = 1:5, cols = 1:8)

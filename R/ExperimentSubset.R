@@ -868,9 +868,9 @@ ExperimentSubset <- function(x,
 #' @examples
 #' # an object with 10 genes and 20 cells
 #' set.seed(1)
-#' counts <- matrix(rpois(200, 5), nrow = 10,
-#'                  dimnames = list(paste0("gene", 1:10),
-#'                                  paste0("cell", 1:20)))
+#' counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts) <- paste0("gene", 1:10)
+#' colnames(counts) <- paste0("cell", 1:20)
 #' es <- ExperimentSubset(list(counts = counts))
 #' # a subset of the first 5 genes and the first 8 cells
 #' es <- createSubset(es, subsetName = "first", rows = 1:5, cols = 1:8)
@@ -884,6 +884,8 @@ NULL
 # columns that remain; i or j may be missing. Subsets are visited parents
 # first, so each is matched against what remains of its parent.
 .remapSubsets <- function(x, out, i, j) {
+  if (missing(i) && missing(j))
+    return(out)
   rows <- NULL
   if (!missing(i)) {
     positions <- seq_len(nrow(x))
@@ -896,20 +898,18 @@ NULL
     names(positions) <- colnames(x)
     cols <- S4Vectors::normalizeSingleBracketSubscript(j, positions)
   }
-  names <- subsetNames(x)
-  depth <- vapply(names, function(name) length(.subsetChain(x, name)),
-                  integer(1))
-  containers <- lapply(names, function(name) {
-    .parentSubsetName(x, .parentAssay(.subsets(x)[[name]]))
-  })
-  names(containers) <- names
+  x <- .qualifyParents(x)
+  chains <- lapply(subsetNames(x), function(name) .subsetChain(x, name))
+  names(chains) <- subsetNames(x)
+  depth <- vapply(chains, length, integer(1))
   # positions in each subset's old rows and columns that remain, in order;
   # NULL when all remain
   keptRows <- list()
   keptCols <- list()
-  for (name in names[order(depth)]) {
+  for (name in names(chains)[order(depth)]) {
     subset <- .subsets(x)[[name]]
-    container <- containers[[name]]
+    chain <- chains[[name]]
+    container <- if (length(chain) > 1) chain[length(chain) - 1] else NULL
     parentRows <- if (is.null(container)) rows else keptRows[[container]]
     parentCols <- if (is.null(container)) cols else keptCols[[container]]
     newRows <- .keepIndices(.rowIndices(subset), parentRows)
@@ -917,16 +917,18 @@ NULL
     keptRows[name] <- list(newRows$kept)
     keptCols[name] <- list(newCols$kept)
     internal <- .internalAssay(subset)
-    if (!is.null(newRows$kept))
-      internal <- internal[newRows$kept, ]
-    if (!is.null(newCols$kept))
-      internal <- internal[, newCols$kept]
+    internalRows <- newRows$kept
+    if (is.null(internalRows))
+      internalRows <- seq_len(nrow(internal))
+    internalCols <- newCols$kept
+    if (is.null(internalCols))
+      internalCols <- seq_len(ncol(internal))
     .subsets(out)[[name]] <- AssaySubset(
       subsetName = .subsetName(subset),
       rowIndices = newRows$indices,
       colIndices = newCols$indices,
       parentAssay = .parentAssay(subset),
-      internalAssay = internal
+      internalAssay = internal[internalRows, internalCols]
     )
   }
   out

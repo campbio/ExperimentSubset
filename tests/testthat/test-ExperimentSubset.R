@@ -1770,6 +1770,9 @@ testthat::test_that("[ keeps the rows of subsets that remain (#4)", {
   testthat::expect_equal(assay(es[paste0("g", 3:10), ], "s1a"),
                          assay(kept, "s1a"))
 
+  # with no subscripts nothing changes
+  testthat::expect_equal(es[, ], es)
+
   # a subset keeps its own order when the main object is reordered
   reversed <- es[10:1, ]
   testthat::expect_equal(as.matrix(assay(reversed, "s1")), counts[1:5, 1:8])
@@ -1836,8 +1839,29 @@ testthat::test_that("[ remaps subsets in every Subset class (#4)", {
     kept <- es[3:10, 2:6]
     testthat::expect_s4_class(kept, class(es))
     testthat::expect_equal(as.matrix(assay(kept, "s1")), counts[3:5, 2:3])
+    # spatial coordinates of the subset follow its columns
+    if (is(experiment, "SpatialExperiment"))
+      testthat::expect_equal(unname(subsetSpatialCoords(kept, "s1")[, "x"]),
+                             c(2, 3))
   }
-  # spatial coordinates of the subset follow its columns
-  testthat::expect_equal(unname(subsetSpatialCoords(kept, "s1")[, "x"]),
-                         c(2, 3))
+})
+
+testthat::test_that("[ keeps one copy of repeated rows in subsets (#4)", {
+  example <- bracketExample()
+  repeated <- example$es[c(3, 3, 4, 1), ]
+  testthat::expect_equal(subsetRownames(repeated, "s1"),
+                         paste0("g", c(1, 3, 4)))
+  testthat::expect_equal(as.matrix(assay(repeated, "s1")),
+                         example$counts[c(1, 3, 4), 1:8])
+  testthat::expect_equal(as.matrix(assay(repeated, "s1a")),
+                         example$counts[3:4, 3:6])
+})
+
+testthat::test_that("[ remaps subsets made from a stored assay (#4)", {
+  example <- bracketExample()
+  es <- createSubset(example$es, "fromDoubled", rows = 2:5, cols = 1:4,
+                     parentAssay = "s1/doubled")
+  kept <- es[3:10, 2:20]
+  testthat::expect_equal(as.matrix(assay(kept, "fromDoubled")),
+                         example$counts[3:5, 2:4] * 2)
 })
