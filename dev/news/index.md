@@ -1,5 +1,10 @@
 # Changelog
 
+## ExperimentSubset 1.23.19 (2026-10-31)
+
+- Joshua D. Campbell is now the maintainer, taking over from Irzam
+  Sarfraz, who remains an author
+
 ## ExperimentSubset 1.23.18 (2026-10-25)
 
 - New article on the website: an end-to-end single-cell workflow on

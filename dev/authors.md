@@ -2,13 +2,12 @@
 
 ## Authors
 
-- **Irzam Sarfraz**. Author, maintainer.
-  [](https://orcid.org/0000-0001-8121-792X)
+- **Irzam Sarfraz**. Author. [](https://orcid.org/0000-0001-8121-792X)
 
 - **Muhammad Asif**. Author, thesis advisor.
   [](https://orcid.org/0000-0003-1839-2527)
 
-- **Joshua D. Campbell**. Author.
+- **Joshua D. Campbell**. Author, maintainer.
   [](https://orcid.org/0000-0003-0780-8662)
 
 ## Citation
