@@ -219,10 +219,11 @@ NULL
 NULL
 
 # Why assay() or assay<- can't take subsetAssayName with i, which is not a
-# subset name: i already names an assay as "subset/assay", or it names
-# something other than a subset. Shared so both give the same reason (#76)
-.subsetAssayNameMisuse <- function(x, i) {
-  if (grepl("/", i, fixed = TRUE) && !i %in% assayNames(x))
+# subset name: i already names an assay as "subset/assay" (qualified), or
+# it names something other than a subset. The caller says which, from the
+# test it already made. Shared so both give the same reason (#76)
+.subsetAssayNameMisuse <- function(i, qualified) {
+  if (qualified)
     return(paste0("'subsetAssayName' can't be used with \"subset/assay\"; '",
                   i, "' already names the assay."))
   paste0("'subsetAssayName' is only used when 'i' is a subset name; '", i,
@@ -237,8 +238,10 @@ NULL
     if (!is.character(args$subsetAssayName)
         || length(args$subsetAssayName) != 1)
       stop("'subsetAssayName' must be a single character string.")
-    if (!i %in% subsetNames(x))
-      stop(.subsetAssayNameMisuse(x, i))
+    if (!i %in% subsetNames(x)) {
+      qualified <- grepl("/", i, fixed = TRUE) && !i %in% assayNames(x)
+      stop(.subsetAssayNameMisuse(i, qualified))
+    }
     i <- paste0(i, "/", args$subsetAssayName)
   }
   ref <- .resolveAssay(x, i)
@@ -550,7 +553,7 @@ NULL
     if (is.null(parts) || !parts[1] %in% subsetNames(x))
       stop("'", i, "' is not \"subset/assay\" for an existing subset.")
     if (!is.null(subsetAssayName))
-      stop(.subsetAssayNameMisuse(x, i))
+      stop(.subsetAssayNameMisuse(i, qualified = TRUE))
     return(setSubsetAssay(x, parts[1], value, parts[2], unlink = unlink))
   }
   # a subset name stores the assay inside that subset
@@ -569,7 +572,7 @@ NULL
   }
   else{
     if (!is.null(subsetAssayName))
-      stop(.subsetAssayNameMisuse(x, i))
+      stop(.subsetAssayNameMisuse(i, qualified = FALSE))
     if (unlink)
       stop("'unlink' only applies when storing an assay in a subset.")
     callNextMethod(x, i, ..., value = value)
