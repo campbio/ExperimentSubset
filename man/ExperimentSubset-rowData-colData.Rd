@@ -118,7 +118,8 @@ of the class \code{x} extends.}
 
 \item{value}{A \code{DataFrame} with one row per row (\code{rowData<-})
 or column (\code{colData<-}) of the subset or the main object, or
-\code{NULL} to remove all columns. For a subset, a \code{data.frame}
+\code{NULL} to remove all columns (a \code{SpatialExperiment} keeps
+its \code{sample_id} column). For a subset, a \code{data.frame}
 is also accepted and converted to a \code{DataFrame}; for the main
 object, \code{colData<-} with a \code{data.frame} is an error.}
 }

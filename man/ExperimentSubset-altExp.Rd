@@ -109,7 +109,7 @@ of the alternative experiment. Leave it out for the first one.}
 }
 Other arguments are passed on to the \code{SingleCellExperiment}
 method. With \code{subsetName}, \code{altExpNames()} and
-\code{altExpNames<-} take no other arguments.}
+\code{altExpNames<-} ignore other arguments.}
 
 \item{value}{For \code{altExp<-}, a \code{SummarizedExperiment} with one
 column per column of the subset (or of the main object). For

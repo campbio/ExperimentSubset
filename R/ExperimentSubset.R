@@ -177,9 +177,11 @@ NULL
 #' @param x An \code{ExperimentSubset} object.
 #' @param i \code{character(1)} The name of a main assay, a subset name, or
 #'   \code{"subset/assay"}.
-#' @param withDimnames \code{logical(1)} Whether the assay returned has row
-#'   and column names. When setting a main assay, passed on to the method
-#'   of the class \code{x} extends. Default \code{TRUE}.
+#' @param withDimnames \code{logical(1)} As for \code{SummarizedExperiment}:
+#'   \code{TRUE} gives the assay returned the row and column names of the
+#'   main object or the subset, and \code{FALSE} keeps the names stored
+#'   with the assay, if any. When setting a main assay, passed on to the
+#'   method of the class \code{x} extends. Default \code{TRUE}.
 #' @param ... \describe{
 #'     \item{\code{subsetAssayName}}{\code{character(1)} With a subset name
 #'       in \code{i}, the name of the assay to get from or store in that
@@ -680,7 +682,7 @@ NULL
 #'   }
 #'   Other arguments are passed on to the \code{SingleCellExperiment}
 #'   method. With \code{subsetName}, \code{altExpNames()} and
-#'   \code{altExpNames<-} take no other arguments.
+#'   \code{altExpNames<-} ignore other arguments.
 #' @param value For \code{altExp<-}, a \code{SummarizedExperiment} with one
 #'   column per column of the subset (or of the main object). For
 #'   \code{altExps<-}, a list of them. For \code{altExpNames<-}, a
@@ -1515,7 +1517,8 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 #'   of the class \code{x} extends.
 #' @param value A \code{DataFrame} with one row per row (\code{rowData<-})
 #'   or column (\code{colData<-}) of the subset or the main object, or
-#'   \code{NULL} to remove all columns. For a subset, a \code{data.frame}
+#'   \code{NULL} to remove all columns (a \code{SpatialExperiment} keeps
+#'   its \code{sample_id} column). For a subset, a \code{data.frame}
 #'   is also accepted and converted to a \code{DataFrame}; for the main
 #'   object, \code{colData<-} with a \code{data.frame} is an error.
 #' @return \code{rowData()} and \code{colData()} return a \code{DataFrame}.

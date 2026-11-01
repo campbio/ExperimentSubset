@@ -43,9 +43,11 @@
 \item{i}{\code{character(1)} The name of a main assay, a subset name, or
 \code{"subset/assay"}.}
 
-\item{withDimnames}{\code{logical(1)} Whether the assay returned has row
-and column names. When setting a main assay, passed on to the method
-of the class \code{x} extends. Default \code{TRUE}.}
+\item{withDimnames}{\code{logical(1)} As for \code{SummarizedExperiment}:
+\code{TRUE} gives the assay returned the row and column names of the
+main object or the subset, and \code{FALSE} keeps the names stored
+with the assay, if any. When setting a main assay, passed on to the
+method of the class \code{x} extends. Default \code{TRUE}.}
 
 \item{...}{\describe{
   \item{\code{subsetAssayName}}{\code{character(1)} With a subset name
