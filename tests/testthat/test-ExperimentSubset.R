@@ -1280,6 +1280,12 @@ testthat::test_that("Qualified names that don't exist give clear errors", {
   testthat::expect_error(assay(es, "nope/counts"), regexp = "nope/counts")
   testthat::expect_error(assay(es, "s1", subsetAssayName = c("a", "b")),
                          regexp = "subsetAssayName")
+  # subsetAssayName with an i that isn't a subset name gives the same
+  # reason as the setter, not that the subset doesn't exist (#76)
+  testthat::expect_error(assay(es, "s1/counts", subsetAssayName = "x"),
+                         regexp = "already names")
+  testthat::expect_error(assay(es, "counts", subsetAssayName = "x"),
+                         regexp = "not a subset")
   testthat::expect_error(assay(es, "nope/extra") <- s1Counts,
                          regexp = "existing subset")
   testthat::expect_error(subsetParent(es, "counts"),

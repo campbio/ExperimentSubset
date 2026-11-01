@@ -218,6 +218,17 @@ NULL
 #' assay(es, "first/logcounts")
 NULL
 
+# Why assay() or assay<- can't take subsetAssayName with i, which is not a
+# subset name: i already names an assay as "subset/assay", or it names
+# something other than a subset. Shared so both give the same reason (#76)
+.subsetAssayNameMisuse <- function(x, i) {
+  if (grepl("/", i, fixed = TRUE) && !i %in% assayNames(x))
+    return(paste0("'subsetAssayName' can't be used with \"subset/assay\"; '",
+                  i, "' already names the assay."))
+  paste0("'subsetAssayName' is only used when 'i' is a subset name; '", i,
+         "' is not a subset.")
+}
+
 .assay <- function(x, i, ...){
   args <- list(...)
   withDimnames <- !isFALSE(args$withDimnames)
@@ -226,7 +237,8 @@ NULL
     if (!is.character(args$subsetAssayName)
         || length(args$subsetAssayName) != 1)
       stop("'subsetAssayName' must be a single character string.")
-    .isSubset(x, i)
+    if (!i %in% subsetNames(x))
+      stop(.subsetAssayNameMisuse(x, i))
     i <- paste0(i, "/", args$subsetAssayName)
   }
   ref <- .resolveAssay(x, i)
@@ -538,8 +550,7 @@ NULL
     if (is.null(parts) || !parts[1] %in% subsetNames(x))
       stop("'", i, "' is not \"subset/assay\" for an existing subset.")
     if (!is.null(subsetAssayName))
-      stop("'subsetAssayName' can't be used with \"subset/assay\"; '", i,
-           "' already names the assay.")
+      stop(.subsetAssayNameMisuse(x, i))
     return(setSubsetAssay(x, parts[1], value, parts[2], unlink = unlink))
   }
   # a subset name stores the assay inside that subset
@@ -558,8 +569,7 @@ NULL
   }
   else{
     if (!is.null(subsetAssayName))
-      stop("'subsetAssayName' is only used when 'i' is a subset name; '",
-           i, "' is not a subset.")
+      stop(.subsetAssayNameMisuse(x, i))
     if (unlink)
       stop("'unlink' only applies when storing an assay in a subset.")
     callNextMethod(x, i, ..., value = value)
