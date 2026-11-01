@@ -1,5 +1,23 @@
 # Changelog
 
+## ExperimentSubset 1.23.25 (2026-11-01)
+
+- [`cbind()`](https://rdrr.io/r/base/cbind.html) and
+  [`rbind()`](https://rdrr.io/r/base/cbind.html) now keep the subsets of
+  every object, with their own assays, rowData, colData, reducedDims and
+  altExps. Before, only the first object’s subsets were kept and the
+  others were dropped without a message. Subsets of later objects move
+  to where that object’s columns or rows are in the result. Subset names
+  repeated across the objects are an error, as is
+  [`cbind()`](https://rdrr.io/r/base/cbind.html) of an object with
+  subsets whose rows aren’t the first object’s, in the same order. For
+  SpatialExperiment objects, each subset’s `sample_id` follows the main
+  object’s when [`cbind()`](https://rdrr.io/r/base/cbind.html) renames
+  repeated sample IDs. Convert a plain object with
+  [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
+  before combining it with `ExperimentSubset` objects
+  ([\#67](https://github.com/campbio/ExperimentSubset/issues/67))
+
 ## ExperimentSubset 1.23.24 (2026-10-31)
 
 - [`subsetSpatialData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md)

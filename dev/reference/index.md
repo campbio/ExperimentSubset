@@ -67,6 +67,17 @@
   [`` `[`( ``*`<SubsetSpatialExperiment>`*`,`*`<ANY>`*`,`*`<ANY>`*`,`*`<ANY>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-subsetting.md)
   [`` `[`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<ANY>`*`,`*`<ANY>`*`,`*`<ANY>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-subsetting.md)
   : Subset an ExperimentSubset object by rows or columns
+- [`cbind(`*`<SubsetRangedSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-combine.md)
+  [`rbind(`*`<SubsetRangedSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-combine.md)
+  [`cbind(`*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-combine.md)
+  [`rbind(`*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-combine.md)
+  [`cbind(`*`<SubsetSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-combine.md)
+  [`rbind(`*`<SubsetSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-combine.md)
+  [`cbind(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-combine.md)
+  [`rbind(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-combine.md)
+  [`cbind(`*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-combine.md)
+  [`rbind(`*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-combine.md)
+  : Combine ExperimentSubset objects by columns or rows
 
 ## Getting and setting subset data
 

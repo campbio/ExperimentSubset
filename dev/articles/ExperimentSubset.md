@@ -798,8 +798,12 @@ which inherits from the class of the input object. This ensures that
 `ExperimentSubset` object can be manipulated in a fashion similar to the
 input object class and so can be used as a drop-in replacement for these
 classes. Most methods that work on the input object class work on the
-`ExperimentSubset` objects as well; subsetting with `[` is an exception
-for objects that contain subsets.
+`ExperimentSubset` objects as well, and `[`,
+[`cbind()`](https://rdrr.io/r/base/cbind.html) and
+[`rbind()`](https://rdrr.io/r/base/cbind.html) also update the subsets.
+Convert a plain object with
+[`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
+before combining it with `ExperimentSubset` objects.
 
 ### Additional `subsets` slot
 
@@ -881,7 +885,7 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.24        TreeSummarizedExperiment_2.21.0
+    ##  [1] ExperimentSubset_1.23.25        TreeSummarizedExperiment_2.21.0
     ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
     ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
     ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 

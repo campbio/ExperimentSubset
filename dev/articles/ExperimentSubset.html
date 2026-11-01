@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.24</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.25</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -884,9 +884,11 @@ class of the input object. This ensures that
 <code>ExperimentSubset</code> object can be manipulated in a fashion
 similar to the input object class and so can be used as a drop-in
 replacement for these classes. Most methods that work on the input
-object class work on the <code>ExperimentSubset</code> objects as well;
-subsetting with <code>[</code> is an exception for objects that contain
-subsets.</p>
+object class work on the <code>ExperimentSubset</code> objects as well,
+and <code>[</code>, <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind()</a></code> and <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code> also
+update the subsets. Convert a plain object with
+<code><a href="../reference/ExperimentSubset.html">ExperimentSubset()</a></code> before combining it with
+<code>ExperimentSubset</code> objects.</p>
 </div>
 <div class="section level3">
 <h3 id="additional-subsets-slot">Additional <code>subsets</code> slot<a class="anchor" aria-label="anchor" href="#additional-subsets-slot"></a>
@@ -985,7 +987,7 @@ keeping all subsets in one object.</li>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] ExperimentSubset_1.23.24        TreeSummarizedExperiment_2.21.0</span></span>
+<span><span class="co">##  [1] ExperimentSubset_1.23.25        TreeSummarizedExperiment_2.21.0</span></span>
 <span><span class="co">##  [3] Biostrings_2.81.9               XVector_0.53.0                 </span></span>
 <span><span class="co">##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    </span></span>
 <span><span class="co">##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 </span></span>
