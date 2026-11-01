@@ -622,8 +622,9 @@ object.
 This ensures that `ExperimentSubset` object can be manipulated in a fashion
 similar to the input object class and so can be used as a drop-in replacement
 for these classes. Most methods that work on the input object class work on
-the `ExperimentSubset` objects as well; subsetting with `[` is an exception
-for objects that contain subsets.
+the `ExperimentSubset` objects as well, and `[`, `cbind()` and `rbind()` also
+update the subsets. Convert a plain object with `ExperimentSubset()` before
+combining it with `ExperimentSubset` objects.
 
 ## Additional `subsets` slot
 

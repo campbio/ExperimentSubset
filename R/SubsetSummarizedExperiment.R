@@ -357,3 +357,28 @@ setMethod(
     .remapSubsets(x, out, i, j)
   }
 )
+
+#' @rdname ExperimentSubset-combine
+#' @importMethodsFrom SummarizedExperiment cbind rbind
+setMethod(
+  f = "cbind",
+  signature = "SubsetSummarizedExperiment",
+  definition = function(..., deparse.level = 1) {
+    objects <- list(...)
+    .checkCombine(objects, "cols")
+    out <- callNextMethod()
+    .combineSubsets(out, objects, "cols")
+  }
+)
+
+#' @rdname ExperimentSubset-combine
+setMethod(
+  f = "rbind",
+  signature = "SubsetSummarizedExperiment",
+  definition = function(..., deparse.level = 1) {
+    objects <- list(...)
+    .checkCombine(objects, "rows")
+    out <- callNextMethod()
+    .combineSubsets(out, objects, "rows")
+  }
+)
