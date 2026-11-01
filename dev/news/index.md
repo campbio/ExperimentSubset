@@ -1,5 +1,17 @@
 # Changelog
 
+## ExperimentSubset 1.23.27 (2026-11-01)
+
+- `assay(x, i, subsetAssayName = )` with an `i` that isn’t a subset name
+  now gives the same reason as `assay<-`: that `i` already names an
+  assay as `"subset/assay"`, that `i` has a `/` but isn’t
+  `"subset/assay"` for an existing subset, or that `i` is not a subset.
+  Before, it said that `i` was a subset that does not exist, and
+  referred to a `subsetName` argument that
+  [`assay()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
+  doesn’t have
+  ([\#76](https://github.com/campbio/ExperimentSubset/issues/76))
+
 ## ExperimentSubset 1.23.26 (2026-11-01)
 
 - New help pages for the methods of Bioconductor generics that take
