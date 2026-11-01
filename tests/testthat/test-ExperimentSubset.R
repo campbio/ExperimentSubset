@@ -1947,3 +1947,117 @@ testthat::test_that("createSubset says when the parent is empty (#68)", {
                                       parentAssay = "s1"),
                          "Parent 's1' has no columns")
 })
+
+# Two objects to combine, each with a subset; the second also has a subset
+# of its subset, an assay and a colData column stored in its subset. For
+# cbind() they share rows, for rbind() they share columns
+combineExample <- function(along) {
+  counts1 <- matrix(as.numeric(seq_len(200)), nrow = 10,
+                    dimnames = list(paste0("g", 1:10), paste0("c", 1:20)))
+  counts2 <- counts1 * 100
+  if (along == "cols")
+    colnames(counts2) <- paste0("d", 1:20)
+  else
+    rownames(counts2) <- paste0("h", 1:10)
+  es1 <- ExperimentSubset(SingleCellExperiment(list(counts = counts1)))
+  es1 <- createSubset(es1, "s1", rows = 1:5, cols = 1:8)
+  es2 <- ExperimentSubset(SingleCellExperiment(list(counts = counts2)))
+  es2 <- createSubset(es2, "s2", rows = 6:10, cols = 9:20)
+  es2 <- createSubset(es2, "s2a", rows = 2:4, cols = 3:6, parentAssay = "s2")
+  es2 <- setSubsetAssay(es2, "s2", counts2[6:10, 9:20] * 2, "doubled")
+  colData(es2, subsetName = "s2")$tag <- paste0("t", 1:12)
+  list(es1 = es1, es2 = es2, counts1 = counts1, counts2 = counts2)
+}
+
+testthat::test_that("cbind keeps the subsets of every object (#67)", {
+  example <- combineExample("cols")
+  counts1 <- example$counts1
+  counts2 <- example$counts2
+
+  combined <- cbind(example$es1, example$es2)
+  testthat::expect_equal(subsetNames(combined), c("s1", "s2", "s2a"))
+  testthat::expect_equal(as.matrix(assay(combined, "s1")), counts1[1:5, 1:8])
+  testthat::expect_equal(as.matrix(assay(combined, "s2")),
+                         counts2[6:10, 9:20])
+  testthat::expect_equal(subsetColnames(combined, "s2"), paste0("d", 9:20))
+  # the subset's own assay and colData, and the subset of the subset
+  testthat::expect_equal(as.matrix(assay(combined, "s2/doubled")),
+                         counts2[6:10, 9:20] * 2)
+  testthat::expect_equal(colData(combined, subsetName = "s2")$tag,
+                         paste0("t", 1:12))
+  testthat::expect_equal(as.matrix(assay(combined, "s2a")),
+                         counts2[7:9, 11:14])
+})
+
+testthat::test_that("rbind keeps the subsets of every object (#67)", {
+  example <- combineExample("rows")
+  counts1 <- example$counts1
+  counts2 <- example$counts2
+
+  combined <- rbind(example$es1, example$es2)
+  testthat::expect_equal(subsetNames(combined), c("s1", "s2", "s2a"))
+  testthat::expect_equal(as.matrix(assay(combined, "s1")), counts1[1:5, 1:8])
+  testthat::expect_equal(as.matrix(assay(combined, "s2")),
+                         counts2[6:10, 9:20])
+  testthat::expect_equal(subsetRownames(combined, "s2"), paste0("h", 6:10))
+  testthat::expect_equal(as.matrix(assay(combined, "s2/doubled")),
+                         counts2[6:10, 9:20] * 2)
+  testthat::expect_equal(as.matrix(assay(combined, "s2a")),
+                         counts2[7:9, 11:14])
+})
+
+testthat::test_that("cbind counts objects without subsets (#67)", {
+  example <- combineExample("cols")
+  counts3 <- example$counts1 * 10000
+  colnames(counts3) <- paste0("e", 1:20)
+  noSubsets <- ExperimentSubset(SingleCellExperiment(list(counts = counts3)))
+
+  combined <- cbind(example$es1, noSubsets, example$es2)
+  testthat::expect_equal(dim(combined), c(10L, 60L))
+  testthat::expect_equal(as.matrix(assay(combined, "s2")),
+                         example$counts2[6:10, 9:20])
+  testthat::expect_equal(as.matrix(assay(combined, "s2a")),
+                         example$counts2[7:9, 11:14])
+})
+
+testthat::test_that("cbind and rbind stop on repeated subset names (#67)", {
+  example <- combineExample("cols")
+  testthat::expect_error(cbind(example$es1, example$es1), "'s1'")
+  rowsExample <- combineExample("rows")
+  testthat::expect_error(rbind(rowsExample$es2, rowsExample$es2),
+                         "'s2', 's2a'")
+})
+
+testthat::test_that("cbind keeps subsets in every Subset class (#67)", {
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:6)))
+  counts2 <- counts * 100
+  colnames(counts2) <- paste0("other", 1:6)
+  makeExperiments <- function(counts, samples) {
+    se <- SummarizedExperiment(list(counts = counts))
+    list(
+      se,
+      as(se, "RangedSummarizedExperiment"),
+      TreeSummarizedExperiment(assays = list(counts = counts),
+                               rowTree = tinyTree),
+      SpatialExperiment(assays = list(counts = counts),
+                        sample_id = rep(samples, each = 3),
+                        spatialCoords = cbind(x = 1:6, y = 1:6))
+    )
+  }
+  first <- makeExperiments(counts, c("A", "B"))
+  second <- makeExperiments(counts2, c("C", "D"))
+  for (k in seq_along(first)) {
+    es1 <- createSubset(ExperimentSubset(first[[k]]), "s1",
+                        rows = 2:5, cols = 1:3)
+    es2 <- createSubset(ExperimentSubset(second[[k]]), "s2",
+                        rows = 6:10, cols = 4:6)
+    combined <- cbind(es1, es2)
+    testthat::expect_s4_class(combined, class(es1))
+    testthat::expect_equal(subsetNames(combined), c("s1", "s2"))
+    testthat::expect_equal(as.matrix(assay(combined, "s2")),
+                           counts2[6:10, 4:6])
+  }
+})
