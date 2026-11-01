@@ -1,5 +1,24 @@
 # Changelog
 
+## ExperimentSubset 1.23.24 (2026-10-31)
+
+- [`subsetSpatialData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md)
+  and `spatialData(x, subsetName = )` are deprecated, as
+  [`spatialData()`](https://rdrr.io/pkg/SpatialExperiment/man/SpatialExperiment-methods.html)
+  is in SpatialExperiment, which keeps these columns in colData. They
+  warn and still work; use `subsetColData(x, subsetName)` instead, which
+  returns all of the subset’s colData columns, with
+  `parentColData = TRUE` to include the main object’s. They will be
+  defunct in the next release. `spatialData(x)` on the main object is
+  unchanged
+  ([\#34](https://github.com/campbio/ExperimentSubset/issues/34))
+- `subsetSpatialData<-` is defunct and fails with an error saying to add
+  each column with `colData(x, subsetName = "name")$column <- values`.
+  It skips the usual deprecation release because it already failed for
+  every value: SpatialExperiment’s `spatialData<-` takes no
+  `data.frame`, and the method took no `DataFrame`
+  ([\#34](https://github.com/campbio/ExperimentSubset/issues/34))
+
 ## ExperimentSubset 1.23.23 (2026-10-31)
 
 - [`createSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)

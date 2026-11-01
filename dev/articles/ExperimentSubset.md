@@ -446,9 +446,9 @@ The methods include `rowData`, `rowData<-`, `colData`, `colData<-`,
 `metadata`, `metadata<-`, `reducedDim`, `reducedDim<-`, `reducedDims`,
 `reducedDims<-`, `reducedDimNames`, `reducedDimNames<-`, `altExp`,
 `altExp<-`, `altExps`, `altExps<-`, `altExpNames` and `altExpNames<-`,
-and for `SpatialExperiment` objects `spatialCoords` and `spatialData`.
-All of these methods can be used with the subsets by providing the
-optional `subsetName` parameter.
+and for `SpatialExperiment` objects `spatialCoords`. All of these
+methods can be used with the subsets by providing the optional
+`subsetName` parameter.
 
 #### assay-get & assay-set inherited methods
 
@@ -773,12 +773,12 @@ Show the current condition of the `ExperimentSubset` object:
 41. `altExpNames`
 42. `altExpNames<-`
 43. `subsetSpatialCoords`
-44. `subsetSpatialData`
-45. `subsetSpatialData<-`
+44. `subsetSpatialData` (deprecated; use `subsetColData`)
+45. `subsetSpatialData<-` (defunct; use `colData` with `subsetName`)
 46. `subsetRowLinks`
 47. `subsetColLinks`
 48. `spatialCoords`
-49. `spatialData`
+49. `spatialData` (deprecated with `subsetName`; use `subsetColData`)
 50. `spatialData<-`
 51. `rowLinks`
 52. `colLinks`
@@ -881,7 +881,7 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.23        TreeSummarizedExperiment_2.21.0
+    ##  [1] ExperimentSubset_1.23.24        TreeSummarizedExperiment_2.21.0
     ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
     ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
     ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 

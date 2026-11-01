@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.23</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.24</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -546,9 +546,9 @@ object or from any subset by passing the optional
 <code>altExp&lt;-</code>, <code>altExps</code>,
 <code>altExps&lt;-</code>, <code>altExpNames</code> and
 <code>altExpNames&lt;-</code>, and for <code>SpatialExperiment</code>
-objects <code>spatialCoords</code> and <code>spatialData</code>. All of
-these methods can be used with the subsets by providing the optional
-<code>subsetName</code> parameter.</p>
+objects <code>spatialCoords</code>. All of these methods can be used
+with the subsets by providing the optional <code>subsetName</code>
+parameter.</p>
 <div class="section level4">
 <h4 id="assay-get-assay-set-inherited-methods">assay-get &amp; assay-set inherited methods<a class="anchor" aria-label="anchor" href="#assay-get-assay-set-inherited-methods"></a>
 </h4>
@@ -849,12 +849,18 @@ object:</p>
 <li><code>altExpNames</code></li>
 <li><code>altExpNames&lt;-</code></li>
 <li><code>subsetSpatialCoords</code></li>
-<li><code>subsetSpatialData</code></li>
-<li><code>subsetSpatialData&lt;-</code></li>
+<li>
+<code>subsetSpatialData</code> (deprecated; use
+<code>subsetColData</code>)</li>
+<li>
+<code>subsetSpatialData&lt;-</code> (defunct; use
+<code>colData</code> with <code>subsetName</code>)</li>
 <li><code>subsetRowLinks</code></li>
 <li><code>subsetColLinks</code></li>
 <li><code>spatialCoords</code></li>
-<li><code>spatialData</code></li>
+<li>
+<code>spatialData</code> (deprecated with <code>subsetName</code>;
+use <code>subsetColData</code>)</li>
 <li><code>spatialData&lt;-</code></li>
 <li><code>rowLinks</code></li>
 <li><code>colLinks</code></li>
@@ -979,7 +985,7 @@ keeping all subsets in one object.</li>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] ExperimentSubset_1.23.23        TreeSummarizedExperiment_2.21.0</span></span>
+<span><span class="co">##  [1] ExperimentSubset_1.23.24        TreeSummarizedExperiment_2.21.0</span></span>
 <span><span class="co">##  [3] Biostrings_2.81.9               XVector_0.53.0                 </span></span>
 <span><span class="co">##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    </span></span>
 <span><span class="co">##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 </span></span>

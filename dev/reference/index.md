@@ -117,8 +117,7 @@ SpatialExperiment, for a subset.
   objects
 - [`subsetSpatialData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md)
   [`` `subsetSpatialData<-`() ``](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md)
-  : Accessor method for spatialData from subsets in ExperimentSubset
-  objects
+  : Deprecated: spatialData of subsets in ExperimentSubset objects
 
 ## Methods that take subsetName
 

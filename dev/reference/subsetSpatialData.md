@@ -1,8 +1,13 @@
-# Accessor method for spatialData from subsets in ExperimentSubset objects
+# Deprecated: spatialData of subsets in ExperimentSubset objects
 
-Get `spatialData` from a subset.
-
-Set `spatialData` to a subset.
+`subsetSpatialData()` and `spatialData(x, subsetName =)` are deprecated,
+and `subsetSpatialData<-` is defunct, because `spatialData()` and
+`spatialData<-` are deprecated in SpatialExperiment, which now keeps
+these columns in `colData`. Use `subsetColData(x, subsetName)` to get
+them, which returns all of the subset's colData columns, with
+`parentColData = TRUE` to include the main object's, and
+`colData(x, subsetName = "name")$column <- values` to add a column to a
+subset. The getters will be defunct in the next release.
 
 ## Usage
 
@@ -14,7 +19,7 @@ subsetSpatialData(x, subsetName) <- value
 # S4 method for class 'SubsetSpatialExperiment,character'
 subsetSpatialData(x, subsetName, parentSpatialData)
 
-# S4 method for class 'SubsetSpatialExperiment,character,data.frame'
+# S4 method for class 'SubsetSpatialExperiment'
 subsetSpatialData(x, subsetName) <- value
 ```
 
@@ -35,10 +40,13 @@ subsetSpatialData(x, subsetName) <- value
 
 - value:
 
-  Input `data.frame` to store.
+  Ignored: the setter is defunct.
 
 ## Value
 
-The `spatialData` from input object.
+The `spatialData` from input object, with a deprecation warning. The
+setter fails with an error.
 
-Input object with `spatialData` stored.
+## See also
+
+[`subsetColData`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md)

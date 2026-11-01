@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.23</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.24</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,13 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.24" id="experimentsubset-12324-2026-10-31">ExperimentSubset 1.23.24 (2026-10-31)<a class="anchor" aria-label="anchor" href="#experimentsubset-12324-2026-10-31"></a></h2>
+<ul><li>
+<code><a href="../reference/subsetSpatialData.html">subsetSpatialData()</a></code> and <code>spatialData(x, subsetName = )</code> are deprecated, as <code><a href="https://rdrr.io/pkg/SpatialExperiment/man/SpatialExperiment-methods.html" class="external-link">spatialData()</a></code> is in SpatialExperiment, which keeps these columns in colData. They warn and still work; use <code>subsetColData(x, subsetName)</code> instead, which returns all of the subset’s colData columns, with <code>parentColData = TRUE</code> to include the main object’s. They will be defunct in the next release. <code>spatialData(x)</code> on the main object is unchanged (<a href="https://github.com/campbio/ExperimentSubset/issues/34" class="external-link">#34</a>)</li>
+<li>
+<code>subsetSpatialData&lt;-</code> is defunct and fails with an error saying to add each column with <code>colData(x, subsetName = "name")$column &lt;- values</code>. It skips the usual deprecation release because it already failed for every value: SpatialExperiment’s <code>spatialData&lt;-</code> takes no <code>data.frame</code>, and the method took no <code>DataFrame</code> (<a href="https://github.com/campbio/ExperimentSubset/issues/34" class="external-link">#34</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.23" id="experimentsubset-12323-2026-10-31">ExperimentSubset 1.23.23 (2026-10-31)<a class="anchor" aria-label="anchor" href="#experimentsubset-12323-2026-10-31"></a></h2>
 <ul><li>
