@@ -17,12 +17,12 @@ Config/Needs/website: pkgdown, DropletTestFiles, DropletUtils, scuttle,
     singleCellTK, scDblFinder, celda, SingleR, celldex
 Encoding: UTF-8
 Depends:
-  R (>= 4.0.0),
+  R (>= 4.6.0),
   SummarizedExperiment,
   SingleCellExperiment,
   SpatialExperiment,
   TreeSummarizedExperiment
-biocViews: Infrastructure, Software, DataImport, DataRepresentation
+biocViews: Infrastructure, Software, DataImport, DataRepresentation, SingleCell
 Imports:
   methods,
   Matrix,
