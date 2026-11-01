@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.28 (2026-11-01)
+* New tests check that `reducedDim(x)` and `reducedDim(x) <- value` without a `type` act on the first reducedDim of the main object, as `?"ExperimentSubset-reducedDim"` says, for each class with reducedDims. No change in behavior (#77)
+
 # ExperimentSubset 1.23.27 (2026-11-01)
 * `assay(x, i, subsetAssayName = )` with an `i` that isn't a subset name now gives the same reason as `assay<-`: that `i` already names an assay as `"subset/assay"`, that `i` has a `/` but isn't `"subset/assay"` for an existing subset, or that `i` is not a subset. Before, it said that `i` was a subset that does not exist, and referred to a `subsetName` argument that `assay()` doesn't have (#76)
 
