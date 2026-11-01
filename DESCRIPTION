@@ -1,7 +1,7 @@
 Package: ExperimentSubset
 Type: Package
 Title: Manages Subsets of Data with Bioconductor Experiment Objects
-Version: 1.23.25
+Version: 1.23.26
 Authors@R: c(person(given="Irzam", family="Sarfraz", email="irzam9095@gmail.com", role=c("aut"),
               comment = c(ORCID = "0000-0001-8121-792X")),
             person(given="Muhammad", family="Asif", email="asif@ntu.edu.pk", role=c("aut","ths"),
@@ -17,12 +17,12 @@ Config/Needs/website: pkgdown, DropletTestFiles, DropletUtils, scuttle,
     singleCellTK, scDblFinder, celda, SingleR, celldex
 Encoding: UTF-8
 Depends:
-  R (>= 4.0.0),
+  R (>= 4.6.0),
   SummarizedExperiment,
   SingleCellExperiment,
   SpatialExperiment,
   TreeSummarizedExperiment
-biocViews: Infrastructure, Software, DataImport, DataRepresentation
+biocViews: Infrastructure, Software, DataImport, DataRepresentation, SingleCell
 Imports:
   methods,
   Matrix,

@@ -1,5 +1,5 @@
 
-#' @rdname metadata
+#' @rdname ExperimentSubset-metadata
 setMethod(
   f = "metadata",
   signature = signature(x = "SubsetSingleCellExperiment"),
@@ -8,7 +8,7 @@ setMethod(
   }
 )
 
-#' @rdname assay
+#' @rdname ExperimentSubset-assay
 setMethod(
   f = "assay",
   signature = signature(x = "SubsetSingleCellExperiment", i = "character"),
@@ -47,7 +47,10 @@ setMethod(
   }
 )
 
-#' @rdname show
+#' @rdname SubsetSingleCellExperiment-class
+#' @param object The object to print, with its subsets and their assays.
+#' @return \code{show()} prints the object and returns \code{NULL}
+#'   invisibly.
 setMethod(
   f = "show",
   signature = "SubsetSingleCellExperiment",
@@ -88,7 +91,7 @@ setMethod(
   }
 )
 
-#' @rdname assay<-
+#' @rdname ExperimentSubset-assay
 setReplaceMethod("assay",
                  c("SubsetSingleCellExperiment", "character"),
                  function(x,
@@ -141,7 +144,7 @@ setMethod(
   }
 )
 
-#' @rdname altExp
+#' @rdname ExperimentSubset-altExp
 setMethod(
   f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "character"),
@@ -150,7 +153,7 @@ setMethod(
   }
 )
 
-#' @rdname altExp
+#' @rdname ExperimentSubset-altExp
 setMethod(
   f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "missing"),
@@ -159,7 +162,7 @@ setMethod(
   }
 )
 
-#' @rdname altExp
+#' @rdname ExperimentSubset-altExp
 setMethod(
   f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "numeric"),
@@ -168,7 +171,7 @@ setMethod(
   }
 )
 
-#' @rdname altExps
+#' @rdname ExperimentSubset-altExp
 setMethod(
   f = "altExps",
   signature = signature(x = "SubsetSingleCellExperiment"),
@@ -177,7 +180,7 @@ setMethod(
   }
 )
 
-#' @rdname altExpNames
+#' @rdname ExperimentSubset-altExp
 setMethod(
   f = "altExpNames",
   signature = signature(x = "SubsetSingleCellExperiment"),
@@ -186,7 +189,7 @@ setMethod(
   }
 )
 
-#' @rdname altExpNames<-
+#' @rdname ExperimentSubset-altExp
 setReplaceMethod(
   f = "altExpNames",
   signature = signature(x = "SubsetSingleCellExperiment", value = "character"),
@@ -196,7 +199,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname altExp<-
+#' @rdname ExperimentSubset-altExp
 setReplaceMethod(
   f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "character"),
@@ -208,7 +211,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname altExp<-
+#' @rdname ExperimentSubset-altExp
 setReplaceMethod(
   f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "missing"),
@@ -220,7 +223,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname altExp<-
+#' @rdname ExperimentSubset-altExp
 setReplaceMethod(
   f = "altExp",
   signature = signature(x = "SubsetSingleCellExperiment", e = "numeric"),
@@ -232,7 +235,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname altExps<-
+#' @rdname ExperimentSubset-altExp
 setReplaceMethod(
   f = "altExps",
   signature = signature(x = "SubsetSingleCellExperiment"),
@@ -244,7 +247,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname metadata<-
+#' @rdname ExperimentSubset-metadata
 setReplaceMethod(
   f = "metadata",
   signature = signature(x = "SubsetSingleCellExperiment"),
@@ -306,7 +309,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname reducedDim
+#' @rdname ExperimentSubset-reducedDim
 setMethod(
   f = "reducedDim",
   signature = signature(x = "SubsetSingleCellExperiment", type = "character"),
@@ -315,7 +318,7 @@ setMethod(
   }
 )
 
-#' @rdname reducedDim
+#' @rdname ExperimentSubset-reducedDim
 setMethod(
   f = "reducedDim",
   signature = signature(x = "SubsetSingleCellExperiment", type = "missing"),
@@ -324,7 +327,7 @@ setMethod(
   }
 )
 
-#' @rdname reducedDim
+#' @rdname ExperimentSubset-reducedDim
 setMethod(
   f = "reducedDim",
   signature = signature(x = "SubsetSingleCellExperiment", type = "numeric"),
@@ -333,7 +336,7 @@ setMethod(
   }
 )
 
-#' @rdname reducedDim<-
+#' @rdname ExperimentSubset-reducedDim
 setReplaceMethod(
   f = "reducedDim",
   signature = signature(x = "SubsetSingleCellExperiment", type = "character"),
@@ -343,7 +346,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname reducedDim<-
+#' @rdname ExperimentSubset-reducedDim
 setReplaceMethod(
   f = "reducedDim",
   signature = signature(x = "SubsetSingleCellExperiment", type = "missing"),
@@ -353,7 +356,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname reducedDim<-
+#' @rdname ExperimentSubset-reducedDim
 setReplaceMethod(
   f = "reducedDim",
   signature = signature(x = "SubsetSingleCellExperiment", type = "numeric"),
@@ -363,7 +366,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname reducedDims
+#' @rdname ExperimentSubset-reducedDim
 setMethod(
   f = "reducedDims",
   signature = signature(x = "SubsetSingleCellExperiment"),
@@ -372,7 +375,7 @@ setMethod(
   }
 )
 
-#' @rdname rowData
+#' @rdname ExperimentSubset-rowData-colData
 setMethod(
   f = "rowData",
   signature = signature(x = "SubsetSingleCellExperiment"),
@@ -381,7 +384,7 @@ setMethod(
   }
 )
 
-#' @rdname colData
+#' @rdname ExperimentSubset-rowData-colData
 setMethod(
   f = "colData",
   signature = signature(x = "SubsetSingleCellExperiment"),
@@ -390,7 +393,7 @@ setMethod(
   }
 )
 
-#' @rdname rowData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "rowData",
   signature = signature(x = "SubsetSingleCellExperiment"),
@@ -400,7 +403,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname colData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetSingleCellExperiment", value = "DataFrame"),
@@ -410,7 +413,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname colData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetSingleCellExperiment", value = "NULL"),
@@ -420,7 +423,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname colData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetSingleCellExperiment", value = "data.frame"),

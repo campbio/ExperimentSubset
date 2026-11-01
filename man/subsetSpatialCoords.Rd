@@ -3,23 +3,37 @@
 \name{subsetSpatialCoords}
 \alias{subsetSpatialCoords}
 \alias{subsetSpatialCoords,SubsetSpatialExperiment,character-method}
+\alias{spatialCoords,SubsetSpatialExperiment-method}
 \title{Accessor method for spatialCoords from subsets in ExperimentSubset objects}
 \usage{
 subsetSpatialCoords(x, subsetName)
 
 \S4method{subsetSpatialCoords}{SubsetSpatialExperiment,character}(x, subsetName)
+
+\S4method{spatialCoords}{SubsetSpatialExperiment}(x, ...)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
 \item{subsetName}{\code{character(1)} Name of the subset to get
 \code{spatialCoords} from.}
+
+\item{...}{For \code{spatialCoords()}: \describe{
+  \item{\code{subsetName}}{\code{character(1)} Name of the subset to
+    get \code{spatialCoords} from. Leave it out for the main object's.}
+}
+Without \code{subsetName}, all arguments are passed on to the
+\code{SpatialExperiment} method.}
 }
 \value{
 The \code{spatialCoords} from input object.
 }
 \description{
-Get \code{spatialCoords} from a subset.
+Get \code{spatialCoords} from a subset, with
+  \code{subsetSpatialCoords(x, subsetName)} or
+  \code{spatialCoords(x, subsetName = )}. Without \code{subsetName},
+  \code{spatialCoords()} returns the main object's, as for
+  \code{SpatialExperiment}.
 }
 \examples{
 # a small SpatialExperiment with six spots
@@ -30,4 +44,6 @@ spe <- SpatialExperiment(assays = list(counts = counts),
 es <- ExperimentSubset(spe)
 es <- createSubset(es, "subset1", cols = 2:4)
 subsetSpatialCoords(es, "subset1")
+# the same, through spatialCoords()
+spatialCoords(es, subsetName = "subset1")
 }

@@ -4,6 +4,7 @@
 \alias{subsetSpatialData}
 \alias{subsetSpatialData<-}
 \alias{subsetSpatialData,SubsetSpatialExperiment,character-method}
+\alias{spatialData,SubsetSpatialExperiment-method}
 \alias{subsetSpatialData<-,SubsetSpatialExperiment-method}
 \title{Deprecated: spatialData of subsets in ExperimentSubset objects}
 \usage{
@@ -12,6 +13,8 @@ subsetSpatialData(x, subsetName, parentSpatialData)
 subsetSpatialData(x, subsetName) <- value
 
 \S4method{subsetSpatialData}{SubsetSpatialExperiment,character}(x, subsetName, parentSpatialData)
+
+\S4method{spatialData}{SubsetSpatialExperiment}(x, ...)
 
 \S4method{subsetSpatialData}{SubsetSpatialExperiment}(x, subsetName) <- value
 }
@@ -25,6 +28,11 @@ subsetSpatialData(x, subsetName) <- value
 spatialData should be combined or not. Default \code{FALSE}.}
 
 \item{value}{Ignored: the setter is defunct.}
+
+\item{...}{For \code{spatialData()}: \code{subsetName} and
+\code{parentSpatialData}, as for \code{subsetSpatialData()}. Without
+\code{subsetName}, all arguments are passed on to the
+\code{SpatialExperiment} method.}
 }
 \value{
 The \code{spatialData} from input object, with a deprecation
