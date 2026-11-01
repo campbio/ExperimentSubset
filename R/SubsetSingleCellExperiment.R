@@ -570,8 +570,10 @@ setMethod(
   f = "cbind",
   signature = "SubsetSingleCellExperiment",
   definition = function(..., deparse.level = 1) {
+    objects <- list(...)
+    .checkCombine(objects, "cols")
     out <- callNextMethod()
-    .combineSubsets(out, list(...), "cols")
+    .combineSubsets(out, objects, "cols")
   }
 )
 
@@ -580,7 +582,9 @@ setMethod(
   f = "rbind",
   signature = "SubsetSingleCellExperiment",
   definition = function(..., deparse.level = 1) {
+    objects <- list(...)
+    .checkCombine(objects, "rows")
     out <- callNextMethod()
-    .combineSubsets(out, list(...), "rows")
+    .combineSubsets(out, objects, "rows")
   }
 )

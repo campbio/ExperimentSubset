@@ -1966,6 +1966,8 @@ combineExample <- function(along) {
   es2 <- createSubset(es2, "s2a", rows = 2:4, cols = 3:6, parentAssay = "s2")
   es2 <- setSubsetAssay(es2, "s2", counts2[6:10, 9:20] * 2, "doubled")
   colData(es2, subsetName = "s2")$tag <- paste0("t", 1:12)
+  es2 <- createSubset(es2, "s2d", rows = 1:2, cols = 1:3,
+                      parentAssay = "s2/doubled")
   list(es1 = es1, es2 = es2, counts1 = counts1, counts2 = counts2)
 }
 
@@ -1975,7 +1977,7 @@ testthat::test_that("cbind keeps the subsets of every object (#67)", {
   counts2 <- example$counts2
 
   combined <- cbind(example$es1, example$es2)
-  testthat::expect_equal(subsetNames(combined), c("s1", "s2", "s2a"))
+  testthat::expect_equal(subsetNames(combined), c("s1", "s2", "s2a", "s2d"))
   testthat::expect_equal(as.matrix(assay(combined, "s1")), counts1[1:5, 1:8])
   testthat::expect_equal(as.matrix(assay(combined, "s2")),
                          counts2[6:10, 9:20])
@@ -1987,6 +1989,9 @@ testthat::test_that("cbind keeps the subsets of every object (#67)", {
                          paste0("t", 1:12))
   testthat::expect_equal(as.matrix(assay(combined, "s2a")),
                          counts2[7:9, 11:14])
+  # a subset made from an assay stored in a subset
+  testthat::expect_equal(as.matrix(assay(combined, "s2d")),
+                         counts2[6:7, 9:11] * 2)
 })
 
 testthat::test_that("rbind keeps the subsets of every object (#67)", {
@@ -1995,15 +2000,19 @@ testthat::test_that("rbind keeps the subsets of every object (#67)", {
   counts2 <- example$counts2
 
   combined <- rbind(example$es1, example$es2)
-  testthat::expect_equal(subsetNames(combined), c("s1", "s2", "s2a"))
+  testthat::expect_equal(subsetNames(combined), c("s1", "s2", "s2a", "s2d"))
   testthat::expect_equal(as.matrix(assay(combined, "s1")), counts1[1:5, 1:8])
   testthat::expect_equal(as.matrix(assay(combined, "s2")),
                          counts2[6:10, 9:20])
   testthat::expect_equal(subsetRownames(combined, "s2"), paste0("h", 6:10))
   testthat::expect_equal(as.matrix(assay(combined, "s2/doubled")),
                          counts2[6:10, 9:20] * 2)
+  testthat::expect_equal(colData(combined, subsetName = "s2")$tag,
+                         paste0("t", 1:12))
   testthat::expect_equal(as.matrix(assay(combined, "s2a")),
                          counts2[7:9, 11:14])
+  testthat::expect_equal(as.matrix(assay(combined, "s2d")),
+                         counts2[6:7, 9:11] * 2)
 })
 
 testthat::test_that("cbind counts objects without subsets (#67)", {
@@ -2022,10 +2031,50 @@ testthat::test_that("cbind counts objects without subsets (#67)", {
 
 testthat::test_that("cbind and rbind stop on repeated subset names (#67)", {
   example <- combineExample("cols")
-  testthat::expect_error(cbind(example$es1, example$es1), "'s1'")
+  testthat::expect_error(cbind(example$es1, example$es1),
+                         "unique.*'s1' is in more than one.*different names")
   rowsExample <- combineExample("rows")
   testthat::expect_error(rbind(rowsExample$es2, rowsExample$es2),
-                         "'s2', 's2a'")
+                         "'s2', 's2a', 's2d' are in more than one")
+})
+
+testthat::test_that("cbind and rbind stop when names don't line up (#67)", {
+  example <- combineExample("cols")
+  # the second object's genes in the opposite order
+  reversed <- example$es2[10:1, ]
+  testthat::expect_error(cbind(example$es1, reversed),
+                         "same rows.*object 2")
+  rowsExample <- combineExample("rows")
+  reversed <- rowsExample$es2[, 20:1]
+  # rbind() of the class the objects extend already checks the columns
+  testthat::expect_error(rbind(rowsExample$es1, reversed),
+                         "same colnames")
+})
+
+testthat::test_that("cbind updates the sample_id of spatial subsets (#67)", {
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(paste0("gene", 1:10),
+                                   paste0("spot", 1:6)))
+  counts2 <- counts * 100
+  colnames(counts2) <- paste0("other", 1:6)
+  # both objects use samples A and B, which cbind renames
+  spe1 <- SpatialExperiment(assays = list(counts = counts),
+                            sample_id = rep(c("A", "B"), each = 3),
+                            spatialCoords = cbind(x = 1:6, y = 1:6))
+  spe2 <- SpatialExperiment(assays = list(counts = counts2),
+                            sample_id = rep(c("A", "B"), each = 3),
+                            spatialCoords = cbind(x = 1:6, y = 1:6))
+  es1 <- createSubset(ExperimentSubset(spe1), "s1", cols = 2:4)
+  es2 <- createSubset(ExperimentSubset(spe2), "s2", cols = 3:5)
+  es2 <- createSubset(es2, "s2a", cols = 2:3, parentAssay = "s2")
+  combined <- suppressMessages(cbind(es1, es2))
+  for (name in c("s1", "s2", "s2a")) {
+    rootCols <- match(subsetColnames(combined, name), colnames(combined))
+    testthat::expect_equal(subsetColData(combined, name)$sample_id,
+                           combined$sample_id[rootCols])
+  }
+  testthat::expect_false(identical(combined$sample_id[9:10],
+                                   spe2$sample_id[3:4]))
 })
 
 testthat::test_that("All Subset classes keep subsets in cbind, rbind (#67)", {

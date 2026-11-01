@@ -887,22 +887,42 @@ ExperimentSubset <- function(x,
 #' subsetColnames(esBoth, subsetName = "firstB")
 NULL
 
+# Checks objects before cbind() (along = "cols") or rbind() ("rows")
+# combines them, so nothing is copied when they can't be: subset names
+# must be unique across the objects, and for cbind() each object with
+# subsets must have the first object's rows, in the same order, since its
+# subsets keep their row indices. rbind() already requires the same
+# column names (#67)
+.checkCombine <- function(objects, along) {
+  hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
+  allNames <- unlist(lapply(objects[hasSubsets], subsetNames))
+  repeated <- unique(allNames[duplicated(allNames)])
+  if (length(repeated) > 0)
+    stop("Subset names must be unique across the objects to combine; ",
+         paste0("'", repeated, "'", collapse = ", "),
+         if (length(repeated) == 1) " is" else " are", " in more than ",
+         "one. Create the subsets under different names before combining.")
+  if (along == "cols") {
+    for (k in which(hasSubsets)) {
+      if (!identical(rownames(objects[[k]]), rownames(objects[[1]])))
+        stop("cbind() needs the same rows, in the same order, in each ",
+             "object with subsets; object ", k, " has different rows ",
+             "from object 1.")
+    }
+  }
+  invisible(NULL)
+}
+
 # Gives out, the result of cbind() or rbind() on objects, the subsets of
-# every object; the parent methods keep only the first object's (#67).
-# Subsets made from a main-object assay move by the columns (along =
-# "cols") or rows ("rows") of the objects before theirs; subsets of
+# every object, since the parent methods keep only the first object's
+# (#67). Subsets made from a main-object assay move by the columns (along
+# = "cols") or rows ("rows") of the objects before theirs; subsets of
 # subsets keep their indices, which are relative to their parent
 .combineSubsets <- function(out, objects, along) {
   getSize <- if (along == "cols") ncol else nrow
   sizes <- vapply(objects, getSize, integer(1))
   offsets <- cumsum(c(0L, sizes[-length(sizes)]))
   hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
-  allNames <- unlist(lapply(objects[hasSubsets], subsetNames))
-  repeated <- unique(allNames[duplicated(allNames)])
-  if (length(repeated) > 0)
-    stop("Subset names must be unique across the objects to combine; ",
-         paste0("'", repeated, "'", collapse = ", "), " is in more than ",
-         "one. Create the subsets under different names before combining.")
   subsets <- list()
   for (k in which(hasSubsets)) {
     # explicit parent names, so a bare one can't match another object's
@@ -927,6 +947,18 @@ NULL
     }
   }
   .subsets(out) <- S4Vectors::SimpleList(subsets)
+  # SpatialExperiment's cbind() renames sample_ids repeated across the
+  # objects; each subset's stored copy follows the main object's
+  if (methods::is(out, "SpatialExperiment")) {
+    subsets <- .subsets(out)
+    for (name in names(subsets)) {
+      rootCols <- .rootIndices(out, name, .colIndices)
+      internal <- .internalAssay(subsets[[name]])
+      internal$sample_id <- out$sample_id[rootCols]
+      .internalAssay(subsets[[name]]) <- internal
+    }
+    .subsets(out) <- subsets
+  }
   out
 }
 
