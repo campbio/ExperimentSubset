@@ -1,5 +1,5 @@
 
-#' @rdname metadata
+#' @rdname ExperimentSubset-metadata
 setMethod(
   f = "metadata",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
@@ -8,7 +8,7 @@ setMethod(
   }
 )
 
-#' @rdname assay
+#' @rdname ExperimentSubset-assay
 setMethod(
   f = "assay",
   signature = signature(x = "SubsetRangedSummarizedExperiment", i = "character"),
@@ -47,7 +47,8 @@ setMethod(
   }
 )
 
-#' @rdname show
+#' @rdname SubsetRangedSummarizedExperiment-class
+#' @param object The object to print, with its subsets and their assays.
 setMethod(
   f = "show",
   signature = "SubsetRangedSummarizedExperiment",
@@ -88,7 +89,7 @@ setMethod(
   }
 )
 
-#' @rdname assay<-
+#' @rdname ExperimentSubset-assay
 setReplaceMethod("assay",
                  c("SubsetRangedSummarizedExperiment", "character"),
                  function(x,
@@ -141,7 +142,7 @@ setMethod(
   }
 )
 
-#' @rdname metadata<-
+#' @rdname ExperimentSubset-metadata
 setReplaceMethod(
   f = "metadata",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
@@ -181,7 +182,7 @@ setMethod(
   }
 )
 
-#' @rdname rowData
+#' @rdname ExperimentSubset-rowData-colData
 setMethod(
   f = "rowData",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
@@ -190,7 +191,7 @@ setMethod(
   }
 )
 
-#' @rdname colData
+#' @rdname ExperimentSubset-rowData-colData
 setMethod(
   f = "colData",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
@@ -199,7 +200,7 @@ setMethod(
   }
 )
 
-#' @rdname rowData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "rowData",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
@@ -209,7 +210,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname colData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetRangedSummarizedExperiment", value = "DataFrame"),
@@ -219,7 +220,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname colData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetRangedSummarizedExperiment", value = "NULL"),
@@ -229,7 +230,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname colData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetRangedSummarizedExperiment",

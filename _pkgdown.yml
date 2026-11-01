@@ -53,9 +53,12 @@ reference:
 - title: Methods that take subsetName
   desc: >
     Methods of Bioconductor generics that read or set a subset's data when
-    given subsetName, and otherwise act on the main object. Besides those
-    below, these include assay(), assay<-, rowData(), colData(),
-    reducedDim(), reducedDims(), altExp(), altExps(), altExpNames(),
-    metadata() and their setters.
+    given subsetName, and otherwise act on the main object. assay() and
+    assay<- name the subset with i instead.
   contents:
+  - ExperimentSubset-assay
+  - ExperimentSubset-rowData-colData
+  - ExperimentSubset-reducedDim
   - starts_with("reducedDim")
+  - ExperimentSubset-altExp
+  - ExperimentSubset-metadata

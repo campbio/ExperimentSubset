@@ -731,10 +731,20 @@ setGeneric(
 )
 
 #' @title Accessor method for spatialCoords from subsets in ExperimentSubset objects
-#' @description Get \code{spatialCoords} from a subset.
+#' @description Get \code{spatialCoords} from a subset, with
+#'   \code{subsetSpatialCoords(x, subsetName)} or
+#'   \code{spatialCoords(x, subsetName = )}. Without \code{subsetName},
+#'   \code{spatialCoords()} returns the main object's, as for
+#'   \code{SpatialExperiment}.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{spatialCoords} from.
+#' @param ... For \code{spatialCoords()}: \describe{
+#'     \item{\code{subsetName}}{\code{character(1)} Name of the subset to
+#'       get \code{spatialCoords} from. Leave it out for the main object's.}
+#'   }
+#'   Without \code{subsetName}, all arguments are passed on to the
+#'   \code{SpatialExperiment} method.
 #' @return The \code{spatialCoords} from input object.
 #' @rdname subsetSpatialCoords
 #' @importMethodsFrom SpatialExperiment spatialCoords
@@ -748,6 +758,8 @@ setGeneric(
 #' es <- ExperimentSubset(spe)
 #' es <- createSubset(es, "subset1", cols = 2:4)
 #' subsetSpatialCoords(es, "subset1")
+#' # the same, through spatialCoords()
+#' spatialCoords(es, subsetName = "subset1")
 setGeneric(
   name = "subsetSpatialCoords",
   def = function(x, subsetName)
@@ -773,6 +785,10 @@ setGeneric(
 #'   \code{spatialData} from.
 #' @param parentSpatialData \code{logical(1)} Logical value indicating if parent
 #'   spatialData should be combined or not. Default \code{FALSE}.
+#' @param ... For \code{spatialData()}: \code{subsetName} and
+#'   \code{parentSpatialData}, as for \code{subsetSpatialData()}. Without
+#'   \code{subsetName}, all arguments are passed on to the
+#'   \code{SpatialExperiment} method.
 #' @return The \code{spatialData} from input object, with a deprecation
 #'   warning. The setter fails with an error.
 #' @seealso \code{\link{subsetColData}}

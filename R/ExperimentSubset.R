@@ -104,6 +104,40 @@ ExperimentSubset <- function(x,
          "creating ES object.")
 }
 
+#' @title Metadata of subsets in ExperimentSubset objects
+#' @description Get or set the \code{metadata} list of a subset by naming
+#'   it with \code{subsetName}. Without \code{subsetName}, \code{metadata()}
+#'   and \code{metadata<-} act on the main object, as for the class
+#'   \code{x} extends.
+#' @param x An \code{ExperimentSubset} object.
+#' @param ... \describe{
+#'     \item{\code{subsetName}}{\code{character(1)} Name of the subset whose
+#'       metadata to get or set. Leave it out for the main object's.}
+#'   }
+#'   Without \code{subsetName}, all arguments are passed on to the method
+#'   of the class \code{x} extends.
+#' @param value A \code{list} to store as the metadata.
+#' @return \code{metadata()} returns a \code{list}. \code{metadata<-}
+#'   returns \code{x} with the metadata set.
+#' @seealso \code{\link[S4Vectors]{metadata}}
+#' @name ExperimentSubset-metadata
+#' @examples
+#' # an object with 10 genes and 20 cells
+#' set.seed(1)
+#' counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts) <- paste0("gene", 1:10)
+#' colnames(counts) <- paste0("cell", 1:20)
+#' es <- ExperimentSubset(list(counts = counts))
+#' # a subset of the first 5 genes and the first 8 cells
+#' es <- createSubset(es, subsetName = "first", rows = 1:5, cols = 1:8)
+#' # store a note in the subset's metadata
+#' metadata(es, subsetName = "first") <- list(note = "the first 8 cells")
+#' # read it back
+#' metadata(es, subsetName = "first")
+#' # the main object's metadata is unchanged
+#' metadata(es)
+NULL
+
 #' @importMethodsFrom S4Vectors metadata
 .metadata <- function(x, ...){
   arglist <- list(...)
@@ -113,6 +147,68 @@ ExperimentSubset <- function(x,
   .isSubset(x, subsetName)
   metadata(.internalAssay(.subsets(x)[[subsetName]]))
 }
+
+#' @title Assays of subsets in ExperimentSubset objects
+#' @description Get or set an assay of the main object or of a subset.
+#'   Unlike the other methods, \code{assay()} and \code{assay<-} name the
+#'   subset with \code{i}, not with \code{subsetName}.
+#'
+#'   \code{assay(x, i)} returns:
+#'   \itemize{
+#'     \item a main assay, when \code{i} is its name, as for the class
+#'       \code{x} extends;
+#'     \item the subset's rows and columns of the assay it was made from,
+#'       when \code{i} is a subset name;
+#'     \item an assay as a subset sees it, when \code{i} is
+#'       \code{"subset/assay"}, or a subset name with
+#'       \code{subsetAssayName = "assay"}: either one stored in the subset,
+#'       or one linked from its parent, cut to the subset's rows and
+#'       columns.
+#'   }
+#'   \code{assay(x, i) <- value} stores a main assay when \code{i} is not a
+#'   subset name. With \code{"subset/assay"}, or a subset name and
+#'   \code{subsetAssayName}, it stores \code{value} in the subset, as
+#'   \code{\link{setSubsetAssay}} does.
+#' @param x An \code{ExperimentSubset} object.
+#' @param i \code{character(1)} The name of a main assay, a subset name, or
+#'   \code{"subset/assay"}.
+#' @param withDimnames \code{logical(1)} Whether the assay returned has row
+#'   and column names. When setting a main assay, passed on to the method
+#'   of the class \code{x} extends. Default \code{TRUE}.
+#' @param ... \describe{
+#'     \item{\code{subsetAssayName}}{\code{character(1)} With a subset name
+#'       in \code{i}, the name of the assay to get from or store in that
+#'       subset. Default \code{NULL}.}
+#'     \item{\code{unlink}}{\code{logical(1)} When storing in a subset,
+#'       store the assay even though the subset sees an assay of that name
+#'       linked from its parent, as for \code{\link{setSubsetAssay}}.
+#'       Default \code{FALSE}.}
+#'   }
+#'   For a main assay, other arguments are passed on to the method of the
+#'   class \code{x} extends.
+#' @param value A matrix-like assay with the main object's dimensions, or,
+#'   to store it in a subset, the subset's.
+#' @return \code{assay()} returns a matrix-like assay. \code{assay<-}
+#'   returns \code{x} with the assay stored.
+#' @seealso \code{\link{getSubsetAssay}}, \code{\link{setSubsetAssay}},
+#'   \code{\link[SummarizedExperiment]{assay}}
+#' @name ExperimentSubset-assay
+#' @examples
+#' # an object with 10 genes and 20 cells
+#' set.seed(1)
+#' counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts) <- paste0("gene", 1:10)
+#' colnames(counts) <- paste0("cell", 1:20)
+#' es <- ExperimentSubset(list(counts = counts))
+#' # a subset of the first 5 genes and the first 8 cells
+#' es <- createSubset(es, subsetName = "first", rows = 1:5, cols = 1:8)
+#' # the subset's 5 x 8 part of the counts
+#' firstCounts <- assay(es, "first")
+#' # store a new assay in the subset
+#' assay(es, "first", subsetAssayName = "logcounts") <- log1p(firstCounts)
+#' # read it back
+#' assay(es, "first/logcounts")
+NULL
 
 .assay <- function(x, i, ...){
   args <- list(...)
@@ -554,6 +650,57 @@ ExperimentSubset <- function(x,
     cat("NULL\n")
   }
 }
+
+#' @title Alternative experiments of subsets in ExperimentSubset objects
+#' @description Get or set the alternative experiments (\code{altExps}) of
+#'   a subset by naming it with \code{subsetName}. Without
+#'   \code{subsetName}, these methods act on the main object, as for
+#'   \code{SingleCellExperiment}. They exist for the classes that extend
+#'   \code{SingleCellExperiment}: \code{SubsetSingleCellExperiment},
+#'   \code{SubsetSpatialExperiment} and \code{SubsetTreeSummarizedExperiment}.
+#' @param x An \code{ExperimentSubset} object.
+#' @param e \code{character(1)} or \code{integer(1)} The name or position
+#'   of the alternative experiment. Leave it out for the first one.
+#' @param withDimnames \code{logical(1)} Passed on to
+#'   \code{\link[SingleCellExperiment]{altExp<-}}. Default \code{TRUE}.
+#' @param withColData \code{logical(1)} Passed on to
+#'   \code{\link[SingleCellExperiment]{altExp<-}}. Default \code{FALSE}.
+#' @param ... \describe{
+#'     \item{\code{subsetName}}{\code{character(1)} Name of the subset whose
+#'       alternative experiments to get or set. Leave it out for the main
+#'       object's.}
+#'   }
+#'   Other arguments are passed on to the \code{SingleCellExperiment}
+#'   method, for the subset or the main object.
+#' @param value For \code{altExp<-}, a \code{SummarizedExperiment} with one
+#'   column per column of the subset (or of the main object). For
+#'   \code{altExps<-}, a list of them. For \code{altExpNames<-}, a
+#'   \code{character} vector of new names.
+#' @return \code{altExp()} returns a \code{SummarizedExperiment},
+#'   \code{altExps()} a list of them and \code{altExpNames()} a
+#'   \code{character} vector. The setters return \code{x} with the change
+#'   made.
+#' @seealso \code{\link[SingleCellExperiment]{altExps}}
+#' @name ExperimentSubset-altExp
+#' @examples
+#' # an object with 10 genes and 20 cells
+#' set.seed(1)
+#' counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts) <- paste0("gene", 1:10)
+#' colnames(counts) <- paste0("cell", 1:20)
+#' es <- ExperimentSubset(list(counts = counts))
+#' # a subset of the first 5 genes and the first 8 cells
+#' es <- createSubset(es, subsetName = "first", rows = 1:5, cols = 1:8)
+#' # counts of 2 spike-in genes in the subset's 8 cells
+#' spikeCounts <- matrix(rpois(16, lambda = 5), nrow = 2)
+#' spikes <- SingleCellExperiment(list(counts = spikeCounts))
+#' # store them as an alternative experiment of the subset
+#' altExp(es, "spikes", subsetName = "first") <- spikes
+#' # list the subset's alternative experiments
+#' altExpNames(es, subsetName = "first")
+#' # read it back
+#' altExp(es, "spikes", subsetName = "first")
+NULL
 
 #' @importMethodsFrom SingleCellExperiment altExp
 .altExp <- function(x, e, ...){
@@ -1221,6 +1368,53 @@ NULL
   value
 }
 
+#' @title Reduced dimensions of subsets in ExperimentSubset objects
+#' @description Get or set the reduced dimensions, such as a PCA or UMAP,
+#'   of a subset by naming it with \code{subsetName}. Without
+#'   \code{subsetName}, these methods act on the main object, as for
+#'   \code{SingleCellExperiment}. They exist for the classes that extend
+#'   \code{SingleCellExperiment}: \code{SubsetSingleCellExperiment},
+#'   \code{SubsetSpatialExperiment} and \code{SubsetTreeSummarizedExperiment}.
+#'   \code{\link{reducedDims<-}}, \code{\link{reducedDimNames}} and
+#'   \code{\link{reducedDimNames<-}} have their own pages.
+#' @param x An \code{ExperimentSubset} object.
+#' @param type \code{character(1)} or \code{integer(1)} The name or
+#'   position of the reduced dimension. Leave it out for the first one.
+#' @param withDimnames \code{logical(1)} Passed on to
+#'   \code{\link[SingleCellExperiment]{reducedDim<-}}. Default \code{TRUE}.
+#' @param ... \describe{
+#'     \item{\code{subsetName}}{\code{character(1)} Name of the subset whose
+#'       reduced dimensions to get or set. Leave it out for the main
+#'       object's.}
+#'   }
+#'   Other arguments are passed on to the \code{SingleCellExperiment}
+#'   method, for the subset or the main object.
+#' @param value A matrix with one row per column of the subset (or of the
+#'   main object).
+#' @return \code{reducedDim()} returns a matrix and \code{reducedDims()} a
+#'   list of them. \code{reducedDim<-} returns \code{x} with the reduced
+#'   dimension stored.
+#' @seealso \code{\link[SingleCellExperiment]{reducedDims}}
+#' @name ExperimentSubset-reducedDim
+#' @examples
+#' # an object with 10 genes and 20 cells
+#' set.seed(1)
+#' counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts) <- paste0("gene", 1:10)
+#' colnames(counts) <- paste0("cell", 1:20)
+#' es <- ExperimentSubset(list(counts = counts))
+#' # a subset of the first 5 genes and the first 8 cells
+#' es <- createSubset(es, subsetName = "first", rows = 1:5, cols = 1:8)
+#' # a 2-dimensional embedding of the subset's 8 cells
+#' embedding <- matrix(rnorm(16), ncol = 2)
+#' # store it in the subset
+#' reducedDim(es, "PCA", subsetName = "first") <- embedding
+#' # read it back
+#' reducedDim(es, "PCA", subsetName = "first")
+#' # all of the subset's reduced dimensions
+#' reducedDims(es, subsetName = "first")
+NULL
+
 #' @importMethodsFrom SingleCellExperiment reducedDim
 .reducedDim <- function(x, type, ...){
   arglist <- list(...)
@@ -1280,6 +1474,63 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   }
   return(x)
 })
+
+#' @title rowData and colData of subsets in ExperimentSubset objects
+#' @description Get or set the \code{rowData} or \code{colData} of a subset
+#'   by naming it with \code{subsetName}. Without \code{subsetName}, these
+#'   methods act on the main object, as for the class \code{x} extends.
+#'
+#'   A subset stores only its own columns. With \code{parentRowData = TRUE}
+#'   or \code{parentColData = TRUE}, the main object's columns come first,
+#'   for the subset's rows or columns, and a subset's own column hides the
+#'   main object's column of the same name, with a message if their values
+#'   differ. When setting a subset's data, the main object's columns among
+#'   them are left out, so only the subset's own are stored. To add one
+#'   column, use \code{colData(x, subsetName = "name")$column <- values}.
+#' @param x An \code{ExperimentSubset} object.
+#' @param use.names \code{logical(1)} Whether the \code{rowData} returned
+#'   has row names. Default \code{TRUE}.
+#' @param ... \describe{
+#'     \item{\code{subsetName}}{\code{character(1)} Name of the subset whose
+#'       data to get or set. Leave it out for the main object's.}
+#'     \item{\code{parentRowData}}{\code{logical(1)} For \code{rowData()}
+#'       of a subset, whether to include the main object's columns.
+#'       Default \code{FALSE}.}
+#'     \item{\code{parentColData}}{\code{logical(1)} For \code{colData()}
+#'       of a subset, whether to include the main object's columns.
+#'       Default \code{FALSE}.}
+#'   }
+#'   Without \code{subsetName}, other arguments are passed on to the method
+#'   of the class \code{x} extends.
+#' @param value A \code{DataFrame} with one row per row (\code{rowData<-})
+#'   or column (\code{colData<-}) of the subset or the main object. For a
+#'   subset, a \code{data.frame} is converted to a \code{DataFrame}.
+#' @return \code{rowData()} and \code{colData()} return a \code{DataFrame}.
+#'   The setters return \code{x} with the data set.
+#' @seealso \code{\link{subsetRowData}}, \code{\link{subsetColData}},
+#'   \code{\link[SummarizedExperiment]{rowData}},
+#'   \code{\link[SummarizedExperiment]{colData}}
+#' @name ExperimentSubset-rowData-colData
+#' @examples
+#' # an object with 10 genes and 20 cells
+#' set.seed(1)
+#' counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts) <- paste0("gene", 1:10)
+#' colnames(counts) <- paste0("cell", 1:20)
+#' es <- ExperimentSubset(list(counts = counts))
+#' # a sample label for every cell of the main object
+#' es$sample <- rep(c("A", "B"), each = 10)
+#' # a subset of the first 5 genes and the first 8 cells
+#' es <- createSubset(es, subsetName = "first", rows = 1:5, cols = 1:8)
+#' # a cluster label for each of the subset's 8 cells
+#' colData(es, subsetName = "first")$cluster <- rep(1:2, times = 4)
+#' # the subset's own columns
+#' colData(es, subsetName = "first")
+#' # with the main object's columns first
+#' colData(es, subsetName = "first", parentColData = TRUE)
+#' # the subset's rowData, which has no columns yet
+#' rowData(es, subsetName = "first")
+NULL
 
 .rowData <- function(x, ...){
   arglist <- list(...)

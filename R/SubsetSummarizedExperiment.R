@@ -108,7 +108,7 @@ setMethod(
   }
 )
 
-#' @rdname metadata
+#' @rdname ExperimentSubset-metadata
 setMethod(
   f = "metadata",
   signature = signature(x = "SubsetSummarizedExperiment"),
@@ -117,7 +117,7 @@ setMethod(
   }
 )
 
-#' @rdname assay
+#' @rdname ExperimentSubset-assay
 setMethod(
   f = "assay",
   signature = signature(x = "SubsetSummarizedExperiment", i = "character"),
@@ -156,7 +156,8 @@ setMethod(
   }
 )
 
-#' @rdname show
+#' @rdname SubsetSummarizedExperiment-class
+#' @param object The object to print, with its subsets and their assays.
 setMethod(
   f = "show",
   signature = "SubsetSummarizedExperiment",
@@ -197,7 +198,7 @@ setMethod(
   }
 )
 
-#' @rdname assay<-
+#' @rdname ExperimentSubset-assay
 setReplaceMethod("assay",
                  c("SubsetSummarizedExperiment", "character"),
                  function(x,
@@ -250,7 +251,7 @@ setMethod(
   }
 )
 
-#' @rdname metadata<-
+#' @rdname ExperimentSubset-metadata
 setReplaceMethod(
   f = "metadata",
   signature = signature(x = "SubsetSummarizedExperiment"),
@@ -290,7 +291,7 @@ setMethod(
   }
 )
 
-#' @rdname rowData
+#' @rdname ExperimentSubset-rowData-colData
 setMethod(
   f = "rowData",
   signature = signature(x = "SubsetSummarizedExperiment"),
@@ -299,7 +300,7 @@ setMethod(
   }
 )
 
-#' @rdname colData
+#' @rdname ExperimentSubset-rowData-colData
 setMethod(
   f = "colData",
   signature = signature(x = "SubsetSummarizedExperiment"),
@@ -308,7 +309,7 @@ setMethod(
   }
 )
 
-#' @rdname rowData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "rowData",
   signature = signature(x = "SubsetSummarizedExperiment"),
@@ -318,7 +319,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname colData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetSummarizedExperiment", value = "DataFrame"),
@@ -328,7 +329,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname colData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetSummarizedExperiment", value = "NULL"),
@@ -338,7 +339,7 @@ setReplaceMethod(
   }
 )
 
-#' @rdname colData<-
+#' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetSummarizedExperiment", value = "data.frame"),
