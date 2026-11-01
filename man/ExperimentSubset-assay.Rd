@@ -50,11 +50,12 @@ of the class \code{x} extends. Default \code{TRUE}.}
 \item{...}{\describe{
   \item{\code{subsetAssayName}}{\code{character(1)} With a subset name
     in \code{i}, the name of the assay to get from or store in that
-    subset. Default \code{NULL}.}
+    subset. It is an error with any other \code{i}, including
+    \code{"subset/assay"}. Default \code{NULL}.}
   \item{\code{unlink}}{\code{logical(1)} When storing in a subset,
     store the assay even though the subset sees an assay of that name
-    linked from its parent, as for \code{\link{setSubsetAssay}}.
-    Default \code{FALSE}.}
+    linked from its parent, as for \code{\link{setSubsetAssay}}. It is
+    an error when storing a main assay. Default \code{FALSE}.}
 }
 For a main assay, other arguments are passed on to the method of the
 class \code{x} extends.}
@@ -76,17 +77,22 @@ Get or set an assay of the main object or of a subset.
     \item a main assay, when \code{i} is its name, as for the class
       \code{x} extends;
     \item the subset's rows and columns of the assay it was made from,
-      when \code{i} is a subset name;
+      when \code{i} is a subset name. If the subset, or a subset it was
+      made from, stored its own assay of that name with
+      \code{unlink = TRUE}, that assay is returned instead;
     \item an assay as a subset sees it, when \code{i} is
       \code{"subset/assay"}, or a subset name with
       \code{subsetAssayName = "assay"}: either one stored in the subset,
       or one linked from its parent, cut to the subset's rows and
       columns.
   }
-  \code{assay(x, i) <- value} stores a main assay when \code{i} is not a
-  subset name. With \code{"subset/assay"}, or a subset name and
-  \code{subsetAssayName}, it stores \code{value} in the subset, as
-  \code{\link{setSubsetAssay}} does.
+  \code{assay(x, i) <- value} stores \code{value} in a subset when
+  \code{i} is \code{"subset/assay"}, or a subset name with
+  \code{subsetAssayName}, as \code{\link{setSubsetAssay}} does. A name
+  with a \code{"/"} is read as \code{"subset/assay"} unless it is the
+  name of a main assay, and a subset name without
+  \code{subsetAssayName} is an error. Any other name stores a main
+  assay.
 }
 \examples{
 # an object with 10 genes and 20 cells

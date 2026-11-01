@@ -49,6 +49,8 @@ setMethod(
 
 #' @rdname SubsetSingleCellExperiment-class
 #' @param object The object to print, with its subsets and their assays.
+#' @return \code{show()} prints the object and returns \code{NULL}
+#'   invisibly.
 setMethod(
   f = "show",
   signature = "SubsetSingleCellExperiment",

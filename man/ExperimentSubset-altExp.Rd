@@ -108,7 +108,8 @@ of the alternative experiment. Leave it out for the first one.}
     object's.}
 }
 Other arguments are passed on to the \code{SingleCellExperiment}
-method, for the subset or the main object.}
+method. With \code{subsetName}, \code{altExpNames()} and
+\code{altExpNames<-} take no other arguments.}
 
 \item{value}{For \code{altExp<-}, a \code{SummarizedExperiment} with one
 column per column of the subset (or of the main object). For
@@ -116,10 +117,12 @@ column per column of the subset (or of the main object). For
 \code{character} vector of new names.}
 
 \item{withDimnames}{\code{logical(1)} Passed on to
-\code{\link[SingleCellExperiment]{altExp<-}}. Default \code{TRUE}.}
+\code{\link[SingleCellExperiment]{altExp<-}} or \code{altExps<-}.
+Default \code{TRUE}.}
 
 \item{withColData}{\code{logical(1)} Passed on to
-\code{\link[SingleCellExperiment]{altExp<-}}. Default \code{FALSE}.}
+\code{\link[SingleCellExperiment]{altExp<-}} or \code{altExps<-}.
+Default \code{FALSE}.}
 }
 \value{
 \code{altExp()} returns a \code{SummarizedExperiment},

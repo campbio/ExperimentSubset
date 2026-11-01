@@ -158,17 +158,22 @@ NULL
 #'     \item a main assay, when \code{i} is its name, as for the class
 #'       \code{x} extends;
 #'     \item the subset's rows and columns of the assay it was made from,
-#'       when \code{i} is a subset name;
+#'       when \code{i} is a subset name. If the subset, or a subset it was
+#'       made from, stored its own assay of that name with
+#'       \code{unlink = TRUE}, that assay is returned instead;
 #'     \item an assay as a subset sees it, when \code{i} is
 #'       \code{"subset/assay"}, or a subset name with
 #'       \code{subsetAssayName = "assay"}: either one stored in the subset,
 #'       or one linked from its parent, cut to the subset's rows and
 #'       columns.
 #'   }
-#'   \code{assay(x, i) <- value} stores a main assay when \code{i} is not a
-#'   subset name. With \code{"subset/assay"}, or a subset name and
-#'   \code{subsetAssayName}, it stores \code{value} in the subset, as
-#'   \code{\link{setSubsetAssay}} does.
+#'   \code{assay(x, i) <- value} stores \code{value} in a subset when
+#'   \code{i} is \code{"subset/assay"}, or a subset name with
+#'   \code{subsetAssayName}, as \code{\link{setSubsetAssay}} does. A name
+#'   with a \code{"/"} is read as \code{"subset/assay"} unless it is the
+#'   name of a main assay, and a subset name without
+#'   \code{subsetAssayName} is an error. Any other name stores a main
+#'   assay.
 #' @param x An \code{ExperimentSubset} object.
 #' @param i \code{character(1)} The name of a main assay, a subset name, or
 #'   \code{"subset/assay"}.
@@ -178,11 +183,12 @@ NULL
 #' @param ... \describe{
 #'     \item{\code{subsetAssayName}}{\code{character(1)} With a subset name
 #'       in \code{i}, the name of the assay to get from or store in that
-#'       subset. Default \code{NULL}.}
+#'       subset. It is an error with any other \code{i}, including
+#'       \code{"subset/assay"}. Default \code{NULL}.}
 #'     \item{\code{unlink}}{\code{logical(1)} When storing in a subset,
 #'       store the assay even though the subset sees an assay of that name
-#'       linked from its parent, as for \code{\link{setSubsetAssay}}.
-#'       Default \code{FALSE}.}
+#'       linked from its parent, as for \code{\link{setSubsetAssay}}. It is
+#'       an error when storing a main assay. Default \code{FALSE}.}
 #'   }
 #'   For a main assay, other arguments are passed on to the method of the
 #'   class \code{x} extends.
@@ -662,16 +668,19 @@ NULL
 #' @param e \code{character(1)} or \code{integer(1)} The name or position
 #'   of the alternative experiment. Leave it out for the first one.
 #' @param withDimnames \code{logical(1)} Passed on to
-#'   \code{\link[SingleCellExperiment]{altExp<-}}. Default \code{TRUE}.
+#'   \code{\link[SingleCellExperiment]{altExp<-}} or \code{altExps<-}.
+#'   Default \code{TRUE}.
 #' @param withColData \code{logical(1)} Passed on to
-#'   \code{\link[SingleCellExperiment]{altExp<-}}. Default \code{FALSE}.
+#'   \code{\link[SingleCellExperiment]{altExp<-}} or \code{altExps<-}.
+#'   Default \code{FALSE}.
 #' @param ... \describe{
 #'     \item{\code{subsetName}}{\code{character(1)} Name of the subset whose
 #'       alternative experiments to get or set. Leave it out for the main
 #'       object's.}
 #'   }
 #'   Other arguments are passed on to the \code{SingleCellExperiment}
-#'   method, for the subset or the main object.
+#'   method. With \code{subsetName}, \code{altExpNames()} and
+#'   \code{altExpNames<-} take no other arguments.
 #' @param value For \code{altExp<-}, a \code{SummarizedExperiment} with one
 #'   column per column of the subset (or of the main object). For
 #'   \code{altExps<-}, a list of them. For \code{altExpNames<-}, a
@@ -1484,9 +1493,11 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 #'   or \code{parentColData = TRUE}, the main object's columns come first,
 #'   for the subset's rows or columns, and a subset's own column hides the
 #'   main object's column of the same name, with a message if their values
-#'   differ. When setting a subset's data, the main object's columns among
-#'   them are left out, so only the subset's own are stored. To add one
-#'   column, use \code{colData(x, subsetName = "name")$column <- values}.
+#'   differ. When setting a subset's data, columns that came from the main
+#'   object, in data read with \code{parentRowData = TRUE} or
+#'   \code{parentColData = TRUE}, are left out with a message, so only the
+#'   subset's own are stored. To add one column, use
+#'   \code{colData(x, subsetName = "name")$column <- values}.
 #' @param x An \code{ExperimentSubset} object.
 #' @param use.names \code{logical(1)} Whether the \code{rowData} returned
 #'   has row names. Default \code{TRUE}.
@@ -1503,8 +1514,10 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
 #'   Without \code{subsetName}, other arguments are passed on to the method
 #'   of the class \code{x} extends.
 #' @param value A \code{DataFrame} with one row per row (\code{rowData<-})
-#'   or column (\code{colData<-}) of the subset or the main object. For a
-#'   subset, a \code{data.frame} is converted to a \code{DataFrame}.
+#'   or column (\code{colData<-}) of the subset or the main object, or
+#'   \code{NULL} to remove all columns. For a subset, a \code{data.frame}
+#'   is also accepted and converted to a \code{DataFrame}; for the main
+#'   object, \code{colData<-} with a \code{data.frame} is an error.
 #' @return \code{rowData()} and \code{colData()} return a \code{DataFrame}.
 #'   The setters return \code{x} with the data set.
 #' @seealso \code{\link{subsetRowData}}, \code{\link{subsetColData}},

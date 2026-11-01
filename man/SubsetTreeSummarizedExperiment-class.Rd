@@ -14,6 +14,10 @@
 \arguments{
 \item{object}{The object to print, with its subsets and their assays.}
 }
+\value{
+\code{show()} prints the object and returns \code{NULL}
+  invisibly.
+}
 \description{
 An S4 class for \code{TreeSummarizedExperiment} objects with added support for
   subsets.

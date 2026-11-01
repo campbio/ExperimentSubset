@@ -117,8 +117,10 @@ Without \code{subsetName}, other arguments are passed on to the method
 of the class \code{x} extends.}
 
 \item{value}{A \code{DataFrame} with one row per row (\code{rowData<-})
-or column (\code{colData<-}) of the subset or the main object. For a
-subset, a \code{data.frame} is converted to a \code{DataFrame}.}
+or column (\code{colData<-}) of the subset or the main object, or
+\code{NULL} to remove all columns. For a subset, a \code{data.frame}
+is also accepted and converted to a \code{DataFrame}; for the main
+object, \code{colData<-} with a \code{data.frame} is an error.}
 }
 \value{
 \code{rowData()} and \code{colData()} return a \code{DataFrame}.
@@ -133,9 +135,11 @@ Get or set the \code{rowData} or \code{colData} of a subset
   or \code{parentColData = TRUE}, the main object's columns come first,
   for the subset's rows or columns, and a subset's own column hides the
   main object's column of the same name, with a message if their values
-  differ. When setting a subset's data, the main object's columns among
-  them are left out, so only the subset's own are stored. To add one
-  column, use \code{colData(x, subsetName = "name")$column <- values}.
+  differ. When setting a subset's data, columns that came from the main
+  object, in data read with \code{parentRowData = TRUE} or
+  \code{parentColData = TRUE}, are left out with a message, so only the
+  subset's own are stored. To add one column, use
+  \code{colData(x, subsetName = "name")$column <- values}.
 }
 \examples{
 # an object with 10 genes and 20 cells
