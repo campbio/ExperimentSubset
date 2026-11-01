@@ -1286,6 +1286,12 @@ testthat::test_that("Qualified names that don't exist give clear errors", {
                          regexp = "already names")
   testthat::expect_error(assay(es, "counts", subsetAssayName = "x"),
                          regexp = "not a subset")
+  # a "/" name that isn't "subset/assay" for an existing subset, as for
+  # the setter
+  testthat::expect_error(assay(es, "nope/counts", subsetAssayName = "x"),
+                         regexp = "existing subset")
+  testthat::expect_error(assay(es, "s1/a/b", subsetAssayName = "x"),
+                         regexp = "existing subset")
   # getSubsetAssay() names its own argument, subsetName, not assay()'s i
   testthat::expect_error(getSubsetAssay(es, "counts", subsetAssayName = "x"),
                          regexp = "'subsetName' must be")

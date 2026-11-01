@@ -230,6 +230,15 @@ NULL
          "' is not a subset.")
 }
 
+# The two names in i, "subset/assay"; stops unless the subset exists.
+# Used by assay() and assay<- so both say the same (#76)
+.qualifiedParts <- function(x, i) {
+  parts <- .splitQualified(i)
+  if (is.null(parts) || !parts[1] %in% subsetNames(x))
+    stop("'", i, "' is not \"subset/assay\" for an existing subset.")
+  parts
+}
+
 .assay <- function(x, i, ...){
   args <- list(...)
   withDimnames <- !isFALSE(args$withDimnames)
@@ -240,6 +249,10 @@ NULL
       stop("'subsetAssayName' must be a single character string.")
     if (!i %in% subsetNames(x)) {
       qualified <- grepl("/", i, fixed = TRUE) && !i %in% assayNames(x)
+      # as for the setter, a "/" name must first be "subset/assay" for an
+      # existing subset
+      if (qualified)
+        .qualifiedParts(x, i)
       stop(.subsetAssayNameMisuse(i, qualified))
     }
     i <- paste0(i, "/", args$subsetAssayName)
@@ -549,9 +562,7 @@ NULL
   unlink <- isTRUE(list(...)$unlink)
   # "subset/assay" stores into that subset
   if (grepl("/", i, fixed = TRUE) && !i %in% assayNames(x)) {
-    parts <- .splitQualified(i)
-    if (is.null(parts) || !parts[1] %in% subsetNames(x))
-      stop("'", i, "' is not \"subset/assay\" for an existing subset.")
+    parts <- .qualifiedParts(x, i)
     if (!is.null(subsetAssayName))
       stop(.subsetAssayNameMisuse(i, qualified = TRUE))
     return(setSubsetAssay(x, parts[1], value, parts[2], unlink = unlink))
