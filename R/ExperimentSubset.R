@@ -218,6 +218,27 @@ NULL
 #' assay(es, "first/logcounts")
 NULL
 
+# Why assay() or assay<- can't take subsetAssayName with i, which is not a
+# subset name: i already names an assay as "subset/assay" (qualified), or
+# it names something other than a subset. The caller says which, from the
+# test it already made. Shared so both give the same reason (#76)
+.subsetAssayNameMisuse <- function(i, qualified) {
+  if (qualified)
+    return(paste0("'subsetAssayName' can't be used with \"subset/assay\"; '",
+                  i, "' already names the assay."))
+  paste0("'subsetAssayName' is only used when 'i' is a subset name; '", i,
+         "' is not a subset.")
+}
+
+# The two names in i, "subset/assay"; stops unless the subset exists.
+# Used by assay() and assay<- so both say the same (#76)
+.qualifiedParts <- function(x, i) {
+  parts <- .splitQualified(i)
+  if (is.null(parts) || !parts[1] %in% subsetNames(x))
+    stop("'", i, "' is not \"subset/assay\" for an existing subset.")
+  parts
+}
+
 .assay <- function(x, i, ...){
   args <- list(...)
   withDimnames <- !isFALSE(args$withDimnames)
@@ -226,7 +247,14 @@ NULL
     if (!is.character(args$subsetAssayName)
         || length(args$subsetAssayName) != 1)
       stop("'subsetAssayName' must be a single character string.")
-    .isSubset(x, i)
+    if (!i %in% subsetNames(x)) {
+      qualified <- grepl("/", i, fixed = TRUE) && !i %in% assayNames(x)
+      # as for the setter, a "/" name must first be "subset/assay" for an
+      # existing subset
+      if (qualified)
+        .qualifiedParts(x, i)
+      stop(.subsetAssayNameMisuse(i, qualified))
+    }
     i <- paste0(i, "/", args$subsetAssayName)
   }
   ref <- .resolveAssay(x, i)
@@ -534,12 +562,9 @@ NULL
   unlink <- isTRUE(list(...)$unlink)
   # "subset/assay" stores into that subset
   if (grepl("/", i, fixed = TRUE) && !i %in% assayNames(x)) {
-    parts <- .splitQualified(i)
-    if (is.null(parts) || !parts[1] %in% subsetNames(x))
-      stop("'", i, "' is not \"subset/assay\" for an existing subset.")
+    parts <- .qualifiedParts(x, i)
     if (!is.null(subsetAssayName))
-      stop("'subsetAssayName' can't be used with \"subset/assay\"; '", i,
-           "' already names the assay.")
+      stop(.subsetAssayNameMisuse(i, qualified = TRUE))
     return(setSubsetAssay(x, parts[1], value, parts[2], unlink = unlink))
   }
   # a subset name stores the assay inside that subset
@@ -558,8 +583,7 @@ NULL
   }
   else{
     if (!is.null(subsetAssayName))
-      stop("'subsetAssayName' is only used when 'i' is a subset name; '",
-           i, "' is not a subset.")
+      stop(.subsetAssayNameMisuse(i, qualified = FALSE))
     if (unlink)
       stop("'unlink' only applies when storing an assay in a subset.")
     callNextMethod(x, i, ..., value = value)

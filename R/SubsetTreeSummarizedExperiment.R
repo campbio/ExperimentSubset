@@ -489,6 +489,8 @@ setMethod(
   {
     if (is.null(subsetAssayName))
       return(assay(x = x, i = subsetName))
+    # checked here so the error names subsetName, not assay()'s i (#76)
+    .isSubset(x, subsetName)
     assay(x = x, i = subsetName, subsetAssayName = subsetAssayName)
   }
 )
