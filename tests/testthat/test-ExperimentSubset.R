@@ -2028,7 +2028,7 @@ testthat::test_that("cbind and rbind stop on repeated subset names (#67)", {
                          "'s2', 's2a'")
 })
 
-testthat::test_that("cbind keeps subsets in every Subset class (#67)", {
+testthat::test_that("All Subset classes keep subsets in cbind, rbind (#67)", {
   data("tinyTree", package = "TreeSummarizedExperiment",
        envir = environment())
   counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
@@ -2049,6 +2049,8 @@ testthat::test_that("cbind keeps subsets in every Subset class (#67)", {
   }
   first <- makeExperiments(counts, c("A", "B"))
   second <- makeExperiments(counts2, c("C", "D"))
+  # for rbind, the same columns and samples, and the same rows of the tree
+  third <- makeExperiments(counts * 100, c("A", "B"))
   for (k in seq_along(first)) {
     es1 <- createSubset(ExperimentSubset(first[[k]]), "s1",
                         rows = 2:5, cols = 1:3)
@@ -2059,5 +2061,13 @@ testthat::test_that("cbind keeps subsets in every Subset class (#67)", {
     testthat::expect_equal(subsetNames(combined), c("s1", "s2"))
     testthat::expect_equal(as.matrix(assay(combined, "s2")),
                            counts2[6:10, 4:6])
+
+    es3 <- createSubset(ExperimentSubset(third[[k]]), "s3",
+                        rows = 6:10, cols = 4:6)
+    stacked <- rbind(es1, es3)
+    testthat::expect_s4_class(stacked, class(es1))
+    testthat::expect_equal(subsetNames(stacked), c("s1", "s3"))
+    testthat::expect_equal(as.matrix(assay(stacked, "s3")),
+                           counts[6:10, 4:6] * 100)
   }
 })
