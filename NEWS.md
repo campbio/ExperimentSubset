@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.27 (2026-11-01)
+* `assay(x, i, subsetAssayName = )` with an `i` that isn't a subset name now gives the same reason as `assay<-`: that `i` already names an assay as `"subset/assay"`, or that `i` is not a subset. Before, it said that `i` was a subset that does not exist, and referred to a `subsetName` argument that `assay()` doesn't have (#76)
+
 # ExperimentSubset 1.23.26 (2026-11-01)
 * New help pages for the methods of Bioconductor generics that take `subsetName =`: `?"ExperimentSubset-assay"` (`assay()`, `assay<-`, which name the subset with `i`), `?"ExperimentSubset-rowData-colData"`, `?"ExperimentSubset-reducedDim"`, `?"ExperimentSubset-altExp"` and `?"ExperimentSubset-metadata"`. `spatialCoords(x, subsetName = )` and `spatialData(x, subsetName = )` are now on the `subsetSpatialCoords` and `subsetSpatialData` pages, and each `show()` method on its class's page. Before, these methods had no help page (#15)
 * The package now requires R 4.6.0 or later, the R version of Bioconductor 3.24 (#52)
