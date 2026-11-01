@@ -753,6 +753,33 @@ testthat::test_that("reducedDim with subsetName works without a type", {
                          pca * 2)
 })
 
+testthat::test_that("reducedDim on the main object works without a type", {
+  # (#77) each class with reducedDims, getter and setter, no subsetName
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:6)))
+  objects <- list(
+    sce = SingleCellExperiment(list(counts = counts)),
+    spe = SpatialExperiment(assays = list(counts = counts),
+                            spatialCoords = cbind(x = 1:6, y = 1:6)),
+    tse = TreeSummarizedExperiment(assays = list(counts = counts),
+                                   rowTree = tinyTree)
+  )
+  pca <- matrix(as.numeric(seq_len(12)), nrow = 6, ncol = 2)
+  for (name in names(objects)) {
+    es <- ExperimentSubset(objects[[name]])
+    reducedDim(es, "PCA") <- pca
+    # without a type, the getter returns the first reducedDim
+    testthat::expect_equal(unname(reducedDim(es)), pca, info = name)
+    # without a type, the setter replaces the first reducedDim
+    reducedDim(es) <- pca * 2
+    testthat::expect_equal(reducedDimNames(es), "PCA", info = name)
+    testthat::expect_equal(unname(reducedDim(es, "PCA")), pca * 2,
+                           info = name)
+  }
+})
+
 testthat::test_that("Links and spatialData of a subset keep its names", {
   data("tinyTree", package = "TreeSummarizedExperiment",
        envir = environment())
