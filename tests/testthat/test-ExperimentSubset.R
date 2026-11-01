@@ -769,13 +769,18 @@ testthat::test_that("reducedDim on the main object works without a type", {
   pca <- matrix(as.numeric(seq_len(12)), nrow = 6, ncol = 2)
   for (name in names(objects)) {
     es <- ExperimentSubset(objects[[name]])
+    testthat::expect_s4_class(es, paste0("Subset", class(objects[[name]])))
     reducedDim(es, "PCA") <- pca
+    reducedDim(es, "UMAP") <- pca * 10
     # without a type, the getter returns the first reducedDim
     testthat::expect_equal(unname(reducedDim(es)), pca, info = name)
     # without a type, the setter replaces the first reducedDim
     reducedDim(es) <- pca * 2
-    testthat::expect_equal(reducedDimNames(es), "PCA", info = name)
+    testthat::expect_equal(reducedDimNames(es), c("PCA", "UMAP"),
+                           info = name)
     testthat::expect_equal(unname(reducedDim(es, "PCA")), pca * 2,
+                           info = name)
+    testthat::expect_equal(unname(reducedDim(es, "UMAP")), pca * 10,
                            info = name)
   }
 })
