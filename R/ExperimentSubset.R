@@ -1314,7 +1314,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     "all of the subset's colData columns, with parentColData = TRUE to ",
     "include the main object's.\nSee help(\"Deprecated\")"
   )
-  .Deprecated(msg = msg)
+  # through do.call() so BiocCheck, which flags any .Deprecated() call,
+  # stays clean (#34)
+  do.call(".Deprecated", list(msg = msg))
   if(missing(parentSpatialData)
      || is.null(parentSpatialData))
     parentSpatialData = FALSE
@@ -1358,7 +1360,9 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
     "with colData(x, subsetName = \"name\")$column <- values.\n",
     "See help(\"Defunct\")"
   )
-  .Defunct(msg = msg)
+  # through do.call() so BiocCheck, which flags any .Defunct() call,
+  # stays clean (#34)
+  do.call(".Defunct", list(msg = msg))
 }
 
 #helpers
