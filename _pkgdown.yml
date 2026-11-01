@@ -30,6 +30,7 @@ reference:
   - subsetAssayNames
   - subsetAssayCount
   - ExperimentSubset-subsetting
+  - ExperimentSubset-combine
 - title: Getting and setting subset data
   contents:
   - getSubsetAssay

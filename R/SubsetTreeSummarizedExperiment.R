@@ -586,3 +586,23 @@ setMethod(
     .remapSubsets(x, out, i, j)
   }
 )
+
+#' @rdname ExperimentSubset-combine
+setMethod(
+  f = "cbind",
+  signature = "SubsetTreeSummarizedExperiment",
+  definition = function(..., deparse.level = 1) {
+    out <- callNextMethod()
+    .combineSubsets(out, list(...), "cols")
+  }
+)
+
+#' @rdname ExperimentSubset-combine
+setMethod(
+  f = "rbind",
+  signature = "SubsetTreeSummarizedExperiment",
+  definition = function(..., deparse.level = 1) {
+    out <- callNextMethod()
+    .combineSubsets(out, list(...), "rows")
+  }
+)

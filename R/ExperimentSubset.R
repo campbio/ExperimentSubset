@@ -848,6 +848,88 @@ ExperimentSubset <- function(x,
   .toRootIndices(x, .parentAssay(subset), getIndices(subset), getIndices)
 }
 
+#' @title Combine ExperimentSubset objects by columns or rows
+#' @description \code{cbind(...)} and \code{rbind(...)} combine objects as
+#'   for the class they extend, and keep the subsets of every object, with
+#'   their own assays, rowData, colData, reducedDims and altExps. Subsets
+#'   of the second and later objects are moved to where that object's
+#'   columns (for \code{cbind}) or rows (for \code{rbind}) are in the
+#'   result. Subset names must be unique across the objects.
+#' @param ... \code{ExperimentSubset} objects of the same class, which must
+#'   have the same rows for \code{cbind} or the same columns for
+#'   \code{rbind}. Convert a plain object, such as a
+#'   \code{SingleCellExperiment}, with \code{ExperimentSubset()} first,
+#'   which keeps all of its data: combining it as it is makes R warn about
+#'   "multiple direct matches", and if it comes first, the result is a
+#'   plain object without subsets.
+#' @param deparse.level Passed on to the method of the class the objects
+#'   extend. Default \code{1}.
+#' @return An object of the same class as the objects in \code{...}.
+#' @name ExperimentSubset-combine
+#' @examples
+#' # two objects with the same 10 genes and 20 cells each
+#' set.seed(1)
+#' counts1 <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts1) <- paste0("gene", 1:10)
+#' colnames(counts1) <- paste0("cellA", 1:20)
+#' counts2 <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts2) <- paste0("gene", 1:10)
+#' colnames(counts2) <- paste0("cellB", 1:20)
+#' es1 <- ExperimentSubset(list(counts = counts1))
+#' es2 <- ExperimentSubset(list(counts = counts2))
+#' # a subset in each object
+#' es1 <- createSubset(es1, subsetName = "firstA", rows = 1:5, cols = 1:8)
+#' es2 <- createSubset(es2, subsetName = "firstB", rows = 1:5, cols = 1:8)
+#' # combine the cells of both objects
+#' esBoth <- cbind(es1, es2)
+#' # both subsets are kept
+#' subsetNames(esBoth)
+#' subsetColnames(esBoth, subsetName = "firstB")
+NULL
+
+# Gives out, the result of cbind() or rbind() on objects, the subsets of
+# every object; the parent methods keep only the first object's (#67).
+# Subsets made from a main-object assay move by the columns (along =
+# "cols") or rows ("rows") of the objects before theirs; subsets of
+# subsets keep their indices, which are relative to their parent
+.combineSubsets <- function(out, objects, along) {
+  getSize <- if (along == "cols") ncol else nrow
+  sizes <- vapply(objects, getSize, integer(1))
+  offsets <- cumsum(c(0L, sizes[-length(sizes)]))
+  hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
+  allNames <- unlist(lapply(objects[hasSubsets], subsetNames))
+  repeated <- unique(allNames[duplicated(allNames)])
+  if (length(repeated) > 0)
+    stop("Subset names must be unique across the objects to combine; ",
+         paste0("'", repeated, "'", collapse = ", "), " is in more than ",
+         "one. Create the subsets under different names before combining.")
+  subsets <- list()
+  for (k in which(hasSubsets)) {
+    # explicit parent names, so a bare one can't match another object's
+    object <- .qualifyParents(objects[[k]])
+    for (name in subsetNames(object)) {
+      subset <- .subsets(object)[[name]]
+      rows <- .rowIndices(subset)
+      cols <- .colIndices(subset)
+      if (is.null(.parentSubsetName(object, .parentAssay(subset)))) {
+        if (along == "cols")
+          cols <- cols + offsets[k]
+        else
+          rows <- rows + offsets[k]
+      }
+      subsets[[name]] <- AssaySubset(
+        subsetName = name,
+        rowIndices = rows,
+        colIndices = cols,
+        parentAssay = .parentAssay(subset),
+        internalAssay = .internalAssay(subset)
+      )
+    }
+  }
+  .subsets(out) <- S4Vectors::SimpleList(subsets)
+  out
+}
+
 #' @title Subset an ExperimentSubset object by rows or columns
 #' @description \code{x[i, j]} keeps rows \code{i} and columns \code{j} of
 #'   the main object, as for the class it extends, and also updates every
