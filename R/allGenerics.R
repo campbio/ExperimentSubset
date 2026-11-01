@@ -756,14 +756,26 @@ setGeneric(
   }
 )
 
-#' @title Accessor method for spatialData from subsets in ExperimentSubset objects
-#' @description Get \code{spatialData} from a subset.
+#' @title Deprecated: spatialData of subsets in ExperimentSubset objects
+#' @description \code{subsetSpatialData()} and
+#'   \code{spatialData(x, subsetName =)} are deprecated, and
+#'   \code{subsetSpatialData<-} is defunct, because
+#'   \code{spatialData()} and \code{spatialData<-} are deprecated in
+#'   SpatialExperiment, which now keeps these columns in \code{colData}.
+#'   Use \code{subsetColData(x, subsetName)} to get them, which returns
+#'   all of the subset's colData columns, with
+#'   \code{parentColData = TRUE} to include the main object's, and
+#'   \code{colData(x, subsetName = "name")$column <- values} to add a
+#'   column to a subset. The getters will be defunct in the next
+#'   release.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{spatialData} from.
 #' @param parentSpatialData \code{logical(1)} Logical value indicating if parent
 #'   spatialData should be combined or not. Default \code{FALSE}.
-#' @return The \code{spatialData} from input object.
+#' @return The \code{spatialData} from input object, with a deprecation
+#'   warning. The setter fails with an error.
+#' @seealso \code{\link{subsetColData}}
 #' @rdname subsetSpatialData
 #' @importMethodsFrom SpatialExperiment spatialData
 #' @export
@@ -775,13 +787,11 @@ setGeneric(
   }
 )
 
-#' @title Setter method for spatialData to subsets in ExperimentSubset objects
-#' @description Set \code{spatialData} to a subset.
+#' @title Defunct: set spatialData of subsets in ExperimentSubset objects
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to set
 #'   \code{spatialData} to.
-#' @param value Input \code{data.frame} to store.
-#' @return Input object with \code{spatialData} stored.
+#' @param value Ignored: the setter is defunct.
 #' @rdname subsetSpatialData
 #' @importMethodsFrom SpatialExperiment spatialData
 #' @export

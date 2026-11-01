@@ -322,9 +322,9 @@ The methods include `rowData`, `rowData<-`, `colData`,
 `colData<-`, `metadata`, `metadata<-`, `reducedDim`, `reducedDim<-`, 
 `reducedDims`, `reducedDims<-`, `reducedDimNames`, `reducedDimNames<-`,
 `altExp`, `altExp<-`, `altExps`, `altExps<-`, `altExpNames` and
-`altExpNames<-`, and for `SpatialExperiment` objects `spatialCoords` and
-`spatialData`. All of these methods can be used with the subsets by providing
-the optional `subsetName` parameter.
+`altExpNames<-`, and for `SpatialExperiment` objects `spatialCoords`. All of
+these methods can be used with the subsets by providing the optional
+`subsetName` parameter.
 
 ### assay-get & assay-set inherited methods
 An exception to the above approach is the use of `assay` and `assay<-` methods,
@@ -597,12 +597,12 @@ subsetSummary(es)
 41. `altExpNames`
 42. `altExpNames<-`
 43. `subsetSpatialCoords`
-44. `subsetSpatialData`
-45. `subsetSpatialData<-`
+44. `subsetSpatialData` (deprecated; use `subsetColData`)
+45. `subsetSpatialData<-` (defunct; use `colData` with `subsetName`)
 46. `subsetRowLinks`
 47. `subsetColLinks`
 48. `spatialCoords`
-49. `spatialData`
+49. `spatialData` (deprecated with `subsetName`; use `subsetColData`)
 50. `spatialData<-`
 51. `rowLinks`
 52. `colLinks`

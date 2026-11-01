@@ -685,6 +685,62 @@ testthat::test_that("SpatialExperiment subsets support all methods", {
   testthat::expect_equal(spatialCoords(es), spatialCoords(spe))
 })
 
+testthat::test_that("Subset spatialData is deprecated, its setter defunct", {
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(paste0("gene", 1:10),
+                                   paste0("spot", 1:6)))
+  spe <- SpatialExperiment(assays = list(counts = counts),
+                           sample_id = rep(c("A", "B"), each = 3),
+                           spatialCoords = cbind(x = 1:6, y = 1:6))
+  # SpatialExperiment's own deprecation note is a message
+  suppressMessages(spatialData(spe) <- DataFrame(region = letters[1:6]))
+  es <- ExperimentSubset(spe)
+  es <- createSubset(es, "s1", cols = 2:5)
+
+  # the getters warn, then return the main object's columns as before
+  testthat::expect_warning(
+    s1Data <- suppressMessages(
+      subsetSpatialData(es, "s1", parentSpatialData = TRUE)
+    ),
+    "deprecated"
+  )
+  testthat::expect_equal(s1Data$region, letters[2:5])
+  testthat::expect_warning(
+    s1Data <- suppressMessages(
+      spatialData(es, subsetName = "s1", parentSpatialData = TRUE)
+    ),
+    "deprecated"
+  )
+  testthat::expect_equal(s1Data$region, letters[2:5])
+  # the main object's spatialData is SpatialExperiment's, with no warning
+  testthat::expect_warning(suppressMessages(spatialData(es)), NA)
+  # one warning, without SpatialExperiment's own notes as well
+  testthat::expect_message(
+    suppressWarnings(subsetSpatialData(es, "s1", parentSpatialData = TRUE)),
+    NA
+  )
+  # a missing subset is an error, before any deprecation warning
+  testthat::expect_warning(
+    testthat::expect_error(subsetSpatialData(es, "s9"), "does not exist"),
+    NA
+  )
+
+  # the setter fails clearly, for both kinds of data frame
+  testthat::expect_error(
+    subsetSpatialData(es, "s1") <- data.frame(region = letters[1:4]),
+    "defunct"
+  )
+  testthat::expect_error(
+    subsetSpatialData(es, "s1") <- DataFrame(region = letters[1:4]),
+    "defunct"
+  )
+  # and for a subset given by number
+  testthat::expect_error(
+    subsetSpatialData(es, 1) <- data.frame(region = letters[1:4]),
+    "defunct"
+  )
+})
+
 testthat::test_that("reducedDim with subsetName works without a type", {
   es <- ExperimentSubset(sce_chcl)
   es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
@@ -717,9 +773,11 @@ testthat::test_that("Links and spatialData of a subset keep its names", {
   colnames(spe) <- spots
   es <- ExperimentSubset(spe)
   es <- createSubset(es, "s1", cols = 2:4)
-  # spatialData() is deprecated in SpatialExperiment (#34)
-  s1Data <- suppressWarnings(subsetSpatialData(es, "s1",
-                                               parentSpatialData = FALSE))
+  # subsetSpatialData() is deprecated (#34)
+  testthat::expect_warning(
+    s1Data <- subsetSpatialData(es, "s1", parentSpatialData = FALSE),
+    "deprecated"
+  )
   testthat::expect_equal(rownames(s1Data), spots[2:4])
 })
 
@@ -1002,11 +1060,13 @@ testthat::test_that("Subset getters use renamed and repeated names", {
   colnames(spe) <- barcodes
   es <- ExperimentSubset(spe)
   es <- createSubset(es, "s1", cols = c(1, 2, 4, 5))
-  # spatialData() is deprecated in SpatialExperiment (#34)
-  s1Data <- suppressWarnings(subsetSpatialData(es, "s1", FALSE))
+  # subsetSpatialData() is deprecated (#34)
+  testthat::expect_warning(s1Data <- subsetSpatialData(es, "s1", FALSE),
+                           "deprecated")
   testthat::expect_equal(rownames(s1Data), c("b1", "b2", "b1", "b2"))
   subsetColnames(es, "s1") <- paste0("spot", 1:4)
-  s1Data <- suppressWarnings(subsetSpatialData(es, "s1", TRUE))
+  testthat::expect_warning(s1Data <- subsetSpatialData(es, "s1", TRUE),
+                           "deprecated")
   testthat::expect_equal(rownames(s1Data), paste0("spot", 1:4))
 })
 

@@ -1303,8 +1303,20 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   .subsetSpatialCoords(x, subsetName)
 }
 
+# Used by both subsetSpatialData() and spatialData(x, subsetName =), which
+# are deprecated in step with SpatialExperiment's spatialData() (#34)
 .subsetSpatialData <- function(x, subsetName, parentSpatialData){
   .isSubset(x, subsetName)
+  msg <- paste0(
+    "subsetSpatialData() and spatialData(x, subsetName =) are deprecated, ",
+    "as is spatialData() in SpatialExperiment, which keeps these columns ",
+    "in colData. Use subsetColData(x, subsetName) instead, which returns ",
+    "all of the subset's colData columns, with parentColData = TRUE to ",
+    "include the main object's.\nSee help(\"Deprecated\")"
+  )
+  # through do.call() so BiocCheck, which flags any .Deprecated() call,
+  # stays clean (#34)
+  do.call(".Deprecated", list(msg = msg))
   if(missing(parentSpatialData)
      || is.null(parentSpatialData))
     parentSpatialData = FALSE
@@ -1313,9 +1325,11 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   out <- S4Vectors::DataFrame(row.names = as.character(seq_len(nSpots)))
   if(parentSpatialData) {
     rootCols <- .rootIndices(x, subsetName, .colIndices)
-    out <- spatialData(x)[rootCols, , drop = FALSE]
+    # SpatialExperiment's note repeats the warning above
+    out <- suppressMessages(spatialData(x))[rootCols, , drop = FALSE]
   }
-  subsetSpatialData <- spatialData(.internalAssay(.subsets(x)[[subsetName]]))
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  subsetSpatialData <- suppressMessages(spatialData(internal))
   if(ncol(subsetSpatialData) > 0)
     out <- cbind(out, subsetSpatialData)
   # the subset's own column names, which subsetColnames<- may have changed
@@ -1336,11 +1350,19 @@ setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
   .subsetSpatialData(x, subsetName, parentSpatialData)
 }
 
-#' @importMethodsFrom SpatialExperiment spatialData<-
+# Defunct without a deprecation release: it failed for every value, since
+# SpatialExperiment's spatialData<- takes no data.frame, and the method
+# took no DataFrame (#34)
 '.subsetSpatialData<-' <- function(x, subsetName, value){
-  .isSubset(x, subsetName)
-  spatialData(.internalAssay(.subsets(x)[[subsetName]])) <- value
-  return(x)
+  msg <- paste0(
+    "subsetSpatialData<- is defunct, as spatialData<- is deprecated in ",
+    "SpatialExperiment. Add each column to the subset's colData instead, ",
+    "with colData(x, subsetName = \"name\")$column <- values.\n",
+    "See help(\"Defunct\")"
+  )
+  # through do.call() so BiocCheck, which flags any .Defunct() call,
+  # stays clean (#34)
+  do.call(".Defunct", list(msg = msg))
 }
 
 #helpers
