@@ -20,6 +20,9 @@ subsetSpatialData(x, subsetName) <- value
 subsetSpatialData(x, subsetName, parentSpatialData)
 
 # S4 method for class 'SubsetSpatialExperiment'
+spatialData(x, ...)
+
+# S4 method for class 'SubsetSpatialExperiment'
 subsetSpatialData(x, subsetName) <- value
 ```
 
@@ -41,6 +44,12 @@ subsetSpatialData(x, subsetName) <- value
 - value:
 
   Ignored: the setter is defunct.
+
+- ...:
+
+  For `spatialData()`: `subsetName` and `parentSpatialData`, as for
+  `subsetSpatialData()`. Without `subsetName`, all arguments are passed
+  on to the `SpatialExperiment` method.
 
 ## Value
 

@@ -3,6 +3,23 @@
 An S4 class for `SingleCellExperiment` objects with added support for
 subsets.
 
+## Usage
+
+``` r
+# S4 method for class 'SubsetSingleCellExperiment'
+show(object)
+```
+
+## Arguments
+
+- object:
+
+  The object to print, with its subsets and their assays.
+
+## Value
+
+`show()` prints the object and returns `NULL` invisibly.
+
 ## Slots
 
 - `subsets`:

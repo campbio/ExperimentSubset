@@ -5,36 +5,31 @@
 - [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
   : ExperimentSubset constructor
 
-- [`SubsetRangedSummarizedExperiment-class`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetRangedSummarizedExperiment-class.md)
-  [`.SubsetRangedSummarizedExperiment`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetRangedSummarizedExperiment-class.md)
+- [`show(`*`<SubsetRangedSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetRangedSummarizedExperiment-class.md)
   :
 
   An S4 class for `RangedSummarizedExperiment` objects with added
   support for subsets.
 
-- [`SubsetSingleCellExperiment-class`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetSingleCellExperiment-class.md)
-  [`.SubsetSingleCellExperiment`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetSingleCellExperiment-class.md)
+- [`show(`*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetSingleCellExperiment-class.md)
   :
 
   An S4 class for `SingleCellExperiment` objects with added support for
   subsets.
 
-- [`SubsetSpatialExperiment-class`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetSpatialExperiment-class.md)
-  [`.SubsetSpatialExperiment`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetSpatialExperiment-class.md)
+- [`show(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetSpatialExperiment-class.md)
   :
 
   An S4 class for `SpatialExperiment` objects with added support for
   subsets.
 
-- [`SubsetSummarizedExperiment-class`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetSummarizedExperiment-class.md)
-  [`.SubsetSummarizedExperiment`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetSummarizedExperiment-class.md)
+- [`show(`*`<SubsetSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetSummarizedExperiment-class.md)
   :
 
   An S4 class for `SummarizedExperiment` objects with added support for
   subsets.
 
-- [`SubsetTreeSummarizedExperiment-class`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetTreeSummarizedExperiment-class.md)
-  [`.SubsetTreeSummarizedExperiment`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetTreeSummarizedExperiment-class.md)
+- [`show(`*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetTreeSummarizedExperiment-class.md)
   :
 
   An S4 class for `TreeSummarizedExperiment` objects with added support
@@ -124,20 +119,84 @@ SpatialExperiment, for a subset.
   : Accessor method for colLinks from subsets in ExperimentSubset
   objects
 - [`subsetSpatialCoords()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialCoords.md)
+  [`spatialCoords(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialCoords.md)
   : Accessor method for spatialCoords from subsets in ExperimentSubset
   objects
 - [`subsetSpatialData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md)
   [`` `subsetSpatialData<-`() ``](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md)
+  [`spatialData(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md)
   : Deprecated: spatialData of subsets in ExperimentSubset objects
 
 ## Methods that take subsetName
 
 Methods of Bioconductor generics that read or set a subset’s data when
-given subsetName, and otherwise act on the main object. Besides those
-below, these include assay(), assay\<-, rowData(), colData(),
-reducedDim(), reducedDims(), altExp(), altExps(), altExpNames(),
-metadata() and their setters.
+given subsetName, and otherwise act on the main object. assay() and
+assay\<- name the subset with i instead.
 
+- [`assay(`*`<SubsetRangedSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assay<-`( ``*`<SubsetRangedSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`assay(`*`<SubsetSingleCellExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assay<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`assay(`*`<SubsetSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assay<-`( ``*`<SubsetSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`assay(`*`<SubsetSpatialExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assay<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`assay(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assay<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  : Assays of subsets in ExperimentSubset objects
+- [`rowData(`*`<SubsetRangedSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`colData(`*`<SubsetRangedSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `rowData<-`( ``*`<SubsetRangedSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetRangedSummarizedExperiment>`*`,`*`<DataFrame>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetRangedSummarizedExperiment>`*`,`*`<NULL>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetRangedSummarizedExperiment>`*`,`*`<data.frame>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`rowData(`*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`colData(`*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `rowData<-`( ``*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<DataFrame>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<NULL>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<data.frame>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`rowData(`*`<SubsetSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`colData(`*`<SubsetSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `rowData<-`( ``*`<SubsetSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetSummarizedExperiment>`*`,`*`<DataFrame>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetSummarizedExperiment>`*`,`*`<NULL>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetSummarizedExperiment>`*`,`*`<data.frame>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`rowData(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`colData(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `rowData<-`( ``*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<DataFrame>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<NULL>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<data.frame>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`rowData(`*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`colData(`*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `rowData<-`( ``*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<DataFrame>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<NULL>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  [`` `colData<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<data.frame>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
+  : rowData and colData of subsets in ExperimentSubset objects
+- [`reducedDim(`*`<SubsetSingleCellExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDim(`*`<SubsetSingleCellExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDim(`*`<SubsetSingleCellExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDim<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDim<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDim<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDims(`*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDim(`*`<SubsetSpatialExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDim(`*`<SubsetSpatialExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDim(`*`<SubsetSpatialExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDim<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDim<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDim<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDims(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDim(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDim(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDim(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDim<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDim<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDim<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`reducedDims(`*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  : Reduced dimensions of subsets in ExperimentSubset objects
 - [`` `reducedDimNames<-`() ``](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames-set.md)
   : reducedDimNames\<-
 - [`reducedDimNames()`](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames.md)
@@ -146,3 +205,45 @@ metadata() and their setters.
   : reducedDims\<-
 - [`` `reducedDims<-`() ``](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDims-set.md)
   : reducedDims\<-
+- [`altExp(`*`<SubsetSingleCellExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExp(`*`<SubsetSingleCellExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExp(`*`<SubsetSingleCellExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExps(`*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExpNames(`*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExpNames<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExp<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExp<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExp<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExps<-`( ``*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExp(`*`<SubsetSpatialExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExp(`*`<SubsetSpatialExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExp(`*`<SubsetSpatialExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExps(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExpNames(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExpNames<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExp<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExp<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExp<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExps<-`( ``*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExp(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExp(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExp(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExps(`*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`altExpNames(`*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExpNames<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExp<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExp<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExp<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  [`` `altExps<-`( ``*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  : Alternative experiments of subsets in ExperimentSubset objects
+- [`metadata(`*`<SubsetRangedSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md)
+  [`` `metadata<-`( ``*`<SubsetRangedSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md)
+  [`metadata(`*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md)
+  [`` `metadata<-`( ``*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md)
+  [`metadata(`*`<SubsetSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md)
+  [`` `metadata<-`( ``*`<SubsetSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md)
+  [`metadata(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md)
+  [`` `metadata<-`( ``*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md)
+  [`metadata(`*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md)
+  [`` `metadata<-`( ``*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md)
+  : Metadata of subsets in ExperimentSubset objects

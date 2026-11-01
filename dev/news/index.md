@@ -1,5 +1,28 @@
 # Changelog
 
+## ExperimentSubset 1.23.26 (2026-11-01)
+
+- New help pages for the methods of Bioconductor generics that take
+  `subsetName =`:
+  [`?"ExperimentSubset-assay"`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  ([`assay()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html),
+  `assay<-`, which name the subset with `i`),
+  [`?"ExperimentSubset-rowData-colData"`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md),
+  [`?"ExperimentSubset-reducedDim"`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md),
+  [`?"ExperimentSubset-altExp"`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
+  and
+  [`?"ExperimentSubset-metadata"`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-metadata.md).
+  `spatialCoords(x, subsetName = )` and `spatialData(x, subsetName = )`
+  are now on the `subsetSpatialCoords` and `subsetSpatialData` pages,
+  and each `show()` method on its class’s page. Before, these methods
+  had no help page
+  ([\#15](https://github.com/campbio/ExperimentSubset/issues/15))
+- The package now requires R 4.6.0 or later, the R version of
+  Bioconductor 3.24
+  ([\#52](https://github.com/campbio/ExperimentSubset/issues/52))
+- The package is now listed under the `SingleCell` biocView
+  ([\#52](https://github.com/campbio/ExperimentSubset/issues/52))
+
 ## ExperimentSubset 1.23.25 (2026-11-01)
 
 - [`cbind()`](https://rdrr.io/r/base/cbind.html) and

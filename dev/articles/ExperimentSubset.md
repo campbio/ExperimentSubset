@@ -885,7 +885,7 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.25        TreeSummarizedExperiment_2.21.0
+    ##  [1] ExperimentSubset_1.23.26        TreeSummarizedExperiment_2.21.0
     ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
     ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
     ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 

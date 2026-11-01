@@ -27,7 +27,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.25</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.26</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -84,6 +84,9 @@
 <span><span class="fu">subsetSpatialData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentSpatialData</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="fu">spatialData</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
 <span><span class="fu">subsetSpatialData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span></code></pre></div>
     </div>
 
@@ -107,6 +110,13 @@ spatialData should be combined or not. Default <code>FALSE</code>.</p></dd>
 
 <dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>
 <dd><p>Ignored: the setter is defunct.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>For <code>spatialData()</code>: <code>subsetName</code> and
+<code>parentSpatialData</code>, as for <code>subsetSpatialData()</code>. Without
+<code>subsetName</code>, all arguments are passed on to the
+<code>SpatialExperiment</code> method.</p></dd>
 
 </dl></div>
     <div class="section level2">

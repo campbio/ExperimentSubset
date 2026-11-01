@@ -723,7 +723,7 @@ it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
     ##  [7] singleCellTK_2.23.6             DelayedArray_0.39.8            
     ##  [9] SparseArray_1.13.4              S4Arrays_1.13.2                
     ## [11] abind_1.4-8                     Matrix_1.7-6                   
-    ## [13] ExperimentSubset_1.23.25        TreeSummarizedExperiment_2.21.0
+    ## [13] ExperimentSubset_1.23.26        TreeSummarizedExperiment_2.21.0
     ## [15] Biostrings_2.81.9               XVector_0.53.0                 
     ## [17] SpatialExperiment_1.23.0        scuttle_1.23.2                 
     ## [19] DropletUtils_1.33.2             SingleCellExperiment_1.35.2    

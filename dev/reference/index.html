@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.25</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.26</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,35 +57,35 @@
 
         <dt>
 
-          <code><a href="SubsetRangedSummarizedExperiment-class.html">SubsetRangedSummarizedExperiment-class</a></code> <code><a href="SubsetRangedSummarizedExperiment-class.html">.SubsetRangedSummarizedExperiment</a></code>
+          <code><a href="SubsetRangedSummarizedExperiment-class.html">show(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>)</a></code>
 
         </dt>
         <dd>An S4 class for <code>RangedSummarizedExperiment</code> objects with added support for subsets.</dd>
 
         <dt>
 
-          <code><a href="SubsetSingleCellExperiment-class.html">SubsetSingleCellExperiment-class</a></code> <code><a href="SubsetSingleCellExperiment-class.html">.SubsetSingleCellExperiment</a></code>
+          <code><a href="SubsetSingleCellExperiment-class.html">show(<i>&lt;SubsetSingleCellExperiment&gt;</i>)</a></code>
 
         </dt>
         <dd>An S4 class for <code>SingleCellExperiment</code> objects with added support for subsets.</dd>
 
         <dt>
 
-          <code><a href="SubsetSpatialExperiment-class.html">SubsetSpatialExperiment-class</a></code> <code><a href="SubsetSpatialExperiment-class.html">.SubsetSpatialExperiment</a></code>
+          <code><a href="SubsetSpatialExperiment-class.html">show(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code>
 
         </dt>
         <dd>An S4 class for <code>SpatialExperiment</code> objects with added support for subsets.</dd>
 
         <dt>
 
-          <code><a href="SubsetSummarizedExperiment-class.html">SubsetSummarizedExperiment-class</a></code> <code><a href="SubsetSummarizedExperiment-class.html">.SubsetSummarizedExperiment</a></code>
+          <code><a href="SubsetSummarizedExperiment-class.html">show(<i>&lt;SubsetSummarizedExperiment&gt;</i>)</a></code>
 
         </dt>
         <dd>An S4 class for <code>SummarizedExperiment</code> objects with added support for subsets.</dd>
 
         <dt>
 
-          <code><a href="SubsetTreeSummarizedExperiment-class.html">SubsetTreeSummarizedExperiment-class</a></code> <code><a href="SubsetTreeSummarizedExperiment-class.html">.SubsetTreeSummarizedExperiment</a></code>
+          <code><a href="SubsetTreeSummarizedExperiment-class.html">show(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>)</a></code>
 
         </dt>
         <dd>An S4 class for <code>TreeSummarizedExperiment</code> objects with added support for subsets.</dd>
@@ -259,21 +259,21 @@
 
         <dt>
 
-          <code><a href="subsetSpatialCoords.html">subsetSpatialCoords()</a></code>
+          <code><a href="subsetSpatialCoords.html">subsetSpatialCoords()</a></code> <code><a href="subsetSpatialCoords.html">spatialCoords(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code>
 
         </dt>
         <dd>Accessor method for spatialCoords from subsets in ExperimentSubset objects</dd>
 
         <dt>
 
-          <code><a href="subsetSpatialData.html">subsetSpatialData()</a></code> <code><a href="subsetSpatialData.html">`subsetSpatialData&lt;-`()</a></code>
+          <code><a href="subsetSpatialData.html">subsetSpatialData()</a></code> <code><a href="subsetSpatialData.html">`subsetSpatialData&lt;-`()</a></code> <code><a href="subsetSpatialData.html">spatialData(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code>
 
         </dt>
         <dd>Deprecated: spatialData of subsets in ExperimentSubset objects</dd>
       </dl></div><div class="section level2">
       <h2 id="methods-that-take-subsetname">Methods that take subsetName<a class="anchor" aria-label="anchor" href="#methods-that-take-subsetname"></a></h2>
 
-      <div class="section-desc"><p>Methods of Bioconductor generics that read or set a subset’s data when given subsetName, and otherwise act on the main object. Besides those below, these include assay(), assay&lt;-, rowData(), colData(), reducedDim(), reducedDims(), altExp(), altExps(), altExpNames(), metadata() and their setters.</p></div>
+      <div class="section-desc"><p>Methods of Bioconductor generics that read or set a subset’s data when given subsetName, and otherwise act on the main object. assay() and assay&lt;- name the subset with i instead.</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -281,6 +281,27 @@
 
 
       <dl><dt>
+
+          <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Assays of subsets in ExperimentSubset objects</dd>
+
+        <dt>
+
+          <code><a href="ExperimentSubset-rowData-colData.html">rowData(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">colData(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`rowData&lt;-`(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;DataFrame&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;NULL&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;data.frame&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">rowData(<i>&lt;SubsetSingleCellExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">colData(<i>&lt;SubsetSingleCellExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`rowData&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;DataFrame&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;NULL&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;data.frame&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">rowData(<i>&lt;SubsetSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">colData(<i>&lt;SubsetSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`rowData&lt;-`(<i>&lt;SubsetSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;DataFrame&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;NULL&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;data.frame&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">rowData(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">colData(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`rowData&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;DataFrame&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;NULL&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;data.frame&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">rowData(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">colData(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`rowData&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;DataFrame&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;NULL&gt;</i>)</a></code> <code><a href="ExperimentSubset-rowData-colData.html">`colData&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;data.frame&gt;</i>)</a></code>
+
+        </dt>
+        <dd>rowData and colData of subsets in ExperimentSubset objects</dd>
+
+        <dt>
+
+          <code><a href="ExperimentSubset-reducedDim.html">reducedDim(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDim(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDim(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">`reducedDim&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">`reducedDim&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">`reducedDim&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDims(<i>&lt;SubsetSingleCellExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDim(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDim(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDim(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">`reducedDim&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">`reducedDim&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">`reducedDim&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDims(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDim(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDim(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDim(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">`reducedDim&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">`reducedDim&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">`reducedDim&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-reducedDim.html">reducedDims(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Reduced dimensions of subsets in ExperimentSubset objects</dd>
+
+        <dt>
 
           <code><a href="reducedDimNames-set.html">`reducedDimNames&lt;-`()</a></code>
 
@@ -307,6 +328,20 @@
 
         </dt>
         <dd>reducedDims&lt;-</dd>
+
+        <dt>
+
+          <code><a href="ExperimentSubset-altExp.html">altExp(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExp(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExp(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExps(<i>&lt;SubsetSingleCellExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExpNames(<i>&lt;SubsetSingleCellExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExpNames&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExp&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExp&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExp&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExps&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExp(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExp(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExp(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExps(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExpNames(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExpNames&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExp&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExp&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExp&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExps&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExp(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExp(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExp(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExps(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">altExpNames(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExpNames&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExp&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExp&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;missing&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExp&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;numeric&gt;</i>)</a></code> <code><a href="ExperimentSubset-altExp.html">`altExps&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Alternative experiments of subsets in ExperimentSubset objects</dd>
+
+        <dt>
+
+          <code><a href="ExperimentSubset-metadata.html">metadata(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-metadata.html">`metadata&lt;-`(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-metadata.html">metadata(<i>&lt;SubsetSingleCellExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-metadata.html">`metadata&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-metadata.html">metadata(<i>&lt;SubsetSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-metadata.html">`metadata&lt;-`(<i>&lt;SubsetSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-metadata.html">metadata(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-metadata.html">`metadata&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-metadata.html">metadata(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>)</a></code> <code><a href="ExperimentSubset-metadata.html">`metadata&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Metadata of subsets in ExperimentSubset objects</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
