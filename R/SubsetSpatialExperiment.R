@@ -379,6 +379,16 @@ setMethod(
   }
 )
 
+#' @rdname ExperimentSubset-reducedDim
+setReplaceMethod(
+  f = "reducedDims",
+  signature = signature(x = "SubsetSpatialExperiment"),
+  definition = function(x, withDimnames = TRUE, ..., value) {
+    .reducedDims(x, withDimnames = withDimnames, ...) <- value
+    x
+  }
+)
+
 #' @rdname ExperimentSubset-rowData-colData
 setMethod(
   f = "rowData",
@@ -523,44 +533,6 @@ setMethod(
                         unlink = FALSE)
   {
     .setSubsetExperiment(x, subsetName, value, unlink = unlink)
-  }
-)
-
-#' @rdname reducedDimNames-set
-setReplaceMethod(
-  f = "reducedDimNames",
-  signature = "ANY",
-  definition = function(x, subsetName, value)
-  {
-    if (!missing(subsetName)) {
-      if (is.null(x@subsets[[subsetName]])) {
-        stop(paste(
-          subsetName,
-          "does not exist in the subsets slot of the object."
-        ))
-      }
-      SingleCellExperiment::reducedDimNames(.internalAssay(.subsets(x)[[subsetName]])) <-
-        value
-    }
-    else{
-      SingleCellExperiment::reducedDimNames(x) <- value
-    }
-    x
-  }
-)
-
-#' @rdname reducedDimNames
-setMethod(
-  f = "reducedDimNames",
-  signature = c("ANY"),
-  definition = function(x, ...)
-  {
-    arglist <- list(...)
-    if(!"subsetName" %in% names(arglist))
-      return(SingleCellExperiment::reducedDimNames(x))
-    subsetName = arglist[["subsetName"]]
-    .isSubset(x, subsetName)
-    SingleCellExperiment::reducedDimNames(.internalAssay(.subsets(x)[[subsetName]]))
   }
 )
 

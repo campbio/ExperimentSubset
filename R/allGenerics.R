@@ -413,33 +413,6 @@ setGeneric(
   }
 )
 
-#' @title reducedDims<-
-#' @description A wrapper to the \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset to which the \code{reducedDims} should be set to. If \code{missing}, \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
-#' @param value A \code{list} of values to set to \code{reducedDims}.
-#' @return Updated input object with \code{reducedDims} set.
-#' @export
-#' @examples
-#' data(sce_chcl, package = "scds")
-#' es <- ExperimentSubset(sce_chcl)
-#' es <- createSubset(es, "subset1",
-#' rows = c(1:50), cols = c(1:20),
-#' parentAssay = "counts")
-#' # two small reduced dimensions, one row per cell in the subset
-#' set.seed(1)
-#' pca1 <- matrix(rnorm(40), nrow = 20)
-#' pca2 <- matrix(rnorm(40), nrow = 20)
-#' reducedDims(es, subsetName = "subset1") <- list(PCA_1 = pca1, PCA_2 = pca2)
-#' reducedDims(es, subsetName = "subset1")
-setGeneric(
-  name = "reducedDims<-",
-  def = function(x, subsetName, value)
-  {
-    standardGeneric("reducedDims<-")
-  }
-)
-
 #' @title subsetColnames
 #' @description Get \code{colnames} from a subset in the \code{ExperimentSubset} object.
 #' @param x Input \code{ExperimentSubset} object 

@@ -11,6 +11,7 @@
 \alias{reducedDim<-,SubsetSingleCellExperiment,missing-method}
 \alias{reducedDim<-,SubsetSingleCellExperiment,numeric-method}
 \alias{reducedDims,SubsetSingleCellExperiment-method}
+\alias{reducedDims<-,SubsetSingleCellExperiment-method}
 \alias{reducedDim,SubsetSpatialExperiment,character-method}
 \alias{reducedDim,SubsetSpatialExperiment,missing-method}
 \alias{reducedDim,SubsetSpatialExperiment,numeric-method}
@@ -18,6 +19,7 @@
 \alias{reducedDim<-,SubsetSpatialExperiment,missing-method}
 \alias{reducedDim<-,SubsetSpatialExperiment,numeric-method}
 \alias{reducedDims,SubsetSpatialExperiment-method}
+\alias{reducedDims<-,SubsetSpatialExperiment-method}
 \alias{reducedDim,SubsetTreeSummarizedExperiment,character-method}
 \alias{reducedDim,SubsetTreeSummarizedExperiment,missing-method}
 \alias{reducedDim,SubsetTreeSummarizedExperiment,numeric-method}
@@ -25,6 +27,7 @@
 \alias{reducedDim<-,SubsetTreeSummarizedExperiment,missing-method}
 \alias{reducedDim<-,SubsetTreeSummarizedExperiment,numeric-method}
 \alias{reducedDims,SubsetTreeSummarizedExperiment-method}
+\alias{reducedDims<-,SubsetTreeSummarizedExperiment-method}
 \title{Reduced dimensions of subsets in ExperimentSubset objects}
 \usage{
 \S4method{reducedDim}{SubsetSingleCellExperiment,character}(x, type, ...)
@@ -41,6 +44,8 @@
 
 \S4method{reducedDims}{SubsetSingleCellExperiment}(x, ...)
 
+\S4method{reducedDims}{SubsetSingleCellExperiment}(x, withDimnames = TRUE, ...) <- value
+
 \S4method{reducedDim}{SubsetSpatialExperiment,character}(x, type, ...)
 
 \S4method{reducedDim}{SubsetSpatialExperiment,missing}(x, type, ...)
@@ -55,6 +60,8 @@
 
 \S4method{reducedDims}{SubsetSpatialExperiment}(x, ...)
 
+\S4method{reducedDims}{SubsetSpatialExperiment}(x, withDimnames = TRUE, ...) <- value
+
 \S4method{reducedDim}{SubsetTreeSummarizedExperiment,character}(x, type, ...)
 
 \S4method{reducedDim}{SubsetTreeSummarizedExperiment,missing}(x, type, ...)
@@ -68,6 +75,8 @@
 \S4method{reducedDim}{SubsetTreeSummarizedExperiment,numeric}(x, type, withDimnames = TRUE, ...) <- value
 
 \S4method{reducedDims}{SubsetTreeSummarizedExperiment}(x, ...)
+
+\S4method{reducedDims}{SubsetTreeSummarizedExperiment}(x, withDimnames = TRUE, ...) <- value
 }
 \arguments{
 \item{x}{An \code{ExperimentSubset} object.}
@@ -84,15 +93,17 @@ Other arguments are passed on to the \code{SingleCellExperiment}
 method, for the subset or the main object.}
 
 \item{withDimnames}{\code{logical(1)} Passed on to
-\code{\link[SingleCellExperiment]{reducedDim<-}}. Default \code{TRUE}.}
+\code{\link[SingleCellExperiment]{reducedDim<-}} or \code{reducedDims<-}.
+Default \code{TRUE}.}
 
-\item{value}{A matrix with one row per column of the subset (or of the
-main object).}
+\item{value}{For \code{reducedDim<-}, a matrix with one row per column
+of the subset (or of the main object). For \code{reducedDims<-}, a
+named list of such matrices, which replaces all of them.}
 }
 \value{
 \code{reducedDim()} returns a matrix and \code{reducedDims()} a
-  list of them. \code{reducedDim<-} returns \code{x} with the reduced
-  dimension stored.
+  list of them. \code{reducedDim<-} and \code{reducedDims<-} return
+  \code{x} with the reduced dimensions stored.
 }
 \description{
 Get or set the reduced dimensions, such as a PCA or UMAP,
@@ -101,8 +112,8 @@ Get or set the reduced dimensions, such as a PCA or UMAP,
   \code{SingleCellExperiment}. They exist for the classes that extend
   \code{SingleCellExperiment}: \code{SubsetSingleCellExperiment},
   \code{SubsetSpatialExperiment} and \code{SubsetTreeSummarizedExperiment}.
-  \code{\link{reducedDims<-}}, \code{\link{reducedDimNames}} and
-  \code{\link{reducedDimNames<-}} have their own pages.
+  \code{\link{reducedDimNames}} and \code{\link{reducedDimNames<-}}
+  have their own pages.
 }
 \examples{
 # an object with 10 genes and 20 cells
@@ -121,6 +132,10 @@ reducedDim(es, "PCA", subsetName = "first") <- embedding
 reducedDim(es, "PCA", subsetName = "first")
 # all of the subset's reduced dimensions
 reducedDims(es, subsetName = "first")
+# replace them all with a list of two
+reducedDims(es, subsetName = "first") <- list(PCA = embedding,
+                                              UMAP = embedding * 2)
+reducedDimNames(es, subsetName = "first")
 }
 \seealso{
 \code{\link[SingleCellExperiment]{reducedDims}}

@@ -310,7 +310,7 @@ testthat::test_that("Testing reducedDims",{
                          "hvg123 subset does not exist.")
   
   testthat::expect_error(reducedDimNames(es, subsetName = "hvg123") <- c("PCA_1"),
-                         "hvg123 does not exist in the subsets slot of the object.")
+                         "hvg123 subset does not exist.")
   
   reducedDim(es, type = "PCA") <- scater::calculatePCA(assay(es, "counts"))
   expect_true(!is.null(reducedDim(es, type = "PCA")))
@@ -782,6 +782,88 @@ testthat::test_that("reducedDim on the main object works without a type", {
                            info = name)
     testthat::expect_equal(unname(reducedDim(es, "UMAP")), pca * 10,
                            info = name)
+  }
+})
+
+# (#26) a plain SCE, SpE and TreeSE with 10 genes and 6 cells
+makeReducedDimObjects <- function() {
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:6)))
+  list(
+    sce = SingleCellExperiment(list(counts = counts)),
+    spe = SpatialExperiment(assays = list(counts = counts),
+                            spatialCoords = cbind(x = 1:6, y = 1:6)),
+    tse = TreeSummarizedExperiment(assays = list(counts = counts),
+                                   rowTree = tinyTree)
+  )
+}
+
+testthat::test_that("reducedDims<- is SingleCellExperiment's generic", {
+  # (#26) a package generic of the same name masked SCE's
+  testthat::expect_equal(attr(ExperimentSubset::`reducedDims<-`, "package"),
+                         "SingleCellExperiment")
+})
+
+testthat::test_that("reducedDims<- takes withDimnames", {
+  # (#26) the package generic had no withDimnames and no ...
+  objects <- makeReducedDimObjects()
+  pca <- matrix(as.numeric(seq_len(12)), nrow = 6, ncol = 2)
+  subsetPca <- pca[2:4, ]
+  for (name in names(objects)) {
+    plain <- objects[[name]]
+    testthat::expect_no_error(
+      reducedDims(plain, withDimnames = FALSE) <- list(PCA = pca)
+    )
+    testthat::expect_equal(unname(reducedDim(plain, "PCA")), pca,
+                           info = name)
+
+    es <- ExperimentSubset(objects[[name]])
+    es <- createSubset(es, "s1", rows = 1:5, cols = 2:4)
+    testthat::expect_no_error(
+      reducedDims(es, withDimnames = FALSE) <- list(PCA = pca)
+    )
+    testthat::expect_equal(unname(reducedDim(es, "PCA")), pca, info = name)
+    testthat::expect_no_error(
+      reducedDims(es, withDimnames = FALSE, subsetName = "s1") <-
+        list(UMAP = subsetPca)
+    )
+    testthat::expect_equal(reducedDimNames(es, subsetName = "s1"), "UMAP",
+                           info = name)
+    testthat::expect_equal(
+      unname(reducedDim(es, "UMAP", subsetName = "s1")), subsetPca,
+      info = name
+    )
+    # the main object's reducedDims are unchanged
+    testthat::expect_equal(reducedDimNames(es), "PCA", info = name)
+  }
+})
+
+testthat::test_that("reducedDims and their names check the subset name", {
+  # (#26) each class's methods, not only the last file in Collate
+  objects <- makeReducedDimObjects()
+  subsetPca <- matrix(as.numeric(seq_len(6)), nrow = 3, ncol = 2)
+  for (name in names(objects)) {
+    es <- ExperimentSubset(objects[[name]])
+    es <- createSubset(es, "s1", rows = 1:5, cols = 2:4)
+    reducedDims(es, subsetName = "s1") <- list(PCA = subsetPca)
+    reducedDimNames(es, subsetName = "s1") <- "renamed"
+    testthat::expect_equal(reducedDimNames(es, subsetName = "s1"), "renamed",
+                           info = name)
+    testthat::expect_equal(reducedDimNames(es), character(0), info = name)
+    testthat::expect_error(
+      reducedDims(es, subsetName = "nope") <- list(PCA = subsetPca),
+      "nope subset does not exist", info = name
+    )
+    testthat::expect_error(
+      reducedDimNames(es, subsetName = "nope"),
+      "nope subset does not exist", info = name
+    )
+    testthat::expect_error(
+      reducedDimNames(es, subsetName = "nope") <- "renamed",
+      "nope subset does not exist", info = name
+    )
   }
 })
 

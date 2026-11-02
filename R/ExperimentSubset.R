@@ -1565,13 +1565,14 @@ NULL
 #'   \code{SingleCellExperiment}. They exist for the classes that extend
 #'   \code{SingleCellExperiment}: \code{SubsetSingleCellExperiment},
 #'   \code{SubsetSpatialExperiment} and \code{SubsetTreeSummarizedExperiment}.
-#'   \code{\link{reducedDims<-}}, \code{\link{reducedDimNames}} and
-#'   \code{\link{reducedDimNames<-}} have their own pages.
+#'   \code{\link{reducedDimNames}} and \code{\link{reducedDimNames<-}}
+#'   have their own pages.
 #' @param x An \code{ExperimentSubset} object.
 #' @param type \code{character(1)} or \code{integer(1)} The name or
 #'   position of the reduced dimension. Leave it out for the first one.
 #' @param withDimnames \code{logical(1)} Passed on to
-#'   \code{\link[SingleCellExperiment]{reducedDim<-}}. Default \code{TRUE}.
+#'   \code{\link[SingleCellExperiment]{reducedDim<-}} or \code{reducedDims<-}.
+#'   Default \code{TRUE}.
 #' @param ... \describe{
 #'     \item{\code{subsetName}}{\code{character(1)} Name of the subset whose
 #'       reduced dimensions to get or set. Leave it out for the main
@@ -1579,11 +1580,12 @@ NULL
 #'   }
 #'   Other arguments are passed on to the \code{SingleCellExperiment}
 #'   method, for the subset or the main object.
-#' @param value A matrix with one row per column of the subset (or of the
-#'   main object).
+#' @param value For \code{reducedDim<-}, a matrix with one row per column
+#'   of the subset (or of the main object). For \code{reducedDims<-}, a
+#'   named list of such matrices, which replaces all of them.
 #' @return \code{reducedDim()} returns a matrix and \code{reducedDims()} a
-#'   list of them. \code{reducedDim<-} returns \code{x} with the reduced
-#'   dimension stored.
+#'   list of them. \code{reducedDim<-} and \code{reducedDims<-} return
+#'   \code{x} with the reduced dimensions stored.
 #' @seealso \code{\link[SingleCellExperiment]{reducedDims}}
 #' @name ExperimentSubset-reducedDim
 #' @examples
@@ -1603,6 +1605,10 @@ NULL
 #' reducedDim(es, "PCA", subsetName = "first")
 #' # all of the subset's reduced dimensions
 #' reducedDims(es, subsetName = "first")
+#' # replace them all with a list of two
+#' reducedDims(es, subsetName = "first") <- list(PCA = embedding,
+#'                                               UMAP = embedding * 2)
+#' reducedDimNames(es, subsetName = "first")
 NULL
 
 #' @importMethodsFrom SingleCellExperiment reducedDim
@@ -1646,24 +1652,57 @@ NULL
   do.call(reducedDims, c(list(internal), .otherArgs(...)))
 }
 
-#' @title reducedDims<-
-#' @description A wrapper to the \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset to which the \code{reducedDims} should be set to. If \code{missing}, \code{reducedDims<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
-#' @param value A \code{list} of values to set to \code{reducedDims}.
-#' @return Updated input object with \code{reducedDims} set.
-#' @export
-setReplaceMethod("reducedDims", "ANY", function(x, subsetName, value) {
-  if (!missing(subsetName)) {
+# Exported so ExperimentSubset::`reducedDims<-` still works; it is now
+# SingleCellExperiment's generic, with the methods in R/Subset*.R (#26).
+#' @importMethodsFrom SingleCellExperiment reducedDims<-
+#' @exportMethod reducedDims<-
+`.reducedDims<-` <- function(x, ..., value) {
+  arglist <- list(...)
+  if (!"subsetName" %in% names(arglist))
+    return(callNextMethod(x, ..., value = value))
+  subsetName <- arglist[["subsetName"]]
+  .isSubset(x, subsetName)
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  args <- c(list(internal), .otherArgs(...), list(value = value))
+  .internalAssay(.subsets(x)[[subsetName]]) <- do.call(`reducedDims<-`, args)
+  x
+}
+
+# The package keeps its own reducedDimNames generics: SingleCellExperiment's
+# have no ..., so subsetName can't pass through them (#26). Calls without
+# subsetName go to SingleCellExperiment's unchanged.
+
+#' @rdname reducedDimNames
+setMethod(
+  f = "reducedDimNames",
+  signature = "ANY",
+  definition = function(x, ...) {
+    arglist <- list(...)
+    if (!"subsetName" %in% names(arglist))
+      return(SingleCellExperiment::reducedDimNames(x))
+    subsetName <- arglist[["subsetName"]]
     .isSubset(x, subsetName)
-    SingleCellExperiment::reducedDims(.internalAssay(.subsets(x)[[subsetName]])) <-
-      value
+    internal <- .internalAssay(.subsets(x)[[subsetName]])
+    SingleCellExperiment::reducedDimNames(internal)
   }
-  else{
-    SingleCellExperiment::reducedDims(x) <- value
+)
+
+#' @rdname reducedDimNames-set
+setReplaceMethod(
+  f = "reducedDimNames",
+  signature = "ANY",
+  definition = function(x, subsetName, value) {
+    if (missing(subsetName)) {
+      SingleCellExperiment::reducedDimNames(x) <- value
+      return(x)
+    }
+    .isSubset(x, subsetName)
+    internal <- .internalAssay(.subsets(x)[[subsetName]])
+    SingleCellExperiment::reducedDimNames(internal) <- value
+    .internalAssay(.subsets(x)[[subsetName]]) <- internal
+    x
   }
-  return(x)
-})
+)
 
 #' @title rowData and colData of subsets in ExperimentSubset objects
 #' @description Get or set the \code{rowData} or \code{colData} of a subset
