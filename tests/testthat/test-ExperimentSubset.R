@@ -2378,7 +2378,7 @@ testthat::test_that("Combining keeps names set with subsetRownames<- (#73)", {
                          c("custom", colnames(example$counts1)[10:20]))
 })
 
-testthat::test_that("Combining stops when a subset is named as an assay (#73)", {
+testthat::test_that("Combining stops on a subset named as an assay (#73)", {
   example <- unionExample("cols")
   # the second object has a main assay named as the first object's subset
   es2 <- example$es2
@@ -2392,7 +2392,7 @@ testthat::test_that("Combining stops when a subset is named as an assay (#73)", 
                          "'s2' is a subset in one object and an assay")
 })
 
-testthat::test_that("use.names = FALSE names subsets of unnamed objects (#73)", {
+testthat::test_that("use.names = FALSE names subsets of unnamed data (#73)", {
   example <- unionExample("cols")
   # the second object's genes have no names
   counts2 <- unname(example$counts2)
@@ -2417,7 +2417,8 @@ testthat::test_that("Combining allows a subset named as its own assay (#73)", {
     rowIndices = ExperimentSubset:::.rowIndices(s1),
     colIndices = ExperimentSubset:::.colIndices(s1),
     parentAssay = "counts",
-    internalAssay = ExperimentSubset:::.internalAssay(s1))
+    internalAssay = ExperimentSubset:::.internalAssay(s1)
+  )
   subsets <- ExperimentSubset:::.subsets(es1)
   subsets[["extra"]] <- legacy
   ExperimentSubset:::.subsets(es1) <- subsets
