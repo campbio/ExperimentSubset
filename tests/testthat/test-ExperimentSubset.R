@@ -2391,3 +2391,36 @@ testthat::test_that("Combining stops when a subset is named as an assay (#73)", 
   testthat::expect_error(combineRows(es1, example$es2),
                          "'s2' is a subset in one object and an assay")
 })
+
+testthat::test_that("use.names = FALSE names subsets of unnamed objects (#73)", {
+  example <- unionExample("cols")
+  # the second object's genes have no names
+  counts2 <- unname(example$counts2)
+  colnames(counts2) <- paste0("d", 1:20)
+  es2 <- ExperimentSubset(SingleCellExperiment(list(counts = counts2)))
+  es2 <- createSubset(es2, "s2", rows = 1:6, cols = 9:20)
+  combined <- suppressWarnings(combineCols(example$es1, es2,
+                                           use.names = FALSE))
+  testthat::expect_equal(subsetRownames(combined, "s2"),
+                         rownames(example$counts1)[1:6])
+})
+
+testthat::test_that("Combining allows a subset named as its own assay (#73)", {
+  # an object saved before createSubset() checked names, with a subset
+  # named as one of its own assays
+  example <- unionExample("cols")
+  es1 <- example$es1
+  assay(es1, "extra") <- assay(es1, "counts") * 2
+  s1 <- ExperimentSubset:::.subsets(es1)[["s1"]]
+  legacy <- ExperimentSubset:::AssaySubset(
+    subsetName = "extra",
+    rowIndices = ExperimentSubset:::.rowIndices(s1),
+    colIndices = ExperimentSubset:::.colIndices(s1),
+    parentAssay = "counts",
+    internalAssay = ExperimentSubset:::.internalAssay(s1))
+  subsets <- ExperimentSubset:::.subsets(es1)
+  subsets[["extra"]] <- legacy
+  ExperimentSubset:::.subsets(es1) <- subsets
+  combined <- combineCols(es1, example$es2)
+  testthat::expect_true("extra" %in% subsetNames(combined))
+})

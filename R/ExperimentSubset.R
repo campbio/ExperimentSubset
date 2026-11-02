@@ -327,7 +327,7 @@ NULL
   internalAssay <- SingleCellExperiment(assays = a)
   if(inherits(x, "SpatialExperiment"))
     internalAssay$sample_id <- x$sample_id[rootCols]
-  internalAssay <- as(internalAssay, gsub("Subset", "", class(x)))
+  internalAssay <- as(internalAssay, .baseClass(x))
   
   rownames(internalAssay) <- rownames(x)[rootRows]
   colnames(internalAssay) <- colnames(x)[rootCols]
@@ -1124,10 +1124,21 @@ NULL
 #' subsetRownames(esAll, subsetName = "newGenes")
 NULL
 
+# Whether each of objects is an ExperimentSubset object, with subsets
+.hasSubsets <- function(objects) {
+  vapply(objects, methods::.hasSlot, logical(1), "subsets")
+}
+
+# The class an ExperimentSubset object extends, which the stored objects
+# of its subsets have
+.baseClass <- function(x) {
+  sub("^Subset", "", as.character(class(x)))
+}
+
 # Checks that subset names are unique across the objects to combine, and
-# differ from the assay names of all of them (#67, #73)
+# differ from the assay names of the other objects (#67, #73)
 .checkSubsetNames <- function(objects) {
-  hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
+  hasSubsets <- .hasSubsets(objects)
   allNames <- unlist(lapply(objects[hasSubsets], subsetNames))
   repeated <- unique(allNames[duplicated(allNames)])
   if (length(repeated) > 0)
@@ -1137,13 +1148,16 @@ NULL
          "one. Create the subsets under different names before combining.")
   # combineCols() and combineRows() keep the assays of every object, so a
   # subset named as another object's assay would be hidden by it (#73)
-  allAssays <- unlist(lapply(objects, SummarizedExperiment::assayNames))
-  clashes <- intersect(allNames, allAssays)
-  if (length(clashes) > 0)
-    stop(paste0("'", clashes, "'", collapse = ", "),
-         if (length(clashes) == 1) " is a subset" else " are subsets",
-         " in one object and an assay in another; subset names must ",
-         "differ from assay names. Rename one of them before combining.")
+  for (k in which(hasSubsets)) {
+    otherAssays <- unlist(lapply(objects[-k],
+                                 SummarizedExperiment::assayNames))
+    clashes <- intersect(subsetNames(objects[[k]]), otherAssays)
+    if (length(clashes) > 0)
+      stop(paste0("'", clashes, "'", collapse = ", "),
+           if (length(clashes) == 1) " is a subset" else " are subsets",
+           " in one object and an assay in another; subset names must ",
+           "differ from assay names. Rename one of them before combining.")
+  }
   invisible(NULL)
 }
 
@@ -1155,9 +1169,8 @@ NULL
 # column names (#67)
 .checkCombine <- function(objects, along) {
   .checkSubsetNames(objects)
-  hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
   if (along == "cols") {
-    for (k in which(hasSubsets)) {
+    for (k in which(.hasSubsets(objects))) {
       if (!identical(rownames(objects[[k]]), rownames(objects[[1]])))
         stop("cbind() needs the same rows, in the same order, in each ",
              "object with subsets; object ", k, " has different rows ",
@@ -1167,31 +1180,47 @@ NULL
   invisible(NULL)
 }
 
-# Where the rows and columns of each object are in out, the result of
-# combining objects along "cols" (cbind(), combineCols()) or "rows"
-# (rbind(), combineRows()): list(rows =, cols =), each a list with one
-# vector of positions in out per object. Along the combined dimension,
-# each object follows the objects before it; on the other, positions
-# are matched by name when useNames is TRUE, as combineCols() and
-# combineRows() do, and kept otherwise
+# Where the rows and columns of each object with subsets are in out, the
+# result of combining objects along "cols" (cbind(), combineCols()) or
+# "rows" (rbind(), combineRows()): list(rows =, cols =), each a list with
+# a vector of positions in out per object, or NULL where they don't
+# change. Along the combined dimension, each object follows the objects
+# before it; on the other, positions are matched by name when useNames is
+# TRUE, as combineCols() and combineRows() do, and don't change otherwise
 .combineMaps <- function(objects, out, along, useNames) {
   byCols <- along == "cols"
   getSize <- if (byCols) ncol else nrow
   getOtherNames <- if (byCols) rownames else colnames
   sizes <- vapply(objects, getSize, integer(1))
   offsets <- cumsum(c(0L, sizes[-length(sizes)]))
-  shifted <- lapply(seq_along(objects),
-                    function(k) seq_len(sizes[k]) + offsets[k])
-  matched <- lapply(objects, function(object) {
+  shifted <- matched <- vector("list", length(objects))
+  for (k in which(.hasSubsets(objects))) {
+    shifted[[k]] <- seq_len(sizes[k]) + offsets[k]
     if (isTRUE(useNames))
-      match(getOtherNames(object), getOtherNames(out))
-    else
-      seq_len(if (byCols) nrow(object) else ncol(object))
-  })
+      matched[[k]] <- match(getOtherNames(objects[[k]]),
+                            getOtherNames(out))
+  }
   if (byCols)
     list(rows = matched, cols = shifted)
   else
     list(rows = shifted, cols = matched)
+}
+
+# The names a subset stores on one dimension, after its object's names
+# there, from, became to in the combined object: combineCols() and
+# combineRows() with use.names = FALSE match by position and keep the
+# first object's names. Stored names that are still the object's follow;
+# names set with subsetRownames<- or subsetColnames<- stay (#73)
+.followNames <- function(stored, from, to) {
+  if (is.null(from))
+    return(if (is.null(stored)) to else stored)
+  if (is.null(stored))
+    return(stored)
+  if (is.null(to))
+    return(if (isTRUE(all(stored == from))) NULL else stored)
+  same <- which(stored == from)
+  stored[same] <- to[same]
+  stored
 }
 
 # Gives out, the result of combining objects along "cols" or "rows", the
@@ -1202,31 +1231,49 @@ NULL
 # made from a main-object assay move to where their rows and columns are
 # in out (see .combineMaps()); subsets of subsets keep their indices,
 # which are relative to their parent. Each subset's stored object is
-# converted to the class out extends, if that differs
+# converted to the class out extends, if that differs, and its names on
+# the matched dimension follow out's (see .followNames())
 .combineSubsets <- function(out, objects, along, useNames = FALSE) {
   if (!methods::.hasSlot(out, "subsets"))
     out <- ExperimentSubset(out)
   maps <- .combineMaps(objects, out, along, useNames)
-  baseClass <- sub("^Subset", "", as.character(class(out)))
-  hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
+  baseClass <- .baseClass(out)
+  byCols <- along == "cols"
+  getOtherIndices <- if (byCols) .rowIndices else .colIndices
+  getOtherNames <- if (byCols) rownames else colnames
   subsets <- list()
-  # the object each subset comes from
-  sources <- list()
-  for (k in which(hasSubsets)) {
+  for (k in which(.hasSubsets(objects))) {
     # explicit parent names, so a bare one can't match another object's
     object <- .qualifyParents(objects[[k]])
+    # matched by position, out has the first object's names (#73)
+    renamed <- !isTRUE(useNames) &&
+      !identical(getOtherNames(object), getOtherNames(out))
     for (name in subsetNames(object)) {
-      sources[[name]] <- k
       subset <- .subsets(object)[[name]]
       rows <- .rowIndices(subset)
       cols <- .colIndices(subset)
       if (is.null(.parentSubsetName(object, .parentAssay(subset)))) {
-        rows <- maps$rows[[k]][rows]
-        cols <- maps$cols[[k]][cols]
+        if (!is.null(maps$rows[[k]]))
+          rows <- maps$rows[[k]][rows]
+        if (!is.null(maps$cols[[k]]))
+          cols <- maps$cols[[k]][cols]
       }
       internal <- .internalAssay(subset)
       if (!identical(as.character(class(internal)), baseClass))
         internal <- methods::as(internal, baseClass)
+      if (renamed) {
+        positions <- .rootIndices(object, name, getOtherIndices)
+        stored <- getOtherNames(internal)
+        followed <- .followNames(stored,
+                                 getOtherNames(object)[positions],
+                                 getOtherNames(out)[positions])
+        if (!identical(followed, stored)) {
+          if (byCols)
+            rownames(internal) <- followed
+          else
+            colnames(internal) <- followed
+        }
+      }
       subsets[[name]] <- AssaySubset(
         subsetName = name,
         rowIndices = rows,
@@ -1237,7 +1284,6 @@ NULL
     }
   }
   .subsets(out) <- S4Vectors::SimpleList(subsets)
-  out <- .followMatchedNames(out, objects, sources, along)
   # SpatialExperiment's cbind() renames sample_ids repeated across the
   # objects; each subset's stored copy follows the main object's
   if (methods::is(out, "SpatialExperiment")) {
@@ -1250,40 +1296,6 @@ NULL
     }
     .subsets(out) <- subsets
   }
-  out
-}
-
-# Renames the rows (along = "cols") or columns ("rows") stored in each
-# subset of out to the names out has there, where they still are the
-# names their object had: combineCols() and combineRows() with
-# use.names = FALSE match by position and keep the first object's names.
-# Names set with subsetRownames<- or subsetColnames<- are kept, and so
-# are missing ones. sources gives the object in objects each subset
-# comes from (#73)
-.followMatchedNames <- function(out, objects, sources, along) {
-  byCols <- along == "cols"
-  getIndices <- if (byCols) .rowIndices else .colIndices
-  getNames <- if (byCols) rownames else colnames
-  subsets <- .subsets(out)
-  for (name in names(sources)) {
-    object <- objects[[sources[[name]]]]
-    if (identical(getNames(object), getNames(out)))
-      next
-    internal <- .internalAssay(subsets[[name]])
-    stored <- getNames(internal)
-    from <- getNames(object)[.rootIndices(object, name, getIndices)]
-    to <- getNames(out)[.rootIndices(out, name, getIndices)]
-    if (is.null(stored) || is.null(from) || is.null(to))
-      next
-    same <- which(stored == from)
-    stored[same] <- to[same]
-    if (byCols)
-      rownames(internal) <- stored
-    else
-      colnames(internal) <- stored
-    .internalAssay(subsets[[name]]) <- internal
-  }
-  .subsets(out) <- subsets
   out
 }
 

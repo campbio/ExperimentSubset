@@ -114,21 +114,26 @@ combineRows`, as `cbind`/`rbind` are imported. No DESCRIPTION change.
   only when `out` is a SpatialExperiment, so it does not affect the new
   functions.
 - **`.combineMaps(objects, out, along, useNames)`**: one helper for all
-  four functions. Along `along`, a shift by the size of the earlier
-  objects; on the other dimension, `match(<names in that object>, <names
-  in out>)` when `useNames` is `TRUE`, unchanged positions otherwise
-  (which is what `cbind`/`rbind` need).
-- **`.followMatchedNames(out, objects, sources, along)`**: with
-  `use.names = FALSE`, the result takes the first object's names on the
-  matched dimension, so a later object's subsets would keep names the
-  main object no longer has. For each subset whose object's names differ
-  from `out`'s on that dimension, this sets the stored names to `out`'s
-  at the subset's positions, but only where they still equal the
-  object's names there: names set with `subsetRownames<-` or
-  `subsetColnames<-` are kept, as `x[i, j]` keeps them. Missing (`NULL`)
-  names are left as they are. For `cbind`/`rbind` and for
-  `use.names = TRUE` the object's names already match, so nothing
-  changes.
+  four functions, computed only for objects with subsets. Along `along`,
+  a shift by the size of the earlier objects; on the other dimension,
+  `match(<names in that object>, <names in out>)` when `useNames` is
+  `TRUE`, and `NULL` (positions unchanged) otherwise, which is what
+  `cbind`/`rbind` need.
+- **`.followNames(stored, from, to)`**, called from the main loop of
+  `.combineSubsets()`: with `use.names = FALSE`, the result takes the
+  first object's names on the matched dimension, so a later object's
+  subsets would keep names the main object no longer has. For an object
+  whose names on that dimension differ from `out`'s (checked once per
+  object, and only when `use.names = FALSE`), each subset's stored names
+  are set to `out`'s at its positions, but only where they still equal
+  the object's names there: names set with `subsetRownames<-` or
+  `subsetColnames<-` are kept, as `x[i, j]` keeps them. An object
+  without names gives its subsets `out`'s names unless they have their
+  own; if `out` has none, unchanged names become `NULL`. For
+  `cbind`/`rbind` and for `use.names = TRUE` this never runs.
+- **`.hasSubsets(objects)`** and **`.baseClass(x)`**: small shared
+  helpers for the `.hasSlot(…, "subsets")` test and the class a subset's
+  stored object has (also used by `.createSubset()`).
 - **`.checkSubsetNames(objects)`**: the unique-names check, moved out of
   `.checkCombine()` unchanged (same message). `.checkCombine()` calls it
   and keeps `cbind()`'s same-rows check, so `cbind`/`rbind` behave
@@ -171,7 +176,10 @@ Written first; each must fail on its assertion before the fix.
 - Repeated subset names across the objects are an error, with the
   existing message. So is a subset named as another object's assay:
   `combineCols()`/`combineRows()` keep every object's assays, so the
-  assay would hide the subset. `.checkSubsetNames()` checks this for
+  assay would hide the subset. Each object's subset names are compared
+  with the other objects' assays only, so an older object with a subset
+  named as its own assay can still be combined. `.checkSubsetNames()`
+  checks this for
   all four functions (for `cbind`/`rbind` upstream already requires the
   same assays, so it can't arise there).
 - An object without subsets in the middle shifts later subsets
