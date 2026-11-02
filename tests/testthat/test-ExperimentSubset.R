@@ -840,6 +840,31 @@ testthat::test_that("reducedDims<- takes withDimnames", {
   }
 })
 
+testthat::test_that("reducedDims<- needs subsetName by name", {
+  # (#26) the old generic took subsetName second; that is now withDimnames
+  objects <- makeReducedDimObjects()
+  subsetPca <- matrix(as.numeric(seq_len(6)), nrow = 3, ncol = 2)
+  for (name in names(objects)) {
+    es <- ExperimentSubset(objects[[name]])
+    es <- createSubset(es, "s1", rows = 1:5, cols = 2:4)
+    testthat::expect_error(
+      reducedDims(es, "s1") <- list(PCA = subsetPca),
+      "name the subset with subsetName =", info = name
+    )
+    testthat::expect_equal(reducedDimNames(es, subsetName = "s1"),
+                           character(0), info = name)
+  }
+})
+
+testthat::test_that("reducedDims<- on a plain SCE ignores subsetName", {
+  # (#26) as for altExps<-: SingleCellExperiment's method drops it
+  sce <- makeReducedDimObjects()$sce
+  pca <- matrix(as.numeric(seq_len(12)), nrow = 6, ncol = 2)
+  reducedDims(sce, subsetName = "s1") <- list(PCA = pca)
+  testthat::expect_equal(reducedDimNames(sce), "PCA")
+  testthat::expect_equal(unname(reducedDim(sce, "PCA")), pca)
+})
+
 testthat::test_that("reducedDims and their names check the subset name", {
   # (#26) each class's methods, not only the last file in Collate
   objects <- makeReducedDimObjects()

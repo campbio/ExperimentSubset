@@ -87,14 +87,15 @@ position of the reduced dimension. Leave it out for the first one.}
 \item{...}{\describe{
   \item{\code{subsetName}}{\code{character(1)} Name of the subset whose
     reduced dimensions to get or set. Leave it out for the main
-    object's.}
+    object's. Give it by name: for \code{reducedDims<-}, a subset name
+    in second place is \code{withDimnames}, and an error.}
 }
 Other arguments are passed on to the \code{SingleCellExperiment}
 method, for the subset or the main object.}
 
 \item{withDimnames}{\code{logical(1)} Passed on to
-\code{\link[SingleCellExperiment]{reducedDim<-}} or \code{reducedDims<-}.
-Default \code{TRUE}.}
+\code{\link[SingleCellExperiment]{reducedDim<-}} or
+\code{\link[SingleCellExperiment]{reducedDims<-}}. Default \code{TRUE}.}
 
 \item{value}{For \code{reducedDim<-}, a matrix with one row per column
 of the subset (or of the main object). For \code{reducedDims<-}, a

@@ -64,7 +64,16 @@ error rather than a wrong answer.
   that is not an `ExperimentSubset` (for example a plain SCE) now goes
   to SCE's method, which ignores `subsetName`, as `altExps<-` already
   does. Before, it gave "subset does not exist". Calls on
-  `ExperimentSubset` objects keep their current results.
+  `ExperimentSubset` objects that name `subsetName =` keep their current
+  results.
+- Behavior change, added after review: the old generic took
+  `subsetName` second, so `reducedDims(es, "s1") <- value` set subset
+  `s1`. Under SCE's generic the second argument is `withDimnames`, and
+  that call failed with "argument is not interpretable as logical".
+  `.reducedDims<-` now stops early when `withDimnames` is a character
+  string, with an error saying to name the subset with `subsetName =`
+  (the developer chose a clear error over a deprecation). Nothing in the
+  package used the positional form.
 
 ### `reducedDimNames()` and `reducedDimNames<-` (code)
 
@@ -109,12 +118,19 @@ error rather than a wrong answer.
 3. New: for the three `Subset*` SCE classes, `reducedDims<-`,
    `reducedDimNames()` and `reducedDimNames<-` with an unknown
    `subsetName` give the `.isSubset()` error, and `reducedDimNames<-`
-   with a known one renames the subset's reducedDims. Guards the moved
-   methods for each class, not only the last in Collate.
+   with a known one renames the subset's reducedDims. Guards each
+   class's `reducedDims<-` method; the `reducedDimNames` methods are now
+   one `"ANY"` method each.
 4. Changed: the existing expectation at line 312 for
    `reducedDimNames(es, subsetName = "hvg123") <- ...` matches the new
    message ("hvg123 subset does not exist."). It still checks that the
    call fails; only the wording it expects changes.
+5. New, after review: for the three `Subset*` SCE classes,
+   `reducedDims(es, "s1") <- value` gives the error that says to use
+   `subsetName =`, and leaves the subset unchanged.
+6. New, after review: on a plain SCE, `reducedDims(sce, subsetName =
+   "s1") <- value` sets the main object's reducedDims (the behavior the
+   NEWS entry describes).
 
 `make test` and `make coverage` (must not drop) before hand-off;
 `make check-full` and `make bioccheck` before a PR.
@@ -127,7 +143,8 @@ error rather than a wrong answer.
   again, with and without `subsetName =`; `subsetName` on an object
   that isn't an `ExperimentSubset` is now ignored, as for `altExps<-`;
   `reducedDimNames<-` with an unknown subset gives the same error as the
-  other methods (#26).
+  other methods; a subset name given by position to `reducedDims<-` is
+  an error that says to use `subsetName =` (#26).
 
 ## Out of scope
 
@@ -135,3 +152,7 @@ error rather than a wrong answer.
   needs SCE's generics to gain `...`; a draft upstream issue can follow
   separately if wanted.
 - Any other generic in `R/allGenerics.R`.
+- Found in review, already on `devel`, for a separate issue:
+  `reducedDimNames(es, "s1")` ignores a subset name given by position
+  (the setter takes it), and the getter's docs say other arguments are
+  passed to SCE's method, which takes none.

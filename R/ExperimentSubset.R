@@ -1571,12 +1571,13 @@ NULL
 #' @param type \code{character(1)} or \code{integer(1)} The name or
 #'   position of the reduced dimension. Leave it out for the first one.
 #' @param withDimnames \code{logical(1)} Passed on to
-#'   \code{\link[SingleCellExperiment]{reducedDim<-}} or \code{reducedDims<-}.
-#'   Default \code{TRUE}.
+#'   \code{\link[SingleCellExperiment]{reducedDim<-}} or
+#'   \code{\link[SingleCellExperiment]{reducedDims<-}}. Default \code{TRUE}.
 #' @param ... \describe{
 #'     \item{\code{subsetName}}{\code{character(1)} Name of the subset whose
 #'       reduced dimensions to get or set. Leave it out for the main
-#'       object's.}
+#'       object's. Give it by name: for \code{reducedDims<-}, a subset name
+#'       in second place is \code{withDimnames}, and an error.}
 #'   }
 #'   Other arguments are passed on to the \code{SingleCellExperiment}
 #'   method, for the subset or the main object.
@@ -1658,6 +1659,13 @@ NULL
 #' @exportMethod reducedDims<-
 `.reducedDims<-` <- function(x, ..., value) {
   arglist <- list(...)
+  # the package's old generic took subsetName second, where SCE's has
+  # withDimnames, so reducedDims(x, "name") <- value now lands there (#26)
+  if (is.character(arglist[["withDimnames"]]))
+    stop("'withDimnames' must be TRUE or FALSE, not a subset name. To set ",
+         "the reducedDims of a subset, name the subset with subsetName =, ",
+         "as in reducedDims(x, subsetName = \"", arglist[["withDimnames"]][1],
+         "\") <- value.")
   if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ..., value = value))
   subsetName <- arglist[["subsetName"]]
