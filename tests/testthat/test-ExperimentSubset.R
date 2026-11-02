@@ -2167,3 +2167,271 @@ testthat::test_that("All Subset classes keep subsets in cbind, rbind (#67)", {
                            counts[6:10, 4:6] * 100)
   }
 })
+
+# Two objects for combineCols() (along = "cols") or combineRows() ("rows"),
+# as in combineExample(), but they share only some rows (or columns), in a
+# different order, so matching by name differs from matching by position
+unionExample <- function(along) {
+  example <- combineExample(along)
+  counts2 <- example$counts2
+  if (along == "cols")
+    rownames(counts2) <- c(paste0("h", 1:4), paste0("g", 10:5))
+  else
+    colnames(counts2) <- c(paste0("e", 1:8), paste0("c", 20:9))
+  es2 <- ExperimentSubset(SingleCellExperiment(list(counts = counts2)))
+  es2 <- createSubset(es2, "s2", rows = 1:6, cols = 9:20)
+  es2 <- createSubset(es2, "s2a", rows = 2:4, cols = 3:6, parentAssay = "s2")
+  es2 <- setSubsetAssay(es2, "s2", counts2[1:6, 9:20] * 2, "doubled")
+  colData(es2, subsetName = "s2")$tag <- paste0("t", 1:12)
+  es2 <- createSubset(es2, "s2d", rows = 1:2, cols = 1:3,
+                      parentAssay = "s2/doubled")
+  list(es1 = example$es1, es2 = es2, counts1 = example$counts1,
+       counts2 = counts2)
+}
+
+# Checks that combined holds the subsets of unionExample()'s objects
+expectUnionSubsets <- function(combined, example) {
+  counts1 <- example$counts1
+  counts2 <- example$counts2
+  testthat::expect_equal(subsetNames(combined), c("s1", "s2", "s2a", "s2d"))
+  testthat::expect_equal(as.matrix(assay(combined, "s1")), counts1[1:5, 1:8])
+  testthat::expect_equal(as.matrix(assay(combined, "s2")),
+                         counts2[1:6, 9:20])
+  testthat::expect_equal(subsetRownames(combined, "s2"),
+                         rownames(counts2)[1:6])
+  testthat::expect_equal(subsetColnames(combined, "s2"),
+                         colnames(counts2)[9:20])
+  # the subset's own assay and colData, and the subset of the subset
+  testthat::expect_equal(as.matrix(assay(combined, "s2/doubled")),
+                         counts2[1:6, 9:20] * 2)
+  testthat::expect_equal(colData(combined, subsetName = "s2")$tag,
+                         paste0("t", 1:12))
+  testthat::expect_equal(as.matrix(assay(combined, "s2a")),
+                         counts2[2:4, 11:14])
+  # a subset made from an assay stored in a subset
+  testthat::expect_equal(as.matrix(assay(combined, "s2d")),
+                         counts2[1:2, 9:11] * 2)
+}
+
+testthat::test_that("combineCols keeps the subsets of every object (#73)", {
+  example <- unionExample("cols")
+  combined <- combineCols(example$es1, example$es2)
+  testthat::expect_s4_class(combined, "SubsetSingleCellExperiment")
+  testthat::expect_equal(nrow(combined), 14L)
+  expectUnionSubsets(combined, example)
+})
+
+testthat::test_that("combineRows keeps the subsets of every object (#73)", {
+  example <- unionExample("rows")
+  combined <- combineRows(example$es1, example$es2)
+  # combineRows() of SingleCellExperiment returns the class it extends
+  testthat::expect_s4_class(combined, "SubsetRangedSummarizedExperiment")
+  testthat::expect_equal(ncol(combined), 28L)
+  expectUnionSubsets(combined, example)
+})
+
+testthat::test_that("combineCols, combineRows match by position (#73)", {
+  example <- unionExample("cols")
+  # the rows have different names, so the parent method warns that it
+  # keeps the first object's rowRanges
+  combined <- suppressWarnings(combineCols(example$es1, example$es2,
+                                           use.names = FALSE))
+  testthat::expect_equal(nrow(combined), 10L)
+  # the rows keep their positions and take the first object's names
+  testthat::expect_equal(subsetRownames(combined, "s2"),
+                         rownames(example$counts1)[1:6])
+  testthat::expect_equal(unname(as.matrix(assay(combined, "s2"))),
+                         unname(example$counts2[1:6, 9:20]))
+
+  example <- unionExample("rows")
+  combined <- combineRows(example$es1, example$es2, use.names = FALSE)
+  testthat::expect_equal(ncol(combined), 20L)
+  testthat::expect_equal(subsetColnames(combined, "s2"),
+                         colnames(example$counts1)[9:20])
+  testthat::expect_equal(unname(as.matrix(assay(combined, "s2"))),
+                         unname(example$counts2[1:6, 9:20]))
+})
+
+testthat::test_that("combineCols counts objects without subsets (#73)", {
+  example <- unionExample("cols")
+  counts3 <- example$counts1 * 10000
+  rownames(counts3) <- paste0("k", 1:10)
+  colnames(counts3) <- paste0("e", 1:20)
+  noSubsets <- ExperimentSubset(SingleCellExperiment(list(counts = counts3)))
+
+  combined <- combineCols(example$es1, noSubsets, example$es2)
+  testthat::expect_equal(dim(combined), c(24L, 60L))
+  expectUnionSubsets(combined, example)
+  # a plain object, not converted with ExperimentSubset()
+  plain <- SingleCellExperiment(list(counts = counts3))
+  combined <- combineCols(example$es1, plain, example$es2)
+  testthat::expect_equal(dim(combined), c(24L, 60L))
+  expectUnionSubsets(combined, example)
+})
+
+testthat::test_that("combineCols, combineRows stop on repeated names (#73)", {
+  example <- unionExample("cols")
+  testthat::expect_error(combineCols(example$es1, example$es1),
+                         "unique.*'s1' is in more than one.*different names")
+  rowsExample <- unionExample("rows")
+  testthat::expect_error(combineRows(rowsExample$es2, rowsExample$es2),
+                         "'s2', 's2a', 's2d' are in more than one")
+})
+
+testthat::test_that("All Subset classes keep subsets in combineCols (#73)", {
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  genes <- tinyTree$tip.label
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(genes, paste0("cell", 1:6)))
+  # the second object shares 6 genes, in reverse order, and has 4 others
+  counts2 <- counts * 100
+  rownames(counts2) <- c(paste0("other", 1:4), rev(genes[5:10]))
+  colnames(counts2) <- paste0("more", 1:6)
+  # for combineRows, 3 shared cells in reverse order, and 3 others
+  counts3 <- counts * 10000
+  rownames(counts3) <- paste0("feature", 1:10)
+  colnames(counts3) <- c(paste0("cell", 6:4), paste0("new", 1:3))
+  makeExperiments <- function(counts, samples) {
+    se <- SummarizedExperiment(list(counts = counts))
+    list(
+      se,
+      as(se, "RangedSummarizedExperiment"),
+      SingleCellExperiment(list(counts = counts)),
+      TreeSummarizedExperiment(assays = list(counts = counts)),
+      SpatialExperiment(assays = list(counts = counts),
+                        sample_id = samples,
+                        spatialCoords = cbind(x = 1:6, y = 1:6))
+    )
+  }
+  first <- makeExperiments(counts, rep(c("A", "B"), each = 3))
+  second <- makeExperiments(counts2, rep(c("C", "D"), each = 3))
+  third <- makeExperiments(counts3, c("B", "B", "B", "E", "E", "E"))
+  colsClass <- c("SubsetSummarizedExperiment",
+                 "SubsetRangedSummarizedExperiment",
+                 "SubsetSingleCellExperiment",
+                 "SubsetSingleCellExperiment",
+                 "SubsetSingleCellExperiment")
+  rowsClass <- c("SubsetSummarizedExperiment",
+                 rep("SubsetRangedSummarizedExperiment", 4))
+  for (k in seq_along(first)) {
+    es1 <- createSubset(ExperimentSubset(first[[k]]), "s1",
+                        rows = 2:5, cols = 1:3)
+    es2 <- createSubset(ExperimentSubset(second[[k]]), "s2",
+                        rows = 1:6, cols = 4:6)
+    combined <- combineCols(es1, es2)
+    testthat::expect_s4_class(combined, colsClass[k])
+    testthat::expect_equal(subsetNames(combined), c("s1", "s2"))
+    testthat::expect_equal(as.matrix(assay(combined, "s1")), counts[2:5, 1:3])
+    testthat::expect_equal(as.matrix(assay(combined, "s2")),
+                           counts2[1:6, 4:6])
+    for (name in subsetNames(combined)) {
+      subset <- ExperimentSubset:::.subsets(combined)[[name]]
+      internal <- ExperimentSubset:::.internalAssay(subset)
+      testthat::expect_equal(class(internal)[1],
+                             sub("Subset", "", colsClass[k]))
+    }
+
+    es3 <- createSubset(ExperimentSubset(third[[k]]), "s3",
+                        rows = 6:10, cols = 1:4)
+    stacked <- combineRows(es1, es3)
+    testthat::expect_s4_class(stacked, rowsClass[k])
+    testthat::expect_equal(subsetNames(stacked), c("s1", "s3"))
+    testthat::expect_equal(as.matrix(assay(stacked, "s1")), counts[2:5, 1:3])
+    testthat::expect_equal(as.matrix(assay(stacked, "s3")),
+                           counts3[6:10, 1:4])
+    for (name in subsetNames(stacked)) {
+      subset <- ExperimentSubset:::.subsets(stacked)[[name]]
+      internal <- ExperimentSubset:::.internalAssay(subset)
+      testthat::expect_equal(class(internal)[1],
+                             sub("Subset", "", rowsClass[k]))
+    }
+  }
+})
+
+testthat::test_that("Combining keeps names set with subsetRownames<- (#73)", {
+  example <- combineExample("cols")
+  es2 <- example$es2
+  subsetRownames(es2, "s2") <- paste0("renamed", 1:5)
+  combined <- cbind(example$es1, es2)
+  testthat::expect_equal(subsetRownames(combined, "s2"),
+                         paste0("renamed", 1:5))
+
+  example <- unionExample("cols")
+  es2 <- example$es2
+  ownNames <- c("custom", rownames(example$counts2)[2:6])
+  subsetRownames(es2, "s2") <- ownNames
+  combined <- combineCols(example$es1, es2)
+  testthat::expect_equal(subsetRownames(combined, "s2"), ownNames)
+  # matched by position, the renamed row keeps its name and the others
+  # take the first object's
+  combined <- suppressWarnings(combineCols(example$es1, es2,
+                                           use.names = FALSE))
+  testthat::expect_equal(subsetRownames(combined, "s2"),
+                         c("custom", rownames(example$counts1)[2:6]))
+
+  example <- unionExample("rows")
+  es2 <- example$es2
+  subsetColnames(es2, "s2") <- c("custom", colnames(example$counts2)[10:20])
+  combined <- combineRows(example$es1, es2, use.names = FALSE)
+  testthat::expect_equal(subsetColnames(combined, "s2"),
+                         c("custom", colnames(example$counts1)[10:20]))
+})
+
+testthat::test_that("Combining stops on a subset named as an assay (#73)", {
+  example <- unionExample("cols")
+  # the second object has a main assay named as the first object's subset
+  es2 <- example$es2
+  assay(es2, "s1") <- assay(es2, "counts") * 2
+  testthat::expect_error(combineCols(example$es1, es2),
+                         "'s1' is a subset in one object and an assay")
+  example <- unionExample("rows")
+  es1 <- example$es1
+  assay(es1, "s2") <- assay(es1, "counts") * 2
+  testthat::expect_error(combineRows(es1, example$es2),
+                         "'s2' is a subset in one object and an assay")
+})
+
+testthat::test_that("use.names = FALSE names subsets of unnamed data (#73)", {
+  example <- unionExample("cols")
+  # the second object's genes have no names
+  counts2 <- unname(example$counts2)
+  colnames(counts2) <- paste0("d", 1:20)
+  es2 <- ExperimentSubset(SingleCellExperiment(list(counts = counts2)))
+  es2 <- createSubset(es2, "s2", rows = 1:6, cols = 9:20)
+  combined <- suppressWarnings(combineCols(example$es1, es2,
+                                           use.names = FALSE))
+  testthat::expect_equal(subsetRownames(combined, "s2"),
+                         rownames(example$counts1)[1:6])
+
+  # the first object's genes have no names, so the result takes the
+  # second object's, and the subset keeps them
+  counts1 <- unname(example$counts1)
+  colnames(counts1) <- paste0("c", 1:20)
+  es1 <- ExperimentSubset(SingleCellExperiment(list(counts = counts1)))
+  combined <- suppressWarnings(combineCols(es1, example$es2,
+                                           use.names = FALSE))
+  testthat::expect_equal(subsetRownames(combined, "s2"),
+                         rownames(combined)[1:6])
+})
+
+testthat::test_that("Combining allows a subset named as its own assay (#73)", {
+  # an object saved before createSubset() checked names, with a subset
+  # named as one of its own assays
+  example <- unionExample("cols")
+  es1 <- example$es1
+  assay(es1, "extra") <- assay(es1, "counts") * 2
+  s1 <- ExperimentSubset:::.subsets(es1)[["s1"]]
+  legacy <- ExperimentSubset:::AssaySubset(
+    subsetName = "extra",
+    rowIndices = ExperimentSubset:::.rowIndices(s1),
+    colIndices = ExperimentSubset:::.colIndices(s1),
+    parentAssay = "counts",
+    internalAssay = ExperimentSubset:::.internalAssay(s1)
+  )
+  subsets <- ExperimentSubset:::.subsets(es1)
+  subsets[["extra"]] <- legacy
+  ExperimentSubset:::.subsets(es1) <- subsets
+  combined <- combineCols(es1, example$es2)
+  testthat::expect_true("extra" %in% subsetNames(combined))
+})

@@ -593,3 +593,29 @@ setMethod(
     .combineSubsets(out, objects, "rows")
   }
 )
+
+#' @rdname ExperimentSubset-combine
+setMethod(
+  f = "combineCols",
+  signature = "SubsetSingleCellExperiment",
+  definition = function(x, ..., delayed = TRUE, fill = NA,
+                        use.names = TRUE) {
+    objects <- list(x, ...)
+    .checkSubsetNames(objects)
+    out <- callNextMethod()
+    .combineSubsets(out, objects, "cols", use.names)
+  }
+)
+
+#' @rdname ExperimentSubset-combine
+setMethod(
+  f = "combineRows",
+  signature = "SubsetSingleCellExperiment",
+  definition = function(x, ..., delayed = TRUE, fill = NA,
+                        use.names = TRUE) {
+    objects <- list(x, ...)
+    .checkSubsetNames(objects)
+    out <- callNextMethod()
+    .combineSubsets(out, objects, "rows", use.names)
+  }
+)
