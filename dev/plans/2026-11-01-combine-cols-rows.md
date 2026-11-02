@@ -79,45 +79,56 @@ upstream gap from here; fragile).
 
 In each `R/Subset<Class>.R`, next to `cbind`/`rbind`, a `combineCols`
 and a `combineRows` method for that class, with `@rdname
-ExperimentSubset-combine` and `@export`. Each:
+ExperimentSubset-combine` and, like `cbind`/`rbind`, no `@export`: the
+generics are imported, so the methods dispatch once the package is
+loaded. Each:
 
 1. collects `objects <- list(x, ...)`;
 2. checks subset names are unique across the objects (shared helper);
 3. calls `callNextMethod()`, passing `use.names`, `delayed` and `fill`
    through unchanged;
-4. wraps the result with `ExperimentSubset()` if it is not already a
-   `Subset*` object (it never is, since upstream builds a new object);
-5. hands over the subsets with `.combineSubsets()`, using the maps from
-   the name-matching map helper.
+4. hands over the subsets with `.combineSubsets(out, objects, along,
+   use.names)`.
 
-Method formals: `function(x, ..., use.names = TRUE)`, so `use.names` is
-known when building the maps; `delayed` and `fill` stay in `...`.
+Method formals: `function(x, ..., delayed = TRUE, fill = NA, use.names =
+TRUE)`. `use.names` is needed to build the maps; `delayed` and `fill` are
+formals so that `list(x, ...)` doesn't collect them as objects.
 
 `combineCols` and `combineRows` are generics in S4Vectors (already in
-Imports); import them with `@importFrom S4Vectors combineCols
-combineRows`. No DESCRIPTION change.
+Imports); import them with `@importMethodsFrom S4Vectors combineCols
+combineRows`, as `cbind`/`rbind` are imported. No DESCRIPTION change.
 
 ### Shared internals (`R/ExperimentSubset.R`)
 
-- **`.combineSubsets(out, objects, rowMaps, colMaps)`** replaces the
-  `along` argument with, per object, an integer vector mapping that
-  object's row positions (and column positions) to positions in `out`.
-  Subsets made from a main-object assay send their `rowIndices` and
-  `colIndices` through the maps; subsets of subsets keep theirs, which
-  are relative to their parent subset. Parent names are made explicit
-  first with `.qualifyParents()`, as now. Then, if the class of a
-  subset's `internalAssay` is not the base class of `out`, it is
-  converted with `as()`. The SpatialExperiment `sample_id` step stays as
-  it is; it runs only when `out` is a SpatialExperiment, so it does not
-  affect the new functions.
-- **`.bindMaps(objects, along)`**: maps for `cbind`/`rbind`; a shift by
-  the size of the earlier objects along `along`, unchanged positions on
-  the other dimension.
-- **`.unionMaps(objects, out, along, useNames)`**: maps for
-  `combineCols` (`along = "cols"`) and `combineRows` (`"rows"`); the same
-  shift along `along`, and on the other dimension
-  `match(<names in that object>, <names in out>)`, or unchanged
-  positions when `useNames` is `FALSE`.
+- **`.combineSubsets(out, objects, along, useNames = FALSE)`**: `cbind`
+  and `rbind` call it as now; `combineCols`/`combineRows` pass
+  `use.names`. It wraps `out` with `ExperimentSubset()` when it isn't
+  already an `ExperimentSubset` object (upstream builds a new object), so
+  the methods stay short. Subsets made from a main-object assay send
+  their `rowIndices` and `colIndices` through the maps from
+  `.combineMaps()`; subsets of subsets keep theirs, which are relative
+  to their parent subset. Parent names are made explicit first with
+  `.qualifyParents()`, as now. If the class of a subset's
+  `internalAssay` is not the base class of `out`, it is converted with
+  `as()`. The SpatialExperiment `sample_id` step stays as it is; it runs
+  only when `out` is a SpatialExperiment, so it does not affect the new
+  functions.
+- **`.combineMaps(objects, out, along, useNames)`**: one helper for all
+  four functions. Along `along`, a shift by the size of the earlier
+  objects; on the other dimension, `match(<names in that object>, <names
+  in out>)` when `useNames` is `TRUE`, unchanged positions otherwise
+  (which is what `cbind`/`rbind` need).
+- **`.followMatchedNames(out, objects, sources, along)`**: with
+  `use.names = FALSE`, the result takes the first object's names on the
+  matched dimension, so a later object's subsets would keep names the
+  main object no longer has. For each subset whose object's names differ
+  from `out`'s on that dimension, this sets the stored names to `out`'s
+  at the subset's positions, but only where they still equal the
+  object's names there: names set with `subsetRownames<-` or
+  `subsetColnames<-` are kept, as `x[i, j]` keeps them. Missing (`NULL`)
+  names are left as they are. For `cbind`/`rbind` and for
+  `use.names = TRUE` the object's names already match, so nothing
+  changes.
 - **`.checkSubsetNames(objects)`**: the unique-names check, moved out of
   `.checkCombine()` unchanged (same message). `.checkCombine()` calls it
   and keeps `cbind()`'s same-rows check, so `cbind`/`rbind` behave
@@ -134,9 +145,9 @@ combineRows`. No DESCRIPTION change.
 - that methods dispatch on the first object, so a plain first object
   (such as a `SingleCellExperiment`) gives a plain result without
   subsets; convert it with `ExperimentSubset()` first;
-- `@param x` (the first object, for `combineCols`/`combineRows`) and
-  `@param use.names` (passed on; default `TRUE`), and a note that
-  `delayed` and `fill` are passed on through `...`;
+- `@param x` (the first object, for `combineCols`/`combineRows`),
+  `@param use.names` (passed on; default `TRUE`) and `@param
+  delayed,fill` (passed on; defaults `TRUE` and `NA`);
 - an example: two objects with overlapping but different genes, a subset
   in each, `combineCols()`, then `subsetNames()` and `subsetRownames()`.
 
@@ -166,6 +177,10 @@ Written first; each must fail on its assertion before the fix.
   SpatialExperiment `combineRows`, otherwise the input class), that
   subsets are kept, and that each subset's `internalAssay` has the
   result's base class.
+- Names set with `subsetRownames<-` / `subsetColnames<-` survive
+  `cbind`, `combineCols` and `combineRows`, with `use.names = TRUE` and
+  `FALSE`; with `FALSE`, unchanged names follow the first object's.
+- A plain (unconverted) object in the middle of `combineCols()`.
 - Existing `cbind`/`rbind` tests stay unchanged and must pass after the
   refactor.
 
