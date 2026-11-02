@@ -1117,7 +1117,9 @@ NULL
 #' # combine the cells, keeping the genes of both; the gaps are NA
 #' esAll <- combineCols(es1, es3)
 #' dim(esAll)
-#' # the subset keeps its genes
+#' # the subsets of both objects are kept
+#' subsetNames(esAll)
+#' # the new subset keeps its genes
 #' subsetRownames(esAll, subsetName = "newGenes")
 NULL
 
@@ -1198,10 +1200,13 @@ NULL
   baseClass <- sub("^Subset", "", as.character(class(out)))
   hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
   subsets <- list()
+  # the object each subset comes from
+  sources <- list()
   for (k in which(hasSubsets)) {
     # explicit parent names, so a bare one can't match another object's
     object <- .qualifyParents(objects[[k]])
     for (name in subsetNames(object)) {
+      sources[[name]] <- k
       subset <- .subsets(object)[[name]]
       rows <- .rowIndices(subset)
       cols <- .colIndices(subset)
@@ -1222,22 +1227,50 @@ NULL
     }
   }
   .subsets(out) <- S4Vectors::SimpleList(subsets)
-  # Each subset's stored object has the main object's row and column
-  # names, which change when combineCols() or combineRows() match by
-  # position (use.names = FALSE). SpatialExperiment's cbind() renames
-  # sample_ids repeated across the objects; each subset's stored copy
-  # follows the main object's
-  subsets <- .subsets(out)
-  for (name in names(subsets)) {
-    rootRows <- .rootIndices(out, name, .rowIndices)
-    rootCols <- .rootIndices(out, name, .colIndices)
-    internal <- .internalAssay(subsets[[name]])
-    if (!identical(rownames(internal), rownames(out)[rootRows]))
-      rownames(internal) <- rownames(out)[rootRows]
-    if (!identical(colnames(internal), colnames(out)[rootCols]))
-      colnames(internal) <- colnames(out)[rootCols]
-    if (methods::is(out, "SpatialExperiment"))
+  out <- .followMatchedNames(out, objects, sources, along)
+  # SpatialExperiment's cbind() renames sample_ids repeated across the
+  # objects; each subset's stored copy follows the main object's
+  if (methods::is(out, "SpatialExperiment")) {
+    subsets <- .subsets(out)
+    for (name in names(subsets)) {
+      rootCols <- .rootIndices(out, name, .colIndices)
+      internal <- .internalAssay(subsets[[name]])
       internal$sample_id <- out$sample_id[rootCols]
+      .internalAssay(subsets[[name]]) <- internal
+    }
+    .subsets(out) <- subsets
+  }
+  out
+}
+
+# Renames the rows (along = "cols") or columns ("rows") stored in each
+# subset of out to the names out has there, where they still are the
+# names their object had: combineCols() and combineRows() with
+# use.names = FALSE match by position and keep the first object's names.
+# Names set with subsetRownames<- or subsetColnames<- are kept, and so
+# are missing ones. sources gives the object in objects each subset
+# comes from (#73)
+.followMatchedNames <- function(out, objects, sources, along) {
+  byCols <- along == "cols"
+  getIndices <- if (byCols) .rowIndices else .colIndices
+  getNames <- if (byCols) rownames else colnames
+  subsets <- .subsets(out)
+  for (name in names(sources)) {
+    object <- objects[[sources[[name]]]]
+    if (identical(getNames(object), getNames(out)))
+      next
+    internal <- .internalAssay(subsets[[name]])
+    stored <- getNames(internal)
+    from <- getNames(object)[.rootIndices(object, name, getIndices)]
+    to <- getNames(out)[.rootIndices(out, name, getIndices)]
+    if (is.null(stored) || is.null(from) || is.null(to))
+      next
+    same <- which(stored == from)
+    stored[same] <- to[same]
+    if (byCols)
+      rownames(internal) <- stored
+    else
+      colnames(internal) <- stored
     .internalAssay(subsets[[name]]) <- internal
   }
   .subsets(out) <- subsets

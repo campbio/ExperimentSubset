@@ -164,6 +164,8 @@ es3 <- createSubset(es3, subsetName = "newGenes", rows = 6:10)
 # combine the cells, keeping the genes of both; the gaps are NA
 esAll <- combineCols(es1, es3)
 dim(esAll)
-# the subset keeps its genes
+# the subsets of both objects are kept
+subsetNames(esAll)
+# the new subset keeps its genes
 subsetRownames(esAll, subsetName = "newGenes")
 }

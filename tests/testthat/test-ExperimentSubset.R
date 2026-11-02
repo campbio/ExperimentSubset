@@ -2248,6 +2248,8 @@ testthat::test_that("combineCols, combineRows match by position (#73)", {
   testthat::expect_equal(ncol(combined), 20L)
   testthat::expect_equal(subsetColnames(combined, "s2"),
                          colnames(example$counts1)[9:20])
+  testthat::expect_equal(unname(as.matrix(assay(combined, "s2"))),
+                         unname(example$counts2[1:6, 9:20]))
 })
 
 testthat::test_that("combineCols counts objects without subsets (#73)", {
@@ -2258,6 +2260,11 @@ testthat::test_that("combineCols counts objects without subsets (#73)", {
   noSubsets <- ExperimentSubset(SingleCellExperiment(list(counts = counts3)))
 
   combined <- combineCols(example$es1, noSubsets, example$es2)
+  testthat::expect_equal(dim(combined), c(24L, 60L))
+  expectUnionSubsets(combined, example)
+  # a plain object, not converted with ExperimentSubset()
+  plain <- SingleCellExperiment(list(counts = counts3))
+  combined <- combineCols(example$es1, plain, example$es2)
   testthat::expect_equal(dim(combined), c(24L, 60L))
   expectUnionSubsets(combined, example)
 })
@@ -2315,6 +2322,7 @@ testthat::test_that("All Subset classes keep subsets in combineCols (#73)", {
     combined <- combineCols(es1, es2)
     testthat::expect_s4_class(combined, colsClass[k])
     testthat::expect_equal(subsetNames(combined), c("s1", "s2"))
+    testthat::expect_equal(as.matrix(assay(combined, "s1")), counts[2:5, 1:3])
     testthat::expect_equal(as.matrix(assay(combined, "s2")),
                            counts2[1:6, 4:6])
     for (name in subsetNames(combined)) {
@@ -2329,6 +2337,7 @@ testthat::test_that("All Subset classes keep subsets in combineCols (#73)", {
     stacked <- combineRows(es1, es3)
     testthat::expect_s4_class(stacked, rowsClass[k])
     testthat::expect_equal(subsetNames(stacked), c("s1", "s3"))
+    testthat::expect_equal(as.matrix(assay(stacked, "s1")), counts[2:5, 1:3])
     testthat::expect_equal(as.matrix(assay(stacked, "s3")),
                            counts3[6:10, 1:4])
     for (name in subsetNames(stacked)) {
@@ -2338,4 +2347,33 @@ testthat::test_that("All Subset classes keep subsets in combineCols (#73)", {
                              sub("Subset", "", rowsClass[k]))
     }
   }
+})
+
+testthat::test_that("Combining keeps names set with subsetRownames<- (#73)", {
+  example <- combineExample("cols")
+  es2 <- example$es2
+  subsetRownames(es2, "s2") <- paste0("renamed", 1:5)
+  combined <- cbind(example$es1, es2)
+  testthat::expect_equal(subsetRownames(combined, "s2"),
+                         paste0("renamed", 1:5))
+
+  example <- unionExample("cols")
+  es2 <- example$es2
+  ownNames <- c("custom", rownames(example$counts2)[2:6])
+  subsetRownames(es2, "s2") <- ownNames
+  combined <- combineCols(example$es1, es2)
+  testthat::expect_equal(subsetRownames(combined, "s2"), ownNames)
+  # matched by position, the renamed row keeps its name and the others
+  # take the first object's
+  combined <- suppressWarnings(combineCols(example$es1, es2,
+                                           use.names = FALSE))
+  testthat::expect_equal(subsetRownames(combined, "s2"),
+                         c("custom", rownames(example$counts1)[2:6]))
+
+  example <- unionExample("rows")
+  es2 <- example$es2
+  subsetColnames(es2, "s2") <- c("custom", colnames(example$counts2)[10:20])
+  combined <- combineRows(example$es1, es2, use.names = FALSE)
+  testthat::expect_equal(subsetColnames(combined, "s2"),
+                         c("custom", colnames(example$counts1)[10:20]))
 })
