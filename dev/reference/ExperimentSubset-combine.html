@@ -4,12 +4,28 @@
   their own assays, rowData, colData, reducedDims and altExps. Subsets
   of the second and later objects are moved to where that object's
   columns (for cbind) or rows (for rbind) are in the
-  result. Subset names must be unique across the objects."><meta property="og:description" content="cbind(...) and rbind(...) combine objects as
+  result. Subset names must be unique across the objects, and
+  differ from the assay names of all of them.
+combineCols(x, ...) and combineRows(x, ...) combine
+  objects whose rows (for combineCols) or columns (for
+  combineRows) differ, as for the class they extend: the result
+  has all of the rows (or columns), matched by name, and fills the
+  gaps. They keep the subsets of every object too, matching each
+  subset's rows (or columns) by name to the result's, or by position
+  with use.names = FALSE."><meta property="og:description" content="cbind(...) and rbind(...) combine objects as
   for the class they extend, and keep the subsets of every object, with
   their own assays, rowData, colData, reducedDims and altExps. Subsets
   of the second and later objects are moved to where that object's
   columns (for cbind) or rows (for rbind) are in the
-  result. Subset names must be unique across the objects."><meta name="robots" content="noindex"></head><body>
+  result. Subset names must be unique across the objects, and
+  differ from the assay names of all of them.
+combineCols(x, ...) and combineRows(x, ...) combine
+  objects whose rows (for combineCols) or columns (for
+  combineRows) differ, as for the class they extend: the result
+  has all of the rows (or columns), matched by name, and fills the
+  gaps. They keep the subsets of every object too, matching each
+  subset's rows (or columns) by name to the result's, or by position
+  with use.names = FALSE."><meta name="robots" content="noindex"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -17,7 +33,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.28</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.29</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,7 +72,15 @@
   their own assays, rowData, colData, reducedDims and altExps. Subsets
   of the second and later objects are moved to where that object's
   columns (for <code>cbind</code>) or rows (for <code>rbind</code>) are in the
-  result. Subset names must be unique across the objects.</p>
+  result. Subset names must be unique across the objects, and
+  differ from the assay names of all of them.</p>
+<p><code>combineCols(x, ...)</code> and <code>combineRows(x, ...)</code> combine
+  objects whose rows (for <code>combineCols</code>) or columns (for
+  <code>combineRows</code>) differ, as for the class they extend: the result
+  has all of the rows (or columns), matched by name, and fills the
+  gaps. They keep the subsets of every object too, matching each
+  subset's rows (or columns) by name to the result's, or by position
+  with <code>use.names = FALSE</code>.</p>
     </div>
 
     <div class="section level2">
@@ -67,11 +91,23 @@
 <span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment'</span></span>
+<span><span class="fu">combineCols</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, delayed <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NA</span>, use.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment'</span></span>
+<span><span class="fu">combineRows</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, delayed <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NA</span>, use.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
+<span><span class="fu">combineCols</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, delayed <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NA</span>, use.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
+<span><span class="fu">combineRows</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, delayed <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NA</span>, use.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -79,17 +115,35 @@
 <span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
+<span><span class="fu">combineCols</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, delayed <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NA</span>, use.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
+<span><span class="fu">combineRows</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, delayed <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NA</span>, use.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="fu">combineCols</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, delayed <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NA</span>, use.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="fu">combineRows</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, delayed <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NA</span>, use.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">...</span>, deparse.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
+<span><span class="fu">combineCols</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, delayed <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NA</span>, use.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
+<span><span class="fu">combineRows</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, delayed <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NA</span>, use.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -103,17 +157,59 @@ have the same rows for <code>cbind</code> or the same columns for
 <code>SingleCellExperiment</code>, with <code><a href="ExperimentSubset.html">ExperimentSubset()</a></code> first,
 which keeps all of its data: combining it as it is makes R warn about
 "multiple direct matches", and if it comes first, the result is a
-plain object without subsets.</p></dd>
+plain object without subsets. For <code>combineCols</code> and
+<code>combineRows</code>, the objects to combine with <code>x</code>.</p></dd>
 
 
 <dt id="arg-deparse-level">deparse.level<a class="anchor" aria-label="anchor" href="#arg-deparse-level"></a></dt>
 <dd><p>Passed on to the method of the class the objects
 extend. Default <code>1</code>.</p></dd>
 
+
+<dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>For <code>combineCols</code> and <code>combineRows</code>, the first
+<code>ExperimentSubset</code> object to combine.</p></dd>
+
+
+<dt id="arg-delayed-fill">delayed, fill<a class="anchor" aria-label="anchor" href="#arg-delayed-fill"></a></dt>
+<dd><p>Passed on to the method of the class the objects
+extend: whether to combine assays as <code>DelayedArray</code> objects, and
+the value for the gaps. Defaults <code>TRUE</code> and <code>NA</code>.</p></dd>
+
+
+<dt id="arg-use-names">use.names<a class="anchor" aria-label="anchor" href="#arg-use-names"></a></dt>
+<dd><p>Whether to match rows (for <code>combineCols</code>) or
+columns (for <code>combineRows</code>) by name, as the method of the class
+the objects extend does; if <code>FALSE</code>, they are matched by position
+and the objects must have the same number of them. Default
+<code>TRUE</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An object of the same class as the objects in <code>...</code>.</p>
+    <p>For <code>cbind</code> and <code>rbind</code>, an object of the same class
+  as the objects in <code>...</code>. For <code>combineCols</code> and
+  <code>combineRows</code>, the <code>ExperimentSubset</code> class matching the
+  result of the method of the class <code>x</code> extends; see Details.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>For some classes, <code>combineCols()</code> and <code>combineRows()</code>
+  of the class the objects extend return a different class:
+  <code>combineCols()</code> of a <code>TreeSummarizedExperiment</code> or
+  <code>SpatialExperiment</code> returns a <code>SingleCellExperiment</code>, and
+  <code>combineRows()</code> of a <code>SingleCellExperiment</code>,
+  <code>TreeSummarizedExperiment</code> or <code>SpatialExperiment</code> returns a
+  <code>RangedSummarizedExperiment</code>. The result is then the matching
+  <code>ExperimentSubset</code> class, such as
+  <code>SubsetSingleCellExperiment</code>, and each subset is converted to
+  that class too, so it loses what the class can't hold, as the main
+  object does: for example its reducedDims and altExps in a
+  <code>SubsetRangedSummarizedExperiment</code>.</p>
+<p><code>combineCols()</code> and <code>combineRows()</code> use the method for the
+  class of <code>x</code> only, so if <code>x</code> is a plain object, such as a
+  <code>SingleCellExperiment</code>, the result is a plain object without
+  subsets. Convert it with <code><a href="ExperimentSubset.html">ExperimentSubset()</a></code> first.</p>
     </div>
 
     <div class="section level2">
@@ -138,6 +234,24 @@ extend. Default <code>1</code>.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "firstA" "firstB"</span>
 <span class="r-in"><span><span class="fu"><a href="subsetColnames.html">subsetColnames</a></span><span class="op">(</span><span class="va">esBoth</span>, subsetName <span class="op">=</span> <span class="st">"firstB"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "cellB1" "cellB2" "cellB3" "cellB4" "cellB5" "cellB6" "cellB7" "cellB8"</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># a third object, with genes 6 to 10 and 5 genes the others don't have</span></span></span>
+<span class="r-in"><span><span class="va">counts3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">200</span>, lambda <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">counts3</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"gene"</span>, <span class="fl">6</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">counts3</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"cellC"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">es3</span> <span class="op">&lt;-</span> <span class="fu"><a href="ExperimentSubset.html">ExperimentSubset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts3</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># a subset of the genes only the third object has</span></span></span>
+<span class="r-in"><span><span class="va">es3</span> <span class="op">&lt;-</span> <span class="fu"><a href="createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es3</span>, subsetName <span class="op">=</span> <span class="st">"newGenes"</span>, rows <span class="op">=</span> <span class="fl">6</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># combine the cells, keeping the genes of both; the gaps are NA</span></span></span>
+<span class="r-in"><span><span class="va">esAll</span> <span class="op">&lt;-</span> <span class="fu">combineCols</span><span class="op">(</span><span class="va">es1</span>, <span class="va">es3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">esAll</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15 40</span>
+<span class="r-in"><span><span class="co"># the subsets of both objects are kept</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="subsetNames.html">subsetNames</a></span><span class="op">(</span><span class="va">esAll</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "firstA"   "newGenes"</span>
+<span class="r-in"><span><span class="co"># the new subset keeps its genes</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="subsetRownames.html">subsetRownames</a></span><span class="op">(</span><span class="va">esAll</span>, subsetName <span class="op">=</span> <span class="st">"newGenes"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "gene11" "gene12" "gene13" "gene14" "gene15"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

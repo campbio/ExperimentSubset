@@ -1,5 +1,32 @@
 # Changelog
 
+## ExperimentSubset 1.23.29 (2026-11-01)
+
+- [`combineCols()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html)
+  and
+  [`combineRows()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html)
+  now keep the subsets of every object, with their own assays, rowData,
+  colData, reducedDims and altExps. Before, they returned a plain object
+  and dropped every subset without a message. Each subset’s rows (for
+  [`combineCols()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html))
+  or columns (for
+  [`combineRows()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html))
+  are matched by name to the result’s, or by position with
+  `use.names = FALSE`; subset names repeated across the objects, or used
+  as an assay name in another object, are an error. Where the method of
+  the class the objects extend returns another class
+  ([`combineCols()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html)
+  of a TreeSummarizedExperiment or SpatialExperiment gives a
+  SingleCellExperiment;
+  [`combineRows()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html)
+  of a SingleCellExperiment, TreeSummarizedExperiment or
+  SpatialExperiment gives a RangedSummarizedExperiment), the result is
+  the matching `ExperimentSubset` class, and each subset is converted to
+  that class too. A plain first object still gives a plain result:
+  convert it with
+  [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
+  first ([\#73](https://github.com/campbio/ExperimentSubset/issues/73))
+
 ## ExperimentSubset 1.23.28 (2026-11-01)
 
 - New tests check that `reducedDim(x)` and `reducedDim(x) <- value`
