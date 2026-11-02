@@ -2403,6 +2403,16 @@ testthat::test_that("use.names = FALSE names subsets of unnamed data (#73)", {
                                            use.names = FALSE))
   testthat::expect_equal(subsetRownames(combined, "s2"),
                          rownames(example$counts1)[1:6])
+
+  # the first object's genes have no names, so the result takes the
+  # second object's, and the subset keeps them
+  counts1 <- unname(example$counts1)
+  colnames(counts1) <- paste0("c", 1:20)
+  es1 <- ExperimentSubset(SingleCellExperiment(list(counts = counts1)))
+  combined <- suppressWarnings(combineCols(es1, example$es2,
+                                           use.names = FALSE))
+  testthat::expect_equal(subsetRownames(combined, "s2"),
+                         rownames(combined)[1:6])
 })
 
 testthat::test_that("Combining allows a subset named as its own assay (#73)", {
