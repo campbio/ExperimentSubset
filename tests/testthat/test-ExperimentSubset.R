@@ -2377,3 +2377,17 @@ testthat::test_that("Combining keeps names set with subsetRownames<- (#73)", {
   testthat::expect_equal(subsetColnames(combined, "s2"),
                          c("custom", colnames(example$counts1)[10:20]))
 })
+
+testthat::test_that("Combining stops when a subset is named as an assay (#73)", {
+  example <- unionExample("cols")
+  # the second object has a main assay named as the first object's subset
+  es2 <- example$es2
+  assay(es2, "s1") <- assay(es2, "counts") * 2
+  testthat::expect_error(combineCols(example$es1, es2),
+                         "'s1' is a subset in one object and an assay")
+  example <- unionExample("rows")
+  es1 <- example$es1
+  assay(es1, "s2") <- assay(es1, "counts") * 2
+  testthat::expect_error(combineRows(es1, example$es2),
+                         "'s2' is a subset in one object and an assay")
+})

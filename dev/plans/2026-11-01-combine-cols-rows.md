@@ -169,7 +169,11 @@ Written first; each must fail on its assertion before the fix.
 - `use.names = FALSE` leaves positions unchanged on the matched
   dimension.
 - Repeated subset names across the objects are an error, with the
-  existing message.
+  existing message. So is a subset named as another object's assay:
+  `combineCols()`/`combineRows()` keep every object's assays, so the
+  assay would hide the subset. `.checkSubsetNames()` checks this for
+  all four functions (for `cbind`/`rbind` upstream already requires the
+  same assays, so it can't arise there).
 - An object without subsets in the middle shifts later subsets
   correctly.
 - All five classes: the class of the result (SubsetSCE for TreeSE and

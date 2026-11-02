@@ -1036,7 +1036,8 @@ NULL
 #'   their own assays, rowData, colData, reducedDims and altExps. Subsets
 #'   of the second and later objects are moved to where that object's
 #'   columns (for \code{cbind}) or rows (for \code{rbind}) are in the
-#'   result. Subset names must be unique across the objects.
+#'   result. Subset names must be unique across the objects, and
+#'   differ from the assay names of all of them.
 #'
 #'   \code{combineCols(x, ...)} and \code{combineRows(x, ...)} combine
 #'   objects whose rows (for \code{combineCols}) or columns (for
@@ -1123,8 +1124,8 @@ NULL
 #' subsetRownames(esAll, subsetName = "newGenes")
 NULL
 
-# Checks that subset names are unique across the objects to combine
-# (#67, #73)
+# Checks that subset names are unique across the objects to combine, and
+# differ from the assay names of all of them (#67, #73)
 .checkSubsetNames <- function(objects) {
   hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
   allNames <- unlist(lapply(objects[hasSubsets], subsetNames))
@@ -1134,6 +1135,15 @@ NULL
          paste0("'", repeated, "'", collapse = ", "),
          if (length(repeated) == 1) " is" else " are", " in more than ",
          "one. Create the subsets under different names before combining.")
+  # combineCols() and combineRows() keep the assays of every object, so a
+  # subset named as another object's assay would be hidden by it (#73)
+  allAssays <- unlist(lapply(objects, SummarizedExperiment::assayNames))
+  clashes <- intersect(allNames, allAssays)
+  if (length(clashes) > 0)
+    stop(paste0("'", clashes, "'", collapse = ", "),
+         if (length(clashes) == 1) " is a subset" else " are subsets",
+         " in one object and an assay in another; subset names must ",
+         "differ from assay names. Rename one of them before combining.")
   invisible(NULL)
 }
 

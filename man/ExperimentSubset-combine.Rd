@@ -105,7 +105,8 @@ For \code{cbind} and \code{rbind}, an object of the same class
   their own assays, rowData, colData, reducedDims and altExps. Subsets
   of the second and later objects are moved to where that object's
   columns (for \code{cbind}) or rows (for \code{rbind}) are in the
-  result. Subset names must be unique across the objects.
+  result. Subset names must be unique across the objects, and
+  differ from the assay names of all of them.
 
   \code{combineCols(x, ...)} and \code{combineRows(x, ...)} combine
   objects whose rows (for \code{combineCols}) or columns (for
