@@ -1,5 +1,13 @@
 # Changelog
 
+## ExperimentSubset 1.23.28 (2026-11-01)
+
+- New tests check that `reducedDim(x)` and `reducedDim(x) <- value`
+  without a `type` act on the first reducedDim of the main object, as
+  [`?"ExperimentSubset-reducedDim"`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  says, for each class with reducedDims. No change in behavior
+  ([\#77](https://github.com/campbio/ExperimentSubset/issues/77))
+
 ## ExperimentSubset 1.23.27 (2026-11-01)
 
 - `assay(x, i, subsetAssayName = )` with an `i` that isn’t a subset name
