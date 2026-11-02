@@ -7,35 +7,65 @@
 \alias{ExperimentSubset-combine}
 \alias{cbind,SubsetRangedSummarizedExperiment-method}
 \alias{rbind,SubsetRangedSummarizedExperiment-method}
+\alias{combineCols,SubsetRangedSummarizedExperiment-method}
+\alias{combineRows,SubsetRangedSummarizedExperiment-method}
 \alias{cbind,SubsetSingleCellExperiment-method}
 \alias{rbind,SubsetSingleCellExperiment-method}
+\alias{combineCols,SubsetSingleCellExperiment-method}
+\alias{combineRows,SubsetSingleCellExperiment-method}
 \alias{cbind,SubsetSummarizedExperiment-method}
 \alias{rbind,SubsetSummarizedExperiment-method}
+\alias{combineCols,SubsetSummarizedExperiment-method}
+\alias{combineRows,SubsetSummarizedExperiment-method}
 \alias{cbind,SubsetSpatialExperiment-method}
 \alias{rbind,SubsetSpatialExperiment-method}
+\alias{combineCols,SubsetSpatialExperiment-method}
+\alias{combineRows,SubsetSpatialExperiment-method}
 \alias{cbind,SubsetTreeSummarizedExperiment-method}
 \alias{rbind,SubsetTreeSummarizedExperiment-method}
+\alias{combineCols,SubsetTreeSummarizedExperiment-method}
+\alias{combineRows,SubsetTreeSummarizedExperiment-method}
 \title{Combine ExperimentSubset objects by columns or rows}
 \usage{
 \S4method{cbind}{SubsetRangedSummarizedExperiment}(..., deparse.level = 1)
 
 \S4method{rbind}{SubsetRangedSummarizedExperiment}(..., deparse.level = 1)
 
+\S4method{combineCols}{SubsetRangedSummarizedExperiment}(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
+
+\S4method{combineRows}{SubsetRangedSummarizedExperiment}(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
+
 \S4method{cbind}{SubsetSingleCellExperiment}(..., deparse.level = 1)
 
 \S4method{rbind}{SubsetSingleCellExperiment}(..., deparse.level = 1)
+
+\S4method{combineCols}{SubsetSingleCellExperiment}(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
+
+\S4method{combineRows}{SubsetSingleCellExperiment}(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
 
 \S4method{cbind}{SubsetSummarizedExperiment}(..., deparse.level = 1)
 
 \S4method{rbind}{SubsetSummarizedExperiment}(..., deparse.level = 1)
 
+\S4method{combineCols}{SubsetSummarizedExperiment}(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
+
+\S4method{combineRows}{SubsetSummarizedExperiment}(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
+
 \S4method{cbind}{SubsetSpatialExperiment}(..., deparse.level = 1)
 
 \S4method{rbind}{SubsetSpatialExperiment}(..., deparse.level = 1)
 
+\S4method{combineCols}{SubsetSpatialExperiment}(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
+
+\S4method{combineRows}{SubsetSpatialExperiment}(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
+
 \S4method{cbind}{SubsetTreeSummarizedExperiment}(..., deparse.level = 1)
 
 \S4method{rbind}{SubsetTreeSummarizedExperiment}(..., deparse.level = 1)
+
+\S4method{combineCols}{SubsetTreeSummarizedExperiment}(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
+
+\S4method{combineRows}{SubsetTreeSummarizedExperiment}(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
 }
 \arguments{
 \item{...}{\code{ExperimentSubset} objects of the same class, which must
@@ -44,13 +74,30 @@ have the same rows for \code{cbind} or the same columns for
 \code{SingleCellExperiment}, with \code{ExperimentSubset()} first,
 which keeps all of its data: combining it as it is makes R warn about
 "multiple direct matches", and if it comes first, the result is a
-plain object without subsets.}
+plain object without subsets. For \code{combineCols} and
+\code{combineRows}, the objects to combine with \code{x}.}
 
 \item{deparse.level}{Passed on to the method of the class the objects
 extend. Default \code{1}.}
+
+\item{x}{For \code{combineCols} and \code{combineRows}, the first
+\code{ExperimentSubset} object to combine.}
+
+\item{delayed, fill}{Passed on to the method of the class the objects
+extend: whether to combine assays as \code{DelayedArray} objects, and
+the value for the gaps. Defaults \code{TRUE} and \code{NA}.}
+
+\item{use.names}{Whether to match rows (for \code{combineCols}) or
+columns (for \code{combineRows}) by name, as the method of the class
+the objects extend does; if \code{FALSE}, they are matched by position
+and the objects must have the same number of them. Default
+\code{TRUE}.}
 }
 \value{
-An object of the same class as the objects in \code{...}.
+For \code{cbind} and \code{rbind}, an object of the same class
+  as the objects in \code{...}. For \code{combineCols} and
+  \code{combineRows}, the \code{ExperimentSubset} class matching the
+  result of the method of the class \code{x} extends; see Details.
 }
 \description{
 \code{cbind(...)} and \code{rbind(...)} combine objects as
@@ -59,6 +106,33 @@ An object of the same class as the objects in \code{...}.
   of the second and later objects are moved to where that object's
   columns (for \code{cbind}) or rows (for \code{rbind}) are in the
   result. Subset names must be unique across the objects.
+
+  \code{combineCols(x, ...)} and \code{combineRows(x, ...)} combine
+  objects whose rows (for \code{combineCols}) or columns (for
+  \code{combineRows}) differ, as for the class they extend: the result
+  has all of the rows (or columns), matched by name, and fills the
+  gaps. They keep the subsets of every object too, matching each
+  subset's rows (or columns) by name to the result's, or by position
+  with \code{use.names = FALSE}.
+}
+\details{
+For some classes, \code{combineCols()} and \code{combineRows()}
+  of the class the objects extend return a different class:
+  \code{combineCols()} of a \code{TreeSummarizedExperiment} or
+  \code{SpatialExperiment} returns a \code{SingleCellExperiment}, and
+  \code{combineRows()} of a \code{SingleCellExperiment},
+  \code{TreeSummarizedExperiment} or \code{SpatialExperiment} returns a
+  \code{RangedSummarizedExperiment}. The result is then the matching
+  \code{ExperimentSubset} class, such as
+  \code{SubsetSingleCellExperiment}, and each subset is converted to
+  that class too, so it loses what the class can't hold, as the main
+  object does: for example its reducedDims and altExps in a
+  \code{SubsetRangedSummarizedExperiment}.
+
+  \code{combineCols()} and \code{combineRows()} use the method for the
+  class of \code{x} only, so if \code{x} is a plain object, such as a
+  \code{SingleCellExperiment}, the result is a plain object without
+  subsets. Convert it with \code{ExperimentSubset()} first.
 }
 \examples{
 # two objects with the same 10 genes and 20 cells each
@@ -79,4 +153,17 @@ esBoth <- cbind(es1, es2)
 # both subsets are kept
 subsetNames(esBoth)
 subsetColnames(esBoth, subsetName = "firstB")
+
+# a third object, with genes 6 to 10 and 5 genes the others don't have
+counts3 <- matrix(rpois(200, lambda = 5), nrow = 10)
+rownames(counts3) <- paste0("gene", 6:15)
+colnames(counts3) <- paste0("cellC", 1:20)
+es3 <- ExperimentSubset(list(counts = counts3))
+# a subset of the genes only the third object has
+es3 <- createSubset(es3, subsetName = "newGenes", rows = 6:10)
+# combine the cells, keeping the genes of both; the gaps are NA
+esAll <- combineCols(es1, es3)
+dim(esAll)
+# the subset keeps its genes
+subsetRownames(esAll, subsetName = "newGenes")
 }

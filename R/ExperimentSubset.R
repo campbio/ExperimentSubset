@@ -1037,16 +1037,55 @@ NULL
 #'   of the second and later objects are moved to where that object's
 #'   columns (for \code{cbind}) or rows (for \code{rbind}) are in the
 #'   result. Subset names must be unique across the objects.
+#'
+#'   \code{combineCols(x, ...)} and \code{combineRows(x, ...)} combine
+#'   objects whose rows (for \code{combineCols}) or columns (for
+#'   \code{combineRows}) differ, as for the class they extend: the result
+#'   has all of the rows (or columns), matched by name, and fills the
+#'   gaps. They keep the subsets of every object too, matching each
+#'   subset's rows (or columns) by name to the result's, or by position
+#'   with \code{use.names = FALSE}.
+#' @details For some classes, \code{combineCols()} and \code{combineRows()}
+#'   of the class the objects extend return a different class:
+#'   \code{combineCols()} of a \code{TreeSummarizedExperiment} or
+#'   \code{SpatialExperiment} returns a \code{SingleCellExperiment}, and
+#'   \code{combineRows()} of a \code{SingleCellExperiment},
+#'   \code{TreeSummarizedExperiment} or \code{SpatialExperiment} returns a
+#'   \code{RangedSummarizedExperiment}. The result is then the matching
+#'   \code{ExperimentSubset} class, such as
+#'   \code{SubsetSingleCellExperiment}, and each subset is converted to
+#'   that class too, so it loses what the class can't hold, as the main
+#'   object does: for example its reducedDims and altExps in a
+#'   \code{SubsetRangedSummarizedExperiment}.
+#'
+#'   \code{combineCols()} and \code{combineRows()} use the method for the
+#'   class of \code{x} only, so if \code{x} is a plain object, such as a
+#'   \code{SingleCellExperiment}, the result is a plain object without
+#'   subsets. Convert it with \code{ExperimentSubset()} first.
 #' @param ... \code{ExperimentSubset} objects of the same class, which must
 #'   have the same rows for \code{cbind} or the same columns for
 #'   \code{rbind}. Convert a plain object, such as a
 #'   \code{SingleCellExperiment}, with \code{ExperimentSubset()} first,
 #'   which keeps all of its data: combining it as it is makes R warn about
 #'   "multiple direct matches", and if it comes first, the result is a
-#'   plain object without subsets.
+#'   plain object without subsets. For \code{combineCols} and
+#'   \code{combineRows}, the objects to combine with \code{x}.
 #' @param deparse.level Passed on to the method of the class the objects
 #'   extend. Default \code{1}.
-#' @return An object of the same class as the objects in \code{...}.
+#' @param x For \code{combineCols} and \code{combineRows}, the first
+#'   \code{ExperimentSubset} object to combine.
+#' @param delayed,fill Passed on to the method of the class the objects
+#'   extend: whether to combine assays as \code{DelayedArray} objects, and
+#'   the value for the gaps. Defaults \code{TRUE} and \code{NA}.
+#' @param use.names Whether to match rows (for \code{combineCols}) or
+#'   columns (for \code{combineRows}) by name, as the method of the class
+#'   the objects extend does; if \code{FALSE}, they are matched by position
+#'   and the objects must have the same number of them. Default
+#'   \code{TRUE}.
+#' @return For \code{cbind} and \code{rbind}, an object of the same class
+#'   as the objects in \code{...}. For \code{combineCols} and
+#'   \code{combineRows}, the \code{ExperimentSubset} class matching the
+#'   result of the method of the class \code{x} extends; see Details.
 #' @name ExperimentSubset-combine
 #' @examples
 #' # two objects with the same 10 genes and 20 cells each
@@ -1067,15 +1106,24 @@ NULL
 #' # both subsets are kept
 #' subsetNames(esBoth)
 #' subsetColnames(esBoth, subsetName = "firstB")
+#'
+#' # a third object, with genes 6 to 10 and 5 genes the others don't have
+#' counts3 <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts3) <- paste0("gene", 6:15)
+#' colnames(counts3) <- paste0("cellC", 1:20)
+#' es3 <- ExperimentSubset(list(counts = counts3))
+#' # a subset of the genes only the third object has
+#' es3 <- createSubset(es3, subsetName = "newGenes", rows = 6:10)
+#' # combine the cells, keeping the genes of both; the gaps are NA
+#' esAll <- combineCols(es1, es3)
+#' dim(esAll)
+#' # the subset keeps its genes
+#' subsetRownames(esAll, subsetName = "newGenes")
 NULL
 
-# Checks objects before cbind() (along = "cols") or rbind() ("rows")
-# combines them, so nothing is copied when they can't be: subset names
-# must be unique across the objects, and for cbind() each object with
-# subsets must have the first object's rows, in the same order, since its
-# subsets keep their row indices. rbind() already requires the same
-# column names (#67)
-.checkCombine <- function(objects, along) {
+# Checks that subset names are unique across the objects to combine
+# (#67, #73)
+.checkSubsetNames <- function(objects) {
   hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
   allNames <- unlist(lapply(objects[hasSubsets], subsetNames))
   repeated <- unique(allNames[duplicated(allNames)])
@@ -1084,6 +1132,18 @@ NULL
          paste0("'", repeated, "'", collapse = ", "),
          if (length(repeated) == 1) " is" else " are", " in more than ",
          "one. Create the subsets under different names before combining.")
+  invisible(NULL)
+}
+
+# Checks objects before cbind() (along = "cols") or rbind() ("rows")
+# combines them, so nothing is copied when they can't be: subset names
+# must be unique across the objects, and for cbind() each object with
+# subsets must have the first object's rows, in the same order, since its
+# subsets keep their row indices. rbind() already requires the same
+# column names (#67)
+.checkCombine <- function(objects, along) {
+  .checkSubsetNames(objects)
+  hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
   if (along == "cols") {
     for (k in which(hasSubsets)) {
       if (!identical(rownames(objects[[k]]), rownames(objects[[1]])))
@@ -1095,15 +1155,47 @@ NULL
   invisible(NULL)
 }
 
-# Gives out, the result of cbind() or rbind() on objects, the subsets of
-# every object, since the parent methods keep only the first object's
-# (#67). Subsets made from a main-object assay move by the columns (along
-# = "cols") or rows ("rows") of the objects before theirs; subsets of
-# subsets keep their indices, which are relative to their parent
-.combineSubsets <- function(out, objects, along) {
-  getSize <- if (along == "cols") ncol else nrow
+# Where the rows and columns of each object are in out, the result of
+# combining objects along "cols" (cbind(), combineCols()) or "rows"
+# (rbind(), combineRows()): list(rows =, cols =), each a list with one
+# vector of positions in out per object. Along the combined dimension,
+# each object follows the objects before it; on the other, positions
+# are matched by name when useNames is TRUE, as combineCols() and
+# combineRows() do, and kept otherwise
+.combineMaps <- function(objects, out, along, useNames) {
+  byCols <- along == "cols"
+  getSize <- if (byCols) ncol else nrow
+  getOtherNames <- if (byCols) rownames else colnames
   sizes <- vapply(objects, getSize, integer(1))
   offsets <- cumsum(c(0L, sizes[-length(sizes)]))
+  shifted <- lapply(seq_along(objects),
+                    function(k) seq_len(sizes[k]) + offsets[k])
+  matched <- lapply(objects, function(object) {
+    if (isTRUE(useNames))
+      match(getOtherNames(object), getOtherNames(out))
+    else
+      seq_len(if (byCols) nrow(object) else ncol(object))
+  })
+  if (byCols)
+    list(rows = matched, cols = shifted)
+  else
+    list(rows = shifted, cols = matched)
+}
+
+# Gives out, the result of combining objects along "cols" or "rows", the
+# subsets of every object. cbind() and rbind() of the parent class keep
+# only the first object's subsets (#67); combineCols() and combineRows()
+# keep none, and return a new object of the class they extend or one it
+# extends, which is wrapped as the matching Subset class (#73). Subsets
+# made from a main-object assay move to where their rows and columns are
+# in out (see .combineMaps()); subsets of subsets keep their indices,
+# which are relative to their parent. Each subset's stored object is
+# converted to the class out extends, if that differs
+.combineSubsets <- function(out, objects, along, useNames = FALSE) {
+  if (!methods::.hasSlot(out, "subsets"))
+    out <- ExperimentSubset(out)
+  maps <- .combineMaps(objects, out, along, useNames)
+  baseClass <- sub("^Subset", "", as.character(class(out)))
   hasSubsets <- vapply(objects, methods::.hasSlot, logical(1), "subsets")
   subsets <- list()
   for (k in which(hasSubsets)) {
@@ -1114,33 +1206,41 @@ NULL
       rows <- .rowIndices(subset)
       cols <- .colIndices(subset)
       if (is.null(.parentSubsetName(object, .parentAssay(subset)))) {
-        if (along == "cols")
-          cols <- cols + offsets[k]
-        else
-          rows <- rows + offsets[k]
+        rows <- maps$rows[[k]][rows]
+        cols <- maps$cols[[k]][cols]
       }
+      internal <- .internalAssay(subset)
+      if (!identical(as.character(class(internal)), baseClass))
+        internal <- methods::as(internal, baseClass)
       subsets[[name]] <- AssaySubset(
         subsetName = name,
         rowIndices = rows,
         colIndices = cols,
         parentAssay = .parentAssay(subset),
-        internalAssay = .internalAssay(subset)
+        internalAssay = internal
       )
     }
   }
   .subsets(out) <- S4Vectors::SimpleList(subsets)
-  # SpatialExperiment's cbind() renames sample_ids repeated across the
-  # objects; each subset's stored copy follows the main object's
-  if (methods::is(out, "SpatialExperiment")) {
-    subsets <- .subsets(out)
-    for (name in names(subsets)) {
-      rootCols <- .rootIndices(out, name, .colIndices)
-      internal <- .internalAssay(subsets[[name]])
+  # Each subset's stored object has the main object's row and column
+  # names, which change when combineCols() or combineRows() match by
+  # position (use.names = FALSE). SpatialExperiment's cbind() renames
+  # sample_ids repeated across the objects; each subset's stored copy
+  # follows the main object's
+  subsets <- .subsets(out)
+  for (name in names(subsets)) {
+    rootRows <- .rootIndices(out, name, .rowIndices)
+    rootCols <- .rootIndices(out, name, .colIndices)
+    internal <- .internalAssay(subsets[[name]])
+    if (!identical(rownames(internal), rownames(out)[rootRows]))
+      rownames(internal) <- rownames(out)[rootRows]
+    if (!identical(colnames(internal), colnames(out)[rootCols]))
+      colnames(internal) <- colnames(out)[rootCols]
+    if (methods::is(out, "SpatialExperiment"))
       internal$sample_id <- out$sample_id[rootCols]
-      .internalAssay(subsets[[name]]) <- internal
-    }
-    .subsets(out) <- subsets
+    .internalAssay(subsets[[name]]) <- internal
   }
+  .subsets(out) <- subsets
   out
 }
 

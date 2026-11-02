@@ -2232,12 +2232,15 @@ testthat::test_that("combineRows keeps the subsets of every object (#73)", {
 
 testthat::test_that("combineCols, combineRows match by position (#73)", {
   example <- unionExample("cols")
-  combined <- combineCols(example$es1, example$es2, use.names = FALSE)
+  # the rows have different names, so the parent method warns that it
+  # keeps the first object's rowRanges
+  combined <- suppressWarnings(combineCols(example$es1, example$es2,
+                                           use.names = FALSE))
   testthat::expect_equal(nrow(combined), 10L)
   # the rows keep their positions and take the first object's names
   testthat::expect_equal(subsetRownames(combined, "s2"),
                          rownames(example$counts1)[1:6])
-  testthat::expect_equal(as.matrix(assay(combined, "s2"), withDimnames = FALSE),
+  testthat::expect_equal(unname(as.matrix(assay(combined, "s2"))),
                          unname(example$counts2[1:6, 9:20]))
 
   example <- unionExample("rows")
@@ -2315,8 +2318,8 @@ testthat::test_that("All Subset classes keep subsets in combineCols (#73)", {
     testthat::expect_equal(as.matrix(assay(combined, "s2")),
                            counts2[1:6, 4:6])
     for (name in subsetNames(combined)) {
-      internal <- ExperimentSubset:::.internalAssay(
-        ExperimentSubset:::.subsets(combined)[[name]])
+      subset <- ExperimentSubset:::.subsets(combined)[[name]]
+      internal <- ExperimentSubset:::.internalAssay(subset)
       testthat::expect_equal(class(internal)[1],
                              sub("Subset", "", colsClass[k]))
     }
@@ -2329,8 +2332,8 @@ testthat::test_that("All Subset classes keep subsets in combineCols (#73)", {
     testthat::expect_equal(as.matrix(assay(stacked, "s3")),
                            counts3[6:10, 1:4])
     for (name in subsetNames(stacked)) {
-      internal <- ExperimentSubset:::.internalAssay(
-        ExperimentSubset:::.subsets(stacked)[[name]])
+      subset <- ExperimentSubset:::.subsets(stacked)[[name]]
+      internal <- ExperimentSubset:::.internalAssay(subset)
       testthat::expect_equal(class(internal)[1],
                              sub("Subset", "", rowsClass[k]))
     }

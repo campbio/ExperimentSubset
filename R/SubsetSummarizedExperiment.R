@@ -387,3 +387,30 @@ setMethod(
     .combineSubsets(out, objects, "rows")
   }
 )
+
+#' @rdname ExperimentSubset-combine
+#' @importMethodsFrom S4Vectors combineCols combineRows
+setMethod(
+  f = "combineCols",
+  signature = "SubsetSummarizedExperiment",
+  definition = function(x, ..., delayed = TRUE, fill = NA,
+                        use.names = TRUE) {
+    objects <- list(x, ...)
+    .checkSubsetNames(objects)
+    out <- callNextMethod()
+    .combineSubsets(out, objects, "cols", use.names)
+  }
+)
+
+#' @rdname ExperimentSubset-combine
+setMethod(
+  f = "combineRows",
+  signature = "SubsetSummarizedExperiment",
+  definition = function(x, ..., delayed = TRUE, fill = NA,
+                        use.names = TRUE) {
+    objects <- list(x, ...)
+    .checkSubsetNames(objects)
+    out <- callNextMethod()
+    .combineSubsets(out, objects, "rows", use.names)
+  }
+)
