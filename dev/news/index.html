@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.29</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.30</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,11 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.30" id="experimentsubset-12330-2026-11-02">ExperimentSubset 1.23.30 (2026-11-02)<a class="anchor" aria-label="anchor" href="#experimentsubset-12330-2026-11-02"></a></h2>
+<ul><li>
+<code>reducedDims&lt;-</code> no longer masks SingleCellExperiment’s while ExperimentSubset is attached, so <code>withDimnames =</code> and the method’s other arguments work again, for plain <code>SingleCellExperiment</code> objects as well as <code>ExperimentSubset</code> ones, with or without <code>subsetName =</code>. Before, <code>reducedDims(x, withDimnames = FALSE) &lt;- value</code> failed with “unused argument”. <code>subsetName =</code> on an object that isn’t an <code>ExperimentSubset</code> is now ignored, as for <code>altExps&lt;-</code>, instead of giving an error. Give the subset by name: <code>reducedDims(x, "subset") &lt;- value</code>, which the old generic allowed, now stops with an error saying to use <code>subsetName =</code>, since the second argument is <code>withDimnames</code>. <code>reducedDimNames&lt;-</code> with a <code>subsetName</code> that isn’t a subset now gives the same error as the other methods (<a href="https://github.com/campbio/ExperimentSubset/issues/26" class="external-link">#26</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.29" id="experimentsubset-12329-2026-11-01">ExperimentSubset 1.23.29 (2026-11-01)<a class="anchor" aria-label="anchor" href="#experimentsubset-12329-2026-11-01"></a></h2>
 <ul><li>

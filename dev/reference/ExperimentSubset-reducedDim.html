@@ -5,15 +5,15 @@
   SingleCellExperiment. They exist for the classes that extend
   SingleCellExperiment: SubsetSingleCellExperiment,
   SubsetSpatialExperiment and SubsetTreeSummarizedExperiment.
-  reducedDims&amp;lt;-, reducedDimNames and
-  reducedDimNames&amp;lt;- have their own pages."><meta property="og:description" content="Get or set the reduced dimensions, such as a PCA or UMAP,
+  reducedDimNames and reducedDimNames&amp;lt;-
+  have their own pages."><meta property="og:description" content="Get or set the reduced dimensions, such as a PCA or UMAP,
   of a subset by naming it with subsetName. Without
   subsetName, these methods act on the main object, as for
   SingleCellExperiment. They exist for the classes that extend
   SingleCellExperiment: SubsetSingleCellExperiment,
   SubsetSpatialExperiment and SubsetTreeSummarizedExperiment.
-  reducedDims&amp;lt;-, reducedDimNames and
-  reducedDimNames&amp;lt;- have their own pages."><meta name="robots" content="noindex"></head><body>
+  reducedDimNames and reducedDimNames&amp;lt;-
+  have their own pages."><meta name="robots" content="noindex"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.29</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.30</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,8 +61,8 @@
   <code>SingleCellExperiment</code>. They exist for the classes that extend
   <code>SingleCellExperiment</code>: <code>SubsetSingleCellExperiment</code>,
   <code>SubsetSpatialExperiment</code> and <code>SubsetTreeSummarizedExperiment</code>.
-  <code>reducedDims&lt;-</code>, <code><a href="reducedDimNames.html">reducedDimNames</a></code> and
-  <code>reducedDimNames&lt;-</code> have their own pages.</p>
+  <code><a href="reducedDimNames.html">reducedDimNames</a></code> and <code>reducedDimNames&lt;-</code>
+  have their own pages.</p>
     </div>
 
     <div class="section level2">
@@ -88,6 +88,9 @@
 <span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
 <span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
+<span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
 <span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
@@ -109,6 +112,9 @@
 <span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
 <span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
@@ -128,7 +134,10 @@
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
-<span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
+<span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -148,7 +157,8 @@ position of the reduced dimension. Leave it out for the first one.</p></dd>
 <dd><dl><dt><code>subsetName</code></dt>
 <dd><p><code>character(1)</code> Name of the subset whose
     reduced dimensions to get or set. Leave it out for the main
-    object's.</p></dd>
+    object's. Give it by name: for <code>reducedDims&lt;-</code>, a subset name
+    in second place is <code>withDimnames</code>, and an error.</p></dd>
 
 
 </dl><p>Other arguments are passed on to the <code>SingleCellExperiment</code>
@@ -157,19 +167,21 @@ method, for the subset or the main object.</p></dd>
 
 <dt id="arg-withdimnames">withDimnames<a class="anchor" aria-label="anchor" href="#arg-withdimnames"></a></dt>
 <dd><p><code>logical(1)</code> Passed on to
-<code>reducedDim&lt;-</code>. Default <code>TRUE</code>.</p></dd>
+<code>reducedDim&lt;-</code> or
+<code>reducedDims&lt;-</code>. Default <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>
-<dd><p>A matrix with one row per column of the subset (or of the
-main object).</p></dd>
+<dd><p>For <code>reducedDim&lt;-</code>, a matrix with one row per column
+of the subset (or of the main object). For <code>reducedDims&lt;-</code>, a
+named list of such matrices, which replaces all of them.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>reducedDim()</code> returns a matrix and <code>reducedDims()</code> a
-  list of them. <code>reducedDim&lt;-</code> returns <code>x</code> with the reduced
-  dimension stored.</p>
+  list of them. <code>reducedDim&lt;-</code> and <code>reducedDims&lt;-</code> return
+  <code>x</code> with the reduced dimensions stored.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -205,6 +217,11 @@ main object).</p></dd>
 <span class="r-in"><span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"first"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of length 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> names(1): PCA</span>
+<span class="r-in"><span><span class="co"># replace them all with a list of two</span></span></span>
+<span class="r-in"><span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"first"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>PCA <span class="op">=</span> <span class="va">embedding</span>,</span></span>
+<span class="r-in"><span>                                              UMAP <span class="op">=</span> <span class="va">embedding</span> <span class="op">*</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="reducedDimNames.html">reducedDimNames</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"first"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "PCA"  "UMAP"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

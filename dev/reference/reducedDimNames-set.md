@@ -11,12 +11,6 @@ reducedDimNames(x, subsetName) <- value
 
 # S4 method for class 'ANY'
 reducedDimNames(x, subsetName) <- value
-
-# S4 method for class 'ANY'
-reducedDimNames(x, subsetName) <- value
-
-# S4 method for class 'ANY'
-reducedDimNames(x, subsetName) <- value
 ```
 
 ## Arguments

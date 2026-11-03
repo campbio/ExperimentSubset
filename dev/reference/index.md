@@ -192,6 +192,7 @@ assay\<- name the subset with i instead.
   [`` `reducedDim<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`` `reducedDim<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`reducedDims(`*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDims<-`( ``*`<SubsetSingleCellExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`reducedDim(`*`<SubsetSpatialExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`reducedDim(`*`<SubsetSpatialExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`reducedDim(`*`<SubsetSpatialExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
@@ -199,6 +200,7 @@ assay\<- name the subset with i instead.
   [`` `reducedDim<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`` `reducedDim<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`reducedDims(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDims<-`( ``*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`reducedDim(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`reducedDim(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`reducedDim(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
@@ -206,15 +208,12 @@ assay\<- name the subset with i instead.
   [`` `reducedDim<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`` `reducedDim<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   [`reducedDims(`*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
+  [`` `reducedDims<-`( ``*`<SubsetTreeSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-reducedDim.md)
   : Reduced dimensions of subsets in ExperimentSubset objects
 - [`` `reducedDimNames<-`() ``](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames-set.md)
   : reducedDimNames\<-
 - [`reducedDimNames()`](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames.md)
   : reducedDimNames
-- [`` `reducedDims<-`( ``*`<ANY>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDims-set-ANY-method.md)
-  : reducedDims\<-
-- [`` `reducedDims<-`() ``](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDims-set.md)
-  : reducedDims\<-
 - [`altExp(`*`<SubsetSingleCellExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
   [`altExp(`*`<SubsetSingleCellExperiment>`*`,`*`<missing>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)
   [`altExp(`*`<SubsetSingleCellExperiment>`*`,`*`<numeric>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)

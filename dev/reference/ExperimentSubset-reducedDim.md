@@ -5,7 +5,7 @@ naming it with `subsetName`. Without `subsetName`, these methods act on
 the main object, as for `SingleCellExperiment`. They exist for the
 classes that extend `SingleCellExperiment`:
 `SubsetSingleCellExperiment`, `SubsetSpatialExperiment` and
-`SubsetTreeSummarizedExperiment`. `reducedDims<-`,
+`SubsetTreeSummarizedExperiment`.
 [`reducedDimNames`](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames.md)
 and `reducedDimNames<-` have their own pages.
 
@@ -33,6 +33,9 @@ reducedDim(x, type, withDimnames = TRUE, ...) <- value
 # S4 method for class 'SubsetSingleCellExperiment'
 reducedDims(x, ...)
 
+# S4 method for class 'SubsetSingleCellExperiment'
+reducedDims(x, withDimnames = TRUE, ...) <- value
+
 # S4 method for class 'SubsetSpatialExperiment,character'
 reducedDim(x, type, ...)
 
@@ -54,6 +57,9 @@ reducedDim(x, type, withDimnames = TRUE, ...) <- value
 # S4 method for class 'SubsetSpatialExperiment'
 reducedDims(x, ...)
 
+# S4 method for class 'SubsetSpatialExperiment'
+reducedDims(x, withDimnames = TRUE, ...) <- value
+
 # S4 method for class 'SubsetTreeSummarizedExperiment,character'
 reducedDim(x, type, ...)
 
@@ -74,6 +80,9 @@ reducedDim(x, type, withDimnames = TRUE, ...) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment'
 reducedDims(x, ...)
+
+# S4 method for class 'SubsetTreeSummarizedExperiment'
+reducedDims(x, withDimnames = TRUE, ...) <- value
 ```
 
 ## Arguments
@@ -92,24 +101,29 @@ reducedDims(x, ...)
   `subsetName`
 
   : `character(1)` Name of the subset whose reduced dimensions to get or
-    set. Leave it out for the main object's.
+    set. Leave it out for the main object's. Give it by name: for
+    `reducedDims<-`, a subset name in second place is `withDimnames`,
+    and an error.
 
   Other arguments are passed on to the `SingleCellExperiment` method,
   for the subset or the main object.
 
 - withDimnames:
 
-  `logical(1)` Passed on to `reducedDim<-`. Default `TRUE`.
+  `logical(1)` Passed on to `reducedDim<-` or `reducedDims<-`. Default
+  `TRUE`.
 
 - value:
 
-  A matrix with one row per column of the subset (or of the main
-  object).
+  For `reducedDim<-`, a matrix with one row per column of the subset (or
+  of the main object). For `reducedDims<-`, a named list of such
+  matrices, which replaces all of them.
 
 ## Value
 
 `reducedDim()` returns a matrix and `reducedDims()` a list of them.
-`reducedDim<-` returns `x` with the reduced dimension stored.
+`reducedDim<-` and `reducedDims<-` return `x` with the reduced
+dimensions stored.
 
 ## See also
 
@@ -145,4 +159,9 @@ reducedDim(es, "PCA", subsetName = "first")
 reducedDims(es, subsetName = "first")
 #> List of length 1
 #> names(1): PCA
+# replace them all with a list of two
+reducedDims(es, subsetName = "first") <- list(PCA = embedding,
+                                              UMAP = embedding * 2)
+reducedDimNames(es, subsetName = "first")
+#> [1] "PCA"  "UMAP"
 ```

@@ -11,12 +11,6 @@ reducedDimNames(x, ...)
 
 # S4 method for class 'ANY'
 reducedDimNames(x, ...)
-
-# S4 method for class 'ANY'
-reducedDimNames(x, ...)
-
-# S4 method for class 'ANY'
-reducedDimNames(x, ...)
 ```
 
 ## Arguments

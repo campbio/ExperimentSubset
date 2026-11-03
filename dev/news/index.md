@@ -1,5 +1,21 @@
 # Changelog
 
+## ExperimentSubset 1.23.30 (2026-11-02)
+
+- `reducedDims<-` no longer masks SingleCellExperiment’s while
+  ExperimentSubset is attached, so `withDimnames =` and the method’s
+  other arguments work again, for plain `SingleCellExperiment` objects
+  as well as `ExperimentSubset` ones, with or without `subsetName =`.
+  Before, `reducedDims(x, withDimnames = FALSE) <- value` failed with
+  “unused argument”. `subsetName =` on an object that isn’t an
+  `ExperimentSubset` is now ignored, as for `altExps<-`, instead of
+  giving an error. Give the subset by name:
+  `reducedDims(x, "subset") <- value`, which the old generic allowed,
+  now stops with an error saying to use `subsetName =`, since the second
+  argument is `withDimnames`. `reducedDimNames<-` with a `subsetName`
+  that isn’t a subset now gives the same error as the other methods
+  ([\#26](https://github.com/campbio/ExperimentSubset/issues/26))
+
 ## ExperimentSubset 1.23.29 (2026-11-01)
 
 - [`combineCols()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html)
