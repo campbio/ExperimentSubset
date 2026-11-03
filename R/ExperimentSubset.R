@@ -2010,6 +2010,10 @@ NULL
 
 #checks if is a subset
 .isSubset <- function(x, subsetName){
+  # only the "ANY" reducedDimNames methods can get such an x (#82)
+  if (!.hasSubsets(list(x)))
+    stop("'x' is a ", class(x)[1], ", which has no subsets. Convert it ",
+         "with ExperimentSubset() before using subsetName =.")
   if(!subsetName %in% subsetNames(x))
     stop(subsetName, " subset does not exist. 'subsetName' must be the ",
          "name of a subset.")

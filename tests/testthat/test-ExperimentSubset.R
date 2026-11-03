@@ -900,6 +900,20 @@ testthat::test_that("reducedDimNames() takes only subsetName, by name", {
   testthat::expect_equal(reducedDimNames(sce), character(0))
 })
 
+testthat::test_that("subsetName on a plain SCE says it has no subsets", {
+  # (#82) .isSubset() failed in subsetNames() dispatch for these objects
+  sce <- makeReducedDimObjects()$sce
+  reducedDim(sce, "PCA") <- matrix(as.numeric(seq_len(12)), nrow = 6)
+  testthat::expect_error(reducedDimNames(sce, subsetName = "s1"),
+                         "which has no subsets")
+  testthat::expect_error(reducedDimNames(sce, subsetName = "s1") <- "X",
+                         "which has no subsets")
+  testthat::expect_error(reducedDimNames(sce, "s1") <- "X",
+                         "which has no subsets")
+  # without subsetName, the main object is unchanged
+  testthat::expect_equal(reducedDimNames(sce), "PCA")
+})
+
 testthat::test_that("reducedDims and their names check the subset name", {
   # (#26) each class's methods, not only the last file in Collate
   objects <- makeReducedDimObjects()
