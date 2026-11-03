@@ -865,6 +865,29 @@ testthat::test_that("reducedDims<- on a plain SCE ignores subsetName", {
   testthat::expect_equal(unname(reducedDim(sce, "PCA")), pca)
 })
 
+testthat::test_that("reducedDimNames() takes only subsetName, by name", {
+  # (#82) other arguments, or a subset name by position, were dropped
+  objects <- makeReducedDimObjects()
+  mainPca <- matrix(as.numeric(seq_len(12)), nrow = 6, ncol = 2)
+  subsetPca <- matrix(as.numeric(seq_len(6)), nrow = 3, ncol = 2)
+  for (name in names(objects)) {
+    es <- ExperimentSubset(objects[[name]])
+    es <- createSubset(es, "s1", rows = 1:5, cols = 2:4)
+    reducedDim(es, "MAIN") <- mainPca
+    reducedDim(es, "PCA", subsetName = "s1") <- subsetPca
+    testthat::expect_error(reducedDimNames(es, "s1"),
+                           "name the subset with subsetName =", info = name)
+    testthat::expect_error(reducedDimNames(es, foo = 1),
+                           "takes only 'x' and 'subsetName'", info = name)
+    testthat::expect_error(reducedDimNames(es, subsetName = "s1", foo = 1),
+                           "takes only 'x' and 'subsetName'", info = name)
+    # calls without other arguments are unchanged
+    testthat::expect_equal(reducedDimNames(es), "MAIN", info = name)
+    testthat::expect_equal(reducedDimNames(es, subsetName = "s1"), "PCA",
+                           info = name)
+  }
+})
+
 testthat::test_that("reducedDims and their names check the subset name", {
   # (#26) each class's methods, not only the last file in Collate
   objects <- makeReducedDimObjects()

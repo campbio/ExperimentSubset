@@ -1686,7 +1686,8 @@ setMethod(
   signature = "ANY",
   definition = function(x, ...) {
     arglist <- list(...)
-    if (!"subsetName" %in% names(arglist))
+    .checkReducedDimNamesArgs(arglist)
+    if (length(arglist) == 0L)
       return(SingleCellExperiment::reducedDimNames(x))
     subsetName <- arglist[["subsetName"]]
     .isSubset(x, subsetName)
@@ -1694,6 +1695,25 @@ setMethod(
     SingleCellExperiment::reducedDimNames(internal)
   }
 )
+
+# SingleCellExperiment's reducedDimNames() takes only x, so anything in ...
+# other than a named subsetName would be dropped without a message (#82).
+.checkReducedDimNamesArgs <- function(arglist) {
+  argNames <- names(arglist)
+  if (is.null(argNames))
+    argNames <- rep("", length(arglist))
+  unnamed <- arglist[argNames == ""]
+  if (length(unnamed) > 0L && is.character(unnamed[[1]]))
+    stop("To get the reducedDimNames of a subset, name the subset with ",
+         "subsetName =, as in reducedDimNames(x, subsetName = \"",
+         unnamed[[1]][1], "\").")
+  others <- argNames[argNames != "subsetName"]
+  if (length(others) > 0L) {
+    others[others == ""] <- "an unnamed argument"
+    stop("reducedDimNames() takes only 'x' and 'subsetName'. Remove: ",
+         paste(unique(others), collapse = ", "), ".")
+  }
+}
 
 #' @rdname reducedDimNames-set
 setReplaceMethod(
