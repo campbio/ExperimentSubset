@@ -893,10 +893,9 @@ testthat::test_that("reducedDimNames() takes only subsetName, by name", {
     testthat::expect_equal(reducedDimNames(es, subsetName = "s1"), "PCA",
                            info = name)
   }
-  # a plain SCE has no subsets, so no hint to name one
+  # a plain SCE has no subsets, so say that rather than how to name one
   sce <- objects$sce
-  testthat::expect_error(reducedDimNames(sce, "s1"),
-                         "takes only 'x' and 'subsetName'")
+  testthat::expect_error(reducedDimNames(sce, "s1"), "which has no subsets")
   testthat::expect_equal(reducedDimNames(sce), character(0))
 })
 

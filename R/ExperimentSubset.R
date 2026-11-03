@@ -1687,7 +1687,7 @@ setMethod(
   definition = function(x, ...) {
     .checkReducedDimNamesArgs(x, ...)
     arglist <- list(...)
-    if (length(arglist) == 0L)
+    if (!"subsetName" %in% names(arglist))
       return(SingleCellExperiment::reducedDimNames(x))
     subsetName <- arglist[["subsetName"]]
     .isSubset(x, subsetName)
@@ -1709,12 +1709,16 @@ setMethod(
   if (is.null(otherNames))
     otherNames <- rep("", length(others))
   first <- others[[1]]
-  # a lone string by position is a subset name; say how to give it
+  # a lone string by position is a subset name; say how to give it, or,
+  # for an x without subsets, give .isSubset()'s error that it has none
   if (nSubsetNames == 0L && length(others) == 1L && otherNames == ""
-      && .hasSubsets(list(x)) && is.character(first) && length(first) == 1L)
+      && is.character(first) && length(first) == 1L) {
+    if (!.hasSubsets(list(x)))
+      .isSubset(x, first)
     stop("To get the reducedDimNames of a subset, name the subset with ",
          "subsetName =, as in reducedDimNames(x, subsetName = \"", first,
          "\").")
+  }
   otherNames[otherNames == ""] <- "an unnamed argument"
   stop("reducedDimNames() takes only 'x' and 'subsetName'. Remove: ",
        paste(unique(otherNames), collapse = ", "), ".")
