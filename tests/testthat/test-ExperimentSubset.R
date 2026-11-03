@@ -881,11 +881,23 @@ testthat::test_that("reducedDimNames() takes only subsetName, by name", {
                            "takes only 'x' and 'subsetName'", info = name)
     testthat::expect_error(reducedDimNames(es, subsetName = "s1", foo = 1),
                            "takes only 'x' and 'subsetName'", info = name)
+    testthat::expect_error(
+      reducedDimNames(es, subsetName = "s1", subsetName = "s1"),
+      "takes one 'subsetName'", info = name
+    )
+    # an empty name can't be given as subsetName =
+    testthat::expect_error(reducedDimNames(es, character(0)),
+                           "takes only 'x' and 'subsetName'", info = name)
     # calls without other arguments are unchanged
     testthat::expect_equal(reducedDimNames(es), "MAIN", info = name)
     testthat::expect_equal(reducedDimNames(es, subsetName = "s1"), "PCA",
                            info = name)
   }
+  # a plain SCE has no subsets, so no hint to name one
+  sce <- objects$sce
+  testthat::expect_error(reducedDimNames(sce, "s1"),
+                         "takes only 'x' and 'subsetName'")
+  testthat::expect_equal(reducedDimNames(sce), character(0))
 })
 
 testthat::test_that("reducedDims and their names check the subset name", {

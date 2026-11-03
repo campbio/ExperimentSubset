@@ -1685,8 +1685,8 @@ setMethod(
   f = "reducedDimNames",
   signature = "ANY",
   definition = function(x, ...) {
+    .checkReducedDimNamesArgs(x, ...)
     arglist <- list(...)
-    .checkReducedDimNamesArgs(arglist)
     if (length(arglist) == 0L)
       return(SingleCellExperiment::reducedDimNames(x))
     subsetName <- arglist[["subsetName"]]
@@ -1698,21 +1698,26 @@ setMethod(
 
 # SingleCellExperiment's reducedDimNames() takes only x, so anything in ...
 # other than a named subsetName would be dropped without a message (#82).
-.checkReducedDimNamesArgs <- function(arglist) {
-  argNames <- names(arglist)
-  if (is.null(argNames))
-    argNames <- rep("", length(arglist))
-  unnamed <- arglist[argNames == ""]
-  if (length(unnamed) > 0L && is.character(unnamed[[1]]))
+.checkReducedDimNamesArgs <- function(x, ...) {
+  nSubsetNames <- sum(names(list(...)) == "subsetName")
+  if (nSubsetNames > 1L)
+    stop("reducedDimNames() takes one 'subsetName', not several.")
+  others <- .otherArgs(...)
+  if (length(others) == 0L)
+    return(invisible(NULL))
+  otherNames <- names(others)
+  if (is.null(otherNames))
+    otherNames <- rep("", length(others))
+  first <- others[[1]]
+  # a lone string by position is a subset name; say how to give it
+  if (nSubsetNames == 0L && length(others) == 1L && otherNames == ""
+      && .hasSubsets(list(x)) && is.character(first) && length(first) == 1L)
     stop("To get the reducedDimNames of a subset, name the subset with ",
-         "subsetName =, as in reducedDimNames(x, subsetName = \"",
-         unnamed[[1]][1], "\").")
-  others <- argNames[argNames != "subsetName"]
-  if (length(others) > 0L) {
-    others[others == ""] <- "an unnamed argument"
-    stop("reducedDimNames() takes only 'x' and 'subsetName'. Remove: ",
-         paste(unique(others), collapse = ", "), ".")
-  }
+         "subsetName =, as in reducedDimNames(x, subsetName = \"", first,
+         "\").")
+  otherNames[otherNames == ""] <- "an unnamed argument"
+  stop("reducedDimNames() takes only 'x' and 'subsetName'. Remove: ",
+       paste(unique(otherNames), collapse = ", "), ".")
 }
 
 #' @rdname reducedDimNames-set
