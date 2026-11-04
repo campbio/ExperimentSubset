@@ -2660,5 +2660,9 @@ testthat::test_that("A subsetName that isn't one string gives a clear error", {
                            msg, info = info)
     testthat::expect_error(subsetColData(es, bad), msg, info = info)
     testthat::expect_error(subsetRowData(es, bad), msg, info = info)
+    testthat::expect_error(getSubsetExperiment(es, bad), msg, info = info)
+    testthat::expect_error(setSubsetExperiment(es, bad, es), msg,
+                           info = info)
+    testthat::expect_error(subsetSpatialCoords(es, bad), msg, info = info)
   }
 })
