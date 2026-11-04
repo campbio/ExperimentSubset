@@ -2753,7 +2753,7 @@ testthat::test_that("An i that isn't one string gives a clear error (#85)", {
   }
 })
 
-testthat::test_that("ExperimentSubset() returns ExperimentSubsets as is (#89)", {
+testthat::test_that("ExperimentSubset() keeps an ExperimentSubset (#89)", {
   counts <- matrix(seq_len(60), nrow = 6,
                    dimnames = list(paste0("gene", 1:6), paste0("cell", 1:10)))
   inputs <- list(
