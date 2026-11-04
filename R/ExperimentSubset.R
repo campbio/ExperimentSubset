@@ -2012,8 +2012,17 @@ NULL
   args[names(args) != "subsetName"]
 }
 
+# Stops unless subsetName is one non-NA string, before it reaches an if()
+# that would fail with a base R error naming no argument (#83)
+.checkSubsetName <- function(subsetName) {
+  if (!is.character(subsetName) || length(subsetName) != 1L
+      || is.na(subsetName))
+    stop("'subsetName' must be one subset name, a single character string.")
+}
+
 #checks if is a subset
 .isSubset <- function(x, subsetName){
+  .checkSubsetName(subsetName)
   # only the "ANY" reducedDimNames methods can get such an x (#82)
   if (!.hasSubsets(list(x)))
     stop("'x' is a ", class(x)[1], ", which has no subsets. Convert it ",
@@ -2026,6 +2035,7 @@ NULL
 # Name of the subset that holds subsetName: the subset itself, or the
 # subset storing an assay of that name. Stops if there is none.
 .owningSubset <- function(x, subsetName) {
+  .checkSubsetName(subsetName)
   if (subsetName %in% subsetNames(x))
     return(subsetName)
   ref <- .resolveAssay(x, subsetName)
