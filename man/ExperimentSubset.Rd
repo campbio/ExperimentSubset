@@ -10,10 +10,13 @@ ExperimentSubset(
 )
 }
 \arguments{
-\item{x}{An experiment object of one of the five supported classes
-(subclasses of them are not supported), or a named \code{list} of assay
-matrices, which is passed to the \code{SingleCellExperiment} constructor
-as its assays.}
+\item{x}{An experiment object of one of the five supported classes, or a
+named \code{list} of assay matrices, which is passed to the
+\code{SingleCellExperiment} constructor as its assays. An object of a
+subclass of a supported class is converted as the class it extends,
+with a warning: the slots and methods that the subclass adds are not
+kept. An object that is already an \code{ExperimentSubset} is
+returned as is, with the subset from \code{subset}, if given.}
 
 \item{subset}{A named \code{list} to create a subset from within the
 constructor, with elements \code{subsetName} and, optionally,
@@ -26,7 +29,8 @@ in a list you supply is an error.}
 \value{
 An object of the matching \code{Subset*} class, for example a
   \code{SubsetSingleCellExperiment} for a \code{SingleCellExperiment} or
-  a list of assays.
+  a list of assays. For an \code{ExperimentSubset} object, the same
+  object, with the new subset if \code{subset} is given.
 }
 \description{
 This constructor function sets up an \code{ExperimentSubset}

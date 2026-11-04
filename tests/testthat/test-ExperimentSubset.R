@@ -2752,3 +2752,109 @@ testthat::test_that("An i that isn't one string gives a clear error (#85)", {
     testthat::expect_equal(assay(es, 1), assay(es, "counts"), info = name)
   }
 })
+
+testthat::test_that("ExperimentSubset() keeps an ExperimentSubset (#89)", {
+  counts <- matrix(seq_len(60), nrow = 6,
+                   dimnames = list(paste0("gene", 1:6), paste0("cell", 1:10)))
+  inputs <- list(
+    se = SummarizedExperiment(assays = list(counts = counts)),
+    rse = as(SummarizedExperiment(assays = list(counts = counts)),
+             "RangedSummarizedExperiment"),
+    sce = SingleCellExperiment(assays = list(counts = counts)),
+    tse = TreeSummarizedExperiment(assays = list(counts = counts)),
+    spe = SpatialExperiment(assays = list(counts = counts))
+  )
+  for (name in names(inputs)) {
+    es <- ExperimentSubset(inputs[[name]])
+    testthat::expect_identical(ExperimentSubset(es), es, info = name)
+  }
+
+  # subset = still creates a subset on it
+  es <- ExperimentSubset(inputs$sce)
+  withSubset <- ExperimentSubset(es, subset = list(subsetName = "s1",
+                                                   rows = 1:3,
+                                                   cols = 1:4))
+  testthat::expect_equal(subsetNames(withSubset), "s1")
+  testthat::expect_equal(subsetDim(withSubset, subsetName = "s1"), c(3, 4))
+})
+
+testthat::test_that("Subset* subclasses store the base class (#89)", {
+  setClass("Issue89SubsetSce", contains = "SubsetSingleCellExperiment")
+  on.exit(removeClass("Issue89SubsetSce"), add = TRUE)
+  counts <- matrix(seq_len(60), nrow = 6,
+                   dimnames = list(paste0("gene", 1:6), paste0("cell", 1:10)))
+  es <- ExperimentSubset(list(counts = counts))
+  mine <- new("Issue89SubsetSce", es)
+
+  # ExperimentSubset() returns it as is
+  testthat::expect_identical(ExperimentSubset(mine), mine)
+
+  # createSubset() stores a SingleCellExperiment, not the subclass
+  mine <- createSubset(mine, "s1", rows = 1:3, cols = 1:4)
+  stored <- getSubsetExperiment(mine, "s1")
+  testthat::expect_equal(as.character(class(stored)), "SingleCellExperiment")
+
+  # cbind() keeps the subsets, still stored as SingleCellExperiment
+  other <- es
+  colnames(other) <- paste0("other", 1:10)
+  other <- createSubset(other, "s2", cols = 1:2)
+  other <- new("Issue89SubsetSce", other)
+  combined <- cbind(mine, other)
+  testthat::expect_equal(subsetNames(combined), c("s1", "s2"))
+  for (name in c("s1", "s2")) {
+    stored <- getSubsetExperiment(combined, name)
+    testthat::expect_equal(as.character(class(stored)),
+                           "SingleCellExperiment", info = name)
+  }
+
+  # so do rbind() and combineCols()
+  below <- es
+  rownames(below) <- paste0("other", 1:6)
+  below <- createSubset(below, "s3", rows = 1:2)
+  below <- new("Issue89SubsetSce", below)
+  combinations <- list(rbind = rbind(mine, below),
+                       combineCols = combineCols(mine, other))
+  for (how in names(combinations)) {
+    combined <- combinations[[how]]
+    for (name in subsetNames(combined)) {
+      stored <- getSubsetExperiment(combined, name)
+      testthat::expect_equal(as.character(class(stored)),
+                             "SingleCellExperiment",
+                             info = paste(how, name))
+    }
+  }
+  testthat::expect_equal(subsetNames(combinations$rbind), c("s1", "s3"))
+  testthat::expect_equal(subsetNames(combinations$combineCols),
+                         c("s1", "s2"))
+})
+
+testthat::test_that("ExperimentSubset() converts subclasses (#89)", {
+  setClass("Issue89Sce", contains = "SingleCellExperiment",
+           slots = c(extra = "character"))
+  on.exit(removeClass("Issue89Sce"), add = TRUE)
+  counts <- matrix(seq_len(60), nrow = 6,
+                   dimnames = list(paste0("gene", 1:6), paste0("cell", 1:10)))
+  sce <- SingleCellExperiment(assays = list(counts = counts))
+  mine <- new("Issue89Sce", sce, extra = "dropped")
+
+  # converted as a SingleCellExperiment, with a warning
+  testthat::expect_warning(
+    es <- ExperimentSubset(mine),
+    regexp = "'x' is an object of class Issue89Sce, a subclass of"
+  )
+  testthat::expect_equal(as.character(class(es)),
+                         "SubsetSingleCellExperiment")
+  testthat::expect_equal(assay(es, "counts"), counts)
+
+  # subset = still creates a subset
+  subset <- list(subsetName = "s1", rows = 1:3)
+  testthat::expect_warning(es <- ExperimentSubset(mine, subset = subset),
+                           regexp = "Issue89Sce")
+  testthat::expect_equal(subsetNames(es), "s1")
+})
+
+testthat::test_that("ExperimentSubset() rejects an unsupported x (#89)", {
+  counts <- matrix(seq_len(60), nrow = 6)
+  testthat::expect_error(ExperimentSubset(counts),
+                         regexp = "'x' must be a SummarizedExperiment")
+})

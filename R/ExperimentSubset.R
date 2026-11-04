@@ -38,10 +38,13 @@ AssaySubset <- function(subsetName = "subset",
 #'   directly by passing a named \code{list} to the \code{subset} parameter,
 #'   with elements named \code{subsetName}, \code{rows}, \code{cols} and
 #'   \code{parentAssay}.
-#' @param x An experiment object of one of the five supported classes
-#'   (subclasses of them are not supported), or a named \code{list} of assay
-#'   matrices, which is passed to the \code{SingleCellExperiment} constructor
-#'   as its assays.
+#' @param x An experiment object of one of the five supported classes, or a
+#'   named \code{list} of assay matrices, which is passed to the
+#'   \code{SingleCellExperiment} constructor as its assays. An object of a
+#'   subclass of a supported class is converted as the class it extends,
+#'   with a warning: the slots and methods that the subclass adds are not
+#'   kept. An object that is already an \code{ExperimentSubset} is
+#'   returned as is, with the subset from \code{subset}, if given.
 #' @param subset A named \code{list} to create a subset from within the
 #'   constructor, with elements \code{subsetName} and, optionally,
 #'   \code{rows}, \code{cols} and \code{parentAssay}. Leave out
@@ -51,7 +54,8 @@ AssaySubset <- function(subsetName = "subset",
 #'   in a list you supply is an error.
 #' @return An object of the matching \code{Subset*} class, for example a
 #'   \code{SubsetSingleCellExperiment} for a \code{SingleCellExperiment} or
-#'   a list of assays.
+#'   a list of assays. For an \code{ExperimentSubset} object, the same
+#'   object, with the new subset if \code{subset} is given.
 #' @seealso \code{\linkS4class{ExperimentSubset}}, the class every
 #'   \code{Subset*} class extends, for testing whether an object is an
 #'   \code{ExperimentSubset}.
@@ -71,9 +75,25 @@ ExperimentSubset <- function(x,
                                parentAssay = NA
                              ))
 {
-  if (!is.list(x)) {
+  if (methods::is(x, "ExperimentSubset")) {
+    es <- x
+  } else if (!is.list(x)) {
+    baseClass <- .baseClass(x)
+    if (is.na(baseClass))
+      stop("'x' must be a SummarizedExperiment, RangedSummarizedExperiment, ",
+           "SingleCellExperiment, TreeSummarizedExperiment or ",
+           "SpatialExperiment object, or a named list of assays; it is an ",
+           "object of class ", class(x)[1], ".")
     .checkAssayNames(x)
-    es <- as(x, paste0("Subset", class(x)))
+    if (!identical(as.character(class(x)), baseClass)) {
+      warning("'x' is an object of class ", class(x)[1], ", a subclass of ",
+              baseClass,
+              ", so it is converted as a ", baseClass, ": the result is a ",
+              "Subset", baseClass, ", without the slots and methods that ",
+              class(x)[1], " adds.")
+      x <- methods::as(x, baseClass, strict = TRUE)
+    }
+    es <- as(x, paste0("Subset", baseClass))
   }
   else{
     sce <- SingleCellExperiment::SingleCellExperiment(x)
@@ -1136,10 +1156,17 @@ NULL
   vapply(objects, methods::is, logical(1), "ExperimentSubset")
 }
 
-# The class an ExperimentSubset object extends, which the stored objects
-# of its subsets have
+# The supported class that x is or extends, found from its class
+# hierarchy, so a subclass gets the class it extends, not its own (#89);
+# NA if x extends none. For an ExperimentSubset object, it is the class
+# that the stored objects of its subsets have
 .baseClass <- function(x) {
-  sub("^Subset", "", as.character(class(x)))
+  supported <- c("SummarizedExperiment", "RangedSummarizedExperiment",
+                 "SingleCellExperiment", "TreeSummarizedExperiment",
+                 "SpatialExperiment")
+  # closest class first
+  classes <- methods::extends(class(x))
+  classes[classes %in% supported][1]
 }
 
 # Checks that subset names are unique across the objects to combine, and
