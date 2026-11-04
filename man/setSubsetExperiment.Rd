@@ -34,10 +34,15 @@ parent class) with the subset's dimensions and the subset's row and
 column names, in the same order. A tool that drops rows or columns is
 followed by \code{createSubset} instead.}
 
-\item{unlink}{\code{logical(1)} Store assays of \code{value} that have
-the name of an assay linked from the subset's parent but different
-values, as with \code{setSubsetAssay}. Without it, such an assay is an
-error. Default \code{FALSE}.}
+\item{unlink}{\code{TRUE}, \code{FALSE} or a character vector of
+\code{assay} names. Store assays of \code{value} that have the name of
+an assay linked from the subset's parent but different values, as with
+\code{setSubsetAssay}: with \code{TRUE}, every such assay; with a
+character vector, only those it names. Any other such assay is an error,
+and nothing is stored. A message names each assay that is unlinked.
+Names of assays that are not linked, or unchanged, are ignored, so
+\code{unlink = "decontXcounts"} stores a changed \code{decontXcounts}
+but stops if \code{counts} was changed too. Default \code{FALSE}.}
 }
 \value{
 Updated \code{ExperimentSubset} object. Linked assays that are

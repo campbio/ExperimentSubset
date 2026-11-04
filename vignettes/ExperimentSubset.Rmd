@@ -217,7 +217,11 @@ sees (its own and the linked ones), its colData, rowData, reducedDims and
 metadata. Any tool written for that class can then be run on it.
 `setSubsetExperiment` stores the result back in the subset: what the object
 holds replaces the subset's own data, while linked assays that are
-unchanged are not copied.
+unchanged are not copied. A linked assay that the tool changed is an error
+unless `unlink` allows it: `unlink = TRUE` stores every changed linked assay
+as the subset's own, and `unlink = "decontXcounts"` only that one, so a
+change to `counts` made by mistake still stops with an error. A message
+names each assay that is unlinked.
 
 ```{r get-subset-experiment}
 #take 'subset1' out as a SingleCellExperiment
