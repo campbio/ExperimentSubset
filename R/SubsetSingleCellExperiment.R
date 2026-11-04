@@ -495,6 +495,8 @@ setMethod(
                         subsetName,
                         subsetAssayName = NULL)
   {
+    # so a bad subsetName isn't reported as assay()'s i (#85)
+    .checkSubsetName(subsetName)
     if (is.null(subsetAssayName))
       return(assay(x = x, i = subsetName))
     # checked here so the error names subsetName, not assay()'s i (#76)

@@ -240,12 +240,13 @@ NULL
 }
 
 .assay <- function(x, i, ...){
+  .checkAssayI(i)
   args <- list(...)
   withDimnames <- !isFALSE(args$withDimnames)
   # assay(x, "subset", subsetAssayName = "a") means "subset/a"
   if (!is.null(args$subsetAssayName)) {
-    if (!is.character(args$subsetAssayName)
-        || length(args$subsetAssayName) != 1)
+    # NA would become "subset/NA" (#85)
+    if (!.isOneString(args$subsetAssayName))
       stop("'subsetAssayName' must be a single character string.")
     if (!i %in% subsetNames(x)) {
       qualified <- grepl("/", i, fixed = TRUE) && !i %in% assayNames(x)
@@ -560,6 +561,7 @@ NULL
 }
 
 '.assay<-' <- function(x, i, ..., subsetAssayName = NULL, value){
+  .checkAssayI(i)
   unlink <- isTRUE(list(...)$unlink)
   # "subset/assay" stores into that subset
   if (grepl("/", i, fixed = TRUE) && !i %in% assayNames(x)) {
@@ -2014,12 +2016,23 @@ NULL
   args[names(args) != "subsetName"]
 }
 
+# TRUE if value is one non-NA string, which a name used in if() must be
+.isOneString <- function(value) {
+  is.character(value) && length(value) == 1L && !is.na(value)
+}
+
 # Stops unless subsetName is one non-NA string, before it reaches an if()
 # that would fail with a base R error naming no argument (#83)
 .checkSubsetName <- function(subsetName) {
-  if (!is.character(subsetName) || length(subsetName) != 1L
-      || is.na(subsetName))
+  if (!.isOneString(subsetName))
     stop("'subsetName' must be one subset name, a single character string.")
+}
+
+# The same for assay()'s i, which names an assay or a subset (#85)
+.checkAssayI <- function(i) {
+  if (!.isOneString(i))
+    stop("'i' must be one name of an assay, a subset or a \"subset/assay\", ",
+         "a single character string.")
 }
 
 #checks if is a subset

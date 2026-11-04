@@ -2680,3 +2680,34 @@ testthat::test_that("A subsetName that isn't one string gives a clear error", {
   testthat::expect_error(reducedDimNames(sce, NA_character_),
                          "which has no subsets")
 })
+
+testthat::test_that("An i that isn't one string gives a clear error (#85)", {
+  # assay() and assay<- used i in if() without checking it, and
+  # getSubsetAssay() without subsetAssayName passed subsetName on to them
+  objects <- makeReducedDimObjects()
+  se <- SummarizedExperiment(assays = list(counts = assay(objects$sce)))
+  objects$se <- se
+  objects$rse <- as(se, "RangedSummarizedExperiment")
+  iMsg <- "'i' must be one name of an assay, a subset or a \"subset/assay\""
+  subsetNameMsg <- "'subsetName' must be one subset name"
+  m <- matrix(0, nrow = 5, ncol = 3)
+  for (name in names(objects)) {
+    es <- ExperimentSubset(objects[[name]])
+    es <- createSubset(es, "s1", rows = 1:5, cols = 2:4)
+    es <- createSubset(es, "s2", rows = 1:5, cols = 2:4)
+    for (bad in list(c("s1", "s2"), c("counts", "s1"), NA_character_)) {
+      info <- paste(name, deparse(bad))
+      testthat::expect_error(assay(es, bad), iMsg, info = info)
+      testthat::expect_error(assay(es, bad) <- m, iMsg, info = info)
+      testthat::expect_error(getSubsetAssay(es, bad), subsetNameMsg,
+                             info = info)
+    }
+    # an NA subsetAssayName became "s1/NA" and said that isn't an assay
+    testthat::expect_error(
+      assay(es, "s1", subsetAssayName = NA_character_),
+      "'subsetAssayName' must be a single character string", info = name
+    )
+    # a numeric i still goes to the main object's assays
+    testthat::expect_equal(assay(es, 1), assay(es, "counts"), info = name)
+  }
+})
