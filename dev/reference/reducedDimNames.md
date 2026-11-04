@@ -24,8 +24,9 @@ reducedDimNames(x, ...)
 
 - ...:
 
-  Additional arguments. Use `subsetName` to get the `reducedDimNames` of
-  a subset; other arguments are passed to the SCE method.
+  Only `subsetName`, the name of the subset whose `reducedDimNames` to
+  get, given by name. Leave it out for the main object's. A subset name
+  by position, or any other argument, is an error.
 
 ## Value
 

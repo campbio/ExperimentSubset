@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.30</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.31</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,11 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.31" id="experimentsubset-12331-2026-11-03">ExperimentSubset 1.23.31 (2026-11-03)<a class="anchor" aria-label="anchor" href="#experimentsubset-12331-2026-11-03"></a></h2>
+<ul><li>
+<code><a href="../reference/reducedDimNames.html">reducedDimNames()</a></code> now takes only <code>subsetName =</code>, by name, besides <code>x</code>. Before, any other argument was dropped without a message, so <code>reducedDimNames(x, "subset")</code>, with the subset name by position, returned the main object’s names instead of the subset’s. That call now stops with an error saying to use <code>subsetName =</code>, and any other argument, or <code>subsetName</code> given twice, is an error too. Calls with <code>subsetName =</code>, or with no other arguments, are unchanged. <code>reducedDimNames&lt;-</code> still takes the subset name by position. <code><a href="../reference/reducedDimNames.html">reducedDimNames()</a></code> and <code>reducedDimNames&lt;-</code> with <code>subsetName =</code> on an object that isn’t an <code>ExperimentSubset</code>, such as a plain <code>SingleCellExperiment</code>, now say that it has no subsets and to convert it with <code><a href="../reference/ExperimentSubset.html">ExperimentSubset()</a></code>. Before, they failed with “unable to find an inherited method for function ‘subsetNames’” (<a href="https://github.com/campbio/ExperimentSubset/issues/82" class="external-link">#82</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.30" id="experimentsubset-12330-2026-11-02">ExperimentSubset 1.23.30 (2026-11-02)<a class="anchor" aria-label="anchor" href="#experimentsubset-12330-2026-11-02"></a></h2>
 <ul><li>

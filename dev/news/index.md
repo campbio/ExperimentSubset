@@ -1,5 +1,25 @@
 # Changelog
 
+## ExperimentSubset 1.23.31 (2026-11-03)
+
+- [`reducedDimNames()`](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames.md)
+  now takes only `subsetName =`, by name, besides `x`. Before, any other
+  argument was dropped without a message, so
+  `reducedDimNames(x, "subset")`, with the subset name by position,
+  returned the main object’s names instead of the subset’s. That call
+  now stops with an error saying to use `subsetName =`, and any other
+  argument, or `subsetName` given twice, is an error too. Calls with
+  `subsetName =`, or with no other arguments, are unchanged.
+  `reducedDimNames<-` still takes the subset name by position.
+  [`reducedDimNames()`](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames.md)
+  and `reducedDimNames<-` with `subsetName =` on an object that isn’t an
+  `ExperimentSubset`, such as a plain `SingleCellExperiment`, now say
+  that it has no subsets and to convert it with
+  [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md).
+  Before, they failed with “unable to find an inherited method for
+  function ‘subsetNames’”
+  ([\#82](https://github.com/campbio/ExperimentSubset/issues/82))
+
 ## ExperimentSubset 1.23.30 (2026-11-02)
 
 - `reducedDims<-` no longer masks SingleCellExperiment’s while
