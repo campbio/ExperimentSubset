@@ -52,15 +52,20 @@ R keeps classes and functions apart, as for `SummarizedExperiment`.
   time, not stored in the object.
 - No method in this package is defined on the union, so dispatch in
   this package is unchanged.
-- Other packages can define methods on `ExperimentSubset`, but for a
-  `SubsetSingleCellExperiment` the union and `SingleCellExperiment` are
-  equally close superclasses. A package that defines methods for both
-  gets an ambiguous dispatch, which R resolves with a note. Branching
-  with `is()` inside the SingleCellExperiment method, as decontX plans
-  to, avoids this.
+- Other packages can define methods on `ExperimentSubset`, but a
+  package that defines methods for both `ExperimentSubset` and
+  `SingleCellExperiment` gets different methods for different member
+  classes, with no message. For a `SubsetSingleCellExperiment`, both
+  are one step away, and R picks the `SingleCellExperiment` method
+  because that parent comes first. For a `SubsetSpatialExperiment` or
+  `SubsetTreeSummarizedExperiment`, `SingleCellExperiment` is two steps
+  away, so R picks the `ExperimentSubset` method. Branching with `is()`
+  inside the SingleCellExperiment method, as decontX plans to, gives
+  the same result for every member class.
 - A new `Subset*` class must be added to the union's members, in
   `R/allClasses.R`, as well as following the other steps for a new
-  class.
+  class. A test fails if a `Subset*` class in the namespace doesn't
+  extend the union.
 
 ## Alternatives considered
 
@@ -76,5 +81,5 @@ R keeps classes and functions apart, as for `SummarizedExperiment`.
   `contains = c("SingleCellExperiment", "ExperimentSubset")`. It rewrites
   all five class definitions and moves the shared slot under multiple
   inheritance, which risks objects saved by earlier versions and
-  changes dispatch, for nothing issue #5 needs. It has the same
-  dispatch ambiguity as the union.
+  changes dispatch, for nothing issue #5 needs. Other packages'
+  methods would dispatch as they do with the union.
