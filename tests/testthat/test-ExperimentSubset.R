@@ -2688,7 +2688,7 @@ testthat::test_that("An i that isn't one string gives a clear error (#85)", {
   se <- SummarizedExperiment(assays = list(counts = assay(objects$sce)))
   objects$se <- se
   objects$rse <- as(se, "RangedSummarizedExperiment")
-  iMsg <- "'i' must be one assay or subset name"
+  iMsg <- "'i' must be one name of an assay, a subset or a \"subset/assay\""
   subsetNameMsg <- "'subsetName' must be one subset name"
   m <- matrix(0, nrow = 5, ncol = 3)
   for (name in names(objects)) {
@@ -2702,6 +2702,11 @@ testthat::test_that("An i that isn't one string gives a clear error (#85)", {
       testthat::expect_error(getSubsetAssay(es, bad), subsetNameMsg,
                              info = info)
     }
+    # an NA subsetAssayName became "s1/NA" and said that isn't an assay
+    testthat::expect_error(
+      assay(es, "s1", subsetAssayName = NA_character_),
+      "'subsetAssayName' must be a single character string", info = name
+    )
     # a numeric i still goes to the main object's assays
     testthat::expect_equal(assay(es, 1), assay(es, "counts"), info = name)
   }

@@ -245,8 +245,8 @@ NULL
   withDimnames <- !isFALSE(args$withDimnames)
   # assay(x, "subset", subsetAssayName = "a") means "subset/a"
   if (!is.null(args$subsetAssayName)) {
-    if (!is.character(args$subsetAssayName)
-        || length(args$subsetAssayName) != 1)
+    # NA would become "subset/NA" (#85)
+    if (!.isOneString(args$subsetAssayName))
       stop("'subsetAssayName' must be a single character string.")
     if (!i %in% subsetNames(x)) {
       qualified <- grepl("/", i, fixed = TRUE) && !i %in% assayNames(x)
@@ -2031,7 +2031,8 @@ NULL
 # The same for assay()'s i, which names an assay or a subset (#85)
 .checkAssayI <- function(i) {
   if (!.isOneString(i))
-    stop("'i' must be one assay or subset name, a single character string.")
+    stop("'i' must be one name of an assay, a subset or a \"subset/assay\", ",
+         "a single character string.")
 }
 
 #checks if is a subset
