@@ -2858,3 +2858,113 @@ testthat::test_that("ExperimentSubset() rejects an unsupported x (#89)", {
   testthat::expect_error(ExperimentSubset(counts),
                          regexp = "'x' must be a SummarizedExperiment")
 })
+
+testthat::test_that("unlink can name the assays to unlink (#59)", {
+  es <- ExperimentSubset(simSce)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:8)
+  assay(es, "decontXcounts") <- simCounts * 0.5
+  sub <- getSubsetExperiment(es, "s1")
+  ownDecontX <- as.matrix(assay(sub, "counts")) * 0.9
+  assay(sub, "decontXcounts") <- ownDecontX
+  # a changed counts not named in unlink is an error, as with FALSE
+  changedCounts <- sub
+  assay(changedCounts, "counts") <- as.matrix(assay(sub, "counts")) + 1L
+  testthat::expect_error(
+    setSubsetExperiment(es, "s1", changedCounts, unlink = "decontXcounts"),
+    regexp = "'counts' in subset 's1' is linked"
+  )
+  # only the named assay is unlinked, with a message saying so
+  testthat::expect_message(
+    es2 <- setSubsetExperiment(es, "s1", sub, unlink = "decontXcounts"),
+    regexp = "'s1' now stores its own 'decontXcounts'"
+  )
+  testthat::expect_equal(subsetAssayNames(es2, "s1"),
+                         c("counts", "decontXcounts"))
+  testthat::expect_equal(as.matrix(assay(es2, "s1/decontXcounts")),
+                         ownDecontX)
+  testthat::expect_equal(as.matrix(assay(es2, "s1/counts")),
+                         simCounts[1:5, 1:8])
+  testthat::expect_equal(assay(es2, "decontXcounts"), simCounts * 0.5)
+  # names that are not linked or not changed are ignored
+  es3 <- setSubsetExperiment(es, "s1", sub,
+                             unlink = c("decontXcounts", "counts", "other"))
+  testthat::expect_equal(as.matrix(assay(es3, "s1/counts")),
+                         simCounts[1:5, 1:8])
+  testthat::expect_equal(as.matrix(assay(es3, "s1/decontXcounts")),
+                         ownDecontX)
+  # character(0) unlinks nothing, as FALSE
+  testthat::expect_error(
+    setSubsetExperiment(es, "s1", sub, unlink = character(0)),
+    regexp = "'decontXcounts' in subset 's1' is linked"
+  )
+})
+
+testthat::test_that("unlink = TRUE says which assays it unlinks (#59)", {
+  es <- ExperimentSubset(simSce)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:8)
+  assay(es, "decontXcounts") <- simCounts * 0.5
+  sub <- getSubsetExperiment(es, "s1")
+  assay(sub, "decontXcounts") <- as.matrix(assay(sub, "counts")) * 0.9
+  assay(sub, "counts") <- as.matrix(assay(sub, "counts")) + 1L
+  messages <- testthat::capture_messages(
+    es <- setSubsetExperiment(es, "s1", sub, unlink = TRUE)
+  )
+  countsMessage <- "'s1' now stores its own 'counts', unlinked from the main"
+  testthat::expect_true(any(grepl(countsMessage, messages)))
+  decontXMessage <- "'s1' now stores its own 'decontXcounts'"
+  testthat::expect_true(any(grepl(decontXMessage, messages)))
+  # storing an own assay again unlinks nothing, so says nothing
+  testthat::expect_silent(
+    es <- setSubsetExperiment(es, "s1", sub, unlink = TRUE)
+  )
+  # a subset made from s1 names s1's assay as the source
+  es <- createSubset(es, "child", rows = 1:2, cols = 1:2, parentAssay = "s1")
+  testthat::expect_message(
+    es <- setSubsetAssay(es, "child", matrix(0, 2, 2), "counts",
+                         unlink = TRUE),
+    regexp = "'child' now stores its own 'counts', unlinked from 's1/counts'"
+  )
+})
+
+testthat::test_that("setSubsetAssay and assay<- take unlink names (#59)", {
+  es <- ExperimentSubset(simSce)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:8)
+  own <- simCounts[1:5, 1:8] + 1
+  testthat::expect_error(
+    setSubsetAssay(es, "s1", own, "counts", unlink = "decontXcounts"),
+    regexp = "unlink = \"counts\""
+  )
+  testthat::expect_message(
+    es2 <- setSubsetAssay(es, "s1", own, "counts", unlink = "counts"),
+    regexp = "'s1' now stores its own 'counts'"
+  )
+  testthat::expect_equal(as.matrix(assay(es2, "s1/counts")), own)
+  testthat::expect_error(
+    assay(es, "s1/counts", unlink = "decontXcounts") <- own,
+    regexp = "is linked"
+  )
+  testthat::expect_message(assay(es, "s1/counts", unlink = "counts") <- own,
+                           regexp = "now stores its own 'counts'")
+  testthat::expect_equal(as.matrix(assay(es, "s1/counts")), own)
+  # on a main assay, unlink names are an error, as TRUE is
+  testthat::expect_error(
+    assay(es, "counts", unlink = "counts") <- simCounts,
+    regexp = "only applies"
+  )
+})
+
+testthat::test_that("An invalid unlink is an error (#59)", {
+  es <- ExperimentSubset(simSce)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 1:8)
+  sub <- getSubsetExperiment(es, "s1")
+  own <- simCounts[1:5, 1:8] + 1
+  msg <- "'unlink' must be TRUE, FALSE or a character vector of assay names"
+  for (bad in list(NA, c(TRUE, FALSE), 1, NA_character_, c("counts", ""))) {
+    testthat::expect_error(setSubsetExperiment(es, "s1", sub, unlink = bad),
+                           regexp = msg, fixed = TRUE)
+    testthat::expect_error(setSubsetAssay(es, "s1", own, "x", unlink = bad),
+                           regexp = msg, fixed = TRUE)
+    testthat::expect_error(assay(es, "s1/x", unlink = bad) <- own,
+                           regexp = msg, fixed = TRUE)
+  }
+})
