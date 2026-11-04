@@ -1,6 +1,6 @@
 # 0005. Add an ExperimentSubset class union over the Subset* classes
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-04
 - **Deciders:** Joshua D. Campbell
 
