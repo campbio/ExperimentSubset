@@ -82,11 +82,12 @@ ExperimentSubset <- function(x,
     if (is.na(baseClass))
       stop("'x' must be a SummarizedExperiment, RangedSummarizedExperiment, ",
            "SingleCellExperiment, TreeSummarizedExperiment or ",
-           "SpatialExperiment object, or a named list of assays; it is a ",
-           class(x)[1], ".")
+           "SpatialExperiment object, or a named list of assays; it is an ",
+           "object of class ", class(x)[1], ".")
     .checkAssayNames(x)
     if (!identical(as.character(class(x)), baseClass)) {
-      warning("'x' is a ", class(x)[1], ", a subclass of ", baseClass,
+      warning("'x' is an object of class ", class(x)[1], ", a subclass of ",
+              baseClass,
               ", so it is converted as a ", baseClass, ": the result is a ",
               "Subset", baseClass, ", without the slots and methods that ",
               class(x)[1], " adds.")

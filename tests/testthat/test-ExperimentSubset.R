@@ -2817,8 +2817,10 @@ testthat::test_that("ExperimentSubset() converts subclasses (#89)", {
   mine <- new("Issue89Sce", sce, extra = "dropped")
 
   # converted as a SingleCellExperiment, with a warning
-  testthat::expect_warning(es <- ExperimentSubset(mine),
-                           regexp = "'x' is a Issue89Sce, a subclass of")
+  testthat::expect_warning(
+    es <- ExperimentSubset(mine),
+    regexp = "'x' is an object of class Issue89Sce, a subclass of"
+  )
   testthat::expect_equal(as.character(class(es)),
                          "SubsetSingleCellExperiment")
   testthat::expect_equal(assay(es, "counts"), counts)
