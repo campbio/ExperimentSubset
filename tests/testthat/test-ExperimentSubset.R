@@ -2664,5 +2664,19 @@ testthat::test_that("A subsetName that isn't one string gives a clear error", {
     testthat::expect_error(setSubsetExperiment(es, bad, es), msg,
                            info = info)
     testthat::expect_error(subsetSpatialCoords(es, bad), msg, info = info)
+    testthat::expect_error(setSubsetAssay(es, bad, pca, "a"), msg,
+                           info = info)
   }
+  # subsetParent() dispatches on x only, so it gets every bad value
+  for (bad in badValues) {
+    testthat::expect_error(subsetParent(es, bad), msg, info = deparse(bad))
+  }
+  # on an object without subsets, that comes first, whatever subsetName is
+  sce <- makeReducedDimObjects()$sce
+  testthat::expect_error(reducedDimNames(sce, subsetName = NULL),
+                         "which has no subsets")
+  testthat::expect_error(reducedDimNames(sce, subsetName = NULL) <- "X",
+                         "which has no subsets")
+  testthat::expect_error(reducedDimNames(sce, NA_character_),
+                         "which has no subsets")
 })

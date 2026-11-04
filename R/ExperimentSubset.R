@@ -379,6 +379,7 @@ NULL
                          subsetAssayName = NULL,
                          unlink = FALSE) {
 
+  .checkSubsetName(subsetName)
   if (!subsetName %in% subsetNames(x))
     stop(subsetName, " does not exist in the subsets slot of the object. 
          You need to create a new subset with createSubset() function. ")
@@ -591,6 +592,7 @@ NULL
 }
 
 .subsetParent <- function(x, subsetName){
+  .checkSubsetName(subsetName)
   ref <- .resolveAssay(x, subsetName)
   if (is.null(ref) || ref$kind == "main") {
     stop(subsetName,
@@ -2022,11 +2024,12 @@ NULL
 
 #checks if is a subset
 .isSubset <- function(x, subsetName){
-  .checkSubsetName(subsetName)
-  # only the "ANY" reducedDimNames methods can get such an x (#82)
+  # only the "ANY" reducedDimNames methods can get such an x (#82); that
+  # comes first, as no subsetName would work on it
   if (!.hasSubsets(list(x)))
     stop("'x' is a ", class(x)[1], ", which has no subsets. Convert it ",
          "with ExperimentSubset() before using subsetName =.")
+  .checkSubsetName(subsetName)
   if(!subsetName %in% subsetNames(x))
     stop(subsetName, " subset does not exist. 'subsetName' must be the ",
          "name of a subset.")
