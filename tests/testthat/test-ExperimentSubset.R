@@ -2869,25 +2869,36 @@ testthat::test_that("unlink can name the assays to unlink (#59)", {
   # a changed counts not named in unlink is an error, as with FALSE
   changedCounts <- sub
   assay(changedCounts, "counts") <- as.matrix(assay(sub, "counts")) + 1L
-  testthat::expect_error(
+  # and says nothing about decontXcounts, which is not stored either
+  messages <- testthat::capture_messages(testthat::expect_error(
     setSubsetExperiment(es, "s1", changedCounts, unlink = "decontXcounts"),
-    regexp = "'counts' in subset 's1' is linked"
-  )
+    regexp = "unlink = c(\"decontXcounts\", \"counts\")", fixed = TRUE
+  ))
+  testthat::expect_length(messages, 0)
   # only the named assay is unlinked, with a message saying so
-  testthat::expect_message(
-    es2 <- setSubsetExperiment(es, "s1", sub, unlink = "decontXcounts"),
-    regexp = "'s1' now stores its own 'decontXcounts'"
+  messages <- testthat::capture_messages(
+    es2 <- setSubsetExperiment(es, "s1", sub, unlink = "decontXcounts")
   )
+  testthat::expect_length(messages, 1)
+  testthat::expect_match(messages, "'s1' now stores its own 'decontXcounts'")
   testthat::expect_equal(subsetAssayNames(es2, "s1"),
                          c("counts", "decontXcounts"))
+  # s1 stores only decontXcounts; counts stays linked
+  testthat::expect_equal(subsetAssayNames(es2),
+                         c("s1", "s1/decontXcounts"))
   testthat::expect_equal(as.matrix(assay(es2, "s1/decontXcounts")),
                          ownDecontX)
   testthat::expect_equal(as.matrix(assay(es2, "s1/counts")),
                          simCounts[1:5, 1:8])
   testthat::expect_equal(assay(es2, "decontXcounts"), simCounts * 0.5)
   # names that are not linked or not changed are ignored
-  es3 <- setSubsetExperiment(es, "s1", sub,
-                             unlink = c("decontXcounts", "counts", "other"))
+  messages <- testthat::capture_messages(
+    es3 <- setSubsetExperiment(es, "s1", sub,
+                               unlink = c("decontXcounts", "counts", "other"))
+  )
+  testthat::expect_length(messages, 1)
+  testthat::expect_equal(subsetAssayNames(es3),
+                         c("s1", "s1/decontXcounts"))
   testthat::expect_equal(as.matrix(assay(es3, "s1/counts")),
                          simCounts[1:5, 1:8])
   testthat::expect_equal(as.matrix(assay(es3, "s1/decontXcounts")),
@@ -2897,6 +2908,14 @@ testthat::test_that("unlink can name the assays to unlink (#59)", {
     setSubsetExperiment(es, "s1", sub, unlink = character(0)),
     regexp = "'decontXcounts' in subset 's1' is linked"
   )
+  # an error after the unlink check stores nothing and says nothing
+  badName <- sub
+  assay(badName, "a/b") <- ownDecontX
+  messages <- testthat::capture_messages(testthat::expect_error(
+    setSubsetExperiment(es, "s1", badName, unlink = TRUE),
+    regexp = "can't contain '/'"
+  ))
+  testthat::expect_length(messages, 0)
 })
 
 testthat::test_that("unlink = TRUE says which assays it unlinks (#59)", {
@@ -2932,7 +2951,7 @@ testthat::test_that("setSubsetAssay and assay<- take unlink names (#59)", {
   own <- simCounts[1:5, 1:8] + 1
   testthat::expect_error(
     setSubsetAssay(es, "s1", own, "counts", unlink = "decontXcounts"),
-    regexp = "unlink = \"counts\""
+    regexp = "unlink = c(\"decontXcounts\", \"counts\")", fixed = TRUE
   )
   testthat::expect_message(
     es2 <- setSubsetAssay(es, "s1", own, "counts", unlink = "counts"),
@@ -2951,6 +2970,9 @@ testthat::test_that("setSubsetAssay and assay<- take unlink names (#59)", {
     assay(es, "counts", unlink = "counts") <- simCounts,
     regexp = "only applies"
   )
+  # character(0) unlinks nothing, so is allowed there, as FALSE is
+  assay(es, "counts", unlink = character(0)) <- simCounts + 1
+  testthat::expect_equal(assay(es, "counts"), simCounts + 1)
 })
 
 testthat::test_that("An invalid unlink is an error (#59)", {

@@ -294,7 +294,7 @@ NULL
   if (ref$kind == "visible")
     return(.subsetAssayView(x, ref$subset, ref$assay, withDimnames))
   #a subset: its view of the assay its parentAssay refers to, which is
-  #its own if it, or a subset on the way, stored one with unlink = TRUE
+  #its own if it, or a subset on the way, stored one with unlink
   subsetName <- ref$subset
   if (is.null(.parentAssay(.subsets(x)[[subsetName]]))) {
     internal <- .internalAssay(.subsets(x)[[subsetName]])
@@ -403,7 +403,8 @@ NULL
                          subsetName,
                          inputMatrix,
                          subsetAssayName = NULL,
-                         unlink = FALSE) {
+                         unlink = FALSE,
+                         quiet = FALSE) {
 
   .checkSubsetName(subsetName)
   if (!subsetName %in% subsetNames(x))
@@ -437,9 +438,8 @@ NULL
     colnames(internal) <- colnames(inputMatrix)
   assay(internal, withDimnames = FALSE, subsetAssayName) <- inputMatrix
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
-  if (!is.null(source))
-    message("Subset '", subsetName, "' now stores its own '",
-            subsetAssayName, "', unlinked from ", source, ".")
+  if (!is.null(source) && !quiet)
+    .unlinkMessage(subsetName, subsetAssayName, source)
 
   return(x)
 }
@@ -459,6 +459,12 @@ NULL
   isTRUE(unlink) || (is.character(unlink) && assayName %in% unlink)
 }
 
+# Says that subsetName now stores its own assayName, linked from source
+.unlinkMessage <- function(subsetName, assayName, source) {
+  message("Subset '", subsetName, "' now stores its own '", assayName,
+          "', unlinked from ", source, ".")
+}
+
 # If subsetName sees assayName linked from its parent, stops unless unlink
 # allows storing its own, and returns where the link comes from (for
 # example "the main assay 'counts'"); NULL for a name that isn't linked
@@ -470,11 +476,17 @@ NULL
   source <- paste0("'", owner, "/", assayName, "'")
   if (owner == "")
     source <- paste0("the main assay '", assayName, "'")
-  if (!.unlinks(unlink, assayName))
+  if (!.unlinks(unlink, assayName)) {
+    # with names in unlink, suggest adding this one to them
+    suggested <- assayName
+    if (is.character(unlink))
+      suggested <- c(unlink, assayName)
+    suggested <- paste(deparse(suggested), collapse = "")
     stop("'", assayName, "' in subset '", subsetName, "' is linked ",
-         "to ", source, ". Set unlink = TRUE or unlink = \"", assayName,
-         "\" to store a separate '", assayName, "' computed on the cells ",
+         "to ", source, ". Set unlink = TRUE or unlink = ", suggested,
+         " to store a separate '", assayName, "' computed on the cells ",
          "of '", subsetName, "'.")
+  }
   source
 }
 
@@ -555,8 +567,11 @@ NULL
                        .subsetAssayView(x, subsetName, name)))
       stored <- c(stored, name)
   }
+  # where each unlinked assay was linked from, for the messages once
+  # everything is stored
+  sources <- character(0)
   for (name in intersect(stored, linked))
-    .checkLinked(x, subsetName, name, unlink)
+    sources[name] <- .checkLinked(x, subsetName, name, unlink)
 
   # own assays that value no longer has are removed, unless a subset was
   # made from them
@@ -567,7 +582,7 @@ NULL
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
   for (name in stored)
     x <- .setSubsetAssay(x, subsetName, assay(value, name), name,
-                         unlink = unlink)
+                         unlink = unlink, quiet = TRUE)
 
   .subsetRowData(x, subsetName) <- .withoutParentColumns(rowData(value))
   .subsetColData(x, subsetName) <- .withoutParentColumns(colData(value))
@@ -578,6 +593,8 @@ NULL
   }
   metadata(internal) <- metadata(value)
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  for (name in names(sources))
+    .unlinkMessage(subsetName, name, sources[[name]])
   x
 }
 
@@ -625,7 +642,7 @@ NULL
 
 '.assay<-' <- function(x, i, ..., subsetAssayName = NULL, value){
   .checkAssayI(i)
-  unlink <- list(...)$unlink
+  unlink <- list(...)[["unlink"]]
   if (is.null(unlink))
     unlink <- FALSE
   .checkUnlink(unlink)
