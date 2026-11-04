@@ -569,6 +569,47 @@ testthat::test_that("Subsets of subsets use the right rowLinks", {
   testthat::expect_equal(links$nodeLab, rowLinks(tse)$nodeLab[4:6])
 })
 
+testthat::test_that("Every Subset* class is an ExperimentSubset (#5)", {
+  counts <- matrix(seq_len(60), nrow = 6,
+                   dimnames = list(paste0("gene", 1:6), paste0("cell", 1:10)))
+  se <- SummarizedExperiment(assays = list(counts = counts))
+  rse <- as(se, "RangedSummarizedExperiment")
+  sce <- SingleCellExperiment(assays = list(counts = counts))
+  tse <- TreeSummarizedExperiment(assays = list(counts = counts))
+  spe <- SpatialExperiment(assays = list(counts = counts))
+  inputs <- list(se = se, rse = rse, sce = sce, tse = tse, spe = spe,
+                 list = list(counts = counts))
+  expectedClasses <- c(se = "SubsetSummarizedExperiment",
+                       rse = "SubsetRangedSummarizedExperiment",
+                       sce = "SubsetSingleCellExperiment",
+                       tse = "SubsetTreeSummarizedExperiment",
+                       spe = "SubsetSpatialExperiment",
+                       list = "SubsetSingleCellExperiment")
+  for (name in names(inputs)) {
+    es <- ExperimentSubset(inputs[[name]])
+    testthat::expect_equal(class(es)[1], expectedClasses[[name]],
+                           info = name)
+    testthat::expect_true(is(es, "ExperimentSubset"), info = name)
+  }
+
+  # the issue's case: a SubsetSpatialExperiment isn't a
+  # SubsetSingleCellExperiment, but it is an ExperimentSubset
+  testthat::expect_false(is(ExperimentSubset(spe),
+                            "SubsetSingleCellExperiment"))
+  testthat::expect_false(is(sce, "ExperimentSubset"))
+  testthat::expect_false(is(se, "ExperimentSubset"))
+  testthat::expect_false(is(spe, "ExperimentSubset"))
+
+  # a new Subset* class must be added to the union in allClasses.R
+  packageClasses <- getClasses(asNamespace("ExperimentSubset"))
+  subsetClasses <- grep("^Subset", packageClasses, value = TRUE)
+  testthat::expect_length(subsetClasses, 5)
+  for (subsetClass in subsetClasses) {
+    testthat::expect_true(extends(subsetClass, "ExperimentSubset"),
+                          info = subsetClass)
+  }
+})
+
 # Runs the methods every Subset*Experiment class shares on es, whose main
 # assay "counts" has row and column names and at least 5 rows and 6
 # columns. Returns es with a subset "s1" and a stored assay "doubled".
