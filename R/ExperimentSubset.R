@@ -77,8 +77,7 @@ ExperimentSubset <- function(x,
 {
   if (methods::is(x, "ExperimentSubset")) {
     es <- x
-  }
-  else if (!is.list(x)) {
+  } else if (!is.list(x)) {
     baseClass <- .baseClass(x)
     if (is.na(baseClass))
       stop("'x' must be a SummarizedExperiment, RangedSummarizedExperiment, ",
