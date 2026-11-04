@@ -1,5 +1,24 @@
 # Changelog
 
+## ExperimentSubset 1.23.33 (2026-11-03)
+
+- [`assay()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
+  and `assay<-` with an `i` that isn’t one name, such as several names
+  or `NA_character_`, now give the error “‘i’ must be one name of an
+  assay, a subset or a”subset/assay”, a single character string.”
+  Before, they failed with base R errors that didn’t name the argument,
+  such as “the condition has length \> 1” or “‘length = 2’ in coercion
+  to ‘logical(1)’”, or said that ‘NA’ is not the name of an assay.
+  [`getSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetAssay.md)
+  without `subsetAssayName` now gives the same `subsetName` error as
+  with it, instead of
+  [`assay()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)‘s
+  errors. `assay(x, "subset", subsetAssayName = NA)` now says that
+  `subsetAssayName` must be a single character string, as `assay<-`
+  already did, instead of that ’subset/NA’ is not the name of an assay.
+  A numeric `i` is unchanged
+  ([\#85](https://github.com/campbio/ExperimentSubset/issues/85))
+
 ## ExperimentSubset 1.23.32 (2026-11-03)
 
 - A `subsetName` that isn’t one subset name, such as `NULL`, `NA` or
