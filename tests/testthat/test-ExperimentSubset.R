@@ -2590,3 +2590,93 @@ testthat::test_that("Combining allows a subset named as its own assay (#73)", {
   combined <- combineCols(es1, example$es2)
   testthat::expect_true("extra" %in% subsetNames(combined))
 })
+
+testthat::test_that("A subsetName that isn't one string gives a clear error", {
+  # (#83) NULL, NA or several names failed inside .isSubset() with base R
+  # errors that didn't name subsetName
+  es <- ExperimentSubset(makeReducedDimObjects()$spe)
+  es <- createSubset(es, "s1", rows = 1:5, cols = 2:4)
+  es <- createSubset(es, "s2", rows = 1:5, cols = 2:4)
+  msg <- "'subsetName' must be one subset name"
+  pca <- matrix(as.numeric(seq_len(6)), nrow = 3)
+  badValues <- list(NULL, c("s1", "s2"), NA, NA_character_)
+  for (bad in badValues) {
+    info <- deparse(bad)
+    # methods that take subsetName through ...
+    testthat::expect_error(metadata(es, subsetName = bad), msg, info = info)
+    testthat::expect_error(metadata(es, subsetName = bad) <- list(),
+                           msg, info = info)
+    testthat::expect_error(altExp(es, subsetName = bad), msg, info = info)
+    testthat::expect_error(altExp(es, "a", subsetName = bad) <- es,
+                           msg, info = info)
+    testthat::expect_error(altExps(es, subsetName = bad), msg, info = info)
+    testthat::expect_error(altExps(es, subsetName = bad) <- list(),
+                           msg, info = info)
+    testthat::expect_error(altExpNames(es, subsetName = bad), msg,
+                           info = info)
+    testthat::expect_error(altExpNames(es, subsetName = bad) <- character(0),
+                           msg, info = info)
+    testthat::expect_error(reducedDim(es, subsetName = bad), msg, info = info)
+    testthat::expect_error(reducedDim(es, "PCA", subsetName = bad) <- pca,
+                           msg, info = info)
+    testthat::expect_error(reducedDims(es, subsetName = bad), msg,
+                           info = info)
+    testthat::expect_error(reducedDims(es, subsetName = bad) <- list(),
+                           msg, info = info)
+    testthat::expect_error(reducedDimNames(es, subsetName = bad), msg,
+                           info = info)
+    testthat::expect_error(reducedDimNames(es, subsetName = bad) <- "X",
+                           msg, info = info)
+    testthat::expect_error(rowData(es, subsetName = bad), msg, info = info)
+    testthat::expect_error(rowData(es, subsetName = bad) <- DataFrame(),
+                           msg, info = info)
+    testthat::expect_error(colData(es, subsetName = bad), msg, info = info)
+    testthat::expect_error(colData(es, subsetName = bad) <- DataFrame(),
+                           msg, info = info)
+    testthat::expect_error(spatialCoords(es, subsetName = bad), msg,
+                           info = info)
+    testthat::expect_error(spatialData(es, subsetName = bad), msg,
+                           info = info)
+  }
+  # NULL is subsetAssayNames()'s default, which lists every subset
+  testthat::expect_true(all(c("s1", "s2") %in%
+                              subsetAssayNames(es, subsetName = NULL)))
+  for (bad in badValues[-1]) {
+    info <- deparse(bad)
+    testthat::expect_error(subsetAssayNames(es, subsetName = bad), msg,
+                           info = info)
+  }
+  # methods whose subsetName must be character to dispatch
+  for (bad in list(c("s1", "s2"), NA_character_)) {
+    info <- deparse(bad)
+    testthat::expect_error(subsetDim(es, bad), msg, info = info)
+    testthat::expect_error(getSubsetAssay(es, bad, subsetAssayName = "x"),
+                           msg, info = info)
+    testthat::expect_error(subsetColnames(es, bad), msg, info = info)
+    testthat::expect_error(subsetColnames(es, bad) <- letters[1:3],
+                           msg, info = info)
+    testthat::expect_error(subsetRownames(es, bad), msg, info = info)
+    testthat::expect_error(subsetRownames(es, bad) <- letters[1:5],
+                           msg, info = info)
+    testthat::expect_error(subsetColData(es, bad), msg, info = info)
+    testthat::expect_error(subsetRowData(es, bad), msg, info = info)
+    testthat::expect_error(getSubsetExperiment(es, bad), msg, info = info)
+    testthat::expect_error(setSubsetExperiment(es, bad, es), msg,
+                           info = info)
+    testthat::expect_error(subsetSpatialCoords(es, bad), msg, info = info)
+    testthat::expect_error(setSubsetAssay(es, bad, pca, "a"), msg,
+                           info = info)
+  }
+  # subsetParent() dispatches on x only, so it gets every bad value
+  for (bad in badValues) {
+    testthat::expect_error(subsetParent(es, bad), msg, info = deparse(bad))
+  }
+  # on an object without subsets, that comes first, whatever subsetName is
+  sce <- makeReducedDimObjects()$sce
+  testthat::expect_error(reducedDimNames(sce, subsetName = NULL),
+                         "which has no subsets")
+  testthat::expect_error(reducedDimNames(sce, subsetName = NULL) <- "X",
+                         "which has no subsets")
+  testthat::expect_error(reducedDimNames(sce, NA_character_),
+                         "which has no subsets")
+})
