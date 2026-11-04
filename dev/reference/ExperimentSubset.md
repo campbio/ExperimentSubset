@@ -40,6 +40,12 @@ An object of the matching `Subset*` class, for example a
 `SubsetSingleCellExperiment` for a `SingleCellExperiment` or a list of
 assays.
 
+## See also
+
+[`ExperimentSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-class.md),
+the class every `Subset*` class extends, for testing whether an object
+is an `ExperimentSubset`.
+
 ## Examples
 
 ``` r

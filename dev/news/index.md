@@ -1,5 +1,17 @@
 # Changelog
 
+## ExperimentSubset 1.23.34 (2026-11-04)
+
+- New exported virtual class `ExperimentSubset`, which all five
+  `Subset*` classes extend, so `is(x, "ExperimentSubset")` tests whether
+  `x` is an `ExperimentSubset` object, whichever class it extends.
+  Before, this took a list of the five classes or a check for the
+  `subsets` slot: a `SubsetSpatialExperiment`, for example, is not a
+  `SubsetSingleCellExperiment`, though both extend
+  `SingleCellExperiment`. See
+  [`?"ExperimentSubset-class"`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-class.md)
+  ([\#5](https://github.com/campbio/ExperimentSubset/issues/5))
+
 ## ExperimentSubset 1.23.33 (2026-11-03)
 
 - [`assay()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)

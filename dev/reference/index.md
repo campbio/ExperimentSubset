@@ -5,6 +5,9 @@
 - [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
   : ExperimentSubset constructor
 
+- [`ExperimentSubset-class`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-class.md)
+  : The class of every ExperimentSubset object
+
 - [`show(`*`<SubsetRangedSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/SubsetRangedSummarizedExperiment-class.md)
   :
 

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.33</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.34</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,10 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.34" id="experimentsubset-12334-2026-11-04">ExperimentSubset 1.23.34 (2026-11-04)<a class="anchor" aria-label="anchor" href="#experimentsubset-12334-2026-11-04"></a></h2>
+<ul><li>New exported virtual class <code>ExperimentSubset</code>, which all five <code>Subset*</code> classes extend, so <code>is(x, "ExperimentSubset")</code> tests whether <code>x</code> is an <code>ExperimentSubset</code> object, whichever class it extends. Before, this took a list of the five classes or a check for the <code>subsets</code> slot: a <code>SubsetSpatialExperiment</code>, for example, is not a <code>SubsetSingleCellExperiment</code>, though both extend <code>SingleCellExperiment</code>. See <code><a href="../reference/ExperimentSubset-class.html">?"ExperimentSubset-class"</a></code> (<a href="https://github.com/campbio/ExperimentSubset/issues/5" class="external-link">#5</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.33" id="experimentsubset-12333-2026-11-03">ExperimentSubset 1.23.33 (2026-11-03)<a class="anchor" aria-label="anchor" href="#experimentsubset-12333-2026-11-03"></a></h2>
 <ul><li>
