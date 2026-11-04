@@ -599,6 +599,15 @@ testthat::test_that("Every Subset* class is an ExperimentSubset (#5)", {
   testthat::expect_false(is(sce, "ExperimentSubset"))
   testthat::expect_false(is(se, "ExperimentSubset"))
   testthat::expect_false(is(spe, "ExperimentSubset"))
+
+  # a new Subset* class must be added to the union in allClasses.R
+  packageClasses <- getClasses(asNamespace("ExperimentSubset"))
+  subsetClasses <- grep("^Subset", packageClasses, value = TRUE)
+  testthat::expect_length(subsetClasses, 5)
+  for (subsetClass in subsetClasses) {
+    testthat::expect_true(extends(subsetClass, "ExperimentSubset"),
+                          info = subsetClass)
+  }
 })
 
 # Runs the methods every Subset*Experiment class shares on es, whose main

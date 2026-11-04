@@ -1,6 +1,6 @@
 # A common ExperimentSubset class for the Subset* classes (#5)
 
-- **Status:** Draft for review
+- **Status:** Approved and implemented
 - **Date:** 2026-11-04
 - **Branch:** `feature/experimentsubset-class`, from `devel`
 - **Lands:** one PR to `devel` (1.23.34); devel only, no release port
@@ -83,9 +83,9 @@ only.
 
 ### ADR
 
-- `dev/adr/0005-experimentsubset-class-union.md`, status Proposed, and
-  its row in the index in `dev/adr/README.md`. The maintainer changes it
-  to Accepted on approval.
+- `dev/adr/0005-experimentsubset-class-union.md` and its row in the
+  index in `dev/adr/README.md`, proposed with this spec and accepted by
+  the maintainer on 2026-11-04.
 
 ## Testing
 
