@@ -43,3 +43,7 @@ data(sce_chcl, package = "scds")
 es <- ExperimentSubset(sce_chcl)
 es
 }
+\seealso{
+\code{\linkS4class{ExperimentSubset}}, the class all of these
+  extend, for testing whether an object is an \code{ExperimentSubset}.
+}

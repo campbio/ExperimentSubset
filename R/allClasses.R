@@ -89,3 +89,50 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
   prototype = prototype(subsets = SimpleList()),
   contains = "SpatialExperiment"
 )
+
+#' The class of every ExperimentSubset object
+#'
+#' A virtual class that the five \code{Subset*} classes extend:
+#' \code{\linkS4class{SubsetSummarizedExperiment}},
+#' \code{\linkS4class{SubsetRangedSummarizedExperiment}},
+#' \code{\linkS4class{SubsetSingleCellExperiment}},
+#' \code{\linkS4class{SubsetTreeSummarizedExperiment}} and
+#' \code{\linkS4class{SubsetSpatialExperiment}}. Use
+#' \code{is(x, "ExperimentSubset")} to test whether \code{x} is an
+#' \code{ExperimentSubset} object, whichever class it extends. A
+#' \code{SubsetSpatialExperiment}, for example, is not a
+#' \code{SubsetSingleCellExperiment}, though it extends
+#' \code{SingleCellExperiment}.
+#'
+#' The class is virtual, so there are no objects of the class itself. Create
+#' an \code{ExperimentSubset} object with \code{\link{ExperimentSubset}()}.
+#' @name ExperimentSubset-class
+#' @aliases ExperimentSubset-class
+#' @exportClass ExperimentSubset
+#' @examples
+#' # simulate a small count matrix
+#' set.seed(1)
+#' counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts) <- paste0("gene", 1:10)
+#' colnames(counts) <- paste0("spot", 1:20)
+#'
+#' # a SpatialExperiment, and an ExperimentSubset object made from it
+#' spe <- SpatialExperiment(assays = list(counts = counts))
+#' es <- ExperimentSubset(spe)
+#'
+#' # es is an ExperimentSubset, whichever class it extends
+#' is(es, "ExperimentSubset")
+#' is(es, "SubsetSingleCellExperiment")
+#'
+#' # the SpatialExperiment it was made from is not
+#' is(spe, "ExperimentSubset")
+setClassUnion(
+  "ExperimentSubset",
+  c(
+    "SubsetSummarizedExperiment",
+    "SubsetRangedSummarizedExperiment",
+    "SubsetSingleCellExperiment",
+    "SubsetTreeSummarizedExperiment",
+    "SubsetSpatialExperiment"
+  )
+)

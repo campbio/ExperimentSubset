@@ -52,6 +52,8 @@ AssaySubset <- function(subsetName = "subset",
 #' @return An object of the matching \code{Subset*} class, for example a
 #'   \code{SubsetSingleCellExperiment} for a \code{SingleCellExperiment} or
 #'   a list of assays.
+#' @seealso \code{\linkS4class{ExperimentSubset}}, the class all of these
+#'   extend, for testing whether an object is an \code{ExperimentSubset}.
 #' @export
 #' @import Matrix
 #' @importFrom SingleCellExperiment SingleCellExperiment
@@ -1130,7 +1132,7 @@ NULL
 
 # Whether each of objects is an ExperimentSubset object, with subsets
 .hasSubsets <- function(objects) {
-  vapply(objects, methods::.hasSlot, logical(1), "subsets")
+  vapply(objects, methods::is, logical(1), "ExperimentSubset")
 }
 
 # The class an ExperimentSubset object extends, which the stored objects
@@ -1238,7 +1240,7 @@ NULL
 # converted to the class out extends, if that differs, and its names on
 # the matched dimension follow out's (see .followNames())
 .combineSubsets <- function(out, objects, along, useNames = FALSE) {
-  if (!methods::.hasSlot(out, "subsets"))
+  if (!methods::is(out, "ExperimentSubset"))
     out <- ExperimentSubset(out)
   maps <- .combineMaps(objects, out, along, useNames)
   baseClass <- .baseClass(out)
