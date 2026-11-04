@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.34</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.35</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,11 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.35" id="experimentsubset-12335-2026-11-04">ExperimentSubset 1.23.35 (2026-11-04)<a class="anchor" aria-label="anchor" href="#experimentsubset-12335-2026-11-04"></a></h2>
+<ul><li>
+<code><a href="../reference/ExperimentSubset.html">ExperimentSubset()</a></code> on an object that is already an <code>ExperimentSubset</code> now returns it as is, and <code>subset =</code> still creates a subset on it. Before, it failed with “no method or default for coercing ‘SubsetSingleCellExperiment’ to ‘SubsetSubsetSingleCellExperiment’”, so code that wraps an object without knowing whether it is already wrapped had to check first. <code><a href="../reference/ExperimentSubset.html">ExperimentSubset()</a></code> on an object of a subclass of a supported class, such as a class that contains <code>SingleCellExperiment</code>, now converts it as the class it extends, with a warning that the slots and methods the subclass adds are not kept; before, it failed with the same kind of error. Any other <code>x</code> that isn’t a list, such as a matrix, now gives the error “‘x’ must be a SummarizedExperiment, RangedSummarizedExperiment, SingleCellExperiment, TreeSummarizedExperiment or SpatialExperiment object, or a named list of assays”, instead of “unable to find an inherited method for function ‘assayNames’”. For an object of a subclass of a <code>Subset*</code> class, <code><a href="../reference/createSubset.html">createSubset()</a></code>, <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind()</a></code>, <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind()</a></code>, <code><a href="https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html" class="external-link">combineCols()</a></code> and <code><a href="https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html" class="external-link">combineRows()</a></code> now store each subset’s data as the class the object extends, such as <code>SingleCellExperiment</code>; before, they stored it as the subclass itself (<a href="https://github.com/campbio/ExperimentSubset/issues/89" class="external-link">#89</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.34" id="experimentsubset-12334-2026-11-04">ExperimentSubset 1.23.34 (2026-11-04)<a class="anchor" aria-label="anchor" href="#experimentsubset-12334-2026-11-04"></a></h2>
 <ul><li>New exported virtual class <code>ExperimentSubset</code>, which all five <code>Subset*</code> classes extend, so <code>is(x, "ExperimentSubset")</code> tests whether <code>x</code> is an <code>ExperimentSubset</code> object, whichever class it extends. Before, this took a list of the five classes or a check for the <code>subsets</code> slot: a <code>SubsetSpatialExperiment</code>, for example, is not a <code>SubsetSingleCellExperiment</code>, though both extend <code>SingleCellExperiment</code>. See <code><a href="../reference/ExperimentSubset-class.html">?"ExperimentSubset-class"</a></code> (<a href="https://github.com/campbio/ExperimentSubset/issues/5" class="external-link">#5</a>)</li>

@@ -21,9 +21,13 @@ ExperimentSubset(
 
 - x:
 
-  An experiment object of one of the five supported classes (subclasses
-  of them are not supported), or a named `list` of assay matrices, which
-  is passed to the `SingleCellExperiment` constructor as its assays.
+  An experiment object of one of the five supported classes, or a named
+  `list` of assay matrices, which is passed to the
+  `SingleCellExperiment` constructor as its assays. An object of a
+  subclass of a supported class is converted as the class it extends,
+  with a warning: the slots and methods that the subclass adds are not
+  kept. An object that is already an `ExperimentSubset` is returned as
+  is, with the subset from `subset`, if given.
 
 - subset:
 
@@ -38,7 +42,8 @@ ExperimentSubset(
 
 An object of the matching `Subset*` class, for example a
 `SubsetSingleCellExperiment` for a `SingleCellExperiment` or a list of
-assays.
+assays. For an `ExperimentSubset` object, the same object, with the new
+subset if `subset` is given.
 
 ## See also
 

@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.34</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.35</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,10 +78,13 @@
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>An experiment object of one of the five supported classes
-(subclasses of them are not supported), or a named <code>list</code> of assay
-matrices, which is passed to the <code>SingleCellExperiment</code> constructor
-as its assays.</p></dd>
+<dd><p>An experiment object of one of the five supported classes, or a
+named <code>list</code> of assay matrices, which is passed to the
+<code>SingleCellExperiment</code> constructor as its assays. An object of a
+subclass of a supported class is converted as the class it extends,
+with a warning: the slots and methods that the subclass adds are not
+kept. An object that is already an <code>ExperimentSubset</code> is
+returned as is, with the subset from <code>subset</code>, if given.</p></dd>
 
 
 <dt id="arg-subset">subset<a class="anchor" aria-label="anchor" href="#arg-subset"></a></dt>
@@ -98,7 +101,8 @@ in a list you supply is an error.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of the matching <code>Subset*</code> class, for example a
   <code>SubsetSingleCellExperiment</code> for a <code>SingleCellExperiment</code> or
-  a list of assays.</p>
+  a list of assays. For an <code>ExperimentSubset</code> object, the same
+  object, with the new subset if <code>subset</code> is given.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

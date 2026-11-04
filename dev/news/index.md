@@ -1,5 +1,34 @@
 # Changelog
 
+## ExperimentSubset 1.23.35 (2026-11-04)
+
+- [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
+  on an object that is already an `ExperimentSubset` now returns it as
+  is, and `subset =` still creates a subset on it. Before, it failed
+  with “no method or default for coercing ‘SubsetSingleCellExperiment’
+  to ‘SubsetSubsetSingleCellExperiment’”, so code that wraps an object
+  without knowing whether it is already wrapped had to check first.
+  [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
+  on an object of a subclass of a supported class, such as a class that
+  contains `SingleCellExperiment`, now converts it as the class it
+  extends, with a warning that the slots and methods the subclass adds
+  are not kept; before, it failed with the same kind of error. Any other
+  `x` that isn’t a list, such as a matrix, now gives the error “‘x’ must
+  be a SummarizedExperiment, RangedSummarizedExperiment,
+  SingleCellExperiment, TreeSummarizedExperiment or SpatialExperiment
+  object, or a named list of assays”, instead of “unable to find an
+  inherited method for function ‘assayNames’”. For an object of a
+  subclass of a `Subset*` class,
+  [`createSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md),
+  [`cbind()`](https://rdrr.io/r/base/cbind.html),
+  [`rbind()`](https://rdrr.io/r/base/cbind.html),
+  [`combineCols()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html)
+  and
+  [`combineRows()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html)
+  now store each subset’s data as the class the object extends, such as
+  `SingleCellExperiment`; before, they stored it as the subclass itself
+  ([\#89](https://github.com/campbio/ExperimentSubset/issues/89))
+
 ## ExperimentSubset 1.23.34 (2026-11-04)
 
 - New exported virtual class `ExperimentSubset`, which all five
