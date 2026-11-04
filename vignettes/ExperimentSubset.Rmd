@@ -197,8 +197,9 @@ A subset also sees the assays of its parent, sliced to its rows and columns,
 under the same names: these are *linked* assays, and they are not copied.
 Each subset has its own names, so two subsets made from the same parent can
 store an assay with the same name. Storing an assay with a name the subset
-already sees through its parent needs `unlink = TRUE`, which makes the subset
-(and subsets made from it) use its own version from then on.
+already sees through its parent needs `unlink = TRUE`, or `unlink =` that
+name, which makes the subset (and subsets made from it) use its own version
+from then on.
 
 ```{r subset-assay-names}
 #'subset1' sees its own assay and the main 'counts' it was made from

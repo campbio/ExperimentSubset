@@ -2908,6 +2908,17 @@ testthat::test_that("unlink can name the assays to unlink (#59)", {
     setSubsetExperiment(es, "s1", sub, unlink = character(0)),
     regexp = "'decontXcounts' in subset 's1' is linked"
   )
+  # every changed linked assay unlink doesn't allow is named at once
+  assay(changedCounts, "decontXcounts") <- ownDecontX + 1
+  testthat::expect_error(
+    setSubsetExperiment(es, "s1", changedCounts, unlink = c(a = "other")),
+    regexp = paste0("'counts' in subset 's1' is linked to the main assay ",
+                    "'counts' and 'decontXcounts' to the main assay ",
+                    "'decontXcounts'. Set unlink = TRUE or unlink = ",
+                    "c(\"other\", \"counts\", \"decontXcounts\") to store ",
+                    "separate 'counts' and 'decontXcounts'"),
+    fixed = TRUE
+  )
   # an error after the unlink check stores nothing and says nothing
   badName <- sub
   assay(badName, "a/b") <- ownDecontX

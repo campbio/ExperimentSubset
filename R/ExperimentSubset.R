@@ -419,7 +419,8 @@ NULL
          "from an assay name.")
   .checkUnlink(unlink)
   # a name linked from the parent is protected unless unlink allows it
-  source <- .checkLinked(x, subsetName, subsetAssayName, unlink)
+  source <- .checkLinked(.assayOwners(x, subsetName), subsetName,
+                         subsetAssayName, unlink)
 
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   if (!identical(as.integer(dim(inputMatrix)), as.integer(dim(internal))))
@@ -438,7 +439,7 @@ NULL
     colnames(internal) <- colnames(inputMatrix)
   assay(internal, withDimnames = FALSE, subsetAssayName) <- inputMatrix
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
-  if (!is.null(source) && !quiet)
+  if (length(source) > 0 && !quiet)
     .unlinkMessage(subsetName, subsetAssayName, source)
 
   return(x)
@@ -465,29 +466,46 @@ NULL
           "', unlinked from ", source, ".")
 }
 
-# If subsetName sees assayName linked from its parent, stops unless unlink
-# allows storing its own, and returns where the link comes from (for
-# example "the main assay 'counts'"); NULL for a name that isn't linked
-.checkLinked <- function(x, subsetName, assayName, unlink) {
-  owners <- .assayOwners(x, subsetName)
-  if (!assayName %in% names(owners) || owners[[assayName]] == subsetName)
-    return(NULL)
-  owner <- owners[[assayName]]
-  source <- paste0("'", owner, "/", assayName, "'")
-  if (owner == "")
-    source <- paste0("the main assay '", assayName, "'")
-  if (!.unlinks(unlink, assayName)) {
-    # with names in unlink, suggest adding this one to them
-    suggested <- assayName
-    if (is.character(unlink))
-      suggested <- c(unlink, assayName)
-    suggested <- paste(deparse(suggested), collapse = "")
-    stop("'", assayName, "' in subset '", subsetName, "' is linked ",
-         "to ", source, ". Set unlink = TRUE or unlink = ", suggested,
-         " to store a separate '", assayName, "' computed on the cells ",
-         "of '", subsetName, "'.")
-  }
-  source
+# For the assays in assayNames that subsetName sees linked from its
+# parent (owners is .assayOwners(x, subsetName)), stops unless unlink
+# allows storing its own, naming every one it doesn't, and returns where
+# each is linked from (for example "the main assay 'counts'"), named by
+# assay; character(0) when none is linked
+.checkLinked <- function(owners, subsetName, assayNames, unlink) {
+  assayNames <- assayNames[assayNames %in% names(owners)]
+  assayNames <- assayNames[owners[assayNames] != subsetName]
+  if (length(assayNames) == 0)
+    return(character(0))
+  sources <- paste0("'", owners[assayNames], "/", assayNames, "'")
+  main <- owners[assayNames] == ""
+  sources[main] <- paste0("the main assay '", assayNames[main], "'")
+  names(sources) <- assayNames
+  blocked <- assayNames[!vapply(assayNames, .unlinks, logical(1),
+                                unlink = unlink)]
+  if (length(blocked) == 0)
+    return(sources)
+  # with names in unlink, suggest adding these to them
+  suggested <- blocked
+  if (is.character(unlink))
+    suggested <- c(unname(unlink), blocked)
+  suggested <- paste(deparse(suggested), collapse = "")
+  quoted <- paste0("'", blocked, "'")
+  linkedTo <- paste0(quoted, " to ", sources[blocked])
+  linkedTo[1] <- paste0(quoted[1], " in subset '", subsetName,
+                        "' is linked to ", sources[[blocked[1]]])
+  separate <- if (length(blocked) == 1) "a separate" else "separate"
+  what <- paste(separate, .andList(quoted))
+  stop(.andList(linkedTo), ". Set unlink = TRUE or unlink = ", suggested,
+       " to store ", what, " computed on the cells of '", subsetName,
+       "'.")
+}
+
+# Joins words as "a", "a and b" or "a, b and c"
+.andList <- function(words) {
+  n <- length(words)
+  if (n < 2)
+    return(paste(words, collapse = ""))
+  paste(paste(words[-n], collapse = ", "), "and", words[n])
 }
 
 # A subset as a standalone object of the main object's class: the main
@@ -569,9 +587,7 @@ NULL
   }
   # where each unlinked assay was linked from, for the messages once
   # everything is stored
-  sources <- character(0)
-  for (name in intersect(stored, linked))
-    sources[name] <- .checkLinked(x, subsetName, name, unlink)
+  sources <- .checkLinked(owners, subsetName, stored, unlink)
 
   # own assays that value no longer has are removed, unless a subset was
   # made from them
