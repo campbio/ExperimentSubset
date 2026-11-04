@@ -1,5 +1,50 @@
 # Changelog
 
+## ExperimentSubset 1.23.32 (2026-11-03)
+
+- A `subsetName` that isn’t one subset name, such as `NULL`, `NA` or
+  several names, now gives the error “‘subsetName’ must be one subset
+  name, a single character string.” in the methods that get or set a
+  subset’s data with `subsetName =`: `metadata()`,
+  [`altExp()`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html),
+  [`altExps()`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html),
+  [`altExpNames()`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html),
+  [`reducedDim()`](https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html),
+  [`reducedDims()`](https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html),
+  [`reducedDimNames()`](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames.md),
+  [`rowData()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
+  and
+  [`colData()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html),
+  their setters,
+  [`spatialCoords()`](https://rdrr.io/pkg/SpatialExperiment/man/SpatialExperiment-methods.html),
+  [`spatialData()`](https://rdrr.io/pkg/SpatialExperiment/man/SpatialExperiment-methods.html)
+  and
+  [`subsetParent()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetParent.md).
+  Several names or `NA_character_` give the same error in
+  [`subsetAssayNames()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetAssayNames.md),
+  [`subsetDim()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.md),
+  [`subsetColnames()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColnames.md),
+  [`subsetRownames()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetRownames.md)
+  and their setters,
+  [`subsetColData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md),
+  [`subsetRowData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetRowData.md),
+  [`subsetSpatialCoords()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialCoords.md),
+  [`getSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md),
+  [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md),
+  [`setSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md),
+  and
+  [`getSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetAssay.md)
+  with `subsetAssayName =`. Before, these failed with base R errors that
+  didn’t name the argument, such as “argument is of length zero” or “the
+  condition has length \> 1”, or with “NA subset does not exist” or “NA
+  does not exist in the subsets slot”.
+  `subsetAssayNames(x, subsetName = NULL)`, the default, still lists
+  every subset, and
+  [`reducedDimNames()`](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames.md)
+  on an object without subsets, such as a plain `SingleCellExperiment`,
+  still says first that it has no subsets
+  ([\#83](https://github.com/campbio/ExperimentSubset/issues/83))
+
 ## ExperimentSubset 1.23.31 (2026-11-03)
 
 - [`reducedDimNames()`](https://campbio.github.io/ExperimentSubset/dev/reference/reducedDimNames.md)
