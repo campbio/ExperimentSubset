@@ -44,6 +44,7 @@ es <- ExperimentSubset(sce_chcl)
 es
 }
 \seealso{
-\code{\linkS4class{ExperimentSubset}}, the class all of these
-  extend, for testing whether an object is an \code{ExperimentSubset}.
+\code{\linkS4class{ExperimentSubset}}, the class every
+  \code{Subset*} class extends, for testing whether an object is an
+  \code{ExperimentSubset}.
 }

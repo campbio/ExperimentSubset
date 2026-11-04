@@ -110,21 +110,27 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 #' @aliases ExperimentSubset-class
 #' @exportClass ExperimentSubset
 #' @examples
-#' # simulate a small count matrix
+#' # simulate counts for 10 genes in 20 spots
 #' set.seed(1)
-#' counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' values <- rpois(200, lambda = 5)
+#' counts <- matrix(values, nrow = 10)
 #' rownames(counts) <- paste0("gene", 1:10)
 #' colnames(counts) <- paste0("spot", 1:20)
 #'
-#' # a SpatialExperiment, and an ExperimentSubset object made from it
+#' # make a SpatialExperiment from the counts
 #' spe <- SpatialExperiment(assays = list(counts = counts))
+#'
+#' # convert it to an ExperimentSubset object
 #' es <- ExperimentSubset(spe)
 #'
-#' # es is an ExperimentSubset, whichever class it extends
+#' # es is an ExperimentSubset: TRUE
 #' is(es, "ExperimentSubset")
+#'
+#' # but not a SubsetSingleCellExperiment, though it extends
+#' # SingleCellExperiment: FALSE
 #' is(es, "SubsetSingleCellExperiment")
 #'
-#' # the SpatialExperiment it was made from is not
+#' # the SpatialExperiment it was made from is not an ExperimentSubset: FALSE
 #' is(spe, "ExperimentSubset")
 setClassUnion(
   "ExperimentSubset",

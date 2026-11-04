@@ -52,8 +52,9 @@ AssaySubset <- function(subsetName = "subset",
 #' @return An object of the matching \code{Subset*} class, for example a
 #'   \code{SubsetSingleCellExperiment} for a \code{SingleCellExperiment} or
 #'   a list of assays.
-#' @seealso \code{\linkS4class{ExperimentSubset}}, the class all of these
-#'   extend, for testing whether an object is an \code{ExperimentSubset}.
+#' @seealso \code{\linkS4class{ExperimentSubset}}, the class every
+#'   \code{Subset*} class extends, for testing whether an object is an
+#'   \code{ExperimentSubset}.
 #' @export
 #' @import Matrix
 #' @importFrom SingleCellExperiment SingleCellExperiment
