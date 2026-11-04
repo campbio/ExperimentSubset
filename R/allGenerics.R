@@ -238,9 +238,10 @@ setGeneric(
 #' @title reducedDimNames
 #' @description A wrapper to the \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
 #' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param ... Additional arguments. Use \code{subsetName} to get the
-#'   \code{reducedDimNames} of a subset; other arguments are passed to the
-#'   SCE method.
+#' @param ... Only \code{subsetName}, the name of the subset whose
+#'   \code{reducedDimNames} to get, given by name. Leave it out for the main
+#'   object's. A subset name by position, or any other argument, is an
+#'   error.
 #' @return The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
 #' @rdname reducedDimNames
 #' @export

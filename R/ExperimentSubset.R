@@ -1685,6 +1685,7 @@ setMethod(
   f = "reducedDimNames",
   signature = "ANY",
   definition = function(x, ...) {
+    .checkReducedDimNamesArgs(x, ...)
     arglist <- list(...)
     if (!"subsetName" %in% names(arglist))
       return(SingleCellExperiment::reducedDimNames(x))
@@ -1694,6 +1695,34 @@ setMethod(
     SingleCellExperiment::reducedDimNames(internal)
   }
 )
+
+# SingleCellExperiment's reducedDimNames() takes only x, so anything in ...
+# other than a named subsetName would be dropped without a message (#82).
+.checkReducedDimNamesArgs <- function(x, ...) {
+  nSubsetNames <- sum(names(list(...)) == "subsetName")
+  if (nSubsetNames > 1L)
+    stop("reducedDimNames() takes one 'subsetName', not several.")
+  others <- .otherArgs(...)
+  if (length(others) == 0L)
+    return(invisible(NULL))
+  otherNames <- names(others)
+  if (is.null(otherNames))
+    otherNames <- rep("", length(others))
+  first <- others[[1]]
+  # a lone string by position is a subset name; say how to give it, or,
+  # for an x without subsets, give .isSubset()'s error that it has none
+  if (nSubsetNames == 0L && length(others) == 1L && otherNames == ""
+      && is.character(first) && length(first) == 1L) {
+    if (!.hasSubsets(list(x)))
+      .isSubset(x, first)
+    stop("To get the reducedDimNames of a subset, name the subset with ",
+         "subsetName =, as in reducedDimNames(x, subsetName = \"", first,
+         "\").")
+  }
+  otherNames[otherNames == ""] <- "an unnamed argument"
+  stop("reducedDimNames() takes only 'x' and 'subsetName'. Remove: ",
+       paste(unique(otherNames), collapse = ", "), ".")
+}
 
 #' @rdname reducedDimNames-set
 setReplaceMethod(
@@ -1985,6 +2014,10 @@ NULL
 
 #checks if is a subset
 .isSubset <- function(x, subsetName){
+  # only the "ANY" reducedDimNames methods can get such an x (#82)
+  if (!.hasSubsets(list(x)))
+    stop("'x' is a ", class(x)[1], ", which has no subsets. Convert it ",
+         "with ExperimentSubset() before using subsetName =.")
   if(!subsetName %in% subsetNames(x))
     stop(subsetName, " subset does not exist. 'subsetName' must be the ",
          "name of a subset.")
