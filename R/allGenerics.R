@@ -112,11 +112,14 @@ setGeneric(
 #'   \code{assay} against the \code{inputMatrix} parameter. It can't contain
 #'   \code{"/"}. A subset sees its parent's assays as linked assays, so a name
 #'   linked from the parent (for example a main \code{assay}) needs
-#'   \code{unlink = TRUE}.
-#' @param unlink \code{logical(1)} Store the \code{assay} even though the
-#'   subset sees an assay of that name linked from its parent. The subset, and
-#'   subsets made from it, then use this \code{assay} instead; the parent's is
-#'   unchanged. Default \code{FALSE}.
+#'   \code{unlink}.
+#' @param unlink \code{TRUE}, \code{FALSE} or a character vector of
+#'   \code{assay} names. Store the \code{assay} even though the subset sees an
+#'   assay of that name linked from its parent: with \code{TRUE}, or with a
+#'   character vector that contains \code{subsetAssayName}. The subset, and
+#'   subsets made from it, then use this \code{assay} instead, and a message
+#'   says what was unlinked; the parent's is unchanged. Default
+#'   \code{FALSE}.
 #' @return Updated \code{ExperimentSubset} object with the new \code{assay}
 #'   stored inside the specified subset.
 #' @rdname setSubsetAssay
@@ -579,10 +582,15 @@ setGeneric(
 #'   parent class) with the subset's dimensions and the subset's row and
 #'   column names, in the same order. A tool that drops rows or columns is
 #'   followed by \code{createSubset} instead.
-#' @param unlink \code{logical(1)} Store assays of \code{value} that have
-#'   the name of an assay linked from the subset's parent but different
-#'   values, as with \code{setSubsetAssay}. Without it, such an assay is an
-#'   error. Default \code{FALSE}.
+#' @param unlink \code{TRUE}, \code{FALSE} or a character vector of
+#'   \code{assay} names. Store assays of \code{value} that have the name of
+#'   an assay linked from the subset's parent but different values, as with
+#'   \code{setSubsetAssay}: with \code{TRUE}, every such assay; with a
+#'   character vector, only those it names. Any other such assay is an error,
+#'   and nothing is stored. A message names each assay that is unlinked.
+#'   Names of assays that are not linked, or unchanged, are ignored, so
+#'   \code{unlink = "decontXcounts"} stores a changed \code{decontXcounts}
+#'   but stops if \code{counts} was changed too. Default \code{FALSE}.
 #' @return Updated \code{ExperimentSubset} object. Linked assays that are
 #'   in \code{value} hold the same values as what the subset sees (whatever
 #'   their dimnames, type or class) are not stored, and neither are the main

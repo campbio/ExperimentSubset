@@ -54,10 +54,12 @@ method of the class \code{x} extends. Default \code{TRUE}.}
     in \code{i}, the name of the assay to get from or store in that
     subset. It is an error with any other \code{i}, including
     \code{"subset/assay"}. Default \code{NULL}.}
-  \item{\code{unlink}}{\code{logical(1)} When storing in a subset,
-    store the assay even though the subset sees an assay of that name
-    linked from its parent, as for \code{\link{setSubsetAssay}}. It is
-    an error when storing a main assay. Default \code{FALSE}.}
+  \item{\code{unlink}}{\code{TRUE}, \code{FALSE} or a character
+    vector of assay names. When storing in a subset, store the assay
+    even though the subset sees an assay of that name linked from its
+    parent, with \code{TRUE} or a vector that contains its name, as for
+    \code{\link{setSubsetAssay}}. It is an error when storing a main
+    assay. Default \code{FALSE}.}
 }
 For a main assay, other arguments are passed on to the method of the
 class \code{x} extends.}
@@ -81,7 +83,7 @@ Get or set an assay of the main object or of a subset.
     \item the subset's rows and columns of the assay it was made from,
       when \code{i} is a subset name. If the subset, or a subset it was
       made from, stored its own assay of that name with
-      \code{unlink = TRUE}, that assay is returned instead;
+      \code{unlink}, that assay is returned instead;
     \item an assay as a subset sees it, when \code{i} is
       \code{"subset/assay"}, or a subset name with
       \code{subsetAssayName = "assay"}: either one stored in the subset,

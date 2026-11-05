@@ -183,7 +183,7 @@ NULL
 #'     \item the subset's rows and columns of the assay it was made from,
 #'       when \code{i} is a subset name. If the subset, or a subset it was
 #'       made from, stored its own assay of that name with
-#'       \code{unlink = TRUE}, that assay is returned instead;
+#'       \code{unlink}, that assay is returned instead;
 #'     \item an assay as a subset sees it, when \code{i} is
 #'       \code{"subset/assay"}, or a subset name with
 #'       \code{subsetAssayName = "assay"}: either one stored in the subset,
@@ -210,10 +210,12 @@ NULL
 #'       in \code{i}, the name of the assay to get from or store in that
 #'       subset. It is an error with any other \code{i}, including
 #'       \code{"subset/assay"}. Default \code{NULL}.}
-#'     \item{\code{unlink}}{\code{logical(1)} When storing in a subset,
-#'       store the assay even though the subset sees an assay of that name
-#'       linked from its parent, as for \code{\link{setSubsetAssay}}. It is
-#'       an error when storing a main assay. Default \code{FALSE}.}
+#'     \item{\code{unlink}}{\code{TRUE}, \code{FALSE} or a character
+#'       vector of assay names. When storing in a subset, store the assay
+#'       even though the subset sees an assay of that name linked from its
+#'       parent, with \code{TRUE} or a vector that contains its name, as for
+#'       \code{\link{setSubsetAssay}}. It is an error when storing a main
+#'       assay. Default \code{FALSE}.}
 #'   }
 #'   For a main assay, other arguments are passed on to the method of the
 #'   class \code{x} extends.
@@ -292,7 +294,7 @@ NULL
   if (ref$kind == "visible")
     return(.subsetAssayView(x, ref$subset, ref$assay, withDimnames))
   #a subset: its view of the assay its parentAssay refers to, which is
-  #its own if it, or a subset on the way, stored one with unlink = TRUE
+  #its own if it, or a subset on the way, stored one with unlink
   subsetName <- ref$subset
   if (is.null(.parentAssay(.subsets(x)[[subsetName]]))) {
     internal <- .internalAssay(.subsets(x)[[subsetName]])
@@ -401,7 +403,8 @@ NULL
                          subsetName,
                          inputMatrix,
                          subsetAssayName = NULL,
-                         unlink = FALSE) {
+                         unlink = FALSE,
+                         quiet = FALSE) {
 
   .checkSubsetName(subsetName)
   if (!subsetName %in% subsetNames(x))
@@ -414,18 +417,10 @@ NULL
   if (grepl("/", subsetAssayName, fixed = TRUE))
     stop("'subsetAssayName' can't contain '/', which separates a subset ",
          "from an assay name.")
-  # a name linked from the parent is protected unless unlink = TRUE
-  owners <- .assayOwners(x, subsetName)
-  if (subsetAssayName %in% names(owners)
-      && owners[[subsetAssayName]] != subsetName && !isTRUE(unlink)) {
-    owner <- owners[[subsetAssayName]]
-    source <- paste0("'", owner, "/", subsetAssayName, "'")
-    if (owner == "")
-      source <- paste0("the main assay '", subsetAssayName, "'")
-    stop("'", subsetAssayName, "' in subset '", subsetName, "' is linked ",
-         "to ", source, ". Set unlink = TRUE to store a separate '",
-         subsetAssayName, "' computed on the cells of '", subsetName, "'.")
-  }
+  .checkUnlink(unlink)
+  # a name linked from the parent is protected unless unlink allows it
+  source <- .checkLinked(.assayOwners(x, subsetName), subsetName,
+                         subsetAssayName, unlink)
 
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   if (!identical(as.integer(dim(inputMatrix)), as.integer(dim(internal))))
@@ -444,8 +439,73 @@ NULL
     colnames(internal) <- colnames(inputMatrix)
   assay(internal, withDimnames = FALSE, subsetAssayName) <- inputMatrix
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
-  
+  if (length(source) > 0 && !quiet)
+    .unlinkMessage(subsetName, subsetAssayName, source)
+
   return(x)
+}
+
+# Stops unless unlink is TRUE, FALSE or a character vector of assay names
+.checkUnlink <- function(unlink) {
+  validLogical <- is.logical(unlink) && length(unlink) == 1 && !is.na(unlink)
+  validNames <- is.character(unlink) && !anyNA(unlink) && all(nzchar(unlink))
+  if (!validLogical && !validNames)
+    stop("'unlink' must be TRUE, FALSE or a character vector of assay ",
+         "names.")
+  invisible(NULL)
+}
+
+# TRUE if unlink allows storing the assay assayName over a linked one
+.unlinks <- function(unlink, assayName) {
+  isTRUE(unlink) || (is.character(unlink) && assayName %in% unlink)
+}
+
+# Says that subsetName now stores its own assayName, linked from source
+.unlinkMessage <- function(subsetName, assayName, source) {
+  message("Subset '", subsetName, "' now stores its own '", assayName,
+          "', unlinked from ", source, ".")
+}
+
+# For the assays in assayNames that subsetName sees linked from its
+# parent (owners is .assayOwners(x, subsetName)), stops unless unlink
+# allows storing its own, naming every one it doesn't, and returns where
+# each is linked from (for example "the main assay 'counts'"), named by
+# assay; character(0) when none is linked
+.checkLinked <- function(owners, subsetName, assayNames, unlink) {
+  assayNames <- assayNames[assayNames %in% names(owners)]
+  assayNames <- assayNames[owners[assayNames] != subsetName]
+  if (length(assayNames) == 0)
+    return(character(0))
+  sources <- paste0("'", owners[assayNames], "/", assayNames, "'")
+  main <- owners[assayNames] == ""
+  sources[main] <- paste0("the main assay '", assayNames[main], "'")
+  names(sources) <- assayNames
+  blocked <- assayNames[!vapply(assayNames, .unlinks, logical(1),
+                                unlink = unlink)]
+  if (length(blocked) == 0)
+    return(sources)
+  # with names in unlink, suggest adding these to them
+  suggested <- blocked
+  if (is.character(unlink))
+    suggested <- c(unname(unlink), blocked)
+  suggested <- paste(deparse(suggested), collapse = "")
+  quoted <- paste0("'", blocked, "'")
+  linkedTo <- paste0(quoted, " to ", sources[blocked])
+  linkedTo[1] <- paste0(quoted[1], " in subset '", subsetName,
+                        "' is linked to ", sources[[blocked[1]]])
+  separate <- if (length(blocked) == 1) "a separate" else "separate"
+  what <- paste(separate, .andList(quoted))
+  stop(.andList(linkedTo), ". Set unlink = TRUE or unlink = ", suggested,
+       " to store ", what, " computed on the cells of '", subsetName,
+       "'.")
+}
+
+# Joins words as "a", "a and b" or "a, b and c"
+.andList <- function(words) {
+  n <- length(words)
+  if (n < 2)
+    return(paste(words, collapse = ""))
+  paste(paste(words[-n], collapse = ", "), "and", words[n])
 }
 
 # A subset as a standalone object of the main object's class: the main
@@ -495,7 +555,54 @@ NULL
 # object's tagged columns are left out
 .setSubsetExperiment <- function(x, subsetName, value, unlink = FALSE) {
   .isSubset(x, subsetName)
+  .checkUnlink(unlink)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
+  .checkSubsetValue(internal, subsetName, value)
+
+  # unchanged linked assays are not stored; changed ones only if unlink
+  # allows it, checked before anything is stored
+  x <- .qualifyParents(x)
+  owners <- .assayOwners(x, subsetName)
+  linked <- names(owners)[owners != subsetName]
+  stored <- character(0)
+  for (name in assayNames(value)) {
+    if (!name %in% linked
+        || !.sameAssay(assay(value, name),
+                       .subsetAssayView(x, subsetName, name)))
+      stored <- c(stored, name)
+  }
+  # where each unlinked assay was linked from, for the messages once
+  # everything is stored
+  sources <- .checkLinked(owners, subsetName, stored, unlink)
+
+  # own assays that value no longer has are removed, unless a subset was
+  # made from them
+  kept <- assayNames(internal) %in% assayNames(value)
+  .checkNotParents(x, subsetName, assayNames(internal)[!kept])
+  assays(internal, withDimnames = FALSE) <-
+    assays(internal, withDimnames = FALSE)[kept]
+  .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  for (name in stored)
+    x <- .setSubsetAssay(x, subsetName, assay(value, name), name,
+                         unlink = unlink, quiet = TRUE)
+
+  .subsetRowData(x, subsetName) <- .withoutParentColumns(rowData(value))
+  .subsetColData(x, subsetName) <- .withoutParentColumns(colData(value))
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  if (methods::is(internal, "SingleCellExperiment")) {
+    SingleCellExperiment::reducedDims(internal) <- reducedDims(value)
+    altExps(internal) <- altExps(value)
+  }
+  metadata(internal) <- metadata(value)
+  .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  for (name in names(sources))
+    .unlinkMessage(subsetName, name, sources[[name]])
+  x
+}
+
+# Stops unless value, for setSubsetExperiment(), has the class, dimensions
+# and row and column names of subsetName's internal object
+.checkSubsetValue <- function(internal, subsetName, value) {
   if (!identical(as.character(class(value)), as.character(class(internal))))
     stop("'value' must be a ", class(internal), ", the class of the main ",
          "object, as returned by getSubsetExperiment().")
@@ -511,34 +618,7 @@ NULL
       stop("The ", what, " of 'value' must be the ", what, " of subset '",
            subsetName, "', in the same order.")
   }
-
-  # own assays that value no longer has are removed, unless a subset was
-  # made from them
-  x <- .qualifyParents(x)
-  owners <- .assayOwners(x, subsetName)
-  kept <- assayNames(internal) %in% assayNames(value)
-  .checkNotParents(x, subsetName, assayNames(internal)[!kept])
-  assays(internal, withDimnames = FALSE) <-
-    assays(internal, withDimnames = FALSE)[kept]
-  .internalAssay(.subsets(x)[[subsetName]]) <- internal
-  for (name in assayNames(value)) {
-    input <- assay(value, name)
-    linked <- name %in% names(owners) && owners[[name]] != subsetName
-    if (linked && .sameAssay(input, .subsetAssayView(x, subsetName, name)))
-      next
-    x <- .setSubsetAssay(x, subsetName, input, name, unlink = unlink)
-  }
-
-  .subsetRowData(x, subsetName) <- .withoutParentColumns(rowData(value))
-  .subsetColData(x, subsetName) <- .withoutParentColumns(colData(value))
-  internal <- .internalAssay(.subsets(x)[[subsetName]])
-  if (methods::is(internal, "SingleCellExperiment")) {
-    SingleCellExperiment::reducedDims(internal) <- reducedDims(value)
-    altExps(internal) <- altExps(value)
-  }
-  metadata(internal) <- metadata(value)
-  .internalAssay(.subsets(x)[[subsetName]]) <- internal
-  x
+  invisible(NULL)
 }
 
 # Stops if removing subsetName's own assays in assayNames would change or
@@ -585,7 +665,10 @@ NULL
 
 '.assay<-' <- function(x, i, ..., subsetAssayName = NULL, value){
   .checkAssayI(i)
-  unlink <- isTRUE(list(...)$unlink)
+  unlink <- list(...)[["unlink"]]
+  if (is.null(unlink))
+    unlink <- FALSE
+  .checkUnlink(unlink)
   # "subset/assay" stores into that subset
   if (grepl("/", i, fixed = TRUE) && !i %in% assayNames(x)) {
     parts <- .qualifiedParts(x, i)
@@ -610,7 +693,7 @@ NULL
   else{
     if (!is.null(subsetAssayName))
       stop(.subsetAssayNameMisuse(i, qualified = FALSE))
-    if (unlink)
+    if (!isFALSE(unlink) && length(unlink) > 0)
       stop("'unlink' only applies when storing an assay in a subset.")
     callNextMethod(x, i, ..., value = value)
   }
