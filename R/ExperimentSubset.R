@@ -557,21 +557,7 @@ NULL
   .isSubset(x, subsetName)
   .checkUnlink(unlink)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
-  if (!identical(as.character(class(value)), as.character(class(internal))))
-    stop("'value' must be a ", class(internal), ", the class of the main ",
-         "object, as returned by getSubsetExperiment().")
-  if (!identical(as.integer(dim(value)), as.integer(dim(internal))))
-    stop("'value' must have the same dimensions as subset '", subsetName,
-         "' (", nrow(internal), " x ", ncol(internal), "). To keep fewer ",
-         "rows or columns, create a subset with createSubset().")
-  # matching names show value's rows and columns weren't reordered
-  for (what in c("rownames", "colnames")) {
-    getNames <- match.fun(what)
-    if (!is.null(getNames(internal))
-        && !identical(getNames(value), getNames(internal)))
-      stop("The ", what, " of 'value' must be the ", what, " of subset '",
-           subsetName, "', in the same order.")
-  }
+  .checkSubsetValue(internal, subsetName, value)
 
   # unchanged linked assays are not stored; changed ones only if unlink
   # allows it, checked before anything is stored
@@ -612,6 +598,27 @@ NULL
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
+}
+
+# Stops unless value, for setSubsetExperiment(), has the class, dimensions
+# and row and column names of subsetName's internal object
+.checkSubsetValue <- function(internal, subsetName, value) {
+  if (!identical(as.character(class(value)), as.character(class(internal))))
+    stop("'value' must be a ", class(internal), ", the class of the main ",
+         "object, as returned by getSubsetExperiment().")
+  if (!identical(as.integer(dim(value)), as.integer(dim(internal))))
+    stop("'value' must have the same dimensions as subset '", subsetName,
+         "' (", nrow(internal), " x ", ncol(internal), "). To keep fewer ",
+         "rows or columns, create a subset with createSubset().")
+  # matching names show value's rows and columns weren't reordered
+  for (what in c("rownames", "colnames")) {
+    getNames <- match.fun(what)
+    if (!is.null(getNames(internal))
+        && !identical(getNames(value), getNames(internal)))
+      stop("The ", what, " of 'value' must be the ", what, " of subset '",
+           subsetName, "', in the same order.")
+  }
+  invisible(NULL)
 }
 
 # Stops if removing subsetName's own assays in assayNames would change or
