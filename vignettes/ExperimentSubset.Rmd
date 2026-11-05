@@ -445,7 +445,12 @@ assay(es, "subset2", subsetAssayName = "subset2Assay_a2") <- subset2Assay
 subsetSummary(es)
 ```
 
-Store an experiment object in the `altExp` slot of `subset2`:
+A subset also sees the main object's alternative experiments (`altExps`),
+cut to its cells but with all of their features, and stores only what it
+changes in them, as for assays: a changed linked assay of an `altExp` needs
+`unlink`, with the assay named as `"altExpName/assayName"`. See
+`?"ExperimentSubset-altExp"`. Store an experiment object of its own in the
+`altExp` slot of `subset2`:
 
 ```{r subset-altexp}
 altExp(x = es,
