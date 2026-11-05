@@ -376,14 +376,19 @@ testthat::test_that("Testing altExperiments",{
   testthat::expect_error(altExp(es, "alt1", subsetName = "hvg10002"),
                          "hvg10002 subset does not exist.")
   
-  altExpNames(es, subsetName = "hvg1000") <- c("a1", "a2")
-  expect_true(all.equal(altExpNames(es, subsetName = "hvg1000"), c("a1", "a2")))
+  # the subset sees the main object's altExps a1 and a2, then its own
+  # alt1 and alt2, and renames only its own (#58)
+  altExpNames(es, subsetName = "hvg1000") <- c("a1", "a2", "b1", "b2")
+  expect_true(all.equal(altExpNames(es, subsetName = "hvg1000"),
+                        c("a1", "a2", "b1", "b2")))
 
   testthat::expect_error(altExpNames(es, subsetName = "hvg1000x"),
                          "hvg1000x subset does not exist.")
   
   altExps(es, subsetName = "hvg1000") <- list(a = es@subsets$hvg1000@internalAssay, b = es@subsets$hvg1000@internalAssay)
-  expect_true(all.equal(altExpNames(es, subsetName = "hvg1000"), c("a","b")))
+  # its own altExps are replaced; the main object's stay visible (#58)
+  expect_true(all.equal(altExpNames(es, subsetName = "hvg1000"),
+                        c("a1", "a2", "a", "b")))
 
   testthat::expect_error(altExps(es, subsetName = "hvg") <- list(a = es@subsets$hvg1000@internalAssay, b = es@subsets$hvg1000@internalAssay),
                          "hvg subset does not exist.")
@@ -3068,7 +3073,8 @@ testthat::test_that("withColData and withDimnames work on a subset's altExps (#5
   # a value with other colnames is accepted only without withDimnames
   renamed <- adt
   colnames(renamed) <- paste0("x", 1:8)
-  testthat::expect_error(altExp(es, "ADT", subsetName = "s1") <- renamed)
+  testthat::expect_warning(altExp(es, "ADT", subsetName = "s1") <- renamed,
+                           regexp = "are not the same as")
   altExp(es, "ADT", subsetName = "s1", withDimnames = FALSE) <- renamed
   testthat::expect_equal(colnames(altExp(es, "ADT", subsetName = "s1")),
                          paste0("c", 1:8))
@@ -3167,7 +3173,7 @@ testthat::test_that("A subset's altExp rowData and metadata replace the linked o
   testthat::expect_equal(metadata(adt)$decontPro, list(iterations = 10))
   testthat::expect_equal(ncol(rowData(altExp(es, "ADT"))), 0L)
   own <- ownAltExp(es, "s1", "ADT")
-  testthat::expect_equal(assayNames(own), character(0))
+  testthat::expect_length(assayNames(own), 0)
   testthat::expect_equal(colnames(rowData(own)), "target")
 })
 

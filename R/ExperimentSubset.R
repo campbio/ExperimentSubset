@@ -469,9 +469,16 @@ NULL
 # For the assays in assayNames that subsetName sees linked from its
 # parent (owners is .assayOwners(x, subsetName)), stops unless unlink
 # allows storing its own, naming every one it doesn't, and returns where
-# each is linked from (for example "the main assay 'counts'"), named by
-# assay; character(0) when none is linked
+# each is linked from, as .linkedSources() does
 .checkLinked <- function(owners, subsetName, assayNames, unlink) {
+  .checkUnlinked(.linkedSources(owners, subsetName, assayNames),
+                 subsetName, unlink)
+}
+
+# Where each of the assays in assayNames that subsetName sees linked from
+# its parent is linked from (for example "the main assay 'counts'"), named
+# by assay; character(0) when none is linked
+.linkedSources <- function(owners, subsetName, assayNames) {
   assayNames <- assayNames[assayNames %in% names(owners)]
   assayNames <- assayNames[owners[assayNames] != subsetName]
   if (length(assayNames) == 0)
@@ -480,6 +487,16 @@ NULL
   main <- owners[assayNames] == ""
   sources[main] <- paste0("the main assay '", assayNames[main], "'")
   names(sources) <- assayNames
+  sources
+}
+
+# Stops unless unlink allows storing every linked assay in sources (named
+# by assay, or "altExp/assay" for an assay of an altExp, as from
+# .linkedSources()), naming every one it doesn't, and returns sources
+.checkUnlinked <- function(sources, subsetName, unlink) {
+  if (length(sources) == 0)
+    return(character(0))
+  assayNames <- names(sources)
   blocked <- assayNames[!vapply(assayNames, .unlinks, logical(1),
                                 unlink = unlink)]
   if (length(blocked) == 0)
@@ -544,7 +561,9 @@ NULL
   colData(out) <- .subsetColData(x, subsetName, isTRUE(parentData))
   if (methods::is(out, "SingleCellExperiment")) {
     SingleCellExperiment::reducedDims(out) <- reducedDims(internal)
-    altExps(out) <- altExps(internal)
+    # every altExp the subset sees, its own and linked
+    altExps(out, withDimnames = FALSE) <-
+      altExps(.withSubsetAltExps(x, subsetName), withDimnames = FALSE)
   }
   metadata(out) <- metadata(internal)
   out
@@ -571,9 +590,17 @@ NULL
                        .subsetAssayView(x, subsetName, name)))
       stored <- c(stored, name)
   }
+  # the same for the altExps' assays; one check for both, so one error
+  # names every assay unlink doesn't allow
+  isSce <- methods::is(internal, "SingleCellExperiment")
+  if (isSce)
+    altExpPlan <- .planAltExps(x, subsetName, altExps(value))
   # where each unlinked assay was linked from, for the messages once
   # everything is stored
-  sources <- .checkLinked(owners, subsetName, stored, unlink)
+  sources <- .linkedSources(owners, subsetName, stored)
+  if (isSce)
+    sources <- c(sources, altExpPlan$sources)
+  sources <- .checkUnlinked(sources, subsetName, unlink)
 
   # own assays that value no longer has are removed, unless a subset was
   # made from them
@@ -589,12 +616,12 @@ NULL
   .subsetRowData(x, subsetName) <- .withoutParentColumns(rowData(value))
   .subsetColData(x, subsetName) <- .withoutParentColumns(colData(value))
   internal <- .internalAssay(.subsets(x)[[subsetName]])
-  if (methods::is(internal, "SingleCellExperiment")) {
+  if (isSce)
     SingleCellExperiment::reducedDims(internal) <- reducedDims(value)
-    altExps(internal) <- altExps(value)
-  }
   metadata(internal) <- metadata(value)
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  if (isSce)
+    x <- .applyAltExps(x, subsetName, altExpPlan$parts)
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
@@ -848,16 +875,16 @@ NULL
 NULL
 
 #' @importMethodsFrom SingleCellExperiment altExp
-.altExp <- function(x, e, ...){
+.altExp <- function(x, e, ...) {
   arglist <- list(...)
   if (!"subsetName" %in% names(arglist)) {
     if (missing(e))
       return(callNextMethod(x, ...))
     return(callNextMethod(x, e, ...))
   }
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  internal <- .withSubsetAltExps(x, subsetName)
   # a missing e can't be passed into a second S4 dispatch
   if (missing(e))
     return(do.call(altExp, c(list(internal), .otherArgs(...))))
@@ -865,67 +892,328 @@ NULL
 }
 
 #' @importMethodsFrom SingleCellExperiment altExps
-.altExps <- function(x, ...){
+.altExps <- function(x, ...) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ...))
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  internal <- .withSubsetAltExps(x, subsetName)
   do.call(altExps, c(list(internal), .otherArgs(...)))
 }
 
 #' @importMethodsFrom SingleCellExperiment altExpNames
-.altExpNames <- function(x, ...){
+.altExpNames <- function(x, ...) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ...))
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  altExpNames(.internalAssay(.subsets(x)[[subsetName]]))
+  .altExpHolders(x, subsetName)$names
 }
 
 #' @importMethodsFrom SingleCellExperiment altExpNames<-
-'.altExpNames<-' <- function(x, ..., value){
+'.altExpNames<-' <- function(x, ..., value) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ..., value = value))
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  altExpNames(.internalAssay(.subsets(x)[[subsetName]])) <- value
-  return(x)
+  visible <- .altExpHolders(x, subsetName)$names
+  if (length(value) != length(visible))
+    stop("'value' must give one name for each of the ", length(visible),
+         " altExps of subset '", subsetName, "'.")
+  linked <- .altExpHolders(x, subsetName, own = FALSE)
+  for (i in which(visible %in% linked$names & visible != value)) {
+    holders <- linked$holders[[match(visible[i], linked$names)]]
+    stop("Subset '", subsetName, "' can't rename '", visible[i],
+         "', which is linked to ",
+         .altExpSource(visible[i], holders[1]), ".")
+  }
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  altExpNames(internal) <- value[match(altExpNames(internal), visible)]
+  .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  x
 }
 
 #' @importMethodsFrom SingleCellExperiment altExp<-
-'.altExp<-' <- function(x, e, ..., value){
+'.altExp<-' <- function(x, e, ..., value) {
   arglist <- list(...)
+  unlink <- .unlinkArg(arglist)
   if (!"subsetName" %in% names(arglist)) {
     if (missing(e))
       return(callNextMethod(x, ..., value = value))
     return(callNextMethod(x, e, ..., value = value))
   }
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  # the SingleCellExperiment method checks value and handles e,
+  # withDimnames and withColData on everything the subset sees
+  internal <- .withSubsetAltExps(x, subsetName)
   if (missing(e))
     args <- c(list(internal), .otherArgs(...), list(value = value))
   else
     args <- c(list(internal, e), .otherArgs(...), list(value = value))
-  .internalAssay(.subsets(x)[[subsetName]]) <- do.call(`altExp<-`, args)
-  return(x)
+  internal <- do.call(`altExp<-`, args)
+  .storeAltExps(x, subsetName, altExps(internal, withDimnames = FALSE),
+                unlink)
 }
 
 #' @importMethodsFrom SingleCellExperiment altExps<-
-'.altExps<-' <- function(x, ..., value){
+'.altExps<-' <- function(x, ..., value) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  unlink <- .unlinkArg(arglist)
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ..., value = value))
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  internal <- .withSubsetAltExps(x, subsetName)
   args <- c(list(internal), .otherArgs(...), list(value = value))
-  .internalAssay(.subsets(x)[[subsetName]]) <- do.call(`altExps<-`, args)
-  return(x)
+  internal <- do.call(`altExps<-`, args)
+  .storeAltExps(x, subsetName, altExps(internal, withDimnames = FALSE),
+                unlink)
+}
+
+# The unlink argument of the altExp setters, checked; FALSE if not given.
+# It only applies with subsetName.
+.unlinkArg <- function(arglist) {
+  unlink <- arglist[["unlink"]]
+  if (is.null(unlink))
+    return(FALSE)
+  .checkUnlink(unlink)
+  if (!"subsetName" %in% names(arglist) && !isFALSE(unlink)
+      && length(unlink) > 0)
+    stop("'unlink' only applies when storing in a subset.")
+  unlink
+}
+
+# The altExps a subset sees: their names, the main object's first, then
+# those stored only on subsets down the chain; and for each, where it is
+# stored, top first: "" for the main object, or a subset name. With
+# own = FALSE, what the subset sees linked, without its own altExps.
+#' @importMethodsFrom SingleCellExperiment altExpNames
+.altExpHolders <- function(x, subsetName, own = TRUE) {
+  chain <- .subsetChain(x, subsetName)
+  if (!own)
+    chain <- chain[-length(chain)]
+  names <- altExpNames(x)
+  holders <- rep(list(""), length(names))
+  for (subset in chain) {
+    for (name in altExpNames(.internalAssay(.subsets(x)[[subset]]))) {
+      i <- match(name, names)
+      if (is.na(i)) {
+        names <- c(names, name)
+        holders <- c(holders, list(subset))
+      } else {
+        holders[[i]] <- c(holders[[i]], subset)
+      }
+    }
+  }
+  list(names = names, holders = holders)
+}
+
+# How an error or message names where an altExp is stored
+.altExpSource <- function(name, holder) {
+  if (holder == "")
+    return(paste0("the main altExp '", name, "'"))
+  paste0("altExp '", name, "' of subset '", holder, "'")
+}
+
+# The altExp called name as subsetName sees it, built from the parts
+# stored in holders (from .altExpHolders()), top first, each cut to the
+# subset's columns. A part of the same class, rows and rownames adds its
+# assays, each hiding one of the same name, and replaces rowData, colData,
+# metadata and reducedDims that it has; any other part replaces the
+# altExp. Returns the altExp and, named by assay, where each is stored.
+.subsetAltExpView <- function(x, subsetName, name, holders) {
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  view <- NULL
+  owners <- character(0)
+  for (holder in holders) {
+    if (holder == "") {
+      part <- .storedAltExp(x, name)
+      part <- part[, .indicesIn(x, subsetName, NULL, .colIndices)]
+    } else {
+      part <- .storedAltExp(.internalAssay(.subsets(x)[[holder]]), name)
+      if (holder != subsetName)
+        part <- part[, .indicesIn(x, subsetName, holder, .colIndices)]
+    }
+    partOwners <- rep(holder, length(assayNames(part)))
+    names(partOwners) <- assayNames(part)
+    if (is.null(view) || !.sameAltExpShape(view, part)) {
+      view <- part
+      owners <- partOwners
+      next
+    }
+    view <- .mergeAltExpPart(view, part)
+    owners[names(partOwners)] <- partOwners
+  }
+  if (!is.null(colnames(internal)))
+    colnames(view) <- colnames(internal)
+  list(altExp = view, owners = owners)
+}
+
+# The altExp called name as stored in object, without its dimnames set
+#' @importMethodsFrom SingleCellExperiment altExps
+.storedAltExp <- function(object, name) {
+  altExps(object, withDimnames = FALSE)[[match(name, altExpNames(object))]]
+}
+
+# TRUE if a subset's part of an altExp adds to the linked one rather than
+# replacing it: the same class, number of rows and rownames
+.sameAltExpShape <- function(linked, part) {
+  identical(class(linked), class(part)) && nrow(linked) == nrow(part) &&
+    identical(rownames(linked), rownames(part))
+}
+
+# The linked altExp with a subset's part of the same shape merged in
+.mergeAltExpPart <- function(view, part) {
+  for (name in assayNames(part))
+    assay(view, name, withDimnames = FALSE) <-
+      assay(part, name, withDimnames = FALSE)
+  if (ncol(rowData(part)) > 0)
+    rowData(view) <- rowData(part)
+  if (ncol(colData(part)) > 0)
+    colData(view) <- colData(part)
+  if (length(metadata(part)) > 0)
+    metadata(view) <- metadata(part)
+  if (methods::is(part, "SingleCellExperiment")
+      && length(SingleCellExperiment::reducedDims(part)) > 0)
+    SingleCellExperiment::reducedDims(view, withDimnames = FALSE) <-
+      SingleCellExperiment::reducedDims(part, withDimnames = FALSE)
+  view
+}
+
+# A copy of subsetName's internal object holding every altExp the subset
+# sees, for the SingleCellExperiment altExp methods to run on
+.withSubsetAltExps <- function(x, subsetName) {
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  visible <- .altExpHolders(x, subsetName)
+  views <- lapply(seq_along(visible$names), function(i) {
+    .subsetAltExpView(x, subsetName, visible$names[i],
+                      visible$holders[[i]])$altExp
+  })
+  names(views) <- visible$names
+  SingleCellExperiment::altExps(internal, withDimnames = FALSE) <- views
+  internal
+}
+
+# Stores value, every altExp subsetName should see, as the subset's own
+# altExps, with the unlink rule for changed linked assays, and says which
+# assays are unlinked
+.storeAltExps <- function(x, subsetName, value, unlink) {
+  plan <- .planAltExps(x, subsetName, value)
+  sources <- .checkUnlinked(plan$sources, subsetName, unlink)
+  x <- .applyAltExps(x, subsetName, plan$parts)
+  for (name in names(sources))
+    .unlinkMessage(subsetName, name, sources[[name]])
+  x
+}
+
+# What subsetName stores to see the altExps in value (a named list): for
+# each, NULL if the linked altExp is the same, the value whole if nothing
+# is linked under its name or its shape differs, or else a part with only
+# the assays, rowData, colData, metadata and reducedDims that differ.
+# Also, named "altExp/assay", where each changed linked assay is linked
+# from, for the unlink check.
+.planAltExps <- function(x, subsetName, value) {
+  linked <- .altExpHolders(x, subsetName, own = FALSE)
+  parts <- vector("list", length(value))
+  names(parts) <- names(value)
+  sources <- character(0)
+  for (i in seq_along(value)) {
+    name <- names(value)[i]
+    new <- value[[i]]
+    j <- match(name, linked$names)
+    if (is.na(j)) {
+      parts[[i]] <- new
+      next
+    }
+    old <- .subsetAltExpView(x, subsetName, name, linked$holders[[j]])
+    changed <- names(old$owners)
+    if (.sameAltExpShape(old$altExp, new)) {
+      changed <- .changedAssays(old$altExp, new)
+      parts[i] <- list(.altExpPart(old$altExp, new))
+    } else {
+      parts[[i]] <- new
+    }
+    changed <- intersect(changed, names(old$owners))
+    if (length(changed) > 0) {
+      changedSources <- vapply(old$owners[changed], .altExpSource,
+                               character(1), name = name)
+      names(changedSources) <- paste0(name, "/", changed)
+      sources <- c(sources, changedSources)
+    }
+  }
+  list(parts = parts, sources = sources)
+}
+
+# Names of the assays of new that old doesn't have or holds other values
+# for
+.changedAssays <- function(old, new) {
+  changed <- character(0)
+  for (name in assayNames(new)) {
+    if (!name %in% assayNames(old)
+        || !.sameAssay(assay(new, name, withDimnames = FALSE),
+                       assay(old, name, withDimnames = FALSE)))
+      changed <- c(changed, name)
+  }
+  changed
+}
+
+# new, of the same shape as the linked altExp old, without what old
+# already has: unchanged assays, and rowData, colData, metadata and
+# reducedDims that are the same. NULL if nothing differs.
+.altExpPart <- function(old, new) {
+  part <- new
+  own <- .changedAssays(old, new)
+  assays(part, withDimnames = FALSE) <-
+    assays(new, withDimnames = FALSE)[own]
+  if (.sameColumns(rowData(new), rowData(old)))
+    rowData(part) <- rowData(part)[, 0]
+  if (.sameColumns(colData(new), colData(old)))
+    colData(part) <- colData(part)[, 0]
+  if (identical(metadata(new), metadata(old)))
+    metadata(part) <- list()
+  hasReducedDims <- methods::is(part, "SingleCellExperiment")
+  if (hasReducedDims && .sameAssayList(
+    SingleCellExperiment::reducedDims(new, withDimnames = FALSE),
+    SingleCellExperiment::reducedDims(old, withDimnames = FALSE))) {
+    SingleCellExperiment::reducedDims(part) <- list()
+    hasReducedDims <- FALSE
+  }
+  if (length(own) == 0 && ncol(rowData(part)) == 0
+      && ncol(colData(part)) == 0 && length(metadata(part)) == 0
+      && !hasReducedDims)
+    return(NULL)
+  part
+}
+
+# TRUE if two DataFrames have the same columns, whatever their rownames
+.sameColumns <- function(a, b) {
+  identical(colnames(a), colnames(b)) &&
+    identical(lapply(as.list(a), unname), lapply(as.list(b), unname))
+}
+
+# TRUE if two lists of matrices have the same names and values, as
+# .sameAssay() compares them
+.sameAssayList <- function(a, b) {
+  a <- as.list(a)
+  b <- as.list(b)
+  if (!identical(names(a), names(b)) || length(a) != length(b))
+    return(FALSE)
+  all(vapply(seq_along(a), function(i) .sameAssay(a[[i]], b[[i]]),
+             logical(1)))
+}
+
+# Stores parts (from .planAltExps()) as subsetName's own altExps, in place
+# of those it had; NULL parts are left out
+.applyAltExps <- function(x, subsetName, parts) {
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  parts <- parts[!vapply(parts, is.null, logical(1))]
+  SingleCellExperiment::altExps(internal, withDimnames = FALSE) <- parts
+  .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  x
 }
 
 #' @importMethodsFrom S4Vectors metadata<-
@@ -2120,13 +2408,13 @@ NULL
 
 #helpers
 
-# Arguments in ... other than subsetName, to pass to a subset's internal
-# object, whose methods may not accept subsetName
+# Arguments in ... other than subsetName and unlink, to pass to a subset's
+# internal object, whose methods may not accept them
 .otherArgs <- function(...) {
   args <- list(...)
   if (is.null(names(args)))
     return(args)
-  args[names(args) != "subsetName"]
+  args[!names(args) %in% c("subsetName", "unlink")]
 }
 
 # TRUE if value is one non-NA string, which a name used in if() must be
