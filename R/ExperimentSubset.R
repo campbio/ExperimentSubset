@@ -582,25 +582,17 @@ NULL
   # allows it, checked before anything is stored
   x <- .qualifyParents(x)
   owners <- .assayOwners(x, subsetName)
-  linked <- names(owners)[owners != subsetName]
-  stored <- character(0)
-  for (name in assayNames(value)) {
-    if (!name %in% linked
-        || !.sameAssay(assay(value, name),
-                       .subsetAssayView(x, subsetName, name)))
-      stored <- c(stored, name)
-  }
-  # the same for the altExps' assays; one check for both, so one error
-  # names every assay unlink doesn't allow
+  stored <- .assaysToStore(x, subsetName, value, owners)
+  # the same for the altExps' assays, so one error names every assay
+  # unlink doesn't allow; sources say where each unlinked one was linked
+  # from, for the messages once everything is stored
   isSce <- methods::is(internal, "SingleCellExperiment")
+  altExpPlan <- list(sources = character(0))
   if (isSce)
     altExpPlan <- .planAltExps(x, subsetName, altExps(value))
-  # where each unlinked assay was linked from, for the messages once
-  # everything is stored
-  sources <- .linkedSources(owners, subsetName, stored)
-  if (isSce)
-    sources <- c(sources, altExpPlan$sources)
-  sources <- .checkUnlinked(sources, subsetName, unlink)
+  sources <- .checkUnlinked(
+    c(.linkedSources(owners, subsetName, stored), altExpPlan$sources),
+    subsetName, unlink)
 
   # own assays that value no longer has are removed, unless a subset was
   # made from them
@@ -625,6 +617,21 @@ NULL
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
+}
+
+# Names of the assays of value, for setSubsetExperiment(), that subsetName
+# stores: those not linked from its parent (owners is
+# .assayOwners(x, subsetName)) and linked ones with other values
+.assaysToStore <- function(x, subsetName, value, owners) {
+  linked <- names(owners)[owners != subsetName]
+  stored <- character(0)
+  for (name in assayNames(value)) {
+    if (!name %in% linked
+        || !.sameAssay(assay(value, name),
+                       .subsetAssayView(x, subsetName, name)))
+      stored <- c(stored, name)
+  }
+  stored
 }
 
 # Stops unless value, for setSubsetExperiment(), has the class, dimensions
@@ -827,9 +834,35 @@ NULL
 #'   \code{SingleCellExperiment}. They exist for the classes that extend
 #'   \code{SingleCellExperiment}: \code{SubsetSingleCellExperiment},
 #'   \code{SubsetSpatialExperiment} and \code{SubsetTreeSummarizedExperiment}.
+#' @details A subset sees the main object's altExps, and those stored on
+#'   the subsets it was made from, cut to its own columns (cells). Their
+#'   rows (features, such as the proteins of an ADT altExp) are not cut: a
+#'   subset's \code{rows} pick features of the main object only. These
+#'   altExps are linked, as assays are: the subset sees their current
+#'   values, and stores only what it changes.
+#'
+#'   Storing an altExp in a subset with \code{altExp<-} or \code{altExps<-}
+#'   compares it with the linked one of the same name, assay by assay:
+#'   \itemize{
+#'     \item A new assay is stored as the subset's own, and the linked
+#'       assays stay linked.
+#'     \item An assay with the values of the linked one is not stored.
+#'     \item An assay with other values than the linked one needs
+#'       \code{unlink}, named as \code{"altExpName/assayName"}, such as
+#'       \code{"ADT/counts"}.
+#'     \item rowData, colData, metadata and reducedDims are stored when
+#'       they differ from the linked altExp's, and then replace them whole.
+#'     \item An altExp with other rows, rownames or class than the linked
+#'       one replaces it entirely, so every linked assay counts as changed.
+#'   }
+#'   A subset can't remove or rename a linked altExp: an altExp missing
+#'   from \code{value} in \code{altExps<-} stays visible, and
+#'   \code{altExp(x, e, subsetName = s) <- NULL} removes only what the
+#'   subset stores, so the linked altExp shows again.
 #' @param x An \code{ExperimentSubset} object.
 #' @param e \code{character(1)} or \code{integer(1)} The name or position
-#'   of the alternative experiment. Leave it out for the first one.
+#'   of the alternative experiment. Leave it out for the first one. With
+#'   \code{subsetName}, positions follow \code{altExpNames()}.
 #' @param withDimnames \code{logical(1)} Passed on to
 #'   \code{\link[SingleCellExperiment]{altExp<-}} or \code{altExps<-}.
 #'   Default \code{TRUE}.
@@ -840,6 +873,14 @@ NULL
 #'     \item{\code{subsetName}}{\code{character(1)} Name of the subset whose
 #'       alternative experiments to get or set. Leave it out for the main
 #'       object's.}
+#'     \item{\code{unlink}}{For \code{altExp<-} and \code{altExps<-} with
+#'       \code{subsetName}: \code{TRUE}, \code{FALSE} or a character vector
+#'       of \code{"altExpName/assayName"} names. Store assays of
+#'       \code{value} that have the name of a linked altExp assay but
+#'       different values: with \code{TRUE}, every such assay; with names,
+#'       only those. Any other such assay is an error, and nothing is
+#'       stored. A message names each assay that is unlinked. Default
+#'       \code{FALSE}. It is an error without \code{subsetName}.}
 #'   }
 #'   Other arguments are passed on to the \code{SingleCellExperiment}
 #'   method. With \code{subsetName}, \code{altExpNames()} and
@@ -847,11 +888,14 @@ NULL
 #' @param value For \code{altExp<-}, a \code{SummarizedExperiment} with one
 #'   column per column of the subset (or of the main object). For
 #'   \code{altExps<-}, a list of them. For \code{altExpNames<-}, a
-#'   \code{character} vector of new names.
+#'   \code{character} vector of new names, one for each name
+#'   \code{altExpNames()} returns; with \code{subsetName}, only the subset's
+#'   own altExps can get new names.
 #' @return \code{altExp()} returns a \code{SummarizedExperiment},
 #'   \code{altExps()} a list of them and \code{altExpNames()} a
-#'   \code{character} vector. The setters return \code{x} with the change
-#'   made.
+#'   \code{character} vector. With \code{subsetName}, these are every
+#'   altExp the subset sees: the main object's first, then those stored
+#'   only on subsets. The setters return \code{x} with the change made.
 #' @seealso \code{\link[SingleCellExperiment]{altExps}}
 #' @name ExperimentSubset-altExp
 #' @examples
@@ -861,17 +905,24 @@ NULL
 #' rownames(counts) <- paste0("gene", 1:10)
 #' colnames(counts) <- paste0("cell", 1:20)
 #' es <- ExperimentSubset(list(counts = counts))
+#' # counts of 2 proteins in the same 20 cells, as an altExp
+#' adtCounts <- matrix(rpois(40, lambda = 20), nrow = 2)
+#' rownames(adtCounts) <- c("CD3", "CD4")
+#' altExp(es, "ADT") <- SummarizedExperiment(list(counts = adtCounts))
 #' # a subset of the first 5 genes and the first 8 cells
 #' es <- createSubset(es, subsetName = "first", rows = 1:5, cols = 1:8)
-#' # counts of 2 spike-in genes in the subset's 8 cells
-#' spikeCounts <- matrix(rpois(16, lambda = 5), nrow = 2)
-#' spikes <- SingleCellExperiment(list(counts = spikeCounts))
-#' # store them as an alternative experiment of the subset
-#' altExp(es, "spikes", subsetName = "first") <- spikes
-#' # list the subset's alternative experiments
+#' # the subset sees ADT for its 8 cells, with both proteins
 #' altExpNames(es, subsetName = "first")
-#' # read it back
-#' altExp(es, "spikes", subsetName = "first")
+#' adt <- altExp(es, "ADT", subsetName = "first")
+#' dim(adt)
+#' # add an assay to ADT in the subset only; ADT's counts stay linked
+#' assay(adt, "logcounts") <- log1p(assay(adt, "counts"))
+#' altExp(es, "ADT", subsetName = "first") <- adt
+#' assayNames(altExp(es, "ADT", subsetName = "first"))
+#' assayNames(altExp(es, "ADT"))
+#' # a changed linked assay needs unlink
+#' assay(adt, "counts") <- assay(adt, "counts") + 1L
+#' altExp(es, "ADT", subsetName = "first", unlink = "ADT/counts") <- adt
 NULL
 
 #' @importMethodsFrom SingleCellExperiment altExp
