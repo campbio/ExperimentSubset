@@ -170,6 +170,7 @@ A subset sees the main object's altExps, and those stored on
       \code{"ADT/counts"}.
     \item rowData, colData, metadata and reducedDims are stored when
       they differ from the linked altExp's, and then replace them whole.
+      An empty one shows the linked one, so a subset can't clear them.
       Other parts, such as the altExp's own altExps, \code{colPairs} and
       \code{rowPairs}, always come from the linked altExp.
     \item An assay the subset already stores itself, after an unlink, is
@@ -182,6 +183,12 @@ A subset sees the main object's altExps, and those stored on
   from \code{value} in \code{altExps<-} stays visible, and
   \code{altExp(x, e, subsetName = s) <- NULL} removes only what the
   subset stores, so the linked altExp shows again.
+
+  Changes to a linked altExp carry along to the subsets below it, made
+  from the main object or from the subset that stores it. Its new values
+  show in them. Renaming it renames what they store of it. Removing it,
+  or storing it with other rows or another class, drops what they added
+  to it, with a warning; an altExp a subset stores whole is kept.
 }
 \examples{
 # an object with 10 genes and 20 cells

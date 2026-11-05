@@ -3059,6 +3059,10 @@ testthat::test_that("A subset sees the main object's altExps (#58)", {
   testthat::expect_equal(altExpNames(es, subsetName = "s1"),
                          c("ADT", "spikes"))
   testthat::expect_equal(nrow(altExp(es, 2, subsetName = "s1")), 3L)
+  # an altExp the subset doesn't see gives SingleCellExperiment's error
+  testthat::expect_error(altExp(es, "none", subsetName = "s1"),
+                         regexp = "'none' not in 'altExpNames")
+  testthat::expect_error(altExp(es, 3, subsetName = "s1"))
 })
 
 testthat::test_that("withColData and withDimnames work on a subset's altExps (#58)", {
@@ -3314,6 +3318,115 @@ testthat::test_that("A subset's altExp reducedDims replace the linked ones (#58)
   testthat::expect_equal(unname(reducedDim(altExp(es, "ADT"), "PCA")),
                          matrix(seq_len(40), 20, 2))
   testthat::expect_length(assayNames(ownAltExp(es, "s1", "ADT")), 0)
+  # an altExp without reducedDims shows the linked ones and stores nothing
+  es <- makeAdtFixture()
+  altExp(es, "ADT") <- adtSce
+  adt <- altExp(es, "ADT", subsetName = "s1")
+  reducedDims(adt) <- list()
+  altExp(es, "ADT", subsetName = "s1") <- adt
+  testthat::expect_null(ownAltExp(es, "s1", "ADT"))
+})
+
+testthat::test_that("A rename carries what subsets store along (#58)", {
+  es <- makeAdtFixture()
+  adt <- altExp(es, "ADT", subsetName = "s1")
+  assay(adt, "decontPro") <- assay(adt, "counts") / 2
+  altExp(es, "ADT", subsetName = "s1") <- adt
+  es <- createSubset(es, "s2", cols = 1:3, parentAssay = "s1")
+  adt <- altExp(es, "ADT", subsetName = "s2")
+  assay(adt, "zero") <- assay(adt, "counts") * 0L
+  altExp(es, "ADT", subsetName = "s2") <- adt
+  altExpNames(es) <- "protein"
+  testthat::expect_equal(altExpNames(es, subsetName = "s1"), "protein")
+  testthat::expect_equal(
+    assayNames(altExp(es, "protein", subsetName = "s2")),
+    c("counts", "decontPro", "zero"))
+  # a parent subset's own altExp: its children's parts follow it
+  spikes <- SummarizedExperiment(
+    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8)))))
+  altExp(es, "spikes", subsetName = "s1") <- spikes
+  child <- altExp(es, "spikes", subsetName = "s2")
+  assay(child, "logcounts") <- log1p(assay(child, "counts"))
+  altExp(es, "spikes", subsetName = "s2") <- child
+  altExpNames(es, subsetName = "s1") <- c("protein", "ercc")
+  testthat::expect_equal(altExpNames(es, subsetName = "s2"),
+                         c("protein", "ercc"))
+  testthat::expect_equal(assayNames(altExp(es, "ercc", subsetName = "s2")),
+                         c("counts", "logcounts"))
+  # a rename onto a name a child already stores is an error
+  other <- SummarizedExperiment(
+    list(counts = matrix(1L, 1, 3, dimnames = list(NULL, paste0("c", 1:3)))))
+  altExp(es, "other", subsetName = "s2") <- other
+  testthat::expect_error(
+    altExpNames(es, subsetName = "s1") <- c("protein", "other"),
+    regexp = "Subset 's2' already stores an altExp called 'other'.",
+    fixed = TRUE)
+})
+
+testthat::test_that("Removing or reshaping an altExp drops what subsets added to it (#58)", {
+  es <- makeAdtFixture()
+  adt <- altExp(es, "ADT", subsetName = "s1")
+  assay(adt, "decontPro") <- assay(adt, "counts") / 2
+  altExp(es, "ADT", subsetName = "s1") <- adt
+  # new values keep the subset's part
+  testthat::expect_warning(
+    altExp(es, "ADT") <- SummarizedExperiment(list(counts = adtCounts + 1L)),
+    regexp = NA)
+  testthat::expect_equal(assayNames(altExp(es, "ADT", subsetName = "s1")),
+                         c("counts", "decontPro"))
+  dropped <- paste0("Dropped what subset 's1' stored in altExp 'ADT': the ",
+                    "altExp it added to was removed, or now has other rows ",
+                    "or another class.")
+  # other rows
+  es2 <- es
+  testthat::expect_warning(altExp(es2, "ADT") <- altExp(es2, "ADT")[1, ],
+                           regexp = dropped, fixed = TRUE)
+  testthat::expect_null(ownAltExp(es2, "s1", "ADT"))
+  testthat::expect_equal(dim(altExp(es2, "ADT", subsetName = "s1")),
+                         c(1L, 8L))
+  # removed, one or all
+  es2 <- es
+  testthat::expect_warning(altExp(es2, "ADT") <- NULL,
+                           regexp = dropped, fixed = TRUE)
+  testthat::expect_length(altExpNames(es2, subsetName = "s1"), 0)
+  es2 <- es
+  testthat::expect_warning(altExps(es2) <- list(),
+                           regexp = dropped, fixed = TRUE)
+  testthat::expect_length(altExpNames(es2, subsetName = "s1"), 0)
+  # a whole altExp of the subset's own is kept
+  es3 <- makeAdtFixture()
+  small <- SummarizedExperiment(list(
+    counts = matrix(1L, 1, 8, dimnames = list("p9", paste0("c", 1:8)))))
+  suppressMessages(altExp(es3, "ADT", subsetName = "s1", unlink = TRUE) <- small)
+  testthat::expect_warning(altExp(es3, "ADT") <- NULL, regexp = NA)
+  testthat::expect_equal(rownames(altExp(es3, "ADT", subsetName = "s1")),
+                         "p9")
+  # a parent subset's change reaches its children, also through
+  # setSubsetExperiment()
+  es4 <- makeAdtFixture()
+  es4 <- createSubset(es4, "s2", cols = 1:3, parentAssay = "s1")
+  adt <- altExp(es4, "ADT", subsetName = "s2")
+  assay(adt, "zero") <- assay(adt, "counts") * 0L
+  altExp(es4, "ADT", subsetName = "s2") <- adt
+  testthat::expect_warning(
+    suppressMessages(
+      altExp(es4, "ADT", subsetName = "s1", unlink = TRUE) <- small),
+    regexp = "Dropped what subset 's2' stored in altExp 'ADT'", fixed = TRUE)
+  es5 <- makeAdtFixture()
+  spikes <- SummarizedExperiment(
+    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8)))))
+  altExp(es5, "spikes", subsetName = "s1") <- spikes
+  es5 <- createSubset(es5, "s2", cols = 1:3, parentAssay = "s1")
+  child <- altExp(es5, "spikes", subsetName = "s2")
+  assay(child, "logcounts") <- log1p(assay(child, "counts"))
+  altExp(es5, "spikes", subsetName = "s2") <- child
+  sub <- getSubsetExperiment(es5, "s1")
+  altExp(sub, "spikes") <- NULL
+  testthat::expect_warning(
+    es5 <- setSubsetExperiment(es5, "s1", sub),
+    regexp = "Dropped what subset 's2' stored in altExp 'spikes'",
+    fixed = TRUE)
+  testthat::expect_equal(altExpNames(es5, subsetName = "s2"), "ADT")
 })
 
 testthat::test_that("setSubsetExperiment stores only changed altExp assays (#58)", {

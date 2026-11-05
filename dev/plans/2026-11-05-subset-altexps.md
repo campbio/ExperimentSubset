@@ -141,6 +141,27 @@ altExp(es, "ADT", subsetName = "tcells") <- adt
   an error ("'ADT' is linked to the main altExp 'ADT'; rename it in the
   main object"); the subset's own altExps are renamed.
 
+### Changes to a linked altExp (added after code review)
+
+A subset's part that adds to a linked altExp only makes sense while that
+altExp exists with the same shape. Decided in chat (2026-11-05), "carry
+along":
+
+- After any altExp change at a holder (`altExp<-`, `altExps<-`,
+  `altExpNames<-` on the main object, the same with `subsetName`, and
+  `setSubsetExperiment()`), `.carryAltExpParts()` visits the subsets below
+  that holder, parents first.
+- **Rename:** their parts under the old name are renamed. A rename onto a
+  name a subset below already stores is an error, and nothing changes.
+- **Removed or reshaped** (other rows, rownames or class): a part that
+  added to it is dropped, with a warning naming the subset and altExp. A
+  part that already replaced it whole is kept as the subset's own altExp.
+- New values of the same shape change nothing; subsets see them.
+
+A subset can't clear a linked altExp's rowData, colData, metadata or
+reducedDims: an empty one shows the linked one, as a subset can't remove
+a linked assay. This is documented.
+
 ### `getSubsetExperiment()` and `setSubsetExperiment()`
 
 - `.getSubsetExperiment()`: `altExps(out)` becomes every visible altExp.
