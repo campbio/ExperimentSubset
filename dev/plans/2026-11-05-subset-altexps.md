@@ -172,6 +172,12 @@ piece when the linked altExp later took its shape, and then be dropped):
 - Reading (`.subsetAltExpView()`, `.altExpShape()`) merges only pieces;
   a whole altExp always replaces the linked one. Carrying along drops
   only pieces, and renames update the record.
+- An altExp the subset stores whole stays whole through later writes
+  (`.planAltExps()` keeps it whole), since every write plans every
+  altExp the subset sees. Removing it with `<- NULL` and storing it again
+  makes it a piece if it has the linked altExp's shape.
+- Renames carry along everything subsets below store under the old name,
+  pieces and whole altExps.
 - Objects saved before this have no record and keep the shape rule.
 
 A subset can't clear a linked altExp's rowData, colData, metadata or

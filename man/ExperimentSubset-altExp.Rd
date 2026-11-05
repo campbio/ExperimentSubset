@@ -177,10 +177,11 @@ A subset sees the main object's altExps, and those stored on
       not linked, so storing it again needs no \code{unlink}.
     \item An altExp with other rows, rownames or class than the linked
       one replaces it entirely, so every linked assay counts as changed.
-      It keeps replacing it, even if the linked altExp later has the same
-      rows: whether a stored altExp adds to or replaces the linked one is
-      recorded when it is stored. So is an altExp a subset stores while
-      nothing of that name is linked.
+      It keeps replacing it for as long as the subset stores it, even if
+      the linked altExp later has the same rows, and so does an altExp a
+      subset stores while nothing of that name is linked. To add to the
+      linked altExp instead, remove the subset's with
+      \code{altExp(x, e, subsetName = s) <- NULL} and store it again.
   }
   A subset can't remove or rename a linked altExp, or give one of its own
   the name of another altExp it sees: an altExp missing

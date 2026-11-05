@@ -3399,6 +3399,17 @@ testthat::test_that("A subset's whole altExp stays whole (#58)", {
     regexp = NA)
   testthat::expect_equal(rownames(altExp(es, "ADT", subsetName = "s1")),
                          c("r1", "r2"))
+  # and stays whole through later writes of other altExps and round trips
+  altExp(es, "ADT") <- twoRows(1L, c("counts", "other"))
+  altExp(es, "B", subsetName = "s1") <- own
+  es <- setSubsetExperiment(es, "s1", getSubsetExperiment(es, "s1"))
+  testthat::expect_equal(assayNames(altExp(es, "ADT", subsetName = "s1")),
+                         "counts")
+  testthat::expect_warning(
+    altExp(es, "ADT") <- SummarizedExperiment(list(counts = adtCounts)),
+    regexp = NA)
+  testthat::expect_equal(rownames(altExp(es, "ADT", subsetName = "s1")),
+                         c("r1", "r2"))
   # an altExp the main object adds under a name s1 already stores is
   # hidden by s1's
   altExp(es, "X", subsetName = "s1") <- own
