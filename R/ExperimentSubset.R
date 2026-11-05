@@ -590,9 +590,9 @@ NULL
   altExpPlan <- list(sources = character(0))
   if (isSce)
     altExpPlan <- .planAltExps(x, subsetName, altExps(value))
-  sources <- .checkUnlinked(
-    c(.linkedSources(owners, subsetName, stored), altExpPlan$sources),
-    subsetName, unlink)
+  sources <- c(.linkedSources(owners, subsetName, stored),
+               altExpPlan$sources)
+  sources <- .checkUnlinked(sources, subsetName, unlink)
 
   # own assays that value no longer has are removed, unless a subset was
   # made from them
@@ -970,7 +970,7 @@ NULL
 }
 
 #' @importMethodsFrom SingleCellExperiment altExpNames<-
-'.altExpNames<-' <- function(x, ..., value) {
+`.altExpNames<-` <- function(x, ..., value) {
   arglist <- list(...)
   if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ..., value = value))
@@ -997,7 +997,7 @@ NULL
 }
 
 #' @importMethodsFrom SingleCellExperiment altExp<-
-'.altExp<-' <- function(x, e, ..., value) {
+`.altExp<-` <- function(x, e, ..., value) {
   arglist <- list(...)
   unlink <- .unlinkArg(arglist)
   if (!"subsetName" %in% names(arglist)) {
@@ -1020,7 +1020,7 @@ NULL
 }
 
 #' @importMethodsFrom SingleCellExperiment altExps<-
-'.altExps<-' <- function(x, ..., value) {
+`.altExps<-` <- function(x, ..., value) {
   arglist <- list(...)
   unlink <- .unlinkArg(arglist)
   if (!"subsetName" %in% names(arglist))
@@ -1241,9 +1241,11 @@ NULL
   if (identical(metadata(new), metadata(old)))
     metadata(part) <- list()
   hasReducedDims <- methods::is(part, "SingleCellExperiment")
-  if (hasReducedDims && .sameAssayList(
+  sameReducedDims <- hasReducedDims && .sameAssayList(
     SingleCellExperiment::reducedDims(new, withDimnames = FALSE),
-    SingleCellExperiment::reducedDims(old, withDimnames = FALSE))) {
+    SingleCellExperiment::reducedDims(old, withDimnames = FALSE)
+  )
+  if (sameReducedDims) {
     SingleCellExperiment::reducedDims(part) <- list()
     hasReducedDims <- FALSE
   }
