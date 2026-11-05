@@ -161,6 +161,19 @@ along":
 - `combineCols()`, which can give a main altExp the union of the objects'
   rows, carries along the same way, for each combined object's subsets.
 
+**Pieces are recorded** (decided in chat, 2026-11-05, after the review
+of the carry-along code found that a whole altExp could turn into a
+piece when the linked altExp later took its shape, and then be dropped):
+
+- When a subset stores its altExps, `.applyAltExps()` records the names
+  of those that are pieces in its internal object's `int_metadata`
+  (`ExperimentSubset_altExpPieces`). An altExp stored with no linked one
+  of its name, or of another shape, is whole.
+- Reading (`.subsetAltExpView()`, `.altExpShape()`) merges only pieces;
+  a whole altExp always replaces the linked one. Carrying along drops
+  only pieces, and renames update the record.
+- Objects saved before this have no record and keep the shape rule.
+
 A subset can't clear a linked altExp's rowData, colData, metadata or
 reducedDims: an empty one shows the linked one, as a subset can't remove
 a linked assay. This is documented.

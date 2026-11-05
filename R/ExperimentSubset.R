@@ -613,7 +613,7 @@ NULL
   metadata(internal) <- metadata(value)
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
   if (isSce) {
-    x <- .applyAltExps(x, subsetName, altExpPlan$parts)
+    x <- .applyAltExps(x, subsetName, altExpPlan)
     x <- .carryAltExpParts(before, x, subsetName)
   }
   for (name in names(sources))
@@ -861,6 +861,10 @@ NULL
 #'       not linked, so storing it again needs no \code{unlink}.
 #'     \item An altExp with other rows, rownames or class than the linked
 #'       one replaces it entirely, so every linked assay counts as changed.
+#'       It keeps replacing it, even if the linked altExp later has the same
+#'       rows: whether a stored altExp adds to or replaces the linked one is
+#'       recorded when it is stored. So is an altExp a subset stores while
+#'       nothing of that name is linked.
 #'   }
 #'   A subset can't remove or rename a linked altExp, or give one of its own
 #'   the name of another altExp it sees: an altExp missing
@@ -1024,7 +1028,10 @@ NULL
   before <- x
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   own <- altExpNames(internal)
-  altExpNames(internal) <- value[match(own, visible)]
+  newOwn <- value[match(own, visible)]
+  internal <- .setPieces(internal, .renamePieces(internal, own, newOwn,
+                                                 rep(FALSE, length(own))))
+  altExpNames(internal) <- newOwn
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
   .carryAltExpParts(before, x, subsetName,
                     .renamed(own, altExpNames(internal)))
@@ -1123,10 +1130,10 @@ NULL
 
 # The altExp called name as subsetName sees it, built from the parts
 # stored in holders (from .altExpHolders()), top first, each cut to the
-# subset's columns. A part of the same class, rows and rownames adds its
-# assays, each hiding one of the same name, and replaces rowData, colData,
-# metadata and reducedDims that it has; any other part replaces the
-# altExp. Returns the altExp and, named by assay, where each is stored.
+# subset's columns. A piece (see .isPiece()) adds its assays, each hiding
+# one of the same name, and replaces rowData, colData, metadata and
+# reducedDims that it has; a whole altExp replaces the altExp. Returns the
+# altExp and, named by assay, where each is stored.
 .subsetAltExpView <- function(x, subsetName, name, holders) {
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   view <- NULL
@@ -1142,7 +1149,7 @@ NULL
     }
     partOwners <- rep(holder, length(assayNames(part)))
     names(partOwners) <- assayNames(part)
-    if (is.null(view) || !.sameAltExpShape(view, part)) {
+    if (!.mergesInto(view, part, .holderRole(x, holder, name))) {
       view <- part
       owners <- partOwners
       next
@@ -1211,7 +1218,7 @@ NULL
 .storeAltExps <- function(x, subsetName, value, unlink) {
   plan <- .planAltExps(x, subsetName, value)
   sources <- .checkUnlinked(plan$sources, subsetName, unlink)
-  x <- .carryAltExpParts(x, .applyAltExps(x, subsetName, plan$parts),
+  x <- .carryAltExpParts(x, .applyAltExps(x, subsetName, plan),
                          subsetName)
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
@@ -1220,8 +1227,9 @@ NULL
 
 # What subsetName stores to see the altExps in value (a named list): for
 # each, NULL if the linked altExp is the same, the value whole if nothing
-# is linked under its name or its shape differs, or else a part with only
-# the assays, rowData, colData, metadata and reducedDims that differ.
+# is linked under its name or its shape differs, or else a piece with only
+# the assays, rowData, colData, metadata and reducedDims that differ; and
+# the names of the pieces.
 # Also, named "altExp/assay", where each changed linked assay is linked
 # from, for the unlink check; an assay the subset already stores itself
 # is no longer linked.
@@ -1231,6 +1239,7 @@ NULL
   parts <- vector("list", length(value))
   names(parts) <- names(value)
   sources <- character(0)
+  pieces <- character(0)
   for (i in seq_along(value)) {
     name <- names(value)[i]
     new <- value[[i]]
@@ -1244,6 +1253,7 @@ NULL
     if (.sameAltExpShape(old$altExp, new)) {
       changed <- .changedAssays(old$altExp, new)
       parts[i] <- list(.altExpPart(old$altExp, new, changed))
+      pieces <- c(pieces, name)
     } else {
       parts[[i]] <- new
     }
@@ -1261,7 +1271,7 @@ NULL
       sources <- c(sources, changedSources)
     }
   }
-  list(parts = parts, sources = sources)
+  list(parts = parts, sources = sources, pieces = pieces)
 }
 
 # Names of the assays of new that old doesn't have or holds other values
@@ -1326,10 +1336,11 @@ NULL
 }
 
 # Stores parts (from .planAltExps()) as subsetName's own altExps, in place
-# of those it had; NULL parts are left out
-.applyAltExps <- function(x, subsetName, parts) {
+# of those it had, recording which are pieces; NULL parts are left out
+.applyAltExps <- function(x, subsetName, plan) {
   internal <- .internalAssay(.subsets(x)[[subsetName]])
-  parts <- parts[!vapply(parts, is.null, logical(1))]
+  parts <- plan$parts[!vapply(plan$parts, is.null, logical(1))]
+  internal <- .setPieces(internal, intersect(plan$pieces, names(parts)))
   SingleCellExperiment::altExps(internal, withDimnames = FALSE) <- parts
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
   x
@@ -1358,11 +1369,14 @@ NULL
            taken[1], "'. Rename it first.")
     dropped <- vapply(seq_along(oldNames), function(i) {
       part <- .storedAltExp(internal, oldNames[i])
-      .addsToLinked(before, subset, oldNames[i], part) &&
-        !.addsToLinked(after, subset, newNames[i], part)
+      role <- .isPiece(internal, oldNames[i])
+      .addsToLinked(before, subset, oldNames[i], part, role) &&
+        !.addsToLinked(after, subset, newNames[i], part, role)
     }, logical(1))
     if (!any(moved) && !any(dropped))
       next
+    internal <- .setPieces(internal, .renamePieces(internal, oldNames,
+                                                   newNames, dropped))
     altExpNames(internal) <- newNames
     SingleCellExperiment::altExps(internal, withDimnames = FALSE) <-
       SingleCellExperiment::altExps(internal, withDimnames = FALSE)[!dropped]
@@ -1376,6 +1390,16 @@ NULL
   after
 }
 
+# The pieces internal records (NULL if none), after its altExps oldNames
+# are renamed newNames and those where dropped is TRUE are removed
+.renamePieces <- function(internal, oldNames, newNames, dropped) {
+  pieces <- SingleCellExperiment::int_metadata(internal)[[.piecesKey]]
+  if (is.null(pieces))
+    return(NULL)
+  kept <- oldNames %in% pieces & !dropped
+  newNames[kept]
+}
+
 # Names of the subsets below holder ("" for the main object, or a subset):
 # those made from it, directly or through other subsets, parents first
 .subsetsBelow <- function(x, holder) {
@@ -1386,14 +1410,54 @@ NULL
   subsetNames(x)[below][order(lengths(chains)[below])]
 }
 
-# TRUE if part, what subsetName stores of the altExp called name, adds to
-# a linked altExp of the same shape, rather than replacing it
-.addsToLinked <- function(x, subsetName, name, part) {
+# TRUE if part, what subsetName stores of the altExp called name as role
+# (from .isPiece()), adds to a linked altExp, rather than replacing it
+.addsToLinked <- function(x, subsetName, name, part, role) {
   linked <- .altExpHolders(x, subsetName, own = FALSE)
   j <- match(name, linked$names)
   if (is.na(j))
     return(FALSE)
-  .sameAltExpShape(.altExpShape(x, name, linked$holders[[j]]), part)
+  .mergesInto(.altExpShape(x, name, linked$holders[[j]]), part, role)
+}
+
+# The int_metadata entry of a subset's internal object that names its
+# altExps that are pieces: they add to the linked altExp of that name,
+# while its other altExps replace it. Objects saved before it was
+# recorded don't have it.
+.piecesKey <- "ExperimentSubset_altExpPieces"
+
+# TRUE if internal records the altExp called name as a piece, FALSE if as
+# whole, NA if it records nothing
+.isPiece <- function(internal, name) {
+  pieces <- SingleCellExperiment::int_metadata(internal)[[.piecesKey]]
+  if (is.null(pieces))
+    return(NA)
+  name %in% pieces
+}
+
+# .isPiece() for the altExp called name stored at holder; NA for the main
+# object
+.holderRole <- function(x, holder, name) {
+  if (holder == "")
+    return(NA)
+  .isPiece(.internalAssay(.subsets(x)[[holder]]), name)
+}
+
+# internal with pieces recorded as the names of its pieces, if pieces
+# isn't NULL
+.setPieces <- function(internal, pieces) {
+  if (is.null(pieces))
+    return(internal)
+  SingleCellExperiment::int_metadata(internal)[[.piecesKey]] <-
+    as.character(pieces)
+  internal
+}
+
+# TRUE if part, stored as role (from .isPiece()), adds to view, the altExp
+# built so far: a piece, or, when nothing is recorded, a part of the same
+# class, rows and rownames
+.mergesInto <- function(view, part, role) {
+  !is.null(view) && !isFALSE(role) && .sameAltExpShape(view, part)
 }
 
 # The stored altExp whose class, rows and rownames give the shape of the
@@ -1406,7 +1470,7 @@ NULL
     if (holder != "")
       object <- .internalAssay(.subsets(x)[[holder]])
     part <- .storedAltExp(object, name)
-    if (is.null(shape) || !.sameAltExpShape(shape, part))
+    if (!.mergesInto(shape, part, .holderRole(x, holder, name)))
       shape <- part
   }
   shape

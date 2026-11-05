@@ -3377,6 +3377,54 @@ testthat::test_that("A rename carries what subsets store along (#58)", {
   testthat::expect_equal(altExpNames(es), "ADT")
 })
 
+testthat::test_that("A subset's whole altExp stays whole (#58)", {
+  es <- makeAdtFixture()
+  twoRows <- function(value, assays = "counts") {
+    m <- matrix(value, 2, 20, dimnames = list(c("r1", "r2"),
+                                             paste0("c", 1:20)))
+    SummarizedExperiment(stats::setNames(rep(list(m), length(assays)),
+                                         assays))
+  }
+  own <- twoRows(5L)[, 1:8]
+  suppressMessages(altExp(es, "ADT", subsetName = "s1", unlink = TRUE) <- own)
+  # the main ADT takes the same rows: s1's ADT still replaces it
+  testthat::expect_warning(
+    altExp(es, "ADT") <- twoRows(1L, c("counts", "other")), regexp = NA)
+  adt <- altExp(es, "ADT", subsetName = "s1")
+  testthat::expect_equal(assayNames(adt), "counts")
+  testthat::expect_equal(as.vector(assay(adt, "counts")), rep(5L, 16))
+  # and is kept when the main ADT is reshaped
+  testthat::expect_warning(
+    altExp(es, "ADT") <- SummarizedExperiment(list(counts = adtCounts)),
+    regexp = NA)
+  testthat::expect_equal(rownames(altExp(es, "ADT", subsetName = "s1")),
+                         c("r1", "r2"))
+  # an altExp the main object adds under a name s1 already stores is
+  # hidden by s1's
+  altExp(es, "X", subsetName = "s1") <- own
+  altExp(es, "X") <- twoRows(1L, c("counts", "other"))
+  testthat::expect_equal(assayNames(altExp(es, "X", subsetName = "s1")),
+                         "counts")
+})
+
+testthat::test_that("Objects saved before pieces were recorded read as before (#58)", {
+  es <- makeAdtFixture()
+  # a full copy stored as earlier versions did, with no record of pieces
+  subsets <- ExperimentSubset:::.subsets(es)
+  internal <- ExperimentSubset:::.internalAssay(subsets[["s1"]])
+  copy <- SummarizedExperiment(list(counts = adtCounts[, 1:8] + 5L))
+  altExp(internal, "ADT") <- copy
+  subsets[["s1"]] <- ExperimentSubset:::`.internalAssay<-`(
+    subsets[["s1"]], value = internal)
+  es <- ExperimentSubset:::`.subsets<-`(es, value = subsets)
+  altExp(es, "ADT") <- SummarizedExperiment(
+    list(counts = adtCounts, other = adtCounts * 2L))
+  # the copy's counts hide the main ADT's, whose other assay shows too
+  adt <- altExp(es, "ADT", subsetName = "s1")
+  testthat::expect_equal(assayNames(adt), c("counts", "other"))
+  testthat::expect_equal(assay(adt, "counts"), adtCounts[, 1:8] + 5L)
+})
+
 testthat::test_that("combineCols carries what subsets store along (#58)", {
   es <- makeAdtFixture()
   adt <- altExp(es, "ADT", subsetName = "s1")
