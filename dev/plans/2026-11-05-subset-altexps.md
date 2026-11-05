@@ -152,11 +152,14 @@ along":
   `setSubsetExperiment()`), `.carryAltExpParts()` visits the subsets below
   that holder, parents first.
 - **Rename:** their parts under the old name are renamed. A rename onto a
-  name a subset below already stores is an error, and nothing changes.
+  name a subset below already stores, as a part or an altExp of its own,
+  is an error, and nothing changes.
 - **Removed or reshaped** (other rows, rownames or class): a part that
   added to it is dropped, with a warning naming the subset and altExp. A
   part that already replaced it whole is kept as the subset's own altExp.
 - New values of the same shape change nothing; subsets see them.
+- `combineCols()`, which can give a main altExp the union of the objects'
+  rows, carries along the same way, for each combined object's subsets.
 
 A subset can't clear a linked altExp's rowData, colData, metadata or
 reducedDims: an empty one shows the linked one, as a subset can't remove

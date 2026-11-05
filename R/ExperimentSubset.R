@@ -953,7 +953,7 @@ NULL
   # only the altExp asked for is built; for anything else, all of them,
   # so the SingleCellExperiment method gives its usual error
   visible <- .altExpHolders(x, subsetName)$names
-  name <- if (missing(e)) visible[1] else .altExpName(e, visible)
+  name <- .altExpName(if (missing(e)) 1L else e, visible)
   if (!is.null(name)) {
     internal <- .withSubsetAltExps(x, subsetName, only = name)
     return(do.call(altExp, c(list(internal, name), .otherArgs(...))))
@@ -1343,15 +1343,19 @@ NULL
 # A subset's own whole altExp is kept.
 .carryAltExpParts <- function(before, after, holder,
                               renamed = character(0)) {
-  for (subset in .subsetsBelow(after, holder)) {
+  below <- .subsetsBelow(after, holder)
+  for (subset in below[below %in% subsetNames(before)]) {
     internal <- .internalAssay(.subsets(after)[[subset]])
     oldNames <- altExpNames(internal)
     newNames <- oldNames
     moved <- oldNames %in% names(renamed)
     newNames[moved] <- renamed[oldNames[moved]]
-    if (anyDuplicated(newNames) > 0)
+    # a new name the subset already stores would join two altExps
+    taken <- c(intersect(renamed, oldNames[!moved]),
+               newNames[duplicated(newNames)])
+    if (length(taken) > 0)
       stop("Subset '", subset, "' already stores an altExp called '",
-           newNames[duplicated(newNames)][1], "'. Rename it first.")
+           taken[1], "'. Rename it first.")
     dropped <- vapply(seq_along(oldNames), function(i) {
       part <- .storedAltExp(internal, oldNames[i])
       .addsToLinked(before, subset, oldNames[i], part) &&
@@ -1363,11 +1367,11 @@ NULL
     SingleCellExperiment::altExps(internal, withDimnames = FALSE) <-
       SingleCellExperiment::altExps(internal, withDimnames = FALSE)[!dropped]
     .internalAssay(.subsets(after)[[subset]]) <- internal
+    quoted <- .andList(sprintf("'%s'", newNames[dropped]))
     if (any(dropped))
       warning("Dropped what subset '", subset, "' stored in altExp ",
-              .andList(paste0("'", newNames[dropped], "'")), ": the altExp ",
-              "it added to was removed, or now has other rows or another ",
-              "class.", call. = FALSE)
+              quoted, ": the altExp it added to was removed, or now has ",
+              "other rows or another class.", call. = FALSE)
   }
   after
 }
@@ -1893,6 +1897,16 @@ NULL
     }
     .subsets(out) <- subsets
   }
+  .carryCombined(out, objects)
+}
+
+# After objects are combined into out, carries along what their subsets
+# store of the main altExps, which combineCols() can give other rows
+.carryCombined <- function(out, objects) {
+  if (!methods::is(out, "SingleCellExperiment"))
+    return(out)
+  for (object in objects[.hasSubsets(objects)])
+    out <- .carryAltExpParts(object, out, "")
   out
 }
 

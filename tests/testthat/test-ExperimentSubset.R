@@ -3063,6 +3063,9 @@ testthat::test_that("A subset sees the main object's altExps (#58)", {
   testthat::expect_error(altExp(es, "none", subsetName = "s1"),
                          regexp = "'none' not in 'altExpNames")
   testthat::expect_error(altExp(es, 3, subsetName = "s1"))
+  none <- createSubset(ExperimentSubset(simSce), "s", cols = 1:3)
+  testthat::expect_error(altExp(none, subsetName = "s"),
+                         regexp = "no available entries")
 })
 
 testthat::test_that("withColData and withDimnames work on a subset's altExps (#58)", {
@@ -3361,6 +3364,47 @@ testthat::test_that("A rename carries what subsets store along (#58)", {
     altExpNames(es, subsetName = "s1") <- c("protein", "other"),
     regexp = "Subset 's2' already stores an altExp called 'other'.",
     fixed = TRUE)
+  # also when the subset stores only the new name, an altExp of its own
+  es <- makeAdtFixture()
+  own <- SummarizedExperiment(
+    list(counts = matrix(1L, 2, 8, dimnames = list(c("p1", "p2"),
+                                                   paste0("c", 1:8)))))
+  altExp(es, "X", subsetName = "s1") <- own
+  testthat::expect_error(
+    altExpNames(es) <- "X",
+    regexp = "Subset 's1' already stores an altExp called 'X'.",
+    fixed = TRUE)
+  testthat::expect_equal(altExpNames(es), "ADT")
+})
+
+testthat::test_that("combineCols carries what subsets store along (#58)", {
+  es <- makeAdtFixture()
+  adt <- altExp(es, "ADT", subsetName = "s1")
+  assay(adt, "decontPro") <- assay(adt, "counts") / 2
+  altExp(es, "ADT", subsetName = "s1") <- adt
+  # a plain object of 3 cells whose ADT has the given proteins
+  makeOther <- function(proteins) {
+    counts <- matrix(1L, 10, 3, dimnames = list(paste0("g", 1:10),
+                                               paste0("n", 1:3)))
+    other <- SingleCellExperiment(list(counts = counts))
+    altExp(other, "ADT") <- SummarizedExperiment(list(
+      counts = matrix(1L, length(proteins), 3,
+                      dimnames = list(proteins, paste0("n", 1:3)))))
+    other
+  }
+  # the same proteins: nothing changes
+  testthat::expect_warning(
+    out <- combineCols(es, makeOther(c("p1", "p2"))), regexp = NA)
+  testthat::expect_equal(assayNames(altExp(out, "ADT", subsetName = "s1")),
+                         c("counts", "decontPro"))
+  # a third protein: ADT gets another row, and s1's part is dropped
+  testthat::expect_warning(
+    out <- combineCols(es, makeOther(c("p1", "p2", "p3"))),
+    regexp = "Dropped what subset 's1' stored in altExp 'ADT'", fixed = TRUE)
+  testthat::expect_equal(dim(altExp(out, "ADT", subsetName = "s1")),
+                         c(3L, 8L))
+  testthat::expect_equal(assayNames(altExp(out, "ADT", subsetName = "s1")),
+                         "counts")
 })
 
 testthat::test_that("Removing or reshaping an altExp drops what subsets added to it (#58)", {
