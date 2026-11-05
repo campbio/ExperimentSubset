@@ -1,6 +1,6 @@
 # Subsets see the main object's altExps (#58)
 
-- **Status:** Proposed
+- **Status:** Approved and implemented
 - **Date:** 2026-11-05
 - **Branch:** `feature/subset-altexps`, from `devel`
 - **Lands:** one PR to `devel` (1.23.37); devel only, no release port
@@ -112,7 +112,10 @@ altExp(es, "ADT", subsetName = "tcells") <- adt
       `"altExp/assay"`, with its source ("the main altExp 'ADT'" or
       "altExp 'ADT' of subset 'tcells'"), and suggesting the full
       `unlink = c(...)`, as `.checkLinked()` does for assays. All checks
-      run before anything is stored.
+      run before anything is stored. An assay the subset already stores
+      itself (after an unlink, or in an altExp of another shape) is no
+      longer linked and needs no `unlink` again; this was added after the
+      spec review found that later writes otherwise failed.
   - The subset's own altExps (or own parts) that `value` doesn't have are
     removed. Linked altExps that `value` doesn't have stay visible: a
     subset can't remove what it doesn't store, as for linked assays.
@@ -132,7 +135,9 @@ altExp(es, "ADT", subsetName = "tcells") <- adt
   "'unlink' only applies when storing in a subset." The class files'
   replacement methods need no change, since `unlink` is in `...`.
 - **`.altExpNames<-()`** with `subsetName`: `value` gives one name per
-  visible altExp, as the getter returns them. Renaming a linked altExp is
+  visible altExp, as the getter returns them, with no `NA` or duplicate
+  (a duplicate would let an own altExp take a linked name and hide it
+  without `unlink`). Renaming a linked altExp is
   an error ("'ADT' is linked to the main altExp 'ADT'; rename it in the
   main object"); the subset's own altExps are renamed.
 

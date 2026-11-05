@@ -114,7 +114,8 @@ of the alternative experiment. Leave it out for the first one. With
     different values: with \code{TRUE}, every such assay; with names,
     only those. Any other such assay is an error, and nothing is
     stored. A message names each assay that is unlinked. Default
-    \code{FALSE}. It is an error without \code{subsetName}.}
+    \code{FALSE}. Any other value is an error without
+    \code{subsetName}.}
 }
 Other arguments are passed on to the \code{SingleCellExperiment}
 method. With \code{subsetName}, \code{altExpNames()} and
@@ -124,8 +125,8 @@ method. With \code{subsetName}, \code{altExpNames()} and
 column per column of the subset (or of the main object). For
 \code{altExps<-}, a list of them. For \code{altExpNames<-}, a
 \code{character} vector of new names, one for each name
-\code{altExpNames()} returns; with \code{subsetName}, only the subset's
-own altExps can get new names.}
+\code{altExpNames()} returns; with \code{subsetName}, they must all
+differ, and only the subset's own altExps can get new names.}
 
 \item{withDimnames}{\code{logical(1)} Passed on to
 \code{\link[SingleCellExperiment]{altExp<-}} or \code{altExps<-}.
@@ -169,10 +170,15 @@ A subset sees the main object's altExps, and those stored on
       \code{"ADT/counts"}.
     \item rowData, colData, metadata and reducedDims are stored when
       they differ from the linked altExp's, and then replace them whole.
+      Other parts, such as the altExp's own altExps, \code{colPairs} and
+      \code{rowPairs}, always come from the linked altExp.
+    \item An assay the subset already stores itself, after an unlink, is
+      not linked, so storing it again needs no \code{unlink}.
     \item An altExp with other rows, rownames or class than the linked
       one replaces it entirely, so every linked assay counts as changed.
   }
-  A subset can't remove or rename a linked altExp: an altExp missing
+  A subset can't remove or rename a linked altExp, or give one of its own
+  the name of another altExp it sees: an altExp missing
   from \code{value} in \code{altExps<-} stays visible, and
   \code{altExp(x, e, subsetName = s) <- NULL} removes only what the
   subset stores, so the linked altExp shows again.

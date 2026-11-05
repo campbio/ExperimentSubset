@@ -3241,6 +3241,79 @@ testthat::test_that("A subset removes and renames only its own altExps (#58)", {
     regexp = paste0("Subset 's1' can't rename 'ADT', which is linked to ",
                     "the main altExp 'ADT'."),
     fixed = TRUE)
+  # names must differ, so an own altExp can't take a linked name, which
+  # would hide the linked altExp without unlink
+  testthat::expect_error(
+    altExpNames(es, subsetName = "s1") <- c("ADT", "ADT"),
+    regexp = "one different name for each of the 2 altExps", fixed = TRUE)
+  testthat::expect_error(
+    altExpNames(es, subsetName = "s1") <- c("ADT", NA),
+    regexp = "one different name for each of the 2 altExps", fixed = TRUE)
+  testthat::expect_error(
+    altExpNames(es, subsetName = "s1") <- c("ADT", "ercc", "x"),
+    regexp = "one different name for each of the 2 altExps", fixed = TRUE)
+  testthat::expect_equal(altExpNames(es, subsetName = "s1"),
+                         c("ADT", "ercc"))
+})
+
+testthat::test_that("Writes after an unlink don't need unlink again (#58)", {
+  es <- makeAdtFixture()
+  adt <- altExp(es, "ADT", subsetName = "s1")
+  assay(adt, "counts") <- assay(adt, "counts") + 100L
+  suppressMessages(altExp(es, "ADT", subsetName = "s1", unlink = TRUE) <- adt)
+  # s1's own counts is no longer linked
+  adt <- altExp(es, "ADT", subsetName = "s1")
+  assay(adt, "decontPro") <- assay(adt, "counts") / 2
+  messages <- testthat::capture_messages(
+    altExp(es, "ADT", subsetName = "s1") <- adt)
+  testthat::expect_length(messages, 0)
+  testthat::expect_equal(assayNames(ownAltExp(es, "s1", "ADT")),
+                         c("counts", "decontPro"))
+  spikes <- SummarizedExperiment(
+    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8)))))
+  messages <- testthat::capture_messages(
+    altExp(es, "spikes", subsetName = "s1") <- spikes)
+  testthat::expect_length(messages, 0)
+  messages <- testthat::capture_messages(
+    es2 <- setSubsetExperiment(es, "s1", getSubsetExperiment(es, "s1")))
+  testthat::expect_length(messages, 0)
+  testthat::expect_equal(
+    assay(altExp(es2, "ADT", subsetName = "s1"), "counts"),
+    adtCounts[, 1:8] + 100L)
+  # also after storing an altExp of another shape
+  es <- makeAdtFixture()
+  small <- SummarizedExperiment(list(
+    counts = matrix(1L, 1, 8, dimnames = list("p9", paste0("c", 1:8)))))
+  suppressMessages(altExp(es, "ADT", subsetName = "s1", unlink = TRUE) <- small)
+  assay(small, "counts") <- assay(small, "counts") + 1L
+  messages <- testthat::capture_messages(
+    altExp(es, "ADT", subsetName = "s1") <- small)
+  testthat::expect_length(messages, 0)
+  testthat::expect_equal(
+    as.vector(assay(altExp(es, "ADT", subsetName = "s1"), "counts")),
+    rep(2L, 8))
+})
+
+testthat::test_that("A subset's altExp reducedDims replace the linked ones (#58)", {
+  es <- makeAdtFixture()
+  adtSce <- SingleCellExperiment(list(counts = adtCounts))
+  reducedDim(adtSce, "PCA") <- matrix(seq_len(40), 20, 2)
+  altExp(es, "ADT") <- adtSce
+  adt <- altExp(es, "ADT", subsetName = "s1")
+  testthat::expect_equal(unname(reducedDim(adt, "PCA")),
+                         matrix(seq_len(40), 20, 2)[1:8, ])
+  # storing the same reducedDims stores nothing
+  altExp(es, "ADT", subsetName = "s1") <- adt
+  testthat::expect_null(ownAltExp(es, "s1", "ADT"))
+  reducedDim(adt, "PCA") <- matrix(0, 8, 2)
+  metadata(adt)$note <- "own"
+  altExp(es, "ADT", subsetName = "s1") <- adt
+  adt <- altExp(es, "ADT", subsetName = "s1")
+  testthat::expect_equal(unname(reducedDim(adt, "PCA")), matrix(0, 8, 2))
+  testthat::expect_equal(metadata(adt)$note, "own")
+  testthat::expect_equal(unname(reducedDim(altExp(es, "ADT"), "PCA")),
+                         matrix(seq_len(40), 20, 2))
+  testthat::expect_length(assayNames(ownAltExp(es, "s1", "ADT")), 0)
 })
 
 testthat::test_that("setSubsetExperiment stores only changed altExp assays (#58)", {

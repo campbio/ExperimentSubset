@@ -852,10 +852,15 @@ NULL
 #'       \code{"ADT/counts"}.
 #'     \item rowData, colData, metadata and reducedDims are stored when
 #'       they differ from the linked altExp's, and then replace them whole.
+#'       Other parts, such as the altExp's own altExps, \code{colPairs} and
+#'       \code{rowPairs}, always come from the linked altExp.
+#'     \item An assay the subset already stores itself, after an unlink, is
+#'       not linked, so storing it again needs no \code{unlink}.
 #'     \item An altExp with other rows, rownames or class than the linked
 #'       one replaces it entirely, so every linked assay counts as changed.
 #'   }
-#'   A subset can't remove or rename a linked altExp: an altExp missing
+#'   A subset can't remove or rename a linked altExp, or give one of its own
+#'   the name of another altExp it sees: an altExp missing
 #'   from \code{value} in \code{altExps<-} stays visible, and
 #'   \code{altExp(x, e, subsetName = s) <- NULL} removes only what the
 #'   subset stores, so the linked altExp shows again.
@@ -880,7 +885,8 @@ NULL
 #'       different values: with \code{TRUE}, every such assay; with names,
 #'       only those. Any other such assay is an error, and nothing is
 #'       stored. A message names each assay that is unlinked. Default
-#'       \code{FALSE}. It is an error without \code{subsetName}.}
+#'       \code{FALSE}. Any other value is an error without
+#'       \code{subsetName}.}
 #'   }
 #'   Other arguments are passed on to the \code{SingleCellExperiment}
 #'   method. With \code{subsetName}, \code{altExpNames()} and
@@ -889,8 +895,8 @@ NULL
 #'   column per column of the subset (or of the main object). For
 #'   \code{altExps<-}, a list of them. For \code{altExpNames<-}, a
 #'   \code{character} vector of new names, one for each name
-#'   \code{altExpNames()} returns; with \code{subsetName}, only the subset's
-#'   own altExps can get new names.
+#'   \code{altExpNames()} returns; with \code{subsetName}, they must all
+#'   differ, and only the subset's own altExps can get new names.
 #' @return \code{altExp()} returns a \code{SummarizedExperiment},
 #'   \code{altExps()} a list of them and \code{altExpNames()} a
 #'   \code{character} vector. With \code{subsetName}, these are every
@@ -971,9 +977,12 @@ NULL
   subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
   visible <- .altExpHolders(x, subsetName)$names
-  if (length(value) != length(visible))
-    stop("'value' must give one name for each of the ", length(visible),
-         " altExps of subset '", subsetName, "'.")
+  if (length(value) != length(visible) || anyNA(value)
+      || anyDuplicated(value) > 0)
+    stop("'value' must give one different name for each of the ",
+         length(visible), " altExps of subset '", subsetName, "'.")
+  # every linked name is visible, so with names that differ an own altExp
+  # can't take a linked name, which it would hide without unlink
   linked <- .altExpHolders(x, subsetName, own = FALSE)
   for (i in which(visible %in% linked$names & visible != value)) {
     holders <- linked$holders[[match(visible[i], linked$names)]]
@@ -1166,9 +1175,11 @@ NULL
 # is linked under its name or its shape differs, or else a part with only
 # the assays, rowData, colData, metadata and reducedDims that differ.
 # Also, named "altExp/assay", where each changed linked assay is linked
-# from, for the unlink check.
+# from, for the unlink check; an assay the subset already stores itself
+# is no longer linked.
 .planAltExps <- function(x, subsetName, value) {
   linked <- .altExpHolders(x, subsetName, own = FALSE)
+  current <- .altExpHolders(x, subsetName)
   parts <- vector("list", length(value))
   names(parts) <- names(value)
   sources <- character(0)
@@ -1188,7 +1199,10 @@ NULL
     } else {
       parts[[i]] <- new
     }
-    changed <- intersect(changed, names(old$owners))
+    seen <- .subsetAltExpView(x, subsetName, name,
+                              current$holders[[match(name, current$names)]])
+    stillLinked <- names(seen$owners)[seen$owners != subsetName]
+    changed <- intersect(changed, stillLinked)
     if (length(changed) > 0) {
       changedSources <- vapply(old$owners[changed], .altExpSource,
                                character(1), name = name)
