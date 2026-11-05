@@ -248,8 +248,8 @@ columns, under the same names: these are *linked* assays, and they are
 not copied. Each subset has its own names, so two subsets made from the
 same parent can store an assay with the same name. Storing an assay with
 a name the subset already sees through its parent needs `unlink = TRUE`,
-which makes the subset (and subsets made from it) use its own version
-from then on.
+or `unlink =` that name, which makes the subset (and subsets made from
+it) use its own version from then on.
 
 \
 `#'subset1' sees its own assay and the main 'counts' it was made from`\
@@ -269,7 +269,12 @@ subset sees (its own and the linked ones), its colData, rowData,
 reducedDims and metadata. Any tool written for that class can then be
 run on it. `setSubsetExperiment` stores the result back in the subset:
 what the object holds replaces the subset’s own data, while linked
-assays that are unchanged are not copied.
+assays that are unchanged are not copied. A linked assay that the tool
+changed is an error unless `unlink` allows it: `unlink = TRUE` stores
+every changed linked assay as the subset’s own, and
+`unlink = "decontXcounts"` only that one, so a change to `counts` made
+by mistake still stops with an error. A message names each assay that is
+unlinked.
 
 \
 `#take 'subset1' out as a SingleCellExperiment`\
@@ -885,7 +890,7 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.35        TreeSummarizedExperiment_2.21.0
+    ##  [1] ExperimentSubset_1.23.36        TreeSummarizedExperiment_2.21.0
     ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
     ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
     ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 

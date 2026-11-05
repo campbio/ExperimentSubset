@@ -10,8 +10,8 @@ methods, `assay()` and `assay<-` name the subset with `i`, not with
 
 - the subset's rows and columns of the assay it was made from, when `i`
   is a subset name. If the subset, or a subset it was made from, stored
-  its own assay of that name with `unlink = TRUE`, that assay is
-  returned instead;
+  its own assay of that name with `unlink`, that assay is returned
+  instead;
 
 - an assay as a subset sees it, when `i` is `"subset/assay"`, or a
   subset name with `subsetAssayName = "assay"`: either one stored in the
@@ -88,8 +88,10 @@ assay(x, i, withDimnames = TRUE, ...) <- value
 
   `unlink`
 
-  : `logical(1)` When storing in a subset, store the assay even though
-    the subset sees an assay of that name linked from its parent, as for
+  : `TRUE`, `FALSE` or a character vector of assay names. When storing
+    in a subset, store the assay even though the subset sees an assay of
+    that name linked from its parent, with `TRUE` or a vector that
+    contains its name, as for
     [`setSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md).
     It is an error when storing a main assay. Default `FALSE`.
 

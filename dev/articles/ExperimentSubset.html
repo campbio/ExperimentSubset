@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.35</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.36</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -329,8 +329,9 @@ columns, under the same names: these are <em>linked</em> assays, and
 they are not copied. Each subset has its own names, so two subsets made
 from the same parent can store an assay with the same name. Storing an
 assay with a name the subset already sees through its parent needs
-<code>unlink = TRUE</code>, which makes the subset (and subsets made
-from it) use its own version from then on.</p>
+<code>unlink = TRUE</code>, or <code>unlink =</code> that name, which
+makes the subset (and subsets made from it) use its own version from
+then on.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#'subset1' sees its own assay and the main 'counts' it was made from</span></span>
 <span><span class="fu"><a href="../reference/subsetAssayNames.html">subsetAssayNames</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span></span></code></pre></div>
@@ -353,7 +354,12 @@ own and the linked ones), its colData, rowData, reducedDims and
 metadata. Any tool written for that class can then be run on it.
 <code>setSubsetExperiment</code> stores the result back in the subset:
 what the object holds replaces the subset’s own data, while linked
-assays that are unchanged are not copied.</p>
+assays that are unchanged are not copied. A linked assay that the tool
+changed is an error unless <code>unlink</code> allows it:
+<code>unlink = TRUE</code> stores every changed linked assay as the
+subset’s own, and <code>unlink = "decontXcounts"</code> only that one,
+so a change to <code>counts</code> made by mistake still stops with an
+error. A message names each assay that is unlinked.</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#take 'subset1' out as a SingleCellExperiment</span></span>
 <span><span class="va">subset1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getSubsetExperiment.html">getSubsetExperiment</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"subset1"</span><span class="op">)</span></span>
@@ -987,7 +993,7 @@ keeping all subsets in one object.</li>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] ExperimentSubset_1.23.35        TreeSummarizedExperiment_2.21.0</span></span>
+<span><span class="co">##  [1] ExperimentSubset_1.23.36        TreeSummarizedExperiment_2.21.0</span></span>
 <span><span class="co">##  [3] Biostrings_2.81.9               XVector_0.53.0                 </span></span>
 <span><span class="co">##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    </span></span>
 <span><span class="co">##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 </span></span>

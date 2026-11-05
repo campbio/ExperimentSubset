@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.35</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.36</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,11 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.36" id="experimentsubset-12336-2026-11-04">ExperimentSubset 1.23.36 (2026-11-04)<a class="anchor" aria-label="anchor" href="#experimentsubset-12336-2026-11-04"></a></h2>
+<ul><li>
+<code>unlink</code> in <code><a href="../reference/setSubsetExperiment.html">setSubsetExperiment()</a></code>, <code><a href="../reference/setSubsetAssay.html">setSubsetAssay()</a></code> and <code>assay&lt;-</code> can now name the assays to unlink, as well as being <code>TRUE</code> or <code>FALSE</code>. With <code>unlink = "decontXcounts"</code>, <code><a href="../reference/setSubsetExperiment.html">setSubsetExperiment()</a></code> stores a changed <code>decontXcounts</code> as the subset’s own, but stops with an error, storing nothing, if another linked assay such as <code>counts</code> was changed too. Before, the only choice was <code>unlink = TRUE</code>, which also unlinked an assay changed by mistake, without a message. Names of assays that are not linked, or not changed, are ignored. Each assay that is unlinked now gives a message such as “Subset ‘s1’ now stores its own ‘counts’, unlinked from the main assay ‘counts’.”, whether <code>unlink</code> is <code>TRUE</code> or a name. An <code>unlink</code> that is not <code>TRUE</code>, <code>FALSE</code> or a character vector of assay names, such as <code>NA</code>, now gives the error “‘unlink’ must be TRUE, FALSE or a character vector of assay names.”; before, it was taken as <code>FALSE</code> (<a href="https://github.com/campbio/ExperimentSubset/issues/59" class="external-link">#59</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.35" id="experimentsubset-12335-2026-11-04">ExperimentSubset 1.23.35 (2026-11-04)<a class="anchor" aria-label="anchor" href="#experimentsubset-12335-2026-11-04"></a></h2>
 <ul><li>

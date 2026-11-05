@@ -1,5 +1,26 @@
 # Changelog
 
+## ExperimentSubset 1.23.36 (2026-11-04)
+
+- `unlink` in
+  [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md),
+  [`setSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)
+  and `assay<-` can now name the assays to unlink, as well as being
+  `TRUE` or `FALSE`. With `unlink = "decontXcounts"`,
+  [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md)
+  stores a changed `decontXcounts` as the subset’s own, but stops with
+  an error, storing nothing, if another linked assay such as `counts`
+  was changed too. Before, the only choice was `unlink = TRUE`, which
+  also unlinked an assay changed by mistake, without a message. Names of
+  assays that are not linked, or not changed, are ignored. Each assay
+  that is unlinked now gives a message such as “Subset ‘s1’ now stores
+  its own ‘counts’, unlinked from the main assay ‘counts’.”, whether
+  `unlink` is `TRUE` or a name. An `unlink` that is not `TRUE`, `FALSE`
+  or a character vector of assay names, such as `NA`, now gives the
+  error “‘unlink’ must be TRUE, FALSE or a character vector of assay
+  names.”; before, it was taken as `FALSE`
+  ([\#59](https://github.com/campbio/ExperimentSubset/issues/59))
+
 ## ExperimentSubset 1.23.35 (2026-11-04)
 
 - [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)

@@ -45,14 +45,16 @@ setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
   `character(1)` Specify the name of the new `assay` against the
   `inputMatrix` parameter. It can't contain `"/"`. A subset sees its
   parent's assays as linked assays, so a name linked from the parent
-  (for example a main `assay`) needs `unlink = TRUE`.
+  (for example a main `assay`) needs `unlink`.
 
 - unlink:
 
-  `logical(1)` Store the `assay` even though the subset sees an assay of
-  that name linked from its parent. The subset, and subsets made from
-  it, then use this `assay` instead; the parent's is unchanged. Default
-  `FALSE`.
+  `TRUE`, `FALSE` or a character vector of `assay` names. Store the
+  `assay` even though the subset sees an assay of that name linked from
+  its parent: with `TRUE`, or with a character vector that contains
+  `subsetAssayName`. The subset, and subsets made from it, then use this
+  `assay` instead, and a message says what was unlinked; the parent's is
+  unchanged. Default `FALSE`.
 
 ## Value
 

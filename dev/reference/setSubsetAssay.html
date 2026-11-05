@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.35</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.36</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,14 +90,17 @@ inside which the new subset <code>assay</code> should be stored.</p></dd>
 <code>assay</code> against the <code>inputMatrix</code> parameter. It can't contain
 <code>"/"</code>. A subset sees its parent's assays as linked assays, so a name
 linked from the parent (for example a main <code>assay</code>) needs
-<code>unlink = TRUE</code>.</p></dd>
+<code>unlink</code>.</p></dd>
 
 
 <dt id="arg-unlink">unlink<a class="anchor" aria-label="anchor" href="#arg-unlink"></a></dt>
-<dd><p><code>logical(1)</code> Store the <code>assay</code> even though the
-subset sees an assay of that name linked from its parent. The subset, and
-subsets made from it, then use this <code>assay</code> instead; the parent's is
-unchanged. Default <code>FALSE</code>.</p></dd>
+<dd><p><code>TRUE</code>, <code>FALSE</code> or a character vector of
+<code>assay</code> names. Store the <code>assay</code> even though the subset sees an
+assay of that name linked from its parent: with <code>TRUE</code>, or with a
+character vector that contains <code>subsetAssayName</code>. The subset, and
+subsets made from it, then use this <code>assay</code> instead, and a message
+says what was unlinked; the parent's is unchanged. Default
+<code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

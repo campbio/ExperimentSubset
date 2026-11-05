@@ -11,7 +11,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.35</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.36</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,10 +90,15 @@ followed by <code>createSubset</code> instead.</p></dd>
 
 
 <dt id="arg-unlink">unlink<a class="anchor" aria-label="anchor" href="#arg-unlink"></a></dt>
-<dd><p><code>logical(1)</code> Store assays of <code>value</code> that have
-the name of an assay linked from the subset's parent but different
-values, as with <code>setSubsetAssay</code>. Without it, such an assay is an
-error. Default <code>FALSE</code>.</p></dd>
+<dd><p><code>TRUE</code>, <code>FALSE</code> or a character vector of
+<code>assay</code> names. Store assays of <code>value</code> that have the name of
+an assay linked from the subset's parent but different values, as with
+<code>setSubsetAssay</code>: with <code>TRUE</code>, every such assay; with a
+character vector, only those it names. Any other such assay is an error,
+and nothing is stored. A message names each assay that is unlinked.
+Names of assays that are not linked, or unchanged, are ignored, so
+<code>unlink = "decontXcounts"</code> stores a changed <code>decontXcounts</code>
+but stops if <code>counts</code> was changed too. Default <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

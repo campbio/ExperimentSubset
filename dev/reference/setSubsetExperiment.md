@@ -44,9 +44,14 @@ setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
 - unlink:
 
-  `logical(1)` Store assays of `value` that have the name of an assay
-  linked from the subset's parent but different values, as with
-  `setSubsetAssay`. Without it, such an assay is an error. Default
+  `TRUE`, `FALSE` or a character vector of `assay` names. Store assays
+  of `value` that have the name of an assay linked from the subset's
+  parent but different values, as with `setSubsetAssay`: with `TRUE`,
+  every such assay; with a character vector, only those it names. Any
+  other such assay is an error, and nothing is stored. A message names
+  each assay that is unlinked. Names of assays that are not linked, or
+  unchanged, are ignored, so `unlink = "decontXcounts"` stores a changed
+  `decontXcounts` but stops if `counts` was changed too. Default
   `FALSE`.
 
 ## Value
