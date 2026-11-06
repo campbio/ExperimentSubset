@@ -6,41 +6,41 @@
 \name{subsetColnames}
 \alias{subsetColnames}
 \alias{subsetColnames<-}
-\alias{subsetColnames,SubsetRangedSummarizedExperiment,character-method}
-\alias{subsetColnames<-,SubsetRangedSummarizedExperiment,character-method}
-\alias{subsetColnames,SubsetSingleCellExperiment,character-method}
-\alias{subsetColnames<-,SubsetSingleCellExperiment,character-method}
-\alias{subsetColnames,SubsetSummarizedExperiment,character-method}
-\alias{subsetColnames<-,SubsetSummarizedExperiment,character-method}
-\alias{subsetColnames,SubsetSpatialExperiment,character-method}
-\alias{subsetColnames<-,SubsetSpatialExperiment,character-method}
-\alias{subsetColnames,SubsetTreeSummarizedExperiment,character-method}
-\alias{subsetColnames<-,SubsetTreeSummarizedExperiment,character-method}
+\alias{subsetColnames,SubsetRangedSummarizedExperiment-method}
+\alias{subsetColnames<-,SubsetRangedSummarizedExperiment-method}
+\alias{subsetColnames,SubsetSingleCellExperiment-method}
+\alias{subsetColnames<-,SubsetSingleCellExperiment-method}
+\alias{subsetColnames,SubsetSummarizedExperiment-method}
+\alias{subsetColnames<-,SubsetSummarizedExperiment-method}
+\alias{subsetColnames,SubsetSpatialExperiment-method}
+\alias{subsetColnames<-,SubsetSpatialExperiment-method}
+\alias{subsetColnames,SubsetTreeSummarizedExperiment-method}
+\alias{subsetColnames<-,SubsetTreeSummarizedExperiment-method}
 \title{subsetColnames}
 \usage{
 subsetColnames(x, subsetName)
 
 subsetColnames(x, subsetName) <- value
 
-\S4method{subsetColnames}{SubsetRangedSummarizedExperiment,character}(x, subsetName)
+\S4method{subsetColnames}{SubsetRangedSummarizedExperiment}(x, subsetName)
 
-\S4method{subsetColnames}{SubsetRangedSummarizedExperiment,character}(x, subsetName) <- value
+\S4method{subsetColnames}{SubsetRangedSummarizedExperiment}(x, subsetName) <- value
 
-\S4method{subsetColnames}{SubsetSingleCellExperiment,character}(x, subsetName)
+\S4method{subsetColnames}{SubsetSingleCellExperiment}(x, subsetName)
 
-\S4method{subsetColnames}{SubsetSingleCellExperiment,character}(x, subsetName) <- value
+\S4method{subsetColnames}{SubsetSingleCellExperiment}(x, subsetName) <- value
 
-\S4method{subsetColnames}{SubsetSummarizedExperiment,character}(x, subsetName)
+\S4method{subsetColnames}{SubsetSummarizedExperiment}(x, subsetName)
 
-\S4method{subsetColnames}{SubsetSummarizedExperiment,character}(x, subsetName) <- value
+\S4method{subsetColnames}{SubsetSummarizedExperiment}(x, subsetName) <- value
 
-\S4method{subsetColnames}{SubsetSpatialExperiment,character}(x, subsetName)
+\S4method{subsetColnames}{SubsetSpatialExperiment}(x, subsetName)
 
-\S4method{subsetColnames}{SubsetSpatialExperiment,character}(x, subsetName) <- value
+\S4method{subsetColnames}{SubsetSpatialExperiment}(x, subsetName) <- value
 
-\S4method{subsetColnames}{SubsetTreeSummarizedExperiment,character}(x, subsetName)
+\S4method{subsetColnames}{SubsetTreeSummarizedExperiment}(x, subsetName)
 
-\S4method{subsetColnames}{SubsetTreeSummarizedExperiment,character}(x, subsetName) <- value
+\S4method{subsetColnames}{SubsetTreeSummarizedExperiment}(x, subsetName) <- value
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object.}

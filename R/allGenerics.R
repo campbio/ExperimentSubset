@@ -145,7 +145,8 @@ setGeneric(
                  unlink = FALSE)
   {
     standardGeneric("setSubsetAssay")
-  }
+  },
+  signature = "x"
 )
 
 #' @title Subset parent hierarchy retrieval method for ExperimentSubset objects
@@ -235,7 +236,8 @@ setGeneric(
   def = function(x, subsetName)
   {
     standardGeneric("subsetDim")
-  }
+  },
+  signature = "x"
 )
 
 #' @title reducedDimNames
@@ -346,7 +348,8 @@ setGeneric(
   def = function(x, subsetName, parentRowData)
   {
     standardGeneric("subsetRowData")
-  }
+  },
+  signature = "x"
 )
 
 #' @title Accessor method for colData from subsets in ExperimentSubset objects
@@ -376,7 +379,8 @@ setGeneric(
   def = function(x, subsetName, parentColData)
   {
     standardGeneric("subsetColData")
-  }
+  },
+  signature = "x"
 )
 
 #' @title Setter method for colData to subsets in ExperimentSubset objects
@@ -384,9 +388,11 @@ setGeneric(
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to set
 #'   \code{colData} to.
-#' @param value Input \code{DataFrame} to store. Its rownames must be
-#'   \code{NULL} or the subset's column names, in the same order; other
-#'   rownames are an error. Use \code{subsetColnames<-} to rename columns.
+#' @param value Input \code{DataFrame} to store; a \code{data.frame} is
+#'   converted to one, and \code{NULL} removes the subset's own
+#'   \code{colData} columns. Its rownames must be \code{NULL} or the
+#'   subset's column names, in the same order; other rownames are an error.
+#'   Use \code{subsetColnames<-} to rename columns.
 #' @return Input object with \code{colData} stored.
 #' @rdname subsetColData
 #' @importMethodsFrom SingleCellExperiment colData
@@ -396,7 +402,8 @@ setGeneric(
   def = function(x, subsetName, value)
   {
     standardGeneric("subsetColData<-")
-  }
+  },
+  signature = "x"
 )
 
 #' @title Setter method for rowData to subsets in ExperimentSubset objects
@@ -404,7 +411,9 @@ setGeneric(
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to set
 #'   \code{rowData} to.
-#' @param value Input \code{DataFrame} to store.
+#' @param value Input \code{DataFrame} to store; a \code{data.frame} is
+#'   converted to one, and \code{NULL} removes the subset's own
+#'   \code{rowData} columns.
 #' @return Input object with \code{rowData} stored.
 #' @rdname subsetRowData
 #' @importMethodsFrom SingleCellExperiment rowData
@@ -414,7 +423,8 @@ setGeneric(
   def = function(x, subsetName, value)
   {
     standardGeneric("subsetRowData<-")
-  }
+  },
+  signature = "x"
 )
 
 #' @title subsetColnames
@@ -438,7 +448,8 @@ setGeneric(
   def = function(x, subsetName)
   {
     standardGeneric("subsetColnames")
-  }
+  },
+  signature = "x"
 )
 
 #' @title subsetColnames
@@ -454,7 +465,8 @@ setGeneric(
   def = function(x, subsetName, value)
   {
     standardGeneric("subsetColnames<-")
-  }
+  },
+  signature = "x"
 )
 
 #' @title subsetRownames
@@ -479,7 +491,8 @@ setGeneric(
   def = function(x, subsetName)
   {
     standardGeneric("subsetRownames")
-  }
+  },
+  signature = "x"
 )
 
 #' @title subsetRownames
@@ -497,7 +510,8 @@ setGeneric(
   def = function(x, subsetName, value)
   {
     standardGeneric("subsetRownames<-")
-  }
+  },
+  signature = "x"
 )
 
 #' Get subset assay from an \code{ExperimentSubset} object.
@@ -532,7 +546,8 @@ setGeneric(
                  subsetAssayName = NULL)
   {
     standardGeneric("getSubsetAssay")
-  }
+  },
+  signature = "x"
 )
 
 #' @title Take a subset out as a standalone experiment object
@@ -572,7 +587,8 @@ setGeneric(
   def = function(x, subsetName, parentData = TRUE)
   {
     standardGeneric("getSubsetExperiment")
-  }
+  },
+  signature = "x"
 )
 
 #' @title Store a standalone experiment object back into a subset
@@ -628,7 +644,8 @@ setGeneric(
   def = function(x, subsetName, value, unlink = FALSE)
   {
     standardGeneric("setSubsetExperiment")
-  }
+  },
+  signature = "x"
 )
 
 #' @title reducedDimNames<-
@@ -687,7 +704,8 @@ setGeneric(
   def = function(x, subsetName, parentRowLinkData)
   {
     standardGeneric("subsetRowLinks")
-  }
+  },
+  signature = "x"
 )
 
 #' @title Accessor method for colLinks from subsets in ExperimentSubset objects
@@ -718,7 +736,8 @@ setGeneric(
   def = function(x, subsetName, parentColLinkData)
   {
     standardGeneric("subsetColLinks")
-  }
+  },
+  signature = "x"
 )
 
 #' @title Accessor method for spatialCoords from subsets in ExperimentSubset objects
@@ -756,7 +775,8 @@ setGeneric(
   def = function(x, subsetName)
   {
     standardGeneric("subsetSpatialCoords")
-  }
+  },
+  signature = "x"
 )
 
 #' @title Deprecated: spatialData of subsets in ExperimentSubset objects
@@ -791,7 +811,8 @@ setGeneric(
   def = function(x, subsetName, parentSpatialData)
   {
     standardGeneric("subsetSpatialData")
-  }
+  },
+  signature = "x"
 )
 
 #' @title Defunct: set spatialData of subsets in ExperimentSubset objects

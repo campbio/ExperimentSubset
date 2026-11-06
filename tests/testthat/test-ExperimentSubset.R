@@ -221,7 +221,8 @@ testthat::test_that("Testing createSubset and setSubsetAssay",{
   testthat::expect_equal(getSubsetAssay(es, "subset1"),
                          assay(es, "counts")[rows1, cols1])
   # an assay stored in a subset needs a name
-  for (badName in list(NA_character_, "", c("a", "b"))) {
+  # NULL, NA and 1L failed at dispatch before reaching this check (#97)
+  for (badName in list(NA_character_, "", c("a", "b"), NULL, NA, 1L)) {
     testthat::expect_error(
       setSubsetAssay(es, "subset1", counts1p, subsetAssayName = badName),
       regexp = "'subsetAssayName' must be a single, non-empty character",
@@ -1320,6 +1321,31 @@ testthat::test_that("Subset data setters take NULL or a data.frame", {
   # the main object accepts only a DataFrame or NULL, as SummarizedExperiment
   testthat::expect_error(colData(es) <- data.frame(a = seq_len(ncol(es))),
                          regexp = "DataFrame or NULL")
+
+  # subsetRowData<- and subsetColData<- take the same values (#97)
+  subsetRowData(es, "s1") <- DataFrame(rank = 5:1)
+  fromDataFrame <- subsetRowData(es, "s1")
+  subsetRowData(es, "s1") <- data.frame(rank = 5:1)
+  testthat::expect_equal(subsetRowData(es, "s1"), fromDataFrame)
+  testthat::expect_equal(subsetRowData(es, "s1")$rank, 5:1)
+  testthat::expect_equal(subsetRownames(es, "s1"), rownames(sce)[1:5])
+  subsetRowData(es, "s1") <- NULL
+  testthat::expect_equal(ncol(subsetRowData(es, "s1")), 0L)
+  subsetColData(es, "s1") <- DataFrame(group = letters[1:4])
+  fromDataFrame <- subsetColData(es, "s1")
+  subsetColData(es, "s1") <- data.frame(group = letters[1:4])
+  testthat::expect_equal(subsetColData(es, "s1"), fromDataFrame)
+  testthat::expect_equal(subsetColData(es, "s1")$group, letters[1:4])
+  testthat::expect_equal(subsetColnames(es, "s1"), colnames(sce)[1:4])
+  subsetColData(es, "s1") <- NULL
+  testthat::expect_equal(ncol(subsetColData(es, "s1")), 0L)
+  valueMsg <- "'value' must be a DataFrame, a data.frame or NULL."
+  testthat::expect_error(subsetRowData(es, "s1") <- 1:5, valueMsg,
+                         fixed = TRUE)
+  testthat::expect_error(subsetColData(es, "s1") <- 1:4, valueMsg,
+                         fixed = TRUE)
+  testthat::expect_error(rowData(es, subsetName = "s1") <- 1:5, valueMsg,
+                         fixed = TRUE)
 
   # the parent-column mark is never stored
   s1RowData <- rowData(es, subsetName = "s1", parentRowData = TRUE)
@@ -2789,12 +2815,21 @@ testthat::test_that("A subsetName that isn't one string gives a clear error", {
     testthat::expect_error(subsetAssayNames(es, subsetName = bad), msg,
                            info = info)
   }
-  # methods whose subsetName must be character to dispatch
-  for (bad in list(c("s1", "s2"), NA_character_)) {
+  # (#97) these dispatched on subsetName = "character", so NULL, NA or a
+  # number failed with "unable to find an inherited method"
+  for (bad in c(badValues, list(1L))) {
     info <- deparse(bad)
     testthat::expect_error(subsetDim(es, bad), msg, info = info)
+    testthat::expect_error(getSubsetAssay(es, bad), msg, info = info)
     testthat::expect_error(getSubsetAssay(es, bad, subsetAssayName = "x"),
                            msg, info = info)
+    testthat::expect_error(subsetColData(es, bad) <- DataFrame(),
+                           msg, info = info)
+    testthat::expect_error(subsetRowData(es, bad) <- DataFrame(),
+                           msg, info = info)
+    testthat::expect_error(
+      suppressWarnings(subsetSpatialData(es, bad)), msg, info = info
+    )
     testthat::expect_error(subsetColnames(es, bad), msg, info = info)
     testthat::expect_error(subsetColnames(es, bad) <- letters[1:3],
                            msg, info = info)
@@ -2813,6 +2848,14 @@ testthat::test_that("A subsetName that isn't one string gives a clear error", {
   # subsetParent() dispatches on x only, so it gets every bad value
   for (bad in badValues) {
     testthat::expect_error(subsetParent(es, bad), msg, info = deparse(bad))
+  }
+  # the links of a TreeSummarizedExperiment subset (#97)
+  tes <- ExperimentSubset(makeReducedDimObjects()$tse)
+  tes <- createSubset(tes, "s1", rows = 1:5, cols = 2:4)
+  for (bad in c(badValues, list(1L))) {
+    info <- deparse(bad)
+    testthat::expect_error(subsetRowLinks(tes, bad), msg, info = info)
+    testthat::expect_error(subsetColLinks(tes, bad), msg, info = info)
   }
   # on an object without subsets, that comes first, whatever subsetName is
   sce <- makeReducedDimObjects()$sce

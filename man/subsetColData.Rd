@@ -6,39 +6,39 @@
 \name{subsetColData}
 \alias{subsetColData}
 \alias{subsetColData<-}
-\alias{subsetColData,SubsetRangedSummarizedExperiment,character-method}
-\alias{subsetColData<-,SubsetRangedSummarizedExperiment,character,DataFrame-method}
-\alias{subsetColData,SubsetSingleCellExperiment,character-method}
-\alias{subsetColData<-,SubsetSingleCellExperiment,character,DataFrame-method}
-\alias{subsetColData<-,SubsetSummarizedExperiment,character,DataFrame-method}
-\alias{subsetColData,SubsetSummarizedExperiment,character-method}
-\alias{subsetColData,SubsetSpatialExperiment,character-method}
-\alias{subsetColData<-,SubsetSpatialExperiment,character,DataFrame-method}
-\alias{subsetColData,SubsetTreeSummarizedExperiment,character-method}
-\alias{subsetColData<-,SubsetTreeSummarizedExperiment,character,DataFrame-method}
+\alias{subsetColData,SubsetRangedSummarizedExperiment-method}
+\alias{subsetColData<-,SubsetRangedSummarizedExperiment-method}
+\alias{subsetColData,SubsetSingleCellExperiment-method}
+\alias{subsetColData<-,SubsetSingleCellExperiment-method}
+\alias{subsetColData<-,SubsetSummarizedExperiment-method}
+\alias{subsetColData,SubsetSummarizedExperiment-method}
+\alias{subsetColData,SubsetSpatialExperiment-method}
+\alias{subsetColData<-,SubsetSpatialExperiment-method}
+\alias{subsetColData,SubsetTreeSummarizedExperiment-method}
+\alias{subsetColData<-,SubsetTreeSummarizedExperiment-method}
 \title{Accessor method for colData from subsets in ExperimentSubset objects}
 \usage{
 subsetColData(x, subsetName, parentColData)
 
 subsetColData(x, subsetName) <- value
 
-\S4method{subsetColData}{SubsetRangedSummarizedExperiment,character}(x, subsetName, parentColData)
+\S4method{subsetColData}{SubsetRangedSummarizedExperiment}(x, subsetName, parentColData)
 
-\S4method{subsetColData}{SubsetRangedSummarizedExperiment,character,DataFrame}(x, subsetName) <- value
+\S4method{subsetColData}{SubsetRangedSummarizedExperiment}(x, subsetName) <- value
 
-\S4method{subsetColData}{SubsetSingleCellExperiment,character}(x, subsetName, parentColData)
+\S4method{subsetColData}{SubsetSingleCellExperiment}(x, subsetName, parentColData)
 
-\S4method{subsetColData}{SubsetSingleCellExperiment,character,DataFrame}(x, subsetName) <- value
+\S4method{subsetColData}{SubsetSingleCellExperiment}(x, subsetName) <- value
 
-\S4method{subsetColData}{SubsetSummarizedExperiment,character,DataFrame}(x, subsetName) <- value
+\S4method{subsetColData}{SubsetSummarizedExperiment}(x, subsetName) <- value
 
-\S4method{subsetColData}{SubsetSummarizedExperiment,character}(x, subsetName, parentColData)
+\S4method{subsetColData}{SubsetSummarizedExperiment}(x, subsetName, parentColData)
 
-\S4method{subsetColData}{SubsetSpatialExperiment,character}(x, subsetName, parentColData)
+\S4method{subsetColData}{SubsetSpatialExperiment}(x, subsetName, parentColData)
 
-\S4method{subsetColData}{SubsetSpatialExperiment,character,DataFrame}(x, subsetName) <- value
+\S4method{subsetColData}{SubsetSpatialExperiment}(x, subsetName) <- value
 
-\S4method{subsetColData}{SubsetTreeSummarizedExperiment,character}(x, subsetName, parentColData)
+\S4method{subsetColData}{SubsetTreeSummarizedExperiment}(x, subsetName, parentColData)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
@@ -51,9 +51,11 @@ colData should be combined or not. A subset's own column hides the
 main object's column of the same name, with a message if their values
 differ. Default \code{FALSE}.}
 
-\item{value}{Input \code{DataFrame} to store. Its rownames must be
-\code{NULL} or the subset's column names, in the same order; other
-rownames are an error. Use \code{subsetColnames<-} to rename columns.}
+\item{value}{Input \code{DataFrame} to store; a \code{data.frame} is
+converted to one, and \code{NULL} removes the subset's own
+\code{colData} columns. Its rownames must be \code{NULL} or the
+subset's column names, in the same order; other rownames are an error.
+Use \code{subsetColnames<-} to rename columns.}
 }
 \value{
 The \code{colData} from input object.

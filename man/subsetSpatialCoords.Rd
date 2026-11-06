@@ -2,13 +2,13 @@
 % Please edit documentation in R/allGenerics.R, R/SubsetSpatialExperiment.R
 \name{subsetSpatialCoords}
 \alias{subsetSpatialCoords}
-\alias{subsetSpatialCoords,SubsetSpatialExperiment,character-method}
+\alias{subsetSpatialCoords,SubsetSpatialExperiment-method}
 \alias{spatialCoords,SubsetSpatialExperiment-method}
 \title{Accessor method for spatialCoords from subsets in ExperimentSubset objects}
 \usage{
 subsetSpatialCoords(x, subsetName)
 
-\S4method{subsetSpatialCoords}{SubsetSpatialExperiment,character}(x, subsetName)
+\S4method{subsetSpatialCoords}{SubsetSpatialExperiment}(x, subsetName)
 
 \S4method{spatialCoords}{SubsetSpatialExperiment}(x, ...)
 }

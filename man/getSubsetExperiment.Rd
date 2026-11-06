@@ -5,24 +5,24 @@
 %   R/SubsetTreeSummarizedExperiment.R
 \name{getSubsetExperiment}
 \alias{getSubsetExperiment}
-\alias{getSubsetExperiment,SubsetRangedSummarizedExperiment,character-method}
-\alias{getSubsetExperiment,SubsetSingleCellExperiment,character-method}
-\alias{getSubsetExperiment,SubsetSummarizedExperiment,character-method}
-\alias{getSubsetExperiment,SubsetSpatialExperiment,character-method}
-\alias{getSubsetExperiment,SubsetTreeSummarizedExperiment,character-method}
+\alias{getSubsetExperiment,SubsetRangedSummarizedExperiment-method}
+\alias{getSubsetExperiment,SubsetSingleCellExperiment-method}
+\alias{getSubsetExperiment,SubsetSummarizedExperiment-method}
+\alias{getSubsetExperiment,SubsetSpatialExperiment-method}
+\alias{getSubsetExperiment,SubsetTreeSummarizedExperiment-method}
 \title{Take a subset out as a standalone experiment object}
 \usage{
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 
-\S4method{getSubsetExperiment}{SubsetRangedSummarizedExperiment,character}(x, subsetName, parentData = TRUE)
+\S4method{getSubsetExperiment}{SubsetRangedSummarizedExperiment}(x, subsetName, parentData = TRUE)
 
-\S4method{getSubsetExperiment}{SubsetSingleCellExperiment,character}(x, subsetName, parentData = TRUE)
+\S4method{getSubsetExperiment}{SubsetSingleCellExperiment}(x, subsetName, parentData = TRUE)
 
-\S4method{getSubsetExperiment}{SubsetSummarizedExperiment,character}(x, subsetName, parentData = TRUE)
+\S4method{getSubsetExperiment}{SubsetSummarizedExperiment}(x, subsetName, parentData = TRUE)
 
-\S4method{getSubsetExperiment}{SubsetSpatialExperiment,character}(x, subsetName, parentData = TRUE)
+\S4method{getSubsetExperiment}{SubsetSpatialExperiment}(x, subsetName, parentData = TRUE)
 
-\S4method{getSubsetExperiment}{SubsetTreeSummarizedExperiment,character}(x, subsetName, parentData = TRUE)
+\S4method{getSubsetExperiment}{SubsetTreeSummarizedExperiment}(x, subsetName, parentData = TRUE)
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object.}

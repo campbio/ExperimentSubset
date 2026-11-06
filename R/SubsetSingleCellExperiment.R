@@ -73,10 +73,7 @@ setMethod(
 #' @rdname setSubsetAssay
 setMethod(
   f = "setSubsetAssay",
-  signature = c(
-    x ="SubsetSingleCellExperiment",
-    subsetName = "character",
-    subsetAssayName = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x,
                         subsetName,
                         inputMatrix,
@@ -126,7 +123,7 @@ setMethod(
 #' @rdname subsetDim
 setMethod(
   f = "subsetDim",
-  signature = c("SubsetSingleCellExperiment", "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, subsetName)
   {
     .isSubset(x, subsetName)
@@ -270,7 +267,7 @@ setMethod(
 #' @rdname subsetRowData
 setMethod(
   f = "subsetRowData",
-  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, subsetName, parentRowData)
   {
     .subsetRowData(x, subsetName, parentRowData)
@@ -280,7 +277,7 @@ setMethod(
 #' @rdname subsetColData
 setMethod(
   f = "subsetColData",
-  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, subsetName, parentColData)
   {
     .subsetColData(x, subsetName, parentColData)
@@ -290,7 +287,7 @@ setMethod(
 #' @rdname subsetColData
 setReplaceMethod(
   f = "subsetColData",
-  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character", value = "DataFrame"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, subsetName, value)
   {
     .subsetColData(x, subsetName) <- value
@@ -301,7 +298,7 @@ setReplaceMethod(
 #' @rdname subsetRowData
 setReplaceMethod(
   f = "subsetRowData",
-  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character", value = "DataFrame"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, subsetName, value)
   {
     .subsetRowData(x, subsetName) <- value
@@ -446,7 +443,7 @@ setReplaceMethod(
 #' @rdname subsetColnames
 setMethod(
   f = "subsetColnames",
-  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, subsetName)
   {
     .subsetColnames(x, subsetName)
@@ -456,7 +453,7 @@ setMethod(
 #' @rdname subsetColnames
 setReplaceMethod(
   f = "subsetColnames",
-  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, subsetName, value)
   {
     .subsetColnames(x, subsetName) <- value
@@ -467,7 +464,7 @@ setReplaceMethod(
 #' @rdname subsetRownames
 setMethod(
   f = "subsetRownames",
-  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, subsetName)
   {
     .subsetRownames(x, subsetName)
@@ -477,7 +474,7 @@ setMethod(
 #' @rdname subsetRownames
 setReplaceMethod(
   f = "subsetRownames",
-  signature = c(x = "SubsetSingleCellExperiment", subsetName = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x, subsetName, value)
   {
     .subsetRownames(x, subsetName) <- value
@@ -488,9 +485,7 @@ setReplaceMethod(
 #' @rdname getSubsetAssay
 setMethod(
   f = "getSubsetAssay",
-  signature = c(
-    x ="SubsetSingleCellExperiment",
-    subsetName = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x,
                         subsetName,
                         subsetAssayName = NULL)
@@ -508,9 +503,7 @@ setMethod(
 #' @rdname getSubsetExperiment
 setMethod(
   f = "getSubsetExperiment",
-  signature = c(
-    x = "SubsetSingleCellExperiment",
-    subsetName = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x,
                         subsetName,
                         parentData = TRUE)
@@ -522,9 +515,7 @@ setMethod(
 #' @rdname setSubsetExperiment
 setMethod(
   f = "setSubsetExperiment",
-  signature = c(
-    x = "SubsetSingleCellExperiment",
-    subsetName = "character"),
+  signature = signature(x = "SubsetSingleCellExperiment"),
   definition = function(x,
                         subsetName,
                         value,
