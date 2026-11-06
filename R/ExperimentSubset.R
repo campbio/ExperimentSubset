@@ -2526,7 +2526,6 @@ NULL
     return(callNextMethod(x, ..., value = value))
   }
   subsetName = arglist[["subsetName"]]
-  .isSubset(x, subsetName)
   .subsetRowData(x, subsetName) <- value
   return(x)
 }
@@ -2541,7 +2540,6 @@ NULL
     return(callNextMethod(x, ..., value = value))
   }
   subsetName = arglist[["subsetName"]]
-  .isSubset(x, subsetName)
   .subsetColData(x, subsetName) <- value
   return(x)
 }
