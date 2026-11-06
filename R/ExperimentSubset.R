@@ -2121,8 +2121,8 @@ NULL
   value <- .asSubsetData(value)
   value <- .dropParentColumns(value, "colData")
   # colData<- takes the subset's column names from value's rownames
-  value <- .keepSubsetColnames(value, .subsetColnames(x, subsetName),
-                               subsetName)
+  value <- .keepSubsetNames(value, .subsetColnames(x, subsetName),
+                            subsetName, "column")
   colData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
@@ -2131,6 +2131,10 @@ NULL
   .isSubset(x, subsetName)
   value <- .asSubsetData(value)
   value <- .dropParentColumns(value, "rowData")
+  # rowData<- ignores value's rownames and matches rows by position, so
+  # other rownames would store values against the wrong rows (#100)
+  value <- .keepSubsetNames(value, .subsetRownames(x, subsetName),
+                            subsetName, "row")
   rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
@@ -2233,18 +2237,19 @@ NULL
   value
 }
 
-# Setting a subset's colData must not rename its columns: value's rownames
-# must be NULL, and are then filled in, or the same as the subset's names.
-# A value of the wrong size is left for colData<- to reject.
-.keepSubsetColnames <- function(value, currentNames, subsetName) {
-  if (is.null(value))
+# Setting a subset's colData must not rename its columns, nor its rowData
+# put values against other rows: value's rownames must be NULL, and are
+# then filled in, or the same as the subset's names. what is "row" or
+# "column". A value of the wrong size is left for rowData<- or colData<-
+# to reject, so its error is about the size, not the names.
+.keepSubsetNames <- function(value, currentNames, subsetName, what) {
+  if (is.null(value) || nrow(value) != length(currentNames))
     return(value)
   if (is.null(rownames(value))) {
-    if (nrow(value) == length(currentNames))
-      rownames(value) <- currentNames
+    rownames(value) <- currentNames
   } else if (!is.null(currentNames)
              && !identical(rownames(value), currentNames)) {
-    stop("The rownames of 'value' must be NULL or the column names of ",
+    stop("The rownames of 'value' must be NULL or the ", what, " names of ",
          "subset '", subsetName, "', in the same order.")
   }
   value
@@ -2467,7 +2472,10 @@ setReplaceMethod(
 #'   \code{NULL} to remove all columns (a \code{SpatialExperiment} keeps
 #'   its \code{sample_id} column). For a subset, a \code{data.frame}
 #'   is also accepted and converted to a \code{DataFrame}; for the main
-#'   object, \code{colData<-} with a \code{data.frame} is an error.
+#'   object, \code{colData<-} with a \code{data.frame} is an error. For a
+#'   subset, the rownames of \code{value} must be \code{NULL} or the
+#'   subset's row names (\code{rowData<-}) or column names
+#'   (\code{colData<-}), in the same order.
 #' @return \code{rowData()} and \code{colData()} return a \code{DataFrame}.
 #'   The setters return \code{x} with the data set.
 #' @seealso \code{\link{subsetRowData}}, \code{\link{subsetColData}},
