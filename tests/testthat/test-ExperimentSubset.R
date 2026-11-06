@@ -14,14 +14,14 @@ simCounts <- matrix(rpois(300 * 120, lambda = 1), nrow = 300,
                                     paste0("cell", 1:120)))
 simSce <- SingleCellExperiment(list(counts = simCounts))
 
-# Checks that a subset made from a main assay holds the given rows and
-# columns of it, through the exported API
-expectSubsetOf <- function(es, subsetName, rows, cols, parent = "counts") {
+# Checks that a subset made from the main assay "counts" holds the given
+# rows and columns of it, through the exported API
+expectSubsetOf <- function(es, subsetName, rows, cols) {
   testthat::expect_equal(subsetRownames(es, subsetName), rownames(es)[rows])
   testthat::expect_equal(subsetColnames(es, subsetName), colnames(es)[cols])
-  testthat::expect_equal(subsetParent(es, subsetName), list(parent))
+  testthat::expect_equal(subsetParent(es, subsetName), list("counts"))
   testthat::expect_equal(assay(es, subsetName),
-                         assay(es, parent)[rows, cols, drop = FALSE])
+                         assay(es, "counts")[rows, cols, drop = FALSE])
 }
 
 context("Testing ExperimentSubset functions")
@@ -88,8 +88,8 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
   data(airway, package="airway")
   rse <- airway
   testthat::expect_s4_class(es <- ExperimentSubset(rse), "SubsetRangedSummarizedExperiment")
-  testthat::expect_output(subsetSummary(es), "Main assay\\(s\\):\n counts")
-  testthat::expect_output(subsetSummary(es), "Subset\\(s\\):\nNULL")
+  testthat::expect_output(subsetSummary(es),
+                          "Main assay\\(s\\):\n counts.*Subset\\(s\\):\nNULL")
   testthat::expect_equal(length(metadata(es)), 1)
 
   es <- createSubset(es, "s2", rows = c(1:15))
@@ -220,6 +220,14 @@ testthat::test_that("Testing createSubset and setSubsetAssay",{
   # the subset's own data is unchanged
   testthat::expect_equal(getSubsetAssay(es, "subset1"),
                          assay(es, "counts")[rows1, cols1])
+  # an assay stored in a subset needs a name
+  for (badName in list(NA_character_, "", c("a", "b"))) {
+    testthat::expect_error(
+      setSubsetAssay(es, "subset1", counts1p, subsetAssayName = badName),
+      regexp = "'subsetAssayName' must be a single, non-empty character",
+      info = deparse(badName)
+    )
+  }
 })
 
 testthat::test_that("Testing rownames, colnames, rowData and colData",{
@@ -233,9 +241,9 @@ testthat::test_that("Testing rownames, colnames, rowData and colData",{
   es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
   
   testthat::expect_equal(subsetRownames(es, "subset1/scaledSubset1"),
-                         rownames(counts1p))
+                         rownames(es)[rows1])
   testthat::expect_equal(subsetColnames(es, "subset1/scaledSubset1"),
-                         colnames(counts1p))
+                         colnames(es)[cols1])
   testthat::expect_equal(subsetRownames(es, "subset1"), rownames(es)[rows1])
   testthat::expect_equal(subsetColnames(es, "subset1"), colnames(es)[cols1])
   testthat::expect_error(colData(es, subsetName = "subset1Internal"),
