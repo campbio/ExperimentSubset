@@ -1323,12 +1323,18 @@ testthat::test_that("Subset data setters take NULL or a data.frame", {
                          regexp = "DataFrame or NULL")
 
   # subsetRowData<- and subsetColData<- take the same values (#97)
+  subsetRowData(es, "s1") <- DataFrame(rank = 5:1)
+  fromDataFrame <- subsetRowData(es, "s1")
   subsetRowData(es, "s1") <- data.frame(rank = 5:1)
+  testthat::expect_equal(subsetRowData(es, "s1"), fromDataFrame)
   testthat::expect_equal(subsetRowData(es, "s1")$rank, 5:1)
   testthat::expect_equal(subsetRownames(es, "s1"), rownames(sce)[1:5])
   subsetRowData(es, "s1") <- NULL
   testthat::expect_equal(ncol(subsetRowData(es, "s1")), 0L)
+  subsetColData(es, "s1") <- DataFrame(group = letters[1:4])
+  fromDataFrame <- subsetColData(es, "s1")
   subsetColData(es, "s1") <- data.frame(group = letters[1:4])
+  testthat::expect_equal(subsetColData(es, "s1"), fromDataFrame)
   testthat::expect_equal(subsetColData(es, "s1")$group, letters[1:4])
   testthat::expect_equal(subsetColnames(es, "s1"), colnames(sce)[1:4])
   subsetColData(es, "s1") <- NULL
