@@ -553,7 +553,10 @@ setGeneric(
 #'   sees, its own and those linked from its parent, under their names, with
 #'   the subset's primary assay first. Its rowData and colData are the
 #'   subset's, after the main object's columns if \code{parentData = TRUE}.
-#'   Its reducedDims, altExps and metadata are the subset's. Everything else,
+#'   Its altExps are every altExp the subset sees, its own and those linked
+#'   from the main object or a parent subset, cut to its columns (see
+#'   \code{\link{ExperimentSubset-altExp}}). Its reducedDims and metadata
+#'   are the subset's. Everything else,
 #'   such as row ranges, row and column trees, spatial coordinates, images,
 #'   \code{colPairs} and \code{rowPairs}, comes from the main object.
 #' @rdname getSubsetExperiment
@@ -586,8 +589,10 @@ setGeneric(
 #'   \code{assay} names. Store assays of \code{value} that have the name of
 #'   an assay linked from the subset's parent but different values, as with
 #'   \code{setSubsetAssay}: with \code{TRUE}, every such assay; with a
-#'   character vector, only those it names. Any other such assay is an error,
-#'   and nothing is stored. A message names each assay that is unlinked.
+#'   character vector, only those it names. An assay of an altExp is named
+#'   \code{"altExpName/assayName"}, such as \code{"ADT/counts"}. Any other
+#'   such assay, of the main object or an altExp, is an error, and nothing
+#'   is stored. A message names each assay that is unlinked.
 #'   Names of assays that are not linked, or unchanged, are ignored, so
 #'   \code{unlink = "decontXcounts"} stores a changed \code{decontXcounts}
 #'   but stops if \code{counts} was changed too. Default \code{FALSE}.
@@ -595,6 +600,10 @@ setGeneric(
 #'   in \code{value} hold the same values as what the subset sees (whatever
 #'   their dimnames, type or class) are not stored, and neither are the main
 #'   object's rowData and colData columns added by \code{getSubsetExperiment}.
+#'   altExps are stored as \code{altExp<-} stores them (see
+#'   \code{\link{ExperimentSubset-altExp}}): only the assays and data that
+#'   differ from a linked altExp, and a linked altExp missing from
+#'   \code{value} stays linked.
 #'   Everything else in \code{value} replaces the subset's own data: an own
 #'   assay, reducedDim, altExp or column that \code{value} no longer has is
 #'   removed from the subset, except an assay another subset was made from,
