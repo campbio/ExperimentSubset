@@ -2118,6 +2118,7 @@ NULL
 
 '.subsetColData<-' <- function(x, subsetName, value){
   .isSubset(x, subsetName)
+  value <- .asSubsetData(value)
   value <- .dropParentColumns(value, "colData")
   # colData<- takes the subset's column names from value's rownames
   value <- .keepSubsetColnames(value, .subsetColnames(x, subsetName),
@@ -2128,9 +2129,20 @@ NULL
 
 '.subsetRowData<-' <- function(x, subsetName, value){
   .isSubset(x, subsetName)
+  value <- .asSubsetData(value)
   value <- .dropParentColumns(value, "rowData")
   rowData(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
+}
+
+# A subset's rowData or colData: a DataFrame, a data.frame (converted) or
+# NULL, as rowData<- and colData<- with subsetName take (#97)
+.asSubsetData <- function(value) {
+  if (is.data.frame(value))
+    return(S4Vectors::DataFrame(value, check.names = FALSE))
+  if (!is.null(value) && !methods::is(value, "DataFrame"))
+    stop("'value' must be a DataFrame, a data.frame or NULL.")
+  value
 }
 
 # The main object's columns without those the subset also has: a subset's
@@ -2515,8 +2527,6 @@ NULL
   }
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  if (is.data.frame(value))
-    value <- S4Vectors::DataFrame(value, check.names = FALSE)
   .subsetRowData(x, subsetName) <- value
   return(x)
 }
@@ -2532,8 +2542,6 @@ NULL
   }
   subsetName = arglist[["subsetName"]]
   .isSubset(x, subsetName)
-  if (is.data.frame(value))
-    value <- S4Vectors::DataFrame(value, check.names = FALSE)
   .subsetColData(x, subsetName) <- value
   return(x)
 }

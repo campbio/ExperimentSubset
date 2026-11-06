@@ -3,12 +3,12 @@
 %   R/SubsetTreeSummarizedExperiment.R
 \name{subsetRowLinks}
 \alias{subsetRowLinks}
-\alias{subsetRowLinks,SubsetTreeSummarizedExperiment,character-method}
+\alias{subsetRowLinks,SubsetTreeSummarizedExperiment-method}
 \title{Accessor method for rowLinks from subsets in ExperimentSubset objects}
 \usage{
 subsetRowLinks(x, subsetName, parentRowLinkData)
 
-\S4method{subsetRowLinks}{SubsetTreeSummarizedExperiment,character}(x, subsetName, parentRowLinkData)
+\S4method{subsetRowLinks}{SubsetTreeSummarizedExperiment}(x, subsetName, parentRowLinkData)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

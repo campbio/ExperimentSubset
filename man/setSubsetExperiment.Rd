@@ -5,24 +5,24 @@
 %   R/SubsetTreeSummarizedExperiment.R
 \name{setSubsetExperiment}
 \alias{setSubsetExperiment}
-\alias{setSubsetExperiment,SubsetRangedSummarizedExperiment,character-method}
-\alias{setSubsetExperiment,SubsetSingleCellExperiment,character-method}
-\alias{setSubsetExperiment,SubsetSummarizedExperiment,character-method}
-\alias{setSubsetExperiment,SubsetSpatialExperiment,character-method}
-\alias{setSubsetExperiment,SubsetTreeSummarizedExperiment,character-method}
+\alias{setSubsetExperiment,SubsetRangedSummarizedExperiment-method}
+\alias{setSubsetExperiment,SubsetSingleCellExperiment-method}
+\alias{setSubsetExperiment,SubsetSummarizedExperiment-method}
+\alias{setSubsetExperiment,SubsetSpatialExperiment-method}
+\alias{setSubsetExperiment,SubsetTreeSummarizedExperiment-method}
 \title{Store a standalone experiment object back into a subset}
 \usage{
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
-\S4method{setSubsetExperiment}{SubsetRangedSummarizedExperiment,character}(x, subsetName, value, unlink = FALSE)
+\S4method{setSubsetExperiment}{SubsetRangedSummarizedExperiment}(x, subsetName, value, unlink = FALSE)
 
-\S4method{setSubsetExperiment}{SubsetSingleCellExperiment,character}(x, subsetName, value, unlink = FALSE)
+\S4method{setSubsetExperiment}{SubsetSingleCellExperiment}(x, subsetName, value, unlink = FALSE)
 
-\S4method{setSubsetExperiment}{SubsetSummarizedExperiment,character}(x, subsetName, value, unlink = FALSE)
+\S4method{setSubsetExperiment}{SubsetSummarizedExperiment}(x, subsetName, value, unlink = FALSE)
 
-\S4method{setSubsetExperiment}{SubsetSpatialExperiment,character}(x, subsetName, value, unlink = FALSE)
+\S4method{setSubsetExperiment}{SubsetSpatialExperiment}(x, subsetName, value, unlink = FALSE)
 
-\S4method{setSubsetExperiment}{SubsetTreeSummarizedExperiment,character}(x, subsetName, value, unlink = FALSE)
+\S4method{setSubsetExperiment}{SubsetTreeSummarizedExperiment}(x, subsetName, value, unlink = FALSE)
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object.}

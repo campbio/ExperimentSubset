@@ -3,7 +3,7 @@
 \name{subsetSpatialData}
 \alias{subsetSpatialData}
 \alias{subsetSpatialData<-}
-\alias{subsetSpatialData,SubsetSpatialExperiment,character-method}
+\alias{subsetSpatialData,SubsetSpatialExperiment-method}
 \alias{spatialData,SubsetSpatialExperiment-method}
 \alias{subsetSpatialData<-,SubsetSpatialExperiment-method}
 \title{Deprecated: spatialData of subsets in ExperimentSubset objects}
@@ -12,7 +12,7 @@ subsetSpatialData(x, subsetName, parentSpatialData)
 
 subsetSpatialData(x, subsetName) <- value
 
-\S4method{subsetSpatialData}{SubsetSpatialExperiment,character}(x, subsetName, parentSpatialData)
+\S4method{subsetSpatialData}{SubsetSpatialExperiment}(x, subsetName, parentSpatialData)
 
 \S4method{spatialData}{SubsetSpatialExperiment}(x, ...)
 

@@ -5,24 +5,24 @@
 %   R/SubsetTreeSummarizedExperiment.R
 \name{subsetDim}
 \alias{subsetDim}
-\alias{subsetDim,SubsetRangedSummarizedExperiment,character-method}
-\alias{subsetDim,SubsetSingleCellExperiment,character-method}
-\alias{subsetDim,SubsetSummarizedExperiment,character-method}
-\alias{subsetDim,SubsetSpatialExperiment,character-method}
-\alias{subsetDim,SubsetTreeSummarizedExperiment,character-method}
+\alias{subsetDim,SubsetRangedSummarizedExperiment-method}
+\alias{subsetDim,SubsetSingleCellExperiment-method}
+\alias{subsetDim,SubsetSummarizedExperiment-method}
+\alias{subsetDim,SubsetSpatialExperiment-method}
+\alias{subsetDim,SubsetTreeSummarizedExperiment-method}
 \title{Get dimensions of subsets in ExperimentSubset objects}
 \usage{
 subsetDim(x, subsetName)
 
-\S4method{subsetDim}{SubsetRangedSummarizedExperiment,character}(x, subsetName)
+\S4method{subsetDim}{SubsetRangedSummarizedExperiment}(x, subsetName)
 
-\S4method{subsetDim}{SubsetSingleCellExperiment,character}(x, subsetName)
+\S4method{subsetDim}{SubsetSingleCellExperiment}(x, subsetName)
 
-\S4method{subsetDim}{SubsetSummarizedExperiment,character}(x, subsetName)
+\S4method{subsetDim}{SubsetSummarizedExperiment}(x, subsetName)
 
-\S4method{subsetDim}{SubsetSpatialExperiment,character}(x, subsetName)
+\S4method{subsetDim}{SubsetSpatialExperiment}(x, subsetName)
 
-\S4method{subsetDim}{SubsetTreeSummarizedExperiment,character}(x, subsetName)
+\S4method{subsetDim}{SubsetTreeSummarizedExperiment}(x, subsetName)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}

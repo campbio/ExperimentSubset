@@ -5,25 +5,25 @@
 %   R/SubsetTreeSummarizedExperiment.R
 \name{setSubsetAssay}
 \alias{setSubsetAssay}
-\alias{setSubsetAssay,SubsetRangedSummarizedExperiment,character,ANY,character-method}
-\alias{setSubsetAssay,SubsetSingleCellExperiment,character,ANY,character-method}
-\alias{setSubsetAssay,SubsetSummarizedExperiment,character,ANY,character-method}
-\alias{setSubsetAssay,SubsetSpatialExperiment,character,ANY,character-method}
-\alias{setSubsetAssay,SubsetTreeSummarizedExperiment,character,ANY,character-method}
+\alias{setSubsetAssay,SubsetRangedSummarizedExperiment-method}
+\alias{setSubsetAssay,SubsetSingleCellExperiment-method}
+\alias{setSubsetAssay,SubsetSummarizedExperiment-method}
+\alias{setSubsetAssay,SubsetSpatialExperiment-method}
+\alias{setSubsetAssay,SubsetTreeSummarizedExperiment-method}
 \title{Method for storing new assays inside subsets in ExperimentSubset 
   objects}
 \usage{
 setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-\S4method{setSubsetAssay}{SubsetRangedSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
+\S4method{setSubsetAssay}{SubsetRangedSummarizedExperiment}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-\S4method{setSubsetAssay}{SubsetSingleCellExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
+\S4method{setSubsetAssay}{SubsetSingleCellExperiment}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-\S4method{setSubsetAssay}{SubsetSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
+\S4method{setSubsetAssay}{SubsetSummarizedExperiment}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-\S4method{setSubsetAssay}{SubsetSpatialExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
+\S4method{setSubsetAssay}{SubsetSpatialExperiment}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-\S4method{setSubsetAssay}{SubsetTreeSummarizedExperiment,character,ANY,character}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
+\S4method{setSubsetAssay}{SubsetTreeSummarizedExperiment}(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the input object.}

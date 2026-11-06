@@ -5,24 +5,24 @@
 %   R/SubsetTreeSummarizedExperiment.R
 \name{getSubsetAssay}
 \alias{getSubsetAssay}
-\alias{getSubsetAssay,SubsetRangedSummarizedExperiment,character-method}
-\alias{getSubsetAssay,SubsetSingleCellExperiment,character-method}
-\alias{getSubsetAssay,SubsetSummarizedExperiment,character-method}
-\alias{getSubsetAssay,SubsetSpatialExperiment,character-method}
-\alias{getSubsetAssay,SubsetTreeSummarizedExperiment,character-method}
+\alias{getSubsetAssay,SubsetRangedSummarizedExperiment-method}
+\alias{getSubsetAssay,SubsetSingleCellExperiment-method}
+\alias{getSubsetAssay,SubsetSummarizedExperiment-method}
+\alias{getSubsetAssay,SubsetSpatialExperiment-method}
+\alias{getSubsetAssay,SubsetTreeSummarizedExperiment-method}
 \title{Get subset assay from an \code{ExperimentSubset} object.}
 \usage{
 getSubsetAssay(x, subsetName, subsetAssayName = NULL)
 
-\S4method{getSubsetAssay}{SubsetRangedSummarizedExperiment,character}(x, subsetName, subsetAssayName = NULL)
+\S4method{getSubsetAssay}{SubsetRangedSummarizedExperiment}(x, subsetName, subsetAssayName = NULL)
 
-\S4method{getSubsetAssay}{SubsetSingleCellExperiment,character}(x, subsetName, subsetAssayName = NULL)
+\S4method{getSubsetAssay}{SubsetSingleCellExperiment}(x, subsetName, subsetAssayName = NULL)
 
-\S4method{getSubsetAssay}{SubsetSummarizedExperiment,character}(x, subsetName, subsetAssayName = NULL)
+\S4method{getSubsetAssay}{SubsetSummarizedExperiment}(x, subsetName, subsetAssayName = NULL)
 
-\S4method{getSubsetAssay}{SubsetSpatialExperiment,character}(x, subsetName, subsetAssayName = NULL)
+\S4method{getSubsetAssay}{SubsetSpatialExperiment}(x, subsetName, subsetAssayName = NULL)
 
-\S4method{getSubsetAssay}{SubsetTreeSummarizedExperiment,character}(x, subsetName, subsetAssayName = NULL)
+\S4method{getSubsetAssay}{SubsetTreeSummarizedExperiment}(x, subsetName, subsetAssayName = NULL)
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object.}

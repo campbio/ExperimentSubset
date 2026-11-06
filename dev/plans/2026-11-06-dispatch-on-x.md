@@ -61,8 +61,12 @@ removes the subset's own columns. Anything else gives "'value' must be a
 DataFrame, a data.frame or NULL." The conversion and check move into the
 shared internal setters (`.subsetColData<-`, `.subsetRowData<-`), so the
 `colData<-`/`rowData<-` path and the `subsetColData<-` path use one
-implementation; `rowData(x, subsetName =) <- 1:3` then gets the same
-message instead of SummarizedExperiment's.
+implementation. `rowData(x, subsetName =) <- 1:3` then gets the same
+message. On devel that call worked: SummarizedExperiment's `rowData<-`
+stored the vector as a column named `value`. The developer chose the
+error anyway (asked during implementation), so NEWS lists it as a
+change. `colData(x, subsetName =) <- 1:3` is unchanged: it still fails
+at SummarizedExperiment's dispatch on `value`, before reaching us.
 
 ## Tests (first, in `tests/testthat/test-ExperimentSubset.R`)
 
