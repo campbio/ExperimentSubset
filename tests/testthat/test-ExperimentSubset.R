@@ -14,6 +14,16 @@ simCounts <- matrix(rpois(300 * 120, lambda = 1), nrow = 300,
                                     paste0("cell", 1:120)))
 simSce <- SingleCellExperiment(list(counts = simCounts))
 
+# Checks that a subset made from a main assay holds the given rows and
+# columns of it, through the exported API
+expectSubsetOf <- function(es, subsetName, rows, cols, parent = "counts") {
+  testthat::expect_equal(subsetRownames(es, subsetName), rownames(es)[rows])
+  testthat::expect_equal(subsetColnames(es, subsetName), colnames(es)[cols])
+  testthat::expect_equal(subsetParent(es, subsetName), list(parent))
+  testthat::expect_equal(assay(es, subsetName),
+                         assay(es, parent)[rows, cols, drop = FALSE])
+}
+
 context("Testing ExperimentSubset functions")
 
 testthat::test_that("Testing ExperimentSubset constructor by implicitly providing a SingleCellExperiment object",{
@@ -33,54 +43,71 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
   es <- createSubset(es, "s1", rows = c(1:10))
   testthat::expect_true("s1" %in% subsetNames(es))
   testthat::expect_true("s1" %in% subsetAssayNames(es))
-  show(es)
-  es <- setSubsetAssay(es, "s1", assay(es, "s1"), "newS1")
+  expectSubsetOf(es, "s1", rows = 1:10, cols = seq_len(ncol(se)))
+  testthat::expect_output(show(es), "subsets\\(1\\): s1")
+  s1Plus <- assay(es, "s1") + 1
+  es <- setSubsetAssay(es, "s1", s1Plus, "newS1")
   testthat::expect_true("s1/newS1" %in% subsetAssayNames(es))
   testthat::expect_false("newS1" %in% subsetNames(es))
+  testthat::expect_equal(getSubsetAssay(es, "s1", subsetAssayName = "newS1"),
+                         s1Plus)
+  testthat::expect_output(show(es), "subsetAssays\\(2\\): s1 s1/newS1")
   assay(es, "assay2") <- assay(es, "counts")
   testthat::expect_true("assay2" %in% assayNames(es))
-  testthat::expect_equal(length(subsetParent(es, "s1")), 1)
-  subsetSummary(es)
+  testthat::expect_equal(assay(es, "assay2"), assay(es, "counts"))
+  testthat::expect_equal(subsetParent(es, "s1"), list("counts"))
+  testthat::expect_equal(subsetParent(es, "s1/newS1"), list("s1", "counts"))
+  testthat::expect_output(subsetSummary(es), "s1 +10, 2000 +counts +newS1")
   testthat::expect_equal(subsetDim(es, "s1")[1], 10)
   testthat::expect_equal(subsetDim(es, "s1")[2], 2000)
   testthat::expect_equal(subsetCount(es), 1)
   metadata(es) <- list(a="meta")
   testthat::expect_equal(length(metadata(es)), 1)
   testthat::expect_s4_class(getSubsetAssay(es, "s1"), "dgCMatrix")
+  testthat::expect_equal(getSubsetAssay(es, "s1"),
+                         assay(se, "counts")[1:10, ])
   subsetRownames(es, "s1") <- subsetRownames(es, "s1")
-  testthat::expect_equal(length(subsetRownames(es, "s1")), 10)
+  testthat::expect_equal(subsetRownames(es, "s1"), rownames(se)[1:10])
   subsetColnames(es, "s1") <- subsetColnames(es, "s1")
-  testthat::expect_equal(length(subsetColnames(es, "s1")), 2000)
+  testthat::expect_equal(subsetColnames(es, "s1"), colnames(se))
   subsetRownames(es, "s1/newS1") <- subsetRownames(es, "s1/newS1")
-  testthat::expect_equal(length(subsetRownames(es, "s1/newS1")), 10)
+  testthat::expect_equal(subsetRownames(es, "s1/newS1"), rownames(se)[1:10])
   subsetColnames(es, "s1/newS1") <- subsetColnames(es, "s1/newS1")
-  testthat::expect_equal(length(subsetColnames(es, "s1/newS1")), 2000)
-  colData(es, subsetName = "s1") <- cbind(colData(es, subsetName = "s1"), 
+  testthat::expect_equal(subsetColnames(es, "s1/newS1"), colnames(se))
+  colData(es, subsetName = "s1") <- cbind(colData(es, subsetName = "s1"),
                                           DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s1")[2]))))
   testthat::expect_equal(ncol(colData(es, subsetName = "s1")), 1)
-  rowData(es, subsetName = "s1") <- cbind(rowData(es, subsetName = "s1"), 
+  testthat::expect_equal(colData(es, subsetName = "s1")$col1, seq_len(2000))
+  rowData(es, subsetName = "s1") <- cbind(rowData(es, subsetName = "s1"),
                                           DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s1")[1]))))
   testthat::expect_equal(ncol(rowData(es, subsetName = "s1")), 1)
+  testthat::expect_equal(rowData(es, subsetName = "s1")$col1, seq_len(10))
   
   
   testthat::skip_if_not_installed("airway")
   data(airway, package="airway")
   rse <- airway
   testthat::expect_s4_class(es <- ExperimentSubset(rse), "SubsetRangedSummarizedExperiment")
-  subsetSummary(es)
+  testthat::expect_output(subsetSummary(es), "Main assay\\(s\\):\n counts")
+  testthat::expect_output(subsetSummary(es), "Subset\\(s\\):\nNULL")
   testthat::expect_equal(length(metadata(es)), 1)
 
   es <- createSubset(es, "s2", rows = c(1:15))
   testthat::expect_true("s2" %in% subsetNames(es))
   testthat::expect_true("s2" %in% subsetAssayNames(es))
-  show(es)
-  es <- setSubsetAssay(es, "s2", assay(es, "s2"), "newS2")
+  expectSubsetOf(es, "s2", rows = 1:15, cols = seq_len(ncol(rse)))
+  testthat::expect_output(show(es), "subsets\\(1\\): s2")
+  s2Plus <- assay(es, "s2") + 1
+  es <- setSubsetAssay(es, "s2", s2Plus, "newS2")
   testthat::expect_true("s2/newS2" %in% subsetAssayNames(es))
   testthat::expect_false("newS2" %in% subsetNames(es))
+  testthat::expect_equal(getSubsetAssay(es, "s2", subsetAssayName = "newS2"),
+                         s2Plus)
   assay(es, "assay2") <- assay(es, "counts")
   testthat::expect_true("assay2" %in% assayNames(es))
-  testthat::expect_equal(length(subsetParent(es, "s2")), 1)
-  subsetSummary(es)
+  testthat::expect_equal(assay(es, "assay2"), assay(es, "counts"))
+  testthat::expect_equal(subsetParent(es, "s2"), list("counts"))
+  testthat::expect_output(subsetSummary(es), "s2 +15, 8 +counts +newS2")
   testthat::expect_equal(subsetDim(es, "s2")[1], 15)
   testthat::expect_equal(subsetDim(es, "s2")[2], 8)
   testthat::expect_equal(subsetCount(es), 1)
@@ -88,37 +115,42 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
   testthat::expect_equal(length(metadata(es)), 1)
 
   subsetRownames(es, "s2") <- subsetRownames(es, "s2")
-  testthat::expect_equal(length(subsetRownames(es, "s2")), 15)
+  testthat::expect_equal(subsetRownames(es, "s2"), rownames(rse)[1:15])
   subsetColnames(es, "s2") <- subsetColnames(es, "s2")
-  testthat::expect_equal(length(subsetColnames(es, "s2")), 8)
+  testthat::expect_equal(subsetColnames(es, "s2"), colnames(rse))
   subsetRownames(es, "s2/newS2") <- subsetRownames(es, "s2/newS2")
-  testthat::expect_equal(length(subsetRownames(es, "s2/newS2")), 15)
+  testthat::expect_equal(subsetRownames(es, "s2/newS2"),
+                         rownames(rse)[1:15])
   subsetColnames(es, "s2/newS2") <- subsetColnames(es, "s2/newS2")
-  testthat::expect_equal(length(subsetColnames(es, "s2/newS2")), 8)
-  colData(es, subsetName = "s2") <- cbind(colData(es, subsetName = "s2"), 
+  testthat::expect_equal(subsetColnames(es, "s2/newS2"), colnames(rse))
+  colData(es, subsetName = "s2") <- cbind(colData(es, subsetName = "s2"),
                                           DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[2]))))
   testthat::expect_equal(ncol(colData(es, subsetName = "s2", parentColData = TRUE)), 10)
-  rowData(es, subsetName = "s2") <- cbind(rowData(es, subsetName = "s2"), 
+  testthat::expect_equal(colData(es, subsetName = "s2")$col1, seq_len(8))
+  rowData(es, subsetName = "s2") <- cbind(rowData(es, subsetName = "s2"),
                                           DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[1]))))
   testthat::expect_equal(ncol(rowData(es, subsetName = "s2")), 1)
-  
-  testthat::expect_error(es <- createSubset(es, "s2", rows = c(1:15)),
-                         "A subset with the specified 'subsetName' parameter already exists
-         in the object. Subset names must be unique.")
+  testthat::expect_equal(rowData(es, subsetName = "s2")$col1, seq_len(15))
+
+  # match the start of each message: the rest has line breaks and indents
+  testthat::expect_error(
+    es <- createSubset(es, "s2", rows = c(1:15)),
+    regexp = "A subset with the specified 'subsetName' parameter already"
+  )
   testthat::expect_error(es <- createSubset(es, subsetName = 12, rows = c(1:15)),
                          "'subsetName' must be a single, non-empty")
-  testthat::expect_error(es <- createSubset(es, subsetName = "s3", rows = list()),
-                         "'rows' parameter must be either a 'NULL' to include all rows,
-         or a numeric vector or a character vector that specify the rows to 
-         include in the subset.")
-  testthat::expect_error(es <- createSubset(es, subsetName = "s3", cols = list()),
-                         "'cols' parameter must be either a 'NULL' to include all rows,
-         or a numeric vector or a character vector that specify the columns to 
-         include in the subset.")
-  testthat::expect_error(es <- createSubset(es, subsetName = "s3", parentAssay = 1),
-                         "'parentAssay' parameter can either be 'NULL' to use the default
-         assay in the input object or a character value that specifies the
-         parentAssay to use from parent object.")
+  testthat::expect_error(
+    es <- createSubset(es, subsetName = "s3", rows = list()),
+    regexp = "'rows' parameter must be either a 'NULL'"
+  )
+  testthat::expect_error(
+    es <- createSubset(es, subsetName = "s3", cols = list()),
+    regexp = "'cols' parameter must be either a 'NULL'"
+  )
+  testthat::expect_error(
+    es <- createSubset(es, subsetName = "s3", parentAssay = 1),
+    regexp = "'parentAssay' parameter can either be 'NULL'"
+  )
   testthat::expect_error(es <- createSubset(es, subsetName = "s3", rows = c(64103:64103)),
                          "Selected rows not available in the specified assay.")
   testthat::expect_error(es <- createSubset(es, subsetName = "s3", rows = c(seq(1:64102), 64102)),
@@ -136,48 +168,44 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
 
 testthat::test_that("Testing ExperimentSubset constructor with subset & createSubset without parentAssay",{
   es <- ExperimentSubset(sce_chcl, subset = list(subsetName = "subset10", rows = c(1:10), cols = c(1:2), parentAssay = "counts"))
-  testthat::expect_equal(es@subsets$subset1@subsetName, "subset10")
-  testthat::expect_equal(es@subsets$subset1@rowIndices, c(1:10))
-  testthat::expect_equal(es@subsets$subset1@colIndices, c(1:2))
-  testthat::expect_equal(es@subsets$subset1@parentAssay, "counts")
-  
-  es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299))
-  testthat::expect_equal(es@subsets$subset1@subsetName, "subset1")
-  testthat::expect_equal(es@subsets$subset1@rowIndices, c(10,11,50,56,98,99,102,105,109, 200))
-  testthat::expect_equal(es@subsets$subset1@colIndices, c(20,21,40,45,90,99,100,123,166,299))
-  testthat::expect_equal(es@subsets$subset1@parentAssay, "counts")
+  testthat::expect_equal(subsetNames(es), "subset10")
+  expectSubsetOf(es, "subset10", rows = 1:10, cols = 1:2)
+
+  rows1 <- c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200)
+  cols1 <- c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299)
+  es <- createSubset(es, "subset1", rows = rows1, cols = cols1)
+  testthat::expect_equal(subsetNames(es), c("subset10", "subset1"))
+  expectSubsetOf(es, "subset1", rows = rows1, cols = cols1)
+  expectSubsetOf(es, "subset10", rows = 1:10, cols = 1:2)
 })
 
 testthat::test_that("Testing createSubset and setSubsetAssay",{
   es <- ExperimentSubset(sce_chcl)
+  rows1 <- c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200)
+  cols1 <- c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299)
   #createSubset
-  es <- createSubset(es, "subset1",
-                                       rows = c(10,11,50,56,98,99,102,105,109,200),
-                                       cols = c(20,21,40,45,90,99,100,123,166,299),
-                                       parentAssay = "counts")
-  testthat::expect_equal(es@subsets$subset1@subsetName, "subset1")
-  testthat::expect_equal(es@subsets$subset1@rowIndices, c(10,11,50,56,98,99,102,105,109,200))
-  testthat::expect_equal(es@subsets$subset1@colIndices, c(20,21,40,45,90,99,100,123,166,299))
-  testthat::expect_equal(es@subsets$subset1@parentAssay, "counts")
+  es <- createSubset(es, "subset1", rows = rows1, cols = cols1,
+                     parentAssay = "counts")
+  expectSubsetOf(es, "subset1", rows = rows1, cols = cols1)
   
   subsetRownames(es, "subset1") <- subsetRownames(es, "subset1")
   subsetColnames(es, "subset1") <- subsetColnames(es, "subset1")
-  subsetRownames(es, "subset1") <- subsetRownames(es, "subset1")
-  subsetColnames(es, "subset1") <- subsetColnames(es, "subset1")
+  testthat::expect_equal(subsetRownames(es, "subset1"), rownames(es)[rows1])
+  testthat::expect_equal(subsetColnames(es, "subset1"), colnames(es)[cols1])
   
+  # the same rows and columns, given by name
   es <- createSubset(es, "subset2",
                                        rows = c("OPCML", "RP11-338K17.8", "RP11-770J1.3", "NPSR1", "AC060835.1", "GABRA2", "PRDM16", "CAB39", "LYRM1", "RP1-178F10.3"),
                                        cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC", "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG", "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC", "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC", "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
                                        parentAssay = "counts")
-  testthat::expect_equal(es@subsets$subset2@subsetName, "subset2")
-  testthat::expect_equal(es@subsets$subset2@rowIndices, c(10,11,50,56,98,99,102,105,109,200))
-  testthat::expect_equal(es@subsets$subset2@colIndices, c(20,21,40,45,90,99,100,123,166,299))
-  testthat::expect_equal(es@subsets$subset2@parentAssay, "counts")
-  
-  # expect_error(es <- createSubset(es, "subset3",
-  #                                                   rows = c("OPCML", "RP11-338K17.8", 50,56,98,99,102,105,109,200),
-  #                                                   cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC", "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG", "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC", "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC", "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
-  #                                                   parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
+  expectSubsetOf(es, "subset2", rows = rows1, cols = cols1)
+
+  # numbers given as names are not row names
+  testthat::expect_error(
+    createSubset(es, "subset3", rows = c("OPCML", "RP11-338K17.8", "50"),
+                 cols = 1:2, parentAssay = "counts"),
+    regexp = "Selected rows not available in the specified assay."
+  )
   
   #setSubsetAssay
   counts1p <- assay(es, "subset1")
@@ -185,30 +213,31 @@ testthat::test_that("Testing createSubset and setSubsetAssay",{
   expect_error(es <- setSubsetAssay(es, "subset4", counts1p, "scaledSubset1"),
                "subset4 does not exist in the subsets slot of the object.")
   es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
-  expect_true("scaledSubset1" %in% assayNames(es@subsets$subset1@internalAssay))
-  getSubsetAssay(es, "subset1", subsetAssayName = "scaledSubset1")
-  # expect_error(es <- setSubsetAssay(es, "subset1", counts1p, subsetAssayName = NULL),
-  #              "subset1 already exists. Please choose a different subsetName parameter.")
-  # es <- setSubsetAssay(es, "subset4", counts1p, subsetAssayName = NULL)
-  # expect_equal(rownames(counts1p), rownames(es, "subset4"))
-  # expect_equal(colnames(counts1p), colnames(es, "subset4"))
-  #cant have null now
+  testthat::expect_true("subset1/scaledSubset1" %in% subsetAssayNames(es))
+  testthat::expect_equal(
+    getSubsetAssay(es, "subset1", subsetAssayName = "scaledSubset1"), counts1p
+  )
+  # the subset's own data is unchanged
+  testthat::expect_equal(getSubsetAssay(es, "subset1"),
+                         assay(es, "counts")[rows1, cols1])
 })
 
 testthat::test_that("Testing rownames, colnames, rowData and colData",{
   es <- ExperimentSubset(sce_chcl)
-  es <- createSubset(es, "subset1",
-                     rows = c(10,11,50,56,98,99,102,105,109,200),
-                                       cols = c(20,21,40,45,90,99,100,123,166,299),
-                                       parentAssay = "counts")
+  rows1 <- c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200)
+  cols1 <- c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299)
+  es <- createSubset(es, "subset1", rows = rows1, cols = cols1,
+                     parentAssay = "counts")
   counts1p <- assay(es, "subset1")
   counts1p[,] <- counts1p[,] + 1
   es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
   
-  # expect_equal(rownames(es, subsetName = "scaledSubset1"), rownames(counts1p))
-  # expect_equal(colnames(es, subsetName = "scaledSubset1"), colnames(counts1p))
-  # expect_equal(rownames(es, subsetName = "subset1"), rownames(es)[c(10,11,50,56,98,99,102,105,109,200)])
-  # expect_equal(colnames(es, subsetName = "subset1"), colnames(es)[c(20,21,40,45,90,99,100,123,166,299)])
+  testthat::expect_equal(subsetRownames(es, "subset1/scaledSubset1"),
+                         rownames(counts1p))
+  testthat::expect_equal(subsetColnames(es, "subset1/scaledSubset1"),
+                         colnames(counts1p))
+  testthat::expect_equal(subsetRownames(es, "subset1"), rownames(es)[rows1])
+  testthat::expect_equal(subsetColnames(es, "subset1"), colnames(es)[cols1])
   testthat::expect_error(colData(es, subsetName = "subset1Internal"),
                          "subset1Internal subset does not exist.")
   testthat::expect_error(rowData(es, subsetName = "subset1Internal"),
@@ -218,7 +247,12 @@ testthat::test_that("Testing rownames, colnames, rowData and colData",{
   expect_equal(ncol(rowData(es, subsetName = "subset1", parentRowData = TRUE)), 2)
   expect_equal(nrow(rowData(es, subsetName = "subset1", parentRowData = TRUE)), subsetDim(es, subsetName = "subset1")[1])
   expect_equal(ncol(colData(es, subsetName = "subset1", parentColData = TRUE)), 12)
-  expect_equal(nrow(rowData(es, subsetName = "subset1", parentColData = TRUE)), subsetDim(es, subsetName = "subset1")[2])
+  expect_equal(nrow(colData(es, subsetName = "subset1", parentColData = TRUE)),
+               subsetDim(es, subsetName = "subset1")[2])
+  testthat::expect_equal(rowData(es, subsetName = "subset1")$col1,
+                         seq_along(rows1))
+  testthat::expect_equal(colData(es, subsetName = "subset1")$col1,
+                         seq_along(cols1))
 })
 
 testthat::test_that("Testing subset helper/supplementary functions",{
@@ -234,10 +268,12 @@ testthat::test_that("Testing subset helper/supplementary functions",{
   expect_equal(subsetAssayCount(es), 2)
   expect_equal(subsetAssayNames(es), c("subset1", "subset1/scaledSubset1"))
   expect_equal(subsetNames(es), "subset1")
-  subsetSummary(es)
+  testthat::expect_output(subsetSummary(es),
+                          "subset1 +10, 10 +counts +scaledSubset1")
   expect_equal(subsetParent(es, "subset1/scaledSubset1"),
                list("subset1", "counts"))
-  show(es)
+  testthat::expect_output(show(es),
+                          "subsetAssays\\(2\\): subset1 subset1/scaledSubset1")
 })
 
 testthat::test_that("Testing assay function",{
@@ -246,11 +282,12 @@ testthat::test_that("Testing assay function",{
                                        rows = c(10,11,50,56,98,99,102,105,109,200),
                                        cols = c(20,21,40,45,90,99,100,123,166,299),
                                        parentAssay = "counts")
-  es@subsets$subset1@parentAssay <- "counts"
   subset1Assay <- assay(es, "subset1")
-  expect_true(all.equal(subset1Assay, assay(es, "counts")[c(10,11,50,56,98,99,102,105,109,200), c(20,21,40,45,90,99,100,123,166,299)]))
+  rows1 <- c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200)
+  cols1 <- c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299)
+  testthat::expect_equal(subset1Assay, assay(es, "counts")[rows1, cols1])
   assay(es, "counts2") <- assay(es, "counts")
-  expect_true(all.equal(assay(es, "counts"), assay(es, "counts2")))
+  testthat::expect_equal(assay(es, "counts2"), assay(es, "counts"))
 })
 
 # Builds the object the reducedDims, metadata and altExp tests share, as
@@ -301,10 +338,15 @@ testthat::test_that("Testing reducedDims",{
   expect_true("PCA" %in% reducedDimNames(es, subsetName = "hvg1000"))
   pcaList <- list(a = hvgPca, b = hvgPca)
   reducedDims(es, subsetName = "hvg1000") <- pcaList
-  expect_true(all.equal(reducedDimNames(es, subsetName = "hvg1000"), c("a","b")))
+  testthat::expect_equal(reducedDimNames(es, subsetName = "hvg1000"),
+                         c("a", "b"))
+  testthat::expect_equal(reducedDim(es, "b", subsetName = "hvg1000"), hvgPca)
   
   reducedDimNames(es, subsetName = "hvg1000") <- c("PCA_1", "PCA_2")
-  expect_true(all.equal(reducedDimNames(es, subsetName = "hvg1000"), c("PCA_1", "PCA_2")))
+  testthat::expect_equal(reducedDimNames(es, subsetName = "hvg1000"),
+                         c("PCA_1", "PCA_2"))
+  testthat::expect_equal(reducedDims(es, subsetName = "hvg1000"),
+                         SimpleList(PCA_1 = hvgPca, PCA_2 = hvgPca))
 
   testthat::expect_error(reducedDimNames(es, subsetName = "hvg123"),
                          "hvg123 subset does not exist.")
@@ -312,15 +354,18 @@ testthat::test_that("Testing reducedDims",{
   testthat::expect_error(reducedDimNames(es, subsetName = "hvg123") <- c("PCA_1"),
                          "hvg123 subset does not exist.")
   
-  reducedDim(es, type = "PCA") <- scater::calculatePCA(assay(es, "counts"))
-  expect_true(!is.null(reducedDim(es, type = "PCA")))
+  countsPca <- scater::calculatePCA(assay(es, "counts"))
+  reducedDim(es, type = "PCA") <- countsPca
+  testthat::expect_equal(reducedDim(es, type = "PCA"), countsPca)
 
-  reducedDims(es) <- list(a = scater::calculatePCA(assay(es, "counts")), b = scater::calculatePCA(assay(es, "counts")))
-  expect_true(!is.null(reducedDims(es)))
-  expect_true(all.equal(reducedDimNames(es), c("a", "b")))
+  reducedDims(es) <- list(a = countsPca, b = countsPca * 2)
+  testthat::expect_equal(reducedDims(es),
+                         SimpleList(a = countsPca, b = countsPca * 2))
+  testthat::expect_equal(reducedDimNames(es), c("a", "b"))
 
   reducedDimNames(es) <- c("PCA_Counts_1", "PCA_Counts_2")
-  expect_true(all.equal(reducedDimNames(es), c("PCA_Counts_1", "PCA_Counts_2")))
+  testthat::expect_equal(reducedDimNames(es), c("PCA_Counts_1", "PCA_Counts_2"))
+  testthat::expect_equal(reducedDim(es, "PCA_Counts_2"), countsPca * 2)
 
 })
 
@@ -345,24 +390,41 @@ testthat::test_that("Testing metadata",{
 testthat::test_that("Testing altExperiments",{
   testthat::skip_if_not_installed("scrapper")
   es <- makeHvgFixture()
-  altExp(es, "alt1", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
-  altExp(es, "alt2", subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
-  expect_true(all.equal(altExpNames(es, subsetName = "hvg1000"), c("alt1", "alt2")))
+  # altExps for the subset's cells, told apart by their counts
+  hvgCells <- subsetColnames(es, "hvg1000")
+  makeHvgAlt <- function(value) {
+    counts <- matrix(value, 2, length(hvgCells),
+                     dimnames = list(c("f1", "f2"), hvgCells))
+    SingleCellExperiment(list(counts = counts))
+  }
+  hvgAlt <- makeHvgAlt(1)
+  altExp(es, "alt1", subsetName = "hvg1000") <- hvgAlt
+  altExp(es, "alt2", subsetName = "hvg1000") <- hvgAlt
+  testthat::expect_equal(altExpNames(es, subsetName = "hvg1000"),
+                         c("alt1", "alt2"))
 
-  testthat::expect_error(altExp(es, "alt1", subsetName = "hvg") <- es@subsets$hvg1000@internalAssay,
+  testthat::expect_error(altExp(es, "alt1", subsetName = "hvg") <- hvgAlt,
                          "hvg subset does not exist.")
   
-  altExp(es, subsetName = "hvg1000") <- es@subsets$hvg1000@internalAssay
+  # without a name, altExp<- replaces the first altExp
+  altExp(es, subsetName = "hvg1000") <- makeHvgAlt(2)
   expect_equal(length(altExpNames(es, subsetName = "hvg1000")), 2)
   
-  expect_true(!is.null(altExp(es, subsetName = "hvg1000")))
+  testthat::expect_equal(
+    assay(altExp(es, subsetName = "hvg1000"), "counts"),
+    assay(makeHvgAlt(2), "counts")
+  )
+  testthat::expect_equal(
+    assay(altExp(es, "alt2", subsetName = "hvg1000"), "counts"),
+    assay(hvgAlt, "counts")
+  )
   
   altExp(es) <- simSce
-  expect_true(!is.null(altExp(es)))
+  testthat::expect_equal(assay(altExp(es), "counts"), simCounts)
 
   altExp(es, "a1") <- simSce
   expect_true("a1" %in% altExpNames(es))
-  expect_true(!is.null(altExp(es, "a1")))
+  testthat::expect_equal(assay(altExp(es, "a1"), "counts"), simCounts)
   
   testthat::expect_error(altExpNames(es, subsetName = "na"),
                          "na subset does not exist.")
@@ -371,7 +433,7 @@ testthat::test_that("Testing altExperiments",{
                          "na subset does not exist.")
   
   altExpNames(es) <- c("a1", "a2")
-  expect_true(all.equal(altExpNames(es), c("a1", "a2")))
+  testthat::expect_equal(altExpNames(es), c("a1", "a2"))
   
   testthat::expect_error(altExp(es, "alt1", subsetName = "hvg10002"),
                          "hvg10002 subset does not exist.")
@@ -379,25 +441,29 @@ testthat::test_that("Testing altExperiments",{
   # the subset sees the main object's altExps a1 and a2, then its own
   # alt1 and alt2, and renames only its own (#58)
   altExpNames(es, subsetName = "hvg1000") <- c("a1", "a2", "b1", "b2")
-  expect_true(all.equal(altExpNames(es, subsetName = "hvg1000"),
-                        c("a1", "a2", "b1", "b2")))
+  testthat::expect_equal(altExpNames(es, subsetName = "hvg1000"),
+                         c("a1", "a2", "b1", "b2"))
 
   testthat::expect_error(altExpNames(es, subsetName = "hvg1000x"),
                          "hvg1000x subset does not exist.")
   
-  altExps(es, subsetName = "hvg1000") <- list(a = es@subsets$hvg1000@internalAssay, b = es@subsets$hvg1000@internalAssay)
+  altExps(es, subsetName = "hvg1000") <- list(a = hvgAlt, b = makeHvgAlt(3))
   # its own altExps are replaced; the main object's stay visible (#58)
-  expect_true(all.equal(altExpNames(es, subsetName = "hvg1000"),
-                        c("a1", "a2", "a", "b")))
+  testthat::expect_equal(altExpNames(es, subsetName = "hvg1000"),
+                         c("a1", "a2", "a", "b"))
+  testthat::expect_equal(
+    assay(altExp(es, "b", subsetName = "hvg1000"), "counts"),
+    assay(makeHvgAlt(3), "counts")
+  )
 
-  testthat::expect_error(altExps(es, subsetName = "hvg") <- list(a = es@subsets$hvg1000@internalAssay, b = es@subsets$hvg1000@internalAssay),
+  testthat::expect_error(altExps(es, subsetName = "hvg") <- list(a = hvgAlt),
                          "hvg subset does not exist.")
   
   testthat::expect_error(altExps(es, subsetName = "hvg10002"),
                          "hvg10002 subset does not exist.")
   
   altExps(es) <- list(a = simSce, b = simSce)
-  expect_true(all.equal(altExpNames(es), c("a", "b")))
+  testthat::expect_equal(altExpNames(es), c("a", "b"))
 } 
 )
 
@@ -1729,6 +1795,10 @@ testthat::test_that("Unknown subset names give a clear error", {
   testthat::expect_error(getSubsetAssay(es, "nope"), regexp = "nope")
   testthat::expect_error(subsetDim(es, "nope"),
                          regexp = "nope subset does not exist")
+  testthat::expect_error(
+    subsetParent(es, "nope"),
+    regexp = "nope does not exist in the subsets slot of the object."
+  )
   testthat::expect_error(subsetColnames(es, "nope"),
                          regexp = "nope subset does not exist")
   testthat::expect_error(subsetRownames(es, "nope"),
@@ -1765,31 +1835,43 @@ testthat::test_that("Testing createSubset with multiple paramter options",{
   
   #colnames
   es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts")
-  testthat::expect_equal(es@subsets$subset1@subsetName, "subset1")
-  testthat::expect_equal(es@subsets$subset1@rowIndices, c(10,11,50,56,98,99,102,105,109, 200))
-  testthat::expect_equal(es@subsets$subset1@colIndices, match(c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), subsetColnames(es, subsetName = "subset1")))
-  testthat::expect_equal(es@subsets$subset1@parentAssay, "counts")
+  namedCols <- c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC")
+  testthat::expect_equal(subsetNames(es), "subset1")
+  expectSubsetOf(es, "subset1",
+                 rows = c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200),
+                 cols = match(namedCols, colnames(es)))
   
   #null rows and null cols
   es <- createSubset(es, "subset2", parentAssay = "counts")
-  testthat::expect_equal(es@subsets$subset2@subsetName, "subset2")
-  testthat::expect_equal(es@subsets$subset2@rowIndices, c(1:subsetDim(es, "subset2")[1]))
-  testthat::expect_equal(es@subsets$subset2@colIndices, c(1:subsetDim(es, "subset2")[2]))
-  testthat::expect_equal(es@subsets$subset2@parentAssay, "counts")
+  testthat::expect_equal(subsetNames(es), c("subset1", "subset2"))
+  expectSubsetOf(es, "subset2", rows = seq_len(nrow(es)),
+                 cols = seq_len(ncol(es)))
   
-  #nas introduced in rows or cols : update: this error is changed and does not appear in this way
-  # testthat::expect_error(es <- createSubset(es, "subset22", rows = c("as", "asd", "asd"), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
-  # testthat::expect_error(es <- createSubset(es, "subset22", cols = c("CTGTG", "CAGTCC"), parentAssay = "counts"), "NAs introduced in input rows or columns. Some or all indicated rows or columns not found in specified parent.")
-  
+  # rows or columns given by names that the parent doesn't have
+  testthat::expect_error(
+    createSubset(es, "subset22", rows = c("as", "asd", "asd"),
+                 cols = namedCols, parentAssay = "counts"),
+    regexp = "Selected rows not available in the specified assay."
+  )
+  testthat::expect_error(
+    createSubset(es, "subset22", cols = c("CTGTG", "CAGTCC"),
+                 parentAssay = "counts"),
+    regexp = "Selected columns not available in the specified assay."
+  )
 })
 
 testthat::test_that("Completing test coverage, move this into relevant places later",{
   es <- ExperimentSubset(sce_chcl)
   testthat::expect_warning(es <- createSubset(es, "subset 1", rows = c(1:5), cols = (1:5)),
                            "Removing spaces from the specified subsetName.")
+  testthat::expect_equal(subsetNames(es), "subset1")
   
+  # a named list of assays gives a SubsetSingleCellExperiment of them
   es <- ExperimentSubset(list(counts = assay(sce_chcl, "counts")))
-  
+  testthat::expect_s4_class(es, "SubsetSingleCellExperiment")
+  testthat::expect_equal(assayNames(es), "counts")
+  testthat::expect_equal(assay(es, "counts"), assay(sce_chcl, "counts"))
+  testthat::expect_equal(subsetCount(es), 0)
 })
 # Takes a subset out as a standalone experiment and puts it back unchanged
 checkExperimentRoundTrip <- function(object) {
