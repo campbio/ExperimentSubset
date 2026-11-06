@@ -631,6 +631,12 @@ testthat::test_that("Subset rowData and colData keep the subset's names", {
                                          "NULL or the column names of ",
                                          "subset 's1', in the same order."),
                          fixed = TRUE)
+  # a subset without row names has none to check against
+  unnamed <- ExperimentSubset(list(counts = matrix(1:20, nrow = 5)))
+  unnamed <- createSubset(unnamed, "s1", rows = 1:3, cols = 1:2)
+  rowData(unnamed, subsetName = "s1") <- otherGenes[1:3, , drop = FALSE]
+  testthat::expect_equal(rowData(unnamed, subsetName = "s1")$rank, 1:3)
+  testthat::expect_null(subsetRownames(unnamed, "s1"))
 
   # with the parent's data, the result has the subset's renamed names
   subsetColnames(es, "s1") <- paste0("cell", 1:8)
