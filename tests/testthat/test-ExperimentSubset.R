@@ -607,11 +607,30 @@ testthat::test_that("Subset rowData and colData keep the subset's names", {
   testthat::expect_error(subsetColData(es, "s1") <- DataFrame(a = 1:5),
                          regexp = "nrow")
   testthat::expect_equal(subsetColnames(es, "s1"), cells)
-  # rowData, like SummarizedExperiment's, ignores value's rownames
-  otherGenes <- DataFrame(rank = 5:1, row.names = LETTERS[1:5])
-  rowData(es, subsetName = "s1") <- otherGenes
+  # rowData with other rownames is an error too, so values meant for other
+  # rows aren't stored by position (#100)
+  rowData(es, subsetName = "s1") <- DataFrame(rank = 5:1, row.names = genes)
+  rowMsg <- paste0("The rownames of 'value' must be NULL or the row names ",
+                   "of subset 's1', in the same order.")
+  otherGenes <- DataFrame(rank = 1:5, row.names = LETTERS[1:5])
+  testthat::expect_error(subsetRowData(es, "s1") <- otherGenes,
+                         regexp = rowMsg, fixed = TRUE)
+  testthat::expect_error(rowData(es, subsetName = "s1") <- otherGenes,
+                         regexp = rowMsg, fixed = TRUE)
+  reordered <- DataFrame(rank = 1:5, row.names = rev(genes))
+  testthat::expect_error(subsetRowData(es, "s1") <- reordered,
+                         regexp = rowMsg, fixed = TRUE)
+  otherFrame <- data.frame(rank = 1:5, row.names = paste0("x", 1:5))
+  testthat::expect_error(subsetRowData(es, "s1") <- otherFrame,
+                         regexp = rowMsg, fixed = TRUE)
   testthat::expect_equal(subsetRownames(es, "s1"), genes)
   testthat::expect_equal(rowData(es, subsetName = "s1")$rank, 5:1)
+  # the colData message names the subset's column names
+  testthat::expect_error(subsetColData(es, "s1") <- otherCells,
+                         regexp = paste0("The rownames of 'value' must be ",
+                                         "NULL or the column names of ",
+                                         "subset 's1', in the same order."),
+                         fixed = TRUE)
 
   # with the parent's data, the result has the subset's renamed names
   subsetColnames(es, "s1") <- paste0("cell", 1:8)
