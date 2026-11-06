@@ -74,11 +74,11 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
   testthat::expect_equal(subsetRownames(es, "s1/newS1"), rownames(se)[1:10])
   subsetColnames(es, "s1/newS1") <- subsetColnames(es, "s1/newS1")
   testthat::expect_equal(subsetColnames(es, "s1/newS1"), colnames(se))
-  colData(es, subsetName = "s1") <- cbind(colData(es, subsetName = "s1"),
+  colData(es, subsetName = "s1") <- cbind(colData(es, subsetName = "s1"), 
                                           DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s1")[2]))))
   testthat::expect_equal(ncol(colData(es, subsetName = "s1")), 1)
   testthat::expect_equal(colData(es, subsetName = "s1")$col1, seq_len(2000))
-  rowData(es, subsetName = "s1") <- cbind(rowData(es, subsetName = "s1"),
+  rowData(es, subsetName = "s1") <- cbind(rowData(es, subsetName = "s1"), 
                                           DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s1")[1]))))
   testthat::expect_equal(ncol(rowData(es, subsetName = "s1")), 1)
   testthat::expect_equal(rowData(es, subsetName = "s1")$col1, seq_len(10))
@@ -123,15 +123,15 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
                          rownames(rse)[1:15])
   subsetColnames(es, "s2/newS2") <- subsetColnames(es, "s2/newS2")
   testthat::expect_equal(subsetColnames(es, "s2/newS2"), colnames(rse))
-  colData(es, subsetName = "s2") <- cbind(colData(es, subsetName = "s2"),
+  colData(es, subsetName = "s2") <- cbind(colData(es, subsetName = "s2"), 
                                           DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[2]))))
   testthat::expect_equal(ncol(colData(es, subsetName = "s2", parentColData = TRUE)), 10)
   testthat::expect_equal(colData(es, subsetName = "s2")$col1, seq_len(8))
-  rowData(es, subsetName = "s2") <- cbind(rowData(es, subsetName = "s2"),
+  rowData(es, subsetName = "s2") <- cbind(rowData(es, subsetName = "s2"), 
                                           DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[1]))))
   testthat::expect_equal(ncol(rowData(es, subsetName = "s2")), 1)
   testthat::expect_equal(rowData(es, subsetName = "s2")$col1, seq_len(15))
-
+  
   # match the start of each message: the rest has line breaks and indents
   testthat::expect_error(
     es <- createSubset(es, "s2", rows = c(1:15)),
@@ -170,7 +170,7 @@ testthat::test_that("Testing ExperimentSubset constructor with subset & createSu
   es <- ExperimentSubset(sce_chcl, subset = list(subsetName = "subset10", rows = c(1:10), cols = c(1:2), parentAssay = "counts"))
   testthat::expect_equal(subsetNames(es), "subset10")
   expectSubsetOf(es, "subset10", rows = 1:10, cols = 1:2)
-
+  
   rows1 <- c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200)
   cols1 <- c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299)
   es <- createSubset(es, "subset1", rows = rows1, cols = cols1)
@@ -199,7 +199,7 @@ testthat::test_that("Testing createSubset and setSubsetAssay",{
                                        cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC", "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG", "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC", "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC", "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
                                        parentAssay = "counts")
   expectSubsetOf(es, "subset2", rows = rows1, cols = cols1)
-
+  
   # numbers given as names are not row names
   testthat::expect_error(
     createSubset(es, "subset3", rows = c("OPCML", "RP11-338K17.8", "50"),
@@ -253,6 +253,15 @@ testthat::test_that("Testing rownames, colnames, rowData and colData",{
                          seq_along(rows1))
   testthat::expect_equal(colData(es, subsetName = "subset1")$col1,
                          seq_along(cols1))
+  # the subset is square, so check names to tell its rows from its columns
+  testthat::expect_equal(
+    rownames(rowData(es, subsetName = "subset1", parentRowData = TRUE)),
+    rownames(es)[rows1]
+  )
+  testthat::expect_equal(
+    rownames(colData(es, subsetName = "subset1", parentColData = TRUE)),
+    colnames(es)[cols1]
+  )
 })
 
 testthat::test_that("Testing subset helper/supplementary functions",{
@@ -278,13 +287,11 @@ testthat::test_that("Testing subset helper/supplementary functions",{
 
 testthat::test_that("Testing assay function",{
   es <- ExperimentSubset(sce_chcl)
-  es <- createSubset(es, "subset1",
-                                       rows = c(10,11,50,56,98,99,102,105,109,200),
-                                       cols = c(20,21,40,45,90,99,100,123,166,299),
-                                       parentAssay = "counts")
-  subset1Assay <- assay(es, "subset1")
   rows1 <- c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200)
   cols1 <- c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299)
+  es <- createSubset(es, "subset1", rows = rows1, cols = cols1,
+                     parentAssay = "counts")
+  subset1Assay <- assay(es, "subset1")
   testthat::expect_equal(subset1Assay, assay(es, "counts")[rows1, cols1])
   assay(es, "counts2") <- assay(es, "counts")
   testthat::expect_equal(assay(es, "counts2"), assay(es, "counts"))
