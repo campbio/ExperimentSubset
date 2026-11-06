@@ -2241,13 +2241,12 @@ NULL
 # put values against other rows: value's rownames must be NULL, and are
 # then filled in, or the same as the subset's names. what is "row" or
 # "column". A value of the wrong size is left for rowData<- or colData<-
-# to reject.
+# to reject, so its error is about the size, not the names.
 .keepSubsetNames <- function(value, currentNames, subsetName, what) {
-  if (is.null(value))
+  if (is.null(value) || nrow(value) != length(currentNames))
     return(value)
   if (is.null(rownames(value))) {
-    if (nrow(value) == length(currentNames))
-      rownames(value) <- currentNames
+    rownames(value) <- currentNames
   } else if (!is.null(currentNames)
              && !identical(rownames(value), currentNames)) {
     stop("The rownames of 'value' must be NULL or the ", what, " names of ",

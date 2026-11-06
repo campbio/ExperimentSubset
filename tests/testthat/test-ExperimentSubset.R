@@ -609,7 +609,8 @@ testthat::test_that("Subset rowData and colData keep the subset's names", {
   testthat::expect_equal(subsetColnames(es, "s1"), cells)
   # rowData with other rownames is an error too, so values meant for other
   # rows aren't stored by position (#100)
-  rowData(es, subsetName = "s1") <- DataFrame(rank = 5:1, row.names = genes)
+  rowData(es, subsetName = "s1") <- DataFrame(rank = 11:15, row.names = genes)
+  testthat::expect_equal(rowData(es, subsetName = "s1")$rank, 11:15)
   rowMsg <- paste0("The rownames of 'value' must be NULL or the row names ",
                    "of subset 's1', in the same order.")
   otherGenes <- DataFrame(rank = 1:5, row.names = LETTERS[1:5])
@@ -624,7 +625,14 @@ testthat::test_that("Subset rowData and colData keep the subset's names", {
   testthat::expect_error(subsetRowData(es, "s1") <- otherFrame,
                          regexp = rowMsg, fixed = TRUE)
   testthat::expect_equal(subsetRownames(es, "s1"), genes)
-  testthat::expect_equal(rowData(es, subsetName = "s1")$rank, 5:1)
+  testthat::expect_equal(rowData(es, subsetName = "s1")$rank, 11:15)
+  # a value of the wrong size gets the size error, even with rownames
+  tooFewGenes <- DataFrame(rank = 1:3, row.names = genes[1:3])
+  tooFewCells <- DataFrame(group = letters[1:5], row.names = cells[1:5])
+  testthat::expect_error(subsetRowData(es, "s1") <- tooFewGenes,
+                         regexp = "3 rows in value to replace 5")
+  testthat::expect_error(subsetColData(es, "s1") <- tooFewCells,
+                         regexp = "nrow")
   # the colData message names the subset's column names
   testthat::expect_error(subsetColData(es, "s1") <- otherCells,
                          regexp = paste0("The rownames of 'value' must be ",
