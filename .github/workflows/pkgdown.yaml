@@ -75,6 +75,25 @@ jobs:
           remotes::install_local(".", dependencies = FALSE, upgrade = "never")
         shell: Rscript {0}
 
+      - name: Point ExperimentHub at a cache folder
+        # the articles download their data through ExperimentHub; a fixed
+        # folder lets the next step keep it between runs
+        run: |
+          folder="$HOME/.cache/R/ExperimentHub"
+          echo "EXPERIMENT_HUB_CACHE=$folder" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Restore the downloaded article data
+        # Saved after a successful build and reused, so a download that is
+        # down or broken upstream doesn't break the site. Change the key
+        # to download again, for example after an article uses new data.
+        # The devel job keeps its own copy: caches are per branch, and
+        # pull requests to devel reuse the one saved by devel.
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/R/ExperimentHub
+          key: experimenthub-devel-v1
+
       - name: Build the devel site into site/dev
         env:
           PKGDOWN_DEV_MODE: devel
@@ -226,6 +245,25 @@ jobs:
           BiocManager::install(c(deps, website), update = FALSE, ask = FALSE)
           remotes::install_local(".", dependencies = FALSE, upgrade = "never")
         shell: Rscript {0}
+
+      - name: Point ExperimentHub at a cache folder
+        # the articles download their data through ExperimentHub; a fixed
+        # folder lets the next step keep it between runs
+        run: |
+          folder="$HOME/.cache/R/ExperimentHub"
+          echo "EXPERIMENT_HUB_CACHE=$folder" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Restore the downloaded article data
+        # Saved after a successful build and reused, so a download that is
+        # down or broken upstream doesn't break the site. Change the key
+        # to download again, for example after an article uses new data.
+        # The release job keeps its own copy: caches are per branch, and
+        # master can't read the one saved by devel.
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/R/ExperimentHub
+          key: experimenthub-release-v1
 
       - name: Build the release site
         env:
