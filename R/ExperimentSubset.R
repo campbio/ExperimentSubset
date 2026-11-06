@@ -2473,7 +2473,10 @@ setReplaceMethod(
 #'   \code{NULL} to remove all columns (a \code{SpatialExperiment} keeps
 #'   its \code{sample_id} column). For a subset, a \code{data.frame}
 #'   is also accepted and converted to a \code{DataFrame}; for the main
-#'   object, \code{colData<-} with a \code{data.frame} is an error.
+#'   object, \code{colData<-} with a \code{data.frame} is an error. For a
+#'   subset, the rownames of \code{value} must be \code{NULL} or the
+#'   subset's row names (\code{rowData<-}) or column names
+#'   (\code{colData<-}), in the same order.
 #' @return \code{rowData()} and \code{colData()} return a \code{DataFrame}.
 #'   The setters return \code{x} with the data set.
 #' @seealso \code{\link{subsetRowData}}, \code{\link{subsetColData}},
