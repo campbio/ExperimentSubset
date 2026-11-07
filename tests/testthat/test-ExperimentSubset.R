@@ -1427,10 +1427,14 @@ testthat::test_that("colData<- rejects other values in every Subset class", {
     testthat::expect_equal(colData(es), mainColData, info = name)
     colData(es, subsetName = "s1") <- NULL
     # a SpatialExperiment subset keeps its sample_id column
-    testthat::expect_equal(
-      setdiff(colnames(colData(es, subsetName = "s1")), "sample_id"),
-      character(0), info = name
-    )
+    keptColumns <- if (name == "spe") "sample_id" else character(0)
+    testthat::expect_equal(colnames(colData(es, subsetName = "s1")),
+                           keptColumns, info = name)
+    testthat::expect_equal(colData(es), mainColData, info = name)
+    # a data.frame now reaches the method for any other value
+    colData(es, subsetName = "s1") <- data.frame(group = letters[5:8])
+    testthat::expect_equal(colData(es, subsetName = "s1")$group,
+                           letters[5:8], info = name)
     testthat::expect_equal(colData(es), mainColData, info = name)
   }
 })

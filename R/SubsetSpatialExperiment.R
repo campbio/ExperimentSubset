@@ -411,8 +411,8 @@ setReplaceMethod(
 )
 
 # DataFrame and NULL keep their own methods: with only the "ANY" one,
-# S4 would pick SummarizedExperiment's (or SpatialExperiment's)
-# methods for them, which ignore subsetName (#99)
+# S4 would pick SpatialExperiment's methods for them, which ignore
+# subsetName (#99)
 #' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
