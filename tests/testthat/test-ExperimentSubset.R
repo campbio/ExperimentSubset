@@ -1431,7 +1431,7 @@ testthat::test_that("colData<- rejects other values in every Subset class", {
     testthat::expect_equal(colnames(colData(es, subsetName = "s1")),
                            keptColumns, info = name)
     testthat::expect_equal(colData(es), mainColData, info = name)
-    # a data.frame now reaches the method for any other value
+    # a data.frame with subsetName sets the subset's colData too
     colData(es, subsetName = "s1") <- data.frame(group = letters[5:8])
     testthat::expect_equal(colData(es, subsetName = "s1")$group,
                            letters[5:8], info = name)

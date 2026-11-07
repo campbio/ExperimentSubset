@@ -411,9 +411,10 @@ setReplaceMethod(
   }
 )
 
-# DataFrame and NULL keep their own methods: with only the "ANY" one,
-# S4 would pick SummarizedExperiment's methods for them, which ignore
-# subsetName (#99)
+# DataFrame, NULL and data.frame keep their own methods: with only the
+# "ANY" one, S4 would pick SummarizedExperiment's methods for DataFrame and
+# NULL, which ignore subsetName, and would do the same for any method
+# for data.frame that a package adds to a parent class (#99)
 #' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
@@ -428,6 +429,17 @@ setReplaceMethod(
 setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetTreeSummarizedExperiment", value = "NULL"),
+  definition = function(x, ..., value) {
+    .colData(x, ...) <- value
+    return(x)
+  }
+)
+
+#' @rdname ExperimentSubset-rowData-colData
+setReplaceMethod(
+  f = "colData",
+  signature = signature(x = "SubsetTreeSummarizedExperiment",
+                        value = "data.frame"),
   definition = function(x, ..., value) {
     .colData(x, ...) <- value
     return(x)
