@@ -2552,7 +2552,8 @@ NULL
 '.colData<-' <- function(x, ..., value){
   arglist <- list(...)
   if (!"subsetName" %in% names(arglist)) {
-    if (is.data.frame(value))
+    # as SummarizedExperiment, which has no method for other values (#99)
+    if (!is.null(value) && !methods::is(value, "DataFrame"))
       stop("'value' must be a DataFrame or NULL.")
     value <- .untagParentColumns(value)
     return(callNextMethod(x, ..., value = value))
