@@ -1006,15 +1006,24 @@ NULL
 `.altExpNames<-` <- function(x, ..., value) {
   arglist <- list(...)
   if (!"subsetName" %in% names(arglist)) {
-    out <- callNextMethod(x, ..., value = value)
+    # as SingleCellExperiment, which has no method for other values (#105)
+    if (!is.character(value))
+      stop("'value' must be a character vector of altExp names.")
+    # SingleCellExperiment's method, called directly: from the character
+    # method, callNextMethod() can pick the package's own "ANY" method
+    # instead, as it does for SubsetTreeSummarizedExperiment (#105)
+    setAltExpNames <- methods::getMethod(
+      "altExpNames<-", c("SingleCellExperiment", "character")
+    )
+    out <- setAltExpNames(x, ..., value = value)
     return(.carryAltExpParts(x, out, "",
                              .renamed(altExpNames(x), altExpNames(out))))
   }
   subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
   visible <- .altExpHolders(x, subsetName)$names
-  if (length(value) != length(visible) || anyNA(value)
-      || anyDuplicated(value) > 0)
+  if (!is.character(value) || length(value) != length(visible)
+      || anyNA(value) || anyDuplicated(value) > 0)
     stop("'value' must give one different name for each of the ",
          length(visible), " altExps of subset '", subsetName, "'.")
   # every linked name is visible, so with names that differ an own altExp

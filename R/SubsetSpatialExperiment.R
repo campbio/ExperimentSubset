@@ -198,6 +198,16 @@ setReplaceMethod(
 
 #' @rdname ExperimentSubset-altExp
 setReplaceMethod(
+  f = "altExpNames",
+  signature = signature(x = "SubsetSpatialExperiment", value = "ANY"),
+  definition = function(x, ..., value) {
+    # every value that reaches this method is an error from .altExpNames<-
+    `.altExpNames<-`(x, ..., value = value)
+  }
+)
+
+#' @rdname ExperimentSubset-altExp
+setReplaceMethod(
   f = "altExp",
   signature = signature(x = "SubsetSpatialExperiment", e = "character"),
   definition = function(x, e, withDimnames = TRUE, withColData = FALSE, ...,
