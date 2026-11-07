@@ -719,11 +719,11 @@ it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
     ## other attached packages:
     ##  [1] scater_1.41.3                   ggplot2_4.0.3                  
     ##  [3] celldex_1.23.0                  SingleR_2.15.4                 
-    ##  [5] scrapper_1.7.9                  celda_1.29.3                   
+    ##  [5] scrapper_1.7.11                 celda_1.29.3                   
     ##  [7] singleCellTK_2.23.6             DelayedArray_0.39.8            
     ##  [9] SparseArray_1.13.4              S4Arrays_1.13.2                
     ## [11] abind_1.4-8                     Matrix_1.7-6                   
-    ## [13] ExperimentSubset_1.23.36        TreeSummarizedExperiment_2.21.0
+    ## [13] ExperimentSubset_1.23.41        TreeSummarizedExperiment_2.21.0
     ## [15] Biostrings_2.81.9               XVector_0.53.0                 
     ## [17] SpatialExperiment_1.23.0        scuttle_1.23.2                 
     ## [19] DropletUtils_1.33.2             SingleCellExperiment_1.35.2    
@@ -737,7 +737,7 @@ it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
     ## loaded via a namespace (and not attached):
     ##   [1] fs_2.1.0                  bitops_1.1-0             
     ##   [3] httr_1.4.9                RColorBrewer_1.1-3       
-    ##   [5] doParallel_1.0.17         alabaster.base_1.13.4    
+    ##   [5] doParallel_1.0.17         alabaster.base_1.13.5    
     ##   [7] tools_4.6.1               R6_2.6.1                 
     ##   [9] HDF5Array_1.41.3          lazyeval_0.2.3           
     ##  [11] uwot_0.2.5                rhdf5filters_1.25.5      
@@ -752,15 +752,15 @@ it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
     ##  [29] Rsamtools_2.29.0          systemfonts_1.3.2        
     ##  [31] yulab.utils_0.2.5         dbscan_1.2.7             
     ##  [33] R.utils_2.13.0            parallelly_1.48.0        
-    ##  [35] WriteXLS_6.8.0            limma_3.99.3             
+    ##  [35] WriteXLS_6.8.0            limma_3.99.4             
     ##  [37] RSQLite_3.53.3            shape_1.4.6.1            
     ##  [39] BiocIO_1.23.3             combinat_0.0-9           
     ##  [41] dplyr_1.2.1               dendextend_1.19.1        
     ##  [43] inline_0.3.21             loo_2.10.1               
     ##  [45] ggbeeswarm_0.7.3          R.methodsS3_1.8.2        
     ##  [47] lifecycle_1.0.5           yaml_2.3.12              
-    ##  [49] edgeR_4.99.10             rhdf5_2.57.20            
-    ##  [51] BiocFileCache_3.3.0       Rtsne_0.17               
+    ##  [49] edgeR_4.99.12             rhdf5_2.57.20            
+    ##  [51] BiocFileCache_3.3.2       Rtsne_0.17               
     ##  [53] grid_4.6.1                blob_1.3.0               
     ##  [55] dqrng_0.4.1               ExperimentHub_3.3.2      
     ##  [57] crayon_1.5.3              lattice_0.23-1           
@@ -811,20 +811,19 @@ it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
     ## [147] AnnotationHub_4.3.3       plyr_1.8.9               
     ## [149] listenv_1.1.0             parallel_4.6.1           
     ## [151] ggrepel_0.9.8             scDblFinder_1.27.12      
-    ## [153] circlize_0.4.18           locfit_1.5-9.12          
-    ## [155] igraph_2.3.4              reshape2_1.4.5           
-    ## [157] ScaledMatrix_1.21.0       rstantools_2.7.1         
-    ## [159] BiocVersion_3.24.0        XML_3.99-0.25            
-    ## [161] evaluate_1.0.5            SeuratObject_5.4.0       
-    ## [163] RcppParallel_6.2.1        BiocManager_1.30.27      
-    ## [165] foreach_1.5.2             tidyr_1.3.2              
-    ## [167] purrr_1.2.2               future_1.80.0            
-    ## [169] clue_0.3-68               BiocBaseUtils_1.15.1     
-    ## [171] rsvd_1.0.6                xtable_1.8-8             
-    ## [173] restfulr_0.0.17           tidytree_0.4.8           
-    ## [175] viridisLite_0.4.3         ragg_1.5.2               
-    ## [177] tibble_3.3.1              memoise_2.0.1            
-    ## [179] beeswarm_0.4.0            AnnotationDbi_1.75.2     
-    ## [181] GenomicAlignments_1.49.2  cluster_2.1.8.3          
-    ## [183] globals_0.20.0            decontX_1.11.2           
-    ## [185] GSEABase_1.75.0
+    ## [153] circlize_0.4.18           igraph_2.3.4             
+    ## [155] reshape2_1.4.5            ScaledMatrix_1.21.0      
+    ## [157] rstantools_2.7.1          BiocVersion_3.24.0       
+    ## [159] XML_3.99-0.25             evaluate_1.0.5           
+    ## [161] SeuratObject_5.4.0        RcppParallel_6.2.1       
+    ## [163] BiocManager_1.30.27       foreach_1.5.2            
+    ## [165] tidyr_1.3.2               purrr_1.2.2              
+    ## [167] future_1.80.0             clue_0.3-68              
+    ## [169] BiocBaseUtils_1.15.1      rsvd_1.0.6               
+    ## [171] xtable_1.8-8              restfulr_0.0.17          
+    ## [173] tidytree_0.4.8            viridisLite_0.4.3        
+    ## [175] ragg_1.5.2                tibble_3.3.1             
+    ## [177] memoise_2.0.1             beeswarm_0.4.0           
+    ## [179] AnnotationDbi_1.75.2      GenomicAlignments_1.49.2 
+    ## [181] cluster_2.1.8.3           globals_0.20.0           
+    ## [183] decontX_1.11.2            GSEABase_1.75.0

@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.36</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.41</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -701,8 +701,13 @@ using one of the two approaches:</p>
 <span><span class="co">##      Name  Dim            Parent                           Assays</span></span>
 <span><span class="co">## 1 subset1 5, 5            counts                                 </span></span>
 <span><span class="co">## 2 subset2 2, 5 subset1 -&gt; counts subset2Assay_a1, subset2Assay_a2</span></span></code></pre>
-<p>Store an experiment object in the <code>altExp</code> slot of
-<code>subset2</code>:</p>
+<p>A subset also sees the main object’s alternative experiments
+(<code>altExps</code>), cut to its cells but with all of their features,
+and stores only what it changes in them, as for assays: a changed linked
+assay of an <code>altExp</code> needs <code>unlink</code>, with the
+assay named as <code>"altExpName/assayName"</code>. See
+<code><a href="../reference/ExperimentSubset-altExp.html">?"ExperimentSubset-altExp"</a></code>. Store an experiment object of
+its own in the <code>altExp</code> slot of <code>subset2</code>:</p>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html" class="external-link">altExp</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">es</span>,</span>
 <span>       e <span class="op">=</span> <span class="st">"subset2_alt1"</span>,</span>
@@ -993,7 +998,7 @@ keeping all subsets in one object.</li>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] ExperimentSubset_1.23.36        TreeSummarizedExperiment_2.21.0</span></span>
+<span><span class="co">##  [1] ExperimentSubset_1.23.41        TreeSummarizedExperiment_2.21.0</span></span>
 <span><span class="co">##  [3] Biostrings_2.81.9               XVector_0.53.0                 </span></span>
 <span><span class="co">##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    </span></span>
 <span><span class="co">##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 </span></span>

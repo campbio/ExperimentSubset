@@ -9,19 +9,19 @@ run on the subset. Store what the tool added with `setSubsetExperiment`.
 ``` r
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 
-# S4 method for class 'SubsetRangedSummarizedExperiment,character'
+# S4 method for class 'SubsetRangedSummarizedExperiment'
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 
-# S4 method for class 'SubsetSingleCellExperiment,character'
+# S4 method for class 'SubsetSingleCellExperiment'
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 
-# S4 method for class 'SubsetSummarizedExperiment,character'
+# S4 method for class 'SubsetSummarizedExperiment'
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 
-# S4 method for class 'SubsetSpatialExperiment,character'
+# S4 method for class 'SubsetSpatialExperiment'
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 ```
 
@@ -50,10 +50,13 @@ An object of the main object's class with the subset's rows and columns
 and row and column names. Its assays are every assay the subset sees,
 its own and those linked from its parent, under their names, with the
 subset's primary assay first. Its rowData and colData are the subset's,
-after the main object's columns if `parentData = TRUE`. Its reducedDims,
-altExps and metadata are the subset's. Everything else, such as row
-ranges, row and column trees, spatial coordinates, images, `colPairs`
-and `rowPairs`, comes from the main object.
+after the main object's columns if `parentData = TRUE`. Its altExps are
+every altExp the subset sees, its own and those linked from the main
+object or a parent subset, cut to its columns (see
+[`ExperimentSubset-altExp`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)).
+Its reducedDims and metadata are the subset's. Everything else, such as
+row ranges, row and column trees, spatial coordinates, images,
+`colPairs` and `rowPairs`, comes from the main object.
 
 ## Examples
 

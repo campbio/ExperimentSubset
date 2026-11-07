@@ -9,7 +9,7 @@ Set rowData to a subset."><meta name="robots" content="noindex"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.36</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.41</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,31 +53,31 @@ Set rowData to a subset."><meta name="robots" content="noindex"></head><body>
 <span></span>
 <span><span class="fu">subsetRowData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment'</span></span>
 <span><span class="fu">subsetRowData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentRowData</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment,character,DataFrame'</span></span>
+<span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment'</span></span>
 <span><span class="fu">subsetRowData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
 <span><span class="fu">subsetRowData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentRowData</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment,character,DataFrame'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
 <span><span class="fu">subsetRowData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment,character,DataFrame'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
 <span><span class="fu">subsetRowData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
 <span><span class="fu">subsetRowData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentRowData</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
 <span><span class="fu">subsetRowData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentRowData</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character,DataFrame'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
 <span><span class="fu">subsetRowData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
 <span><span class="fu">subsetRowData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentRowData</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -102,7 +102,13 @@ differ. Default <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>
-<dd><p>Input <code>DataFrame</code> to store.</p></dd>
+<dd><p>Input <code>DataFrame</code> to store; a <code>data.frame</code> is
+converted to one, and <code>NULL</code> removes the subset's own
+<code>rowData</code> columns. Its rownames must be <code>NULL</code> or the
+subset's row names, in the same order; other rownames are an error,
+since rows are matched by position. To store a table with other
+rownames, such as gene IDs for rows named by symbol, put its rows in
+the subset's order and set <code>rownames(value) &lt;- NULL</code> first.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -7,19 +7,19 @@ Get subset assay from an `ExperimentSubset` object.
 ``` r
 getSubsetAssay(x, subsetName, subsetAssayName = NULL)
 
-# S4 method for class 'SubsetRangedSummarizedExperiment,character'
+# S4 method for class 'SubsetRangedSummarizedExperiment'
 getSubsetAssay(x, subsetName, subsetAssayName = NULL)
 
-# S4 method for class 'SubsetSingleCellExperiment,character'
+# S4 method for class 'SubsetSingleCellExperiment'
 getSubsetAssay(x, subsetName, subsetAssayName = NULL)
 
-# S4 method for class 'SubsetSummarizedExperiment,character'
+# S4 method for class 'SubsetSummarizedExperiment'
 getSubsetAssay(x, subsetName, subsetAssayName = NULL)
 
-# S4 method for class 'SubsetSpatialExperiment,character'
+# S4 method for class 'SubsetSpatialExperiment'
 getSubsetAssay(x, subsetName, subsetAssayName = NULL)
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 getSubsetAssay(x, subsetName, subsetAssayName = NULL)
 ```
 

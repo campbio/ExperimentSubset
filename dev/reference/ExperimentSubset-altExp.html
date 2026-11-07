@@ -17,7 +17,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.36</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.41</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -162,7 +162,8 @@
 
 <dt id="arg-e">e<a class="anchor" aria-label="anchor" href="#arg-e"></a></dt>
 <dd><p><code>character(1)</code> or <code>integer(1)</code> The name or position
-of the alternative experiment. Leave it out for the first one.</p></dd>
+of the alternative experiment. Leave it out for the first one. With
+<code>subsetName</code>, positions follow <code>altExpNames()</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -170,6 +171,17 @@ of the alternative experiment. Leave it out for the first one.</p></dd>
 <dd><p><code>character(1)</code> Name of the subset whose
     alternative experiments to get or set. Leave it out for the main
     object's.</p></dd>
+
+  <dt><code>unlink</code></dt>
+<dd><p>For <code>altExp&lt;-</code> and <code>altExps&lt;-</code> with
+    <code>subsetName</code>: <code>TRUE</code>, <code>FALSE</code> or a character vector
+    of <code>"altExpName/assayName"</code> names. Store assays of
+    <code>value</code> that have the name of a linked altExp assay but
+    different values: with <code>TRUE</code>, every such assay; with names,
+    only those. Any other such assay is an error, and nothing is
+    stored. A message names each assay that is unlinked. Default
+    <code>FALSE</code>. Any other value is an error without
+    <code>subsetName</code>.</p></dd>
 
 
 </dl><p>Other arguments are passed on to the <code>SingleCellExperiment</code>
@@ -181,7 +193,9 @@ method. With <code>subsetName</code>, <code>altExpNames()</code> and
 <dd><p>For <code>altExp&lt;-</code>, a <code>SummarizedExperiment</code> with one
 column per column of the subset (or of the main object). For
 <code>altExps&lt;-</code>, a list of them. For <code>altExpNames&lt;-</code>, a
-<code>character</code> vector of new names.</p></dd>
+<code>character</code> vector of new names, one for each name
+<code>altExpNames()</code> returns; with <code>subsetName</code>, they must all
+differ, and only the subset's own altExps can get new names.</p></dd>
 
 
 <dt id="arg-withdimnames">withDimnames<a class="anchor" aria-label="anchor" href="#arg-withdimnames"></a></dt>
@@ -200,8 +214,49 @@ Default <code>FALSE</code>.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>altExp()</code> returns a <code>SummarizedExperiment</code>,
   <code>altExps()</code> a list of them and <code>altExpNames()</code> a
-  <code>character</code> vector. The setters return <code>x</code> with the change
-  made.</p>
+  <code>character</code> vector. With <code>subsetName</code>, these are every
+  altExp the subset sees: the main object's first, then those stored
+  only on subsets. The setters return <code>x</code> with the change made.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>A subset sees the main object's altExps, and those stored on
+  the subsets it was made from, cut to its own columns (cells). Their
+  rows (features, such as the proteins of an ADT altExp) are not cut: a
+  subset's <code>rows</code> pick features of the main object only. These
+  altExps are linked, as assays are: the subset sees their current
+  values, and stores only what it changes.</p>
+<p>Storing an altExp in a subset with <code>altExp&lt;-</code> or <code>altExps&lt;-</code>
+  compares it with the linked one of the same name, assay by assay:</p><ul><li><p>A new assay is stored as the subset's own, and the linked
+      assays stay linked.</p></li>
+<li><p>An assay with the values of the linked one is not stored.</p></li>
+<li><p>An assay with other values than the linked one needs
+      <code>unlink</code>, named as <code>"altExpName/assayName"</code>, such as
+      <code>"ADT/counts"</code>.</p></li>
+<li><p>rowData, colData, metadata and reducedDims are stored when
+      they differ from the linked altExp's, and then replace them whole.
+      An empty one shows the linked one, so a subset can't clear them.
+      Other parts, such as the altExp's own altExps, <code>colPairs</code> and
+      <code>rowPairs</code>, always come from the linked altExp.</p></li>
+<li><p>An assay the subset already stores itself, after an unlink, is
+      not linked, so storing it again needs no <code>unlink</code>.</p></li>
+<li><p>An altExp with other rows, rownames or class than the linked
+      one replaces it entirely, so every linked assay counts as changed.
+      It keeps replacing it for as long as the subset stores it, even if
+      the linked altExp later has the same rows, and so does an altExp a
+      subset stores while nothing of that name is linked. To add to the
+      linked altExp instead, remove the subset's with
+      <code>altExp(x, e, subsetName = s) &lt;- NULL</code> and store it again.</p></li>
+</ul><p>A subset can't remove or rename a linked altExp, or give one of its own
+  the name of another altExp it sees: an altExp missing
+  from <code>value</code> in <code>altExps&lt;-</code> stays visible, and
+  <code>altExp(x, e, subsetName = s) &lt;- NULL</code> removes only what the
+  subset stores, so the linked altExp shows again.</p>
+<p>Changes to a linked altExp carry along to the subsets below it, made
+  from the main object or from the subset that stores it. Its new values
+  show in them. Renaming it renames what they store of it. Removing it,
+  or storing it with other rows or another class, drops what they added
+  to it, with a warning; an altExp a subset stores whole is kept.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -216,31 +271,31 @@ Default <code>FALSE</code>.</p></dd>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"gene"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"cell"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="ExperimentSubset.html">ExperimentSubset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># a subset of the first 5 genes and the first 8 cells</span></span></span>
-<span class="r-in"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"first"</span>, rows <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, cols <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># counts of 2 spike-in genes in the subset's 8 cells</span></span></span>
-<span class="r-in"><span><span class="va">spikeCounts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">16</span>, lambda <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">spikes</span> <span class="op">&lt;-</span> <span class="fu">SingleCellExperiment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">spikeCounts</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="co"># store them as an alternative experiment of the subset</span></span></span>
-<span class="r-in"><span><span class="fu">altExp</span><span class="op">(</span><span class="va">es</span>, <span class="st">"spikes"</span>, subsetName <span class="op">=</span> <span class="st">"first"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">spikes</span></span></span>
+<span class="r-in"><span><span class="co"># counts of 2 proteins in the same 20 cells, as an altExp</span></span></span>
+<span class="r-in"><span><span class="va">adtCounts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">40</span>, lambda <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">adtCounts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD3"</span>, <span class="st">"CD4"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">altExp</span><span class="op">(</span><span class="va">es</span>, <span class="st">"ADT"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">SummarizedExperiment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">adtCounts</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'colnames(value)' are not the same as 'colnames(x)' for 'altExp&lt;-'.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> This will be an error in the next release of Bioconductor.</span>
-<span class="r-in"><span><span class="co"># list the subset's alternative experiments</span></span></span>
+<span class="r-in"><span><span class="co"># a subset of the first 5 genes and the first 8 cells</span></span></span>
+<span class="r-in"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"first"</span>, rows <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, cols <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># the subset sees ADT for its 8 cells, with both proteins</span></span></span>
 <span class="r-in"><span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"first"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "spikes"</span>
-<span class="r-in"><span><span class="co"># read it back</span></span></span>
-<span class="r-in"><span><span class="fu">altExp</span><span class="op">(</span><span class="va">es</span>, <span class="st">"spikes"</span>, subsetName <span class="op">=</span> <span class="st">"first"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> class: SingleCellExperiment </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> dim: 2 8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> metadata(0):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> assays(1): counts</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rownames: NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rowData names(0):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> colnames(8): cell1 cell2 ... cell7 cell8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> colData names(0):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> reducedDimNames(0):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mainExpName: NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> altExpNames(0):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "ADT"</span>
+<span class="r-in"><span><span class="va">adt</span> <span class="op">&lt;-</span> <span class="fu">altExp</span><span class="op">(</span><span class="va">es</span>, <span class="st">"ADT"</span>, subsetName <span class="op">=</span> <span class="st">"first"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">adt</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2 8</span>
+<span class="r-in"><span><span class="co"># add an assay to ADT in the subset only; ADT's counts stay linked</span></span></span>
+<span class="r-in"><span><span class="fu">assay</span><span class="op">(</span><span class="va">adt</span>, <span class="st">"logcounts"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log1p</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">adt</span>, <span class="st">"counts"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">altExp</span><span class="op">(</span><span class="va">es</span>, <span class="st">"ADT"</span>, subsetName <span class="op">=</span> <span class="st">"first"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">adt</span></span></span>
+<span class="r-in"><span><span class="fu">assayNames</span><span class="op">(</span><span class="fu">altExp</span><span class="op">(</span><span class="va">es</span>, <span class="st">"ADT"</span>, subsetName <span class="op">=</span> <span class="st">"first"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "counts"    "logcounts"</span>
+<span class="r-in"><span><span class="fu">assayNames</span><span class="op">(</span><span class="fu">altExp</span><span class="op">(</span><span class="va">es</span>, <span class="st">"ADT"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "counts"</span>
+<span class="r-in"><span><span class="co"># a changed linked assay needs unlink</span></span></span>
+<span class="r-in"><span><span class="fu">assay</span><span class="op">(</span><span class="va">adt</span>, <span class="st">"counts"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">assay</span><span class="op">(</span><span class="va">adt</span>, <span class="st">"counts"</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1L</span></span></span>
+<span class="r-in"><span><span class="fu">altExp</span><span class="op">(</span><span class="va">es</span>, <span class="st">"ADT"</span>, subsetName <span class="op">=</span> <span class="st">"first"</span>, unlink <span class="op">=</span> <span class="st">"ADT/counts"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">adt</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Subset 'first' now stores its own 'ADT/counts', unlinked from the main altExp 'ADT'.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

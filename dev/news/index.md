@@ -1,5 +1,138 @@
 # Changelog
 
+## ExperimentSubset 1.23.41 (2026-11-07)
+
+- `colData(x, subsetName =) <-` with a `value` that isn’t a `DataFrame`,
+  a `data.frame` or `NULL`, such as a vector, now gives the error
+  “‘value’ must be a DataFrame, a data.frame or NULL.”, as
+  `subsetColData<-` and `rowData<-` with `subsetName =` already did.
+  `colData(x) <-` on the main object with such a `value` now gives
+  “‘value’ must be a DataFrame or NULL.”, as it already did for a
+  `data.frame`. Before, both failed with “unable to find an inherited
+  method for function ‘colData\<-’”. Values that worked before are
+  unchanged
+  ([\#99](https://github.com/campbio/ExperimentSubset/issues/99))
+
+## ExperimentSubset 1.23.40 (2026-11-06)
+
+- `subsetRowData<-` and `rowData(x, subsetName =) <-` now stop when the
+  rownames of `value` are not `NULL` and not the subset’s row names, in
+  the same order, with the error “The rownames of ‘value’ must be NULL
+  or the row names of subset ‘s1’, in the same order.”, as
+  `subsetColData<-` and `colData<-` already did for column names.
+  Before, those rownames were dropped without a message and the values
+  were stored against the subset’s rows by position, so values meant for
+  other rows, or for the same rows in another order, went to the wrong
+  rows. This is a change: a table with other rownames, such as gene IDs
+  for a subset whose rows are named by symbol, is now an error; put its
+  rows in the subset’s order and set `rownames(value) <- NULL` first. A
+  `value` with the wrong number of rows now gets the size error from
+  `rowData<-` or `colData<-` even when it has rownames; before,
+  `subsetColData<-` and `colData<-` with `subsetName =` said its
+  rownames were wrong instead. The main object’s `rowData<-` is
+  unchanged
+  ([\#100](https://github.com/campbio/ExperimentSubset/issues/100))
+
+## ExperimentSubset 1.23.39 (2026-11-06)
+
+- A `subsetName` that isn’t a character string, such as `NULL`, `NA` or
+  a number, now gives the error “‘subsetName’ must be one subset name, a
+  single character string.” in
+  [`setSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md),
+  [`getSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetAssay.md),
+  [`getSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md),
+  [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md),
+  [`subsetDim()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.md),
+  [`subsetColData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.md),
+  [`subsetRowData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetRowData.md),
+  [`subsetColnames()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColnames.md),
+  [`subsetRownames()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetRownames.md)
+  and their setters,
+  [`subsetColLinks()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColLinks.md),
+  [`subsetRowLinks()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetRowLinks.md),
+  [`subsetSpatialCoords()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialCoords.md)
+  and
+  [`subsetSpatialData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md).
+  A `subsetAssayName` in
+  [`setSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)
+  that isn’t a character string, such as `NULL`, now gives
+  “‘subsetAssayName’ must be a single, non-empty character string.”
+  Before, these failed with “unable to find an inherited method”,
+  because the methods were chosen by the class of `subsetName` and
+  `subsetAssayName`; now they are chosen by the class of `x` only.
+  `subsetColData<-` and `subsetRowData<-` now take a `data.frame`,
+  converted to a `DataFrame`, and `NULL`, which removes the subset’s own
+  columns, as `colData<-` and `rowData<-` with `subsetName =` already
+  did; before, these failed with the same error. Any other `value` in
+  these and in `rowData<-` with `subsetName =` gives “‘value’ must be a
+  DataFrame, a data.frame or NULL.” This is a change for
+  `rowData(x, subsetName =) <-` with a vector, such as `1:10`, which
+  before stored it as a column named `value`; wrap it in a `DataFrame`
+  or `data.frame` with a column name instead
+  ([\#97](https://github.com/campbio/ExperimentSubset/issues/97))
+
+## ExperimentSubset 1.23.38 (2026-11-05)
+
+- The older tests now check results instead of only running code: subset
+  assay values for `SummarizedExperiment` and
+  `RangedSummarizedExperiment` objects, what
+  [`setSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)
+  stores, the full
+  [`subsetParent()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetParent.md)
+  list, the output of `show()` and
+  [`subsetSummary()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSummary.md),
+  and the reducedDims and altExps read back with `subsetName =`. They no
+  longer read slots with `@`, and the commented-out tests run again or
+  are removed. New tests check
+  [`subsetParent()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetParent.md)
+  with an unknown subset name and
+  [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
+  on a named list of assays. No change in behavior
+  ([\#31](https://github.com/campbio/ExperimentSubset/issues/31))
+
+## ExperimentSubset 1.23.37 (2026-11-05)
+
+- A subset now sees the main object’s alternative experiments (altExps),
+  and those stored on the subsets it was made from, cut to its cells:
+  [`altExp()`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html),
+  [`altExps()`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)
+  and
+  [`altExpNames()`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)
+  with `subsetName =`,
+  [`subsetSummary()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSummary.md)
+  and
+  [`getSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md)
+  include them. Before, a subset saw only the altExps stored on it, so,
+  for example, the ADT counts of its cells weren’t available. An altExp
+  keeps all of its features: a subset’s `rows` pick features of the main
+  object only. These altExps are linked, as assays are: the subset sees
+  their current values, and `altExp<-`, `altExps<-` and
+  [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md)
+  store only what differs from them. A new assay, such as `decontPro`
+  added to ADT, is stored as the subset’s own while ADT’s `counts` stays
+  linked; an assay with other values than the linked one needs `unlink`,
+  which names it as `"altExpName/assayName"`, such as
+  `unlink = "ADT/counts"`, with a message for each assay unlinked.
+  [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md)
+  checks assays and altExp assays together, with one error naming every
+  one `unlink` doesn’t allow. A changed linked assay that the subset
+  already stores, after an unlink, needs no `unlink` again. A subset
+  can’t remove or rename a linked altExp:
+  `altExpNames(x, subsetName =) <-` takes a different name for each
+  altExp the subset sees and renames only its own, and an altExp missing
+  from `altExps(x, subsetName =) <-` stays visible. Changes to a linked
+  altExp carry along to the subsets below it: renaming it, with
+  `altExpNames<-` on the main object or on the subset that stores it,
+  renames what they store of it, and removing it, or storing it with
+  other rows or another class, drops what they added to it, with a
+  warning naming them; an altExp a subset stores whole is kept, and
+  keeps replacing the linked one even if that later has the same rows.
+  An `unlink` other than `FALSE` in `altExp<-` or `altExps<-` without
+  `subsetName` is an error. A subset that stored an altExp under the
+  name of one of the main object’s, with the same class and features,
+  now also sees the main altExp’s assays that it doesn’t store
+  ([\#58](https://github.com/campbio/ExperimentSubset/issues/58))
+
 ## ExperimentSubset 1.23.36 (2026-11-04)
 
 - `unlink` in

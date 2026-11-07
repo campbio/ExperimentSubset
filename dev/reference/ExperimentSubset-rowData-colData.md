@@ -34,6 +34,9 @@ colData(x, ...) <- value
 # S4 method for class 'SubsetRangedSummarizedExperiment,data.frame'
 colData(x, ...) <- value
 
+# S4 method for class 'SubsetRangedSummarizedExperiment,ANY'
+colData(x, ...) <- value
+
 # S4 method for class 'SubsetSingleCellExperiment'
 rowData(x, use.names = TRUE, ...)
 
@@ -50,6 +53,9 @@ colData(x, ...) <- value
 colData(x, ...) <- value
 
 # S4 method for class 'SubsetSingleCellExperiment,data.frame'
+colData(x, ...) <- value
+
+# S4 method for class 'SubsetSingleCellExperiment,ANY'
 colData(x, ...) <- value
 
 # S4 method for class 'SubsetSummarizedExperiment'
@@ -70,6 +76,9 @@ colData(x, ...) <- value
 # S4 method for class 'SubsetSummarizedExperiment,data.frame'
 colData(x, ...) <- value
 
+# S4 method for class 'SubsetSummarizedExperiment,ANY'
+colData(x, ...) <- value
+
 # S4 method for class 'SubsetSpatialExperiment'
 rowData(x, use.names = TRUE, ...)
 
@@ -88,6 +97,9 @@ colData(x, ...) <- value
 # S4 method for class 'SubsetSpatialExperiment,data.frame'
 colData(x, ...) <- value
 
+# S4 method for class 'SubsetSpatialExperiment,ANY'
+colData(x, ...) <- value
+
 # S4 method for class 'SubsetTreeSummarizedExperiment'
 rowData(x, use.names = TRUE, ...)
 
@@ -104,6 +116,9 @@ colData(x, ...) <- value
 colData(x, ...) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment,data.frame'
+colData(x, ...) <- value
+
+# S4 method for class 'SubsetTreeSummarizedExperiment,ANY'
 colData(x, ...) <- value
 ```
 
@@ -145,7 +160,9 @@ colData(x, ...) <- value
   all columns (a `SpatialExperiment` keeps its `sample_id` column). For
   a subset, a `data.frame` is also accepted and converted to a
   `DataFrame`; for the main object, `colData<-` with a `data.frame` is
-  an error.
+  an error. For a subset, the rownames of `value` must be `NULL` or the
+  subset's row names (`rowData<-`) or column names (`colData<-`), in the
+  same order.
 
 ## Value
 

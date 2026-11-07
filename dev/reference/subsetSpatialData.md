@@ -16,7 +16,7 @@ subsetSpatialData(x, subsetName, parentSpatialData)
 
 subsetSpatialData(x, subsetName) <- value
 
-# S4 method for class 'SubsetSpatialExperiment,character'
+# S4 method for class 'SubsetSpatialExperiment'
 subsetSpatialData(x, subsetName, parentSpatialData)
 
 # S4 method for class 'SubsetSpatialExperiment'

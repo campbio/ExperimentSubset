@@ -617,7 +617,13 @@ approaches:
     ## 1 subset1 5, 5            counts                                 
     ## 2 subset2 2, 5 subset1 -> counts subset2Assay_a1, subset2Assay_a2
 
-Store an experiment object in the `altExp` slot of `subset2`:
+A subset also sees the main object’s alternative experiments
+(`altExps`), cut to its cells but with all of their features, and stores
+only what it changes in them, as for assays: a changed linked assay of
+an `altExp` needs `unlink`, with the assay named as
+`"altExpName/assayName"`. See
+[`?"ExperimentSubset-altExp"`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md).
+Store an experiment object of its own in the `altExp` slot of `subset2`:
 
 \
 [`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``x ``=`` ``es``,`\
@@ -890,7 +896,7 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.36        TreeSummarizedExperiment_2.21.0
+    ##  [1] ExperimentSubset_1.23.41        TreeSummarizedExperiment_2.21.0
     ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
     ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
     ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 

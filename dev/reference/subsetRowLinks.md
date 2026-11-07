@@ -7,7 +7,7 @@ Get `rowLinks` from a subset.
 ``` r
 subsetRowLinks(x, subsetName, parentRowLinkData)
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetRowLinks(x, subsetName, parentRowLinkData)
 ```
 

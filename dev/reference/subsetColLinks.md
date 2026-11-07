@@ -7,7 +7,7 @@ Get `colLinks` from a subset.
 ``` r
 subsetColLinks(x, subsetName, parentColLinkData)
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetColLinks(x, subsetName, parentColLinkData)
 ```
 

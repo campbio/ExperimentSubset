@@ -11,31 +11,31 @@ subsetRowData(x, subsetName, parentRowData)
 
 subsetRowData(x, subsetName) <- value
 
-# S4 method for class 'SubsetRangedSummarizedExperiment,character'
+# S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetRowData(x, subsetName, parentRowData)
 
-# S4 method for class 'SubsetRangedSummarizedExperiment,character,DataFrame'
+# S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetRowData(x, subsetName) <- value
 
-# S4 method for class 'SubsetSingleCellExperiment,character'
+# S4 method for class 'SubsetSingleCellExperiment'
 subsetRowData(x, subsetName, parentRowData)
 
-# S4 method for class 'SubsetSingleCellExperiment,character,DataFrame'
+# S4 method for class 'SubsetSingleCellExperiment'
 subsetRowData(x, subsetName) <- value
 
-# S4 method for class 'SubsetSummarizedExperiment,character,DataFrame'
+# S4 method for class 'SubsetSummarizedExperiment'
 subsetRowData(x, subsetName) <- value
 
-# S4 method for class 'SubsetSummarizedExperiment,character'
+# S4 method for class 'SubsetSummarizedExperiment'
 subsetRowData(x, subsetName, parentRowData)
 
-# S4 method for class 'SubsetSpatialExperiment,character'
+# S4 method for class 'SubsetSpatialExperiment'
 subsetRowData(x, subsetName, parentRowData)
 
-# S4 method for class 'SubsetSpatialExperiment,character,DataFrame'
+# S4 method for class 'SubsetSpatialExperiment'
 subsetRowData(x, subsetName) <- value
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetRowData(x, subsetName, parentRowData)
 ```
 
@@ -58,7 +58,13 @@ subsetRowData(x, subsetName, parentRowData)
 
 - value:
 
-  Input `DataFrame` to store.
+  Input `DataFrame` to store; a `data.frame` is converted to one, and
+  `NULL` removes the subset's own `rowData` columns. Its rownames must
+  be `NULL` or the subset's row names, in the same order; other rownames
+  are an error, since rows are matched by position. To store a table
+  with other rownames, such as gene IDs for rows named by symbol, put
+  its rows in the subset's order and set `rownames(value) <- NULL`
+  first.
 
 ## Value
 

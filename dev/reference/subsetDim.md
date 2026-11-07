@@ -8,19 +8,19 @@ Retrieves the dimensions of the specified subset in an
 ``` r
 subsetDim(x, subsetName)
 
-# S4 method for class 'SubsetRangedSummarizedExperiment,character'
+# S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetDim(x, subsetName)
 
-# S4 method for class 'SubsetSingleCellExperiment,character'
+# S4 method for class 'SubsetSingleCellExperiment'
 subsetDim(x, subsetName)
 
-# S4 method for class 'SubsetSummarizedExperiment,character'
+# S4 method for class 'SubsetSummarizedExperiment'
 subsetDim(x, subsetName)
 
-# S4 method for class 'SubsetSpatialExperiment,character'
+# S4 method for class 'SubsetSpatialExperiment'
 subsetDim(x, subsetName)
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetDim(x, subsetName)
 ```
 

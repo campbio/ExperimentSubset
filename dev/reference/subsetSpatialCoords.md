@@ -10,7 +10,7 @@ Get `spatialCoords` from a subset, with
 ``` r
 subsetSpatialCoords(x, subsetName)
 
-# S4 method for class 'SubsetSpatialExperiment,character'
+# S4 method for class 'SubsetSpatialExperiment'
 subsetSpatialCoords(x, subsetName)
 
 # S4 method for class 'SubsetSpatialExperiment'

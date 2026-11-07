@@ -9,19 +9,19 @@ metadata.
 ``` r
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
-# S4 method for class 'SubsetRangedSummarizedExperiment,character'
+# S4 method for class 'SubsetRangedSummarizedExperiment'
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
-# S4 method for class 'SubsetSingleCellExperiment,character'
+# S4 method for class 'SubsetSingleCellExperiment'
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
-# S4 method for class 'SubsetSummarizedExperiment,character'
+# S4 method for class 'SubsetSummarizedExperiment'
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
-# S4 method for class 'SubsetSpatialExperiment,character'
+# S4 method for class 'SubsetSpatialExperiment'
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 ```
 
@@ -47,10 +47,12 @@ setSubsetExperiment(x, subsetName, value, unlink = FALSE)
   `TRUE`, `FALSE` or a character vector of `assay` names. Store assays
   of `value` that have the name of an assay linked from the subset's
   parent but different values, as with `setSubsetAssay`: with `TRUE`,
-  every such assay; with a character vector, only those it names. Any
-  other such assay is an error, and nothing is stored. A message names
-  each assay that is unlinked. Names of assays that are not linked, or
-  unchanged, are ignored, so `unlink = "decontXcounts"` stores a changed
+  every such assay; with a character vector, only those it names. An
+  assay of an altExp is named `"altExpName/assayName"`, such as
+  `"ADT/counts"`. Any other such assay, of the main object or an altExp,
+  is an error, and nothing is stored. A message names each assay that is
+  unlinked. Names of assays that are not linked, or unchanged, are
+  ignored, so `unlink = "decontXcounts"` stores a changed
   `decontXcounts` but stops if `counts` was changed too. Default
   `FALSE`.
 
@@ -59,11 +61,15 @@ setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 Updated `ExperimentSubset` object. Linked assays that are in `value`
 hold the same values as what the subset sees (whatever their dimnames,
 type or class) are not stored, and neither are the main object's rowData
-and colData columns added by `getSubsetExperiment`. Everything else in
-`value` replaces the subset's own data: an own assay, reducedDim, altExp
-or column that `value` no longer has is removed from the subset, except
-an assay another subset was made from, which is an error. Nothing else
-is stored: not row ranges, row and column trees, spatial coordinates,
+and colData columns added by `getSubsetExperiment`. altExps are stored
+as `altExp<-` stores them (see
+[`ExperimentSubset-altExp`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-altExp.md)):
+only the assays and data that differ from a linked altExp, and a linked
+altExp missing from `value` stays linked. Everything else in `value`
+replaces the subset's own data: an own assay, reducedDim, altExp or
+column that `value` no longer has is removed from the subset, except an
+assay another subset was made from, which is an error. Nothing else is
+stored: not row ranges, row and column trees, spatial coordinates,
 images, `colPairs`, `rowPairs` or `mainExpName`.
 
 ## Examples
