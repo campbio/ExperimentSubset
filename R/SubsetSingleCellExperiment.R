@@ -410,6 +410,9 @@ setReplaceMethod(
   }
 )
 
+# DataFrame and NULL keep their own methods: with only the "ANY" one,
+# S4 would pick SummarizedExperiment's (or SpatialExperiment's)
+# methods for them, which ignore subsetName (#99)
 #' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
@@ -433,7 +436,7 @@ setReplaceMethod(
 #' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
-  signature = signature(x = "SubsetSingleCellExperiment", value = "data.frame"),
+  signature = signature(x = "SubsetSingleCellExperiment", value = "ANY"),
   definition = function(x, ..., value) {
     .colData(x, ...) <- value
     return(x)

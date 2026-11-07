@@ -10,31 +10,31 @@
 \alias{rowData<-,SubsetRangedSummarizedExperiment-method}
 \alias{colData<-,SubsetRangedSummarizedExperiment,DataFrame-method}
 \alias{colData<-,SubsetRangedSummarizedExperiment,NULL-method}
-\alias{colData<-,SubsetRangedSummarizedExperiment,data.frame-method}
+\alias{colData<-,SubsetRangedSummarizedExperiment,ANY-method}
 \alias{rowData,SubsetSingleCellExperiment-method}
 \alias{colData,SubsetSingleCellExperiment-method}
 \alias{rowData<-,SubsetSingleCellExperiment-method}
 \alias{colData<-,SubsetSingleCellExperiment,DataFrame-method}
 \alias{colData<-,SubsetSingleCellExperiment,NULL-method}
-\alias{colData<-,SubsetSingleCellExperiment,data.frame-method}
+\alias{colData<-,SubsetSingleCellExperiment,ANY-method}
 \alias{rowData,SubsetSummarizedExperiment-method}
 \alias{colData,SubsetSummarizedExperiment-method}
 \alias{rowData<-,SubsetSummarizedExperiment-method}
 \alias{colData<-,SubsetSummarizedExperiment,DataFrame-method}
 \alias{colData<-,SubsetSummarizedExperiment,NULL-method}
-\alias{colData<-,SubsetSummarizedExperiment,data.frame-method}
+\alias{colData<-,SubsetSummarizedExperiment,ANY-method}
 \alias{rowData,SubsetSpatialExperiment-method}
 \alias{colData,SubsetSpatialExperiment-method}
 \alias{rowData<-,SubsetSpatialExperiment-method}
 \alias{colData<-,SubsetSpatialExperiment,DataFrame-method}
 \alias{colData<-,SubsetSpatialExperiment,NULL-method}
-\alias{colData<-,SubsetSpatialExperiment,data.frame-method}
+\alias{colData<-,SubsetSpatialExperiment,ANY-method}
 \alias{rowData,SubsetTreeSummarizedExperiment-method}
 \alias{colData,SubsetTreeSummarizedExperiment-method}
 \alias{rowData<-,SubsetTreeSummarizedExperiment-method}
 \alias{colData<-,SubsetTreeSummarizedExperiment,DataFrame-method}
 \alias{colData<-,SubsetTreeSummarizedExperiment,NULL-method}
-\alias{colData<-,SubsetTreeSummarizedExperiment,data.frame-method}
+\alias{colData<-,SubsetTreeSummarizedExperiment,ANY-method}
 \title{rowData and colData of subsets in ExperimentSubset objects}
 \usage{
 \S4method{rowData}{SubsetRangedSummarizedExperiment}(x, use.names = TRUE, ...)
@@ -47,7 +47,7 @@
 
 \S4method{colData}{SubsetRangedSummarizedExperiment,NULL}(x, ...) <- value
 
-\S4method{colData}{SubsetRangedSummarizedExperiment,data.frame}(x, ...) <- value
+\S4method{colData}{SubsetRangedSummarizedExperiment,ANY}(x, ...) <- value
 
 \S4method{rowData}{SubsetSingleCellExperiment}(x, use.names = TRUE, ...)
 
@@ -59,7 +59,7 @@
 
 \S4method{colData}{SubsetSingleCellExperiment,NULL}(x, ...) <- value
 
-\S4method{colData}{SubsetSingleCellExperiment,data.frame}(x, ...) <- value
+\S4method{colData}{SubsetSingleCellExperiment,ANY}(x, ...) <- value
 
 \S4method{rowData}{SubsetSummarizedExperiment}(x, use.names = TRUE, ...)
 
@@ -71,7 +71,7 @@
 
 \S4method{colData}{SubsetSummarizedExperiment,NULL}(x, ...) <- value
 
-\S4method{colData}{SubsetSummarizedExperiment,data.frame}(x, ...) <- value
+\S4method{colData}{SubsetSummarizedExperiment,ANY}(x, ...) <- value
 
 \S4method{rowData}{SubsetSpatialExperiment}(x, use.names = TRUE, ...)
 
@@ -83,7 +83,7 @@
 
 \S4method{colData}{SubsetSpatialExperiment,NULL}(x, ...) <- value
 
-\S4method{colData}{SubsetSpatialExperiment,data.frame}(x, ...) <- value
+\S4method{colData}{SubsetSpatialExperiment,ANY}(x, ...) <- value
 
 \S4method{rowData}{SubsetTreeSummarizedExperiment}(x, use.names = TRUE, ...)
 
@@ -95,7 +95,7 @@
 
 \S4method{colData}{SubsetTreeSummarizedExperiment,NULL}(x, ...) <- value
 
-\S4method{colData}{SubsetTreeSummarizedExperiment,data.frame}(x, ...) <- value
+\S4method{colData}{SubsetTreeSummarizedExperiment,ANY}(x, ...) <- value
 }
 \arguments{
 \item{x}{An \code{ExperimentSubset} object.}
