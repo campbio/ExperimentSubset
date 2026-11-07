@@ -75,6 +75,31 @@ jobs:
           remotes::install_local(".", dependencies = FALSE, upgrade = "never")
         shell: Rscript {0}
 
+      - name: Point the data downloads at cache folders
+        # the articles download their data through ExperimentHub, and the
+        # celldex reference through gypsum; fixed folders let the next
+        # step keep them between runs
+        run: |
+          echo "EXPERIMENT_HUB_CACHE=$HOME/.cache/R/ExperimentHub" \
+            >> "$GITHUB_ENV"
+          echo "GYPSUM_CACHE_DIR=$HOME/.cache/R/gypsum" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Restore the downloaded article data
+        # Saved after a successful build and reused, so the data files
+        # aren't downloaded again, and a file that can't be downloaded
+        # doesn't break the site; the hub servers must still be reachable.
+        # Change the key to download again, for example after an article
+        # uses new data.
+        # The devel job keeps its own copy: caches are per branch, and
+        # pull requests to devel reuse the one saved by devel.
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/R/ExperimentHub
+            ~/.cache/R/gypsum
+          key: article-data-devel-v1
+
       - name: Build the devel site into site/dev
         env:
           PKGDOWN_DEV_MODE: devel
@@ -226,6 +251,31 @@ jobs:
           BiocManager::install(c(deps, website), update = FALSE, ask = FALSE)
           remotes::install_local(".", dependencies = FALSE, upgrade = "never")
         shell: Rscript {0}
+
+      - name: Point the data downloads at cache folders
+        # the articles download their data through ExperimentHub, and the
+        # celldex reference through gypsum; fixed folders let the next
+        # step keep them between runs
+        run: |
+          echo "EXPERIMENT_HUB_CACHE=$HOME/.cache/R/ExperimentHub" \
+            >> "$GITHUB_ENV"
+          echo "GYPSUM_CACHE_DIR=$HOME/.cache/R/gypsum" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Restore the downloaded article data
+        # Saved after a successful build and reused, so the data files
+        # aren't downloaded again, and a file that can't be downloaded
+        # doesn't break the site; the hub servers must still be reachable.
+        # Change the key to download again, for example after an article
+        # uses new data.
+        # The release job keeps its own copy: caches are per branch, and
+        # master can't read the one saved by devel.
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/R/ExperimentHub
+            ~/.cache/R/gypsum
+          key: article-data-release-v1
 
       - name: Build the release site
         env:
