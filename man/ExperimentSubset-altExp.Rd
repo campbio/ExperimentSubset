@@ -10,6 +10,7 @@
 \alias{altExps,SubsetSingleCellExperiment-method}
 \alias{altExpNames,SubsetSingleCellExperiment-method}
 \alias{altExpNames<-,SubsetSingleCellExperiment,character-method}
+\alias{altExpNames<-,SubsetSingleCellExperiment,ANY-method}
 \alias{altExp<-,SubsetSingleCellExperiment,character-method}
 \alias{altExp<-,SubsetSingleCellExperiment,missing-method}
 \alias{altExp<-,SubsetSingleCellExperiment,numeric-method}
@@ -20,6 +21,7 @@
 \alias{altExps,SubsetSpatialExperiment-method}
 \alias{altExpNames,SubsetSpatialExperiment-method}
 \alias{altExpNames<-,SubsetSpatialExperiment,character-method}
+\alias{altExpNames<-,SubsetSpatialExperiment,ANY-method}
 \alias{altExp<-,SubsetSpatialExperiment,character-method}
 \alias{altExp<-,SubsetSpatialExperiment,missing-method}
 \alias{altExp<-,SubsetSpatialExperiment,numeric-method}
@@ -30,6 +32,7 @@
 \alias{altExps,SubsetTreeSummarizedExperiment-method}
 \alias{altExpNames,SubsetTreeSummarizedExperiment-method}
 \alias{altExpNames<-,SubsetTreeSummarizedExperiment,character-method}
+\alias{altExpNames<-,SubsetTreeSummarizedExperiment,ANY-method}
 \alias{altExp<-,SubsetTreeSummarizedExperiment,character-method}
 \alias{altExp<-,SubsetTreeSummarizedExperiment,missing-method}
 \alias{altExp<-,SubsetTreeSummarizedExperiment,numeric-method}
@@ -47,6 +50,8 @@
 \S4method{altExpNames}{SubsetSingleCellExperiment}(x, ...)
 
 \S4method{altExpNames}{SubsetSingleCellExperiment,character}(x, ...) <- value
+
+\S4method{altExpNames}{SubsetSingleCellExperiment,ANY}(x, ...) <- value
 
 \S4method{altExp}{SubsetSingleCellExperiment,character}(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
 
@@ -68,6 +73,8 @@
 
 \S4method{altExpNames}{SubsetSpatialExperiment,character}(x, ...) <- value
 
+\S4method{altExpNames}{SubsetSpatialExperiment,ANY}(x, ...) <- value
+
 \S4method{altExp}{SubsetSpatialExperiment,character}(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
 
 \S4method{altExp}{SubsetSpatialExperiment,missing}(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
@@ -87,6 +94,8 @@
 \S4method{altExpNames}{SubsetTreeSummarizedExperiment}(x, ...)
 
 \S4method{altExpNames}{SubsetTreeSummarizedExperiment,character}(x, ...) <- value
+
+\S4method{altExpNames}{SubsetTreeSummarizedExperiment,ANY}(x, ...) <- value
 
 \S4method{altExp}{SubsetTreeSummarizedExperiment,character}(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
 

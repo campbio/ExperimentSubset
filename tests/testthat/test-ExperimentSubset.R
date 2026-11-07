@@ -3484,6 +3484,40 @@ testthat::test_that("A subset removes and renames only its own altExps (#58)", {
                          c("ADT", "ercc"))
 })
 
+testthat::test_that("altExpNames<- rejects values that aren't character", {
+  # (#105) other values failed at S4 dispatch, before the package's check
+  valueMsg <- "'value' must be a character vector of altExp names."
+  classes <- c("SingleCellExperiment", "TreeSummarizedExperiment",
+               "SpatialExperiment")
+  for (class in classes) {
+    es <- makeAdtFixture(class)
+    # a factor of the right length, NULL and a number
+    testthat::expect_error(
+      altExpNames(es, subsetName = "s1") <- factor("protein"),
+      valueMsg, fixed = TRUE, info = class
+    )
+    testthat::expect_error(altExpNames(es, subsetName = "s1") <- NULL,
+                           valueMsg, fixed = TRUE, info = class)
+    testthat::expect_error(altExpNames(es, subsetName = "s1") <- 1L,
+                           valueMsg, fixed = TRUE, info = class)
+    testthat::expect_error(altExpNames(es) <- factor("protein"),
+                           valueMsg, fixed = TRUE, info = class)
+    testthat::expect_error(altExpNames(es) <- NULL,
+                           valueMsg, fixed = TRUE, info = class)
+    testthat::expect_error(altExpNames(es) <- 1L,
+                           valueMsg, fixed = TRUE, info = class)
+    # nothing was renamed
+    testthat::expect_equal(altExpNames(es), "ADT", info = class)
+    testthat::expect_equal(altExpNames(es, subsetName = "s1"), "ADT",
+                           info = class)
+    # a character value still renames the main altExp
+    altExpNames(es) <- "protein"
+    testthat::expect_equal(altExpNames(es), "protein", info = class)
+    testthat::expect_equal(altExpNames(es, subsetName = "s1"), "protein",
+                           info = class)
+  }
+})
+
 testthat::test_that("Writes after an unlink don't need unlink again (#58)", {
   es <- makeAdtFixture()
   adt <- altExp(es, "ADT", subsetName = "s1")

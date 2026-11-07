@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.42 (2026-11-07)
+* `altExpNames<-` with a `value` that isn't a character vector, such as a factor, `NULL` or a number, now gives the error "'value' must be a character vector of altExp names.", with `subsetName =` and on the main object. Before, both failed with "unable to find an inherited method for function 'altExpNames<-'". Character values are unchanged (#105)
+
 # ExperimentSubset 1.23.41 (2026-11-07)
 * `colData(x, subsetName =) <-` with a `value` that isn't a `DataFrame`, a `data.frame` or `NULL`, such as a vector, now gives the error "'value' must be a DataFrame, a data.frame or NULL.", as `subsetColData<-` and `rowData<-` with `subsetName =` already did. `colData(x) <-` on the main object with such a `value` now gives "'value' must be a DataFrame or NULL.", as it already did for a `data.frame`. Before, both failed with "unable to find an inherited method for function 'colData<-'". Values that worked before are unchanged (#99)
 

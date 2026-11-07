@@ -1005,8 +1005,18 @@ NULL
 #' @importMethodsFrom SingleCellExperiment altExpNames<-
 `.altExpNames<-` <- function(x, ..., value) {
   arglist <- list(...)
+  # as SingleCellExperiment, which has no method for other values (#105)
+  if (!is.character(value))
+    stop("'value' must be a character vector of altExp names.")
   if (!"subsetName" %in% names(arglist)) {
-    out <- callNextMethod(x, ..., value = value)
+    # the method of the class x extends, found by dispatch on that class:
+    # from the character method, callNextMethod() can pick the package's
+    # own "ANY" method instead, depending on which class unions are
+    # loaded, and that method has no next method (#105)
+    setAltExpNames <- methods::selectMethod(
+      "altExpNames<-", c(.baseClass(x), "character")
+    )
+    out <- setAltExpNames(x, ..., value = value)
     return(.carryAltExpParts(x, out, "",
                              .renamed(altExpNames(x), altExpNames(out))))
   }
