@@ -451,8 +451,8 @@ setReplaceMethod(
   f = "colData",
   signature = signature(x = "SubsetTreeSummarizedExperiment", value = "ANY"),
   definition = function(x, ..., value) {
-    .colData(x, ...) <- value
-    return(x)
+    # every value that reaches this method is an error from .colData<-
+    `.colData<-`(x, ..., value = value)
   }
 )
 
