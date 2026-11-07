@@ -1391,6 +1391,47 @@ testthat::test_that("Subset data setters take NULL or a data.frame", {
   testthat::expect_null(storedInfo$fromParentData)
 })
 
+testthat::test_that("colData<- rejects other values in every Subset class", {
+  # (#99) other values failed at S4 dispatch, before the package's check
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(tinyTree$tip.label, paste0("cell", 1:6)))
+  se <- SummarizedExperiment(list(counts = counts))
+  objects <- list(
+    se = se,
+    rse = as(se, "RangedSummarizedExperiment"),
+    sce = SingleCellExperiment(list(counts = counts)),
+    tse = TreeSummarizedExperiment(assays = list(counts = counts),
+                                   rowTree = tinyTree),
+    spe = SpatialExperiment(assays = list(counts = counts),
+                            spatialCoords = cbind(x = 1:6, y = 1:6))
+  )
+  subsetMsg <- "'value' must be a DataFrame, a data.frame or NULL."
+  mainMsg <- "'value' must be a DataFrame or NULL."
+  for (name in names(objects)) {
+    es <- ExperimentSubset(objects[[name]])
+    es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
+    mainColData <- colData(es)
+    testthat::expect_error(colData(es, subsetName = "s1") <- 1:4,
+                           subsetMsg, fixed = TRUE, info = name)
+    testthat::expect_error(colData(es, subsetName = "s1") <- "a",
+                           subsetMsg, fixed = TRUE, info = name)
+    testthat::expect_error(colData(es) <- seq_len(ncol(es)),
+                           mainMsg, fixed = TRUE, info = name)
+    # a DataFrame or NULL with subsetName still sets the subset's colData,
+    # not the main object's
+    colData(es, subsetName = "s1") <- DataFrame(group = letters[1:4])
+    testthat::expect_equal(colData(es, subsetName = "s1")$group,
+                           letters[1:4], info = name)
+    testthat::expect_equal(colData(es), mainColData, info = name)
+    colData(es, subsetName = "s1") <- NULL
+    testthat::expect_equal(ncol(colData(es, subsetName = "s1")), 0L,
+                           info = name)
+    testthat::expect_equal(colData(es), mainColData, info = name)
+  }
+})
+
 testthat::test_that("altExps and reducedDims of a subset pass arguments on", {
   es <- ExperimentSubset(sce_chcl)
   es <- createSubset(es, "s1", rows = 1:5, cols = 1:4)
