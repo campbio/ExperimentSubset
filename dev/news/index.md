@@ -1,5 +1,14 @@
 # Changelog
 
+## ExperimentSubset 1.23.42 (2026-11-07)
+
+- `altExpNames<-` with a `value` that isn’t a character vector, such as
+  a factor, `NULL` or a number, now gives the error “‘value’ must be a
+  character vector of altExp names.”, with `subsetName =` and on the
+  main object. Before, both failed with “unable to find an inherited
+  method for function ‘altExpNames\<-’”. Character values are unchanged
+  ([\#105](https://github.com/campbio/ExperimentSubset/issues/105))
+
 ## ExperimentSubset 1.23.41 (2026-11-07)
 
 - `colData(x, subsetName =) <-` with a `value` that isn’t a `DataFrame`,

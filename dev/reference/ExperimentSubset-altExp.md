@@ -27,6 +27,9 @@ altExpNames(x, ...)
 # S4 method for class 'SubsetSingleCellExperiment,character'
 altExpNames(x, ...) <- value
 
+# S4 method for class 'SubsetSingleCellExperiment,ANY'
+altExpNames(x, ...) <- value
+
 # S4 method for class 'SubsetSingleCellExperiment,character'
 altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
 
@@ -57,6 +60,9 @@ altExpNames(x, ...)
 # S4 method for class 'SubsetSpatialExperiment,character'
 altExpNames(x, ...) <- value
 
+# S4 method for class 'SubsetSpatialExperiment,ANY'
+altExpNames(x, ...) <- value
+
 # S4 method for class 'SubsetSpatialExperiment,character'
 altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
 
@@ -85,6 +91,9 @@ altExps(x, ...)
 altExpNames(x, ...)
 
 # S4 method for class 'SubsetTreeSummarizedExperiment,character'
+altExpNames(x, ...) <- value
+
+# S4 method for class 'SubsetTreeSummarizedExperiment,ANY'
 altExpNames(x, ...) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment,character'
