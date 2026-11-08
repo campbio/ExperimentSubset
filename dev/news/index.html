@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.42</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.43</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,10 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.43" id="experimentsubset-12343-2026-11-07">ExperimentSubset 1.23.43 (2026-11-07)<a class="anchor" aria-label="anchor" href="#experimentsubset-12343-2026-11-07"></a></h2>
+<ul><li>Errors from <code><a href="../reference/createSubset.html">createSubset()</a></code>, and from <code><a href="../reference/ExperimentSubset.html">ExperimentSubset()</a></code> with <code>subset =</code>, are now one line, without the line breaks and runs of spaces they had before, and name the argument and the problem: a <code>subsetName</code> that is already a subset now gives “‘subsetName’ must differ from the names of existing subsets; ‘s1’ is already a subset name.” instead of “A subset with the specified ‘subsetName’ parameter already exists in the object. Subset names must be unique.”; a <code>rows</code> or <code>cols</code> that isn’t <code>NULL</code>, numeric or character gives “‘rows’ must be NULL, to include all rows, or a numeric or character vector of the rows to include.” or “‘cols’ must be NULL, to include all columns, or a numeric or character vector of the columns to include.” (before, the <code>cols</code> message said “all rows”); and a <code>parentAssay</code> that isn’t <code>NULL</code> or one character string gives “‘parentAssay’ must be NULL, to use the default assay, or a single character string naming the assay or subset to make the subset from.” <code><a href="../reference/setSubsetAssay.html">setSubsetAssay()</a></code> with a <code>subsetName</code> that isn’t a subset keeps its message, now on one line without trailing spaces (<a href="https://github.com/campbio/ExperimentSubset/issues/96" class="external-link">#96</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.42" id="experimentsubset-12342-2026-11-07">ExperimentSubset 1.23.42 (2026-11-07)<a class="anchor" aria-label="anchor" href="#experimentsubset-12342-2026-11-07"></a></h2>
 <ul><li>

@@ -1,5 +1,30 @@
 # Changelog
 
+## ExperimentSubset 1.23.43 (2026-11-07)
+
+- Errors from
+  [`createSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md),
+  and from
+  [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
+  with `subset =`, are now one line, without the line breaks and runs of
+  spaces they had before, and name the argument and the problem: a
+  `subsetName` that is already a subset now gives “‘subsetName’ must
+  differ from the names of existing subsets; ‘s1’ is already a subset
+  name.” instead of “A subset with the specified ‘subsetName’ parameter
+  already exists in the object. Subset names must be unique.”; a `rows`
+  or `cols` that isn’t `NULL`, numeric or character gives “‘rows’ must
+  be NULL, to include all rows, or a numeric or character vector of the
+  rows to include.” or “‘cols’ must be NULL, to include all columns, or
+  a numeric or character vector of the columns to include.” (before, the
+  `cols` message said “all rows”); and a `parentAssay` that isn’t `NULL`
+  or one character string gives “‘parentAssay’ must be NULL, to use the
+  default assay, or a single character string naming the assay or subset
+  to make the subset from.”
+  [`setSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)
+  with a `subsetName` that isn’t a subset keeps its message, now on one
+  line without trailing spaces
+  ([\#96](https://github.com/campbio/ExperimentSubset/issues/96))
+
 ## ExperimentSubset 1.23.42 (2026-11-07)
 
 - `altExpNames<-` with a `value` that isn’t a character vector, such as
