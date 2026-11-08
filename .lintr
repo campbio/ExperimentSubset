@@ -3,8 +3,13 @@ linters: linters_with_defaults(
     # ExperimentSubset is written with 2-space indentation; keep it (see
     # AGENTS.md).
     indentation_linter = indentation_linter(indent = 2L),
+     # CamelCase: the exported constructors (AssaySubset(), ExperimentSubset())
+    # and the setClass() generators (.SubsetSummarizedExperiment, ...).
+    # genericArgs: argument names that methods must take from Bioconductor
+    # generics such as combineCols() and cbind().
     object_name_linter = object_name_linter(
-      styles = c("camelCase", "snake_case", "symbols")
+      styles = c("camelCase", "CamelCase", "snake_case", "symbols"),
+      regexes = c(genericArgs = "^(use\\.names|deparse\\.level)$")
     ),
     object_length_linter = NULL,
     commented_code_linter = NULL,
