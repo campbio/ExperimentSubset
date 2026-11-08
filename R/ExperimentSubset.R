@@ -568,6 +568,9 @@ NULL
   if (methods::is(out, "SpatialExperiment")
       && !is.null(.spatialCoordsOwner(x, subsetName)))
     spatialCoords(out) <- .subsetSpatialCoords(x, subsetName)
+  # trees the subset, or one it was made from, stores (#35)
+  if (methods::is(out, "TreeSummarizedExperiment"))
+    out <- .withSubsetTrees(x, subsetName, out)
   out
 }
 
@@ -615,6 +618,7 @@ NULL
   metadata(internal) <- metadata(value)
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
   x <- .storeChangedSpatialCoords(x, subsetName, value)
+  x <- .storeChangedTrees(x, subsetName, value)
   if (isSce) {
     x <- .applyAltExps(x, subsetName, altExpPlan)
     x <- .carryAltExpParts(before, x, subsetName)
@@ -2590,58 +2594,211 @@ NULL
   return(x)
 }
 
-.subsetRowLinkData <- function(x, subsetName, parentLinkRowData){
-  .isSubset(x, subsetName)
-  if(missing(parentLinkRowData)
-     || is.null(parentLinkRowData))
-    parentLinkRowData = FALSE
-  internal <- .internalAssay(.subsets(x)[[subsetName]])
-  out <- rowLinks(internal)
-  # a main object without a row tree has no links to add
-  if (parentLinkRowData && !is.null(rowLinks(x))) {
-    rootIndices <- .rootIndices(x, subsetName, .rowIndices)
-    parentLinks <- rowLinks(x)[rootIndices, , drop = FALSE]
-    if (is.null(out))
-      out <- parentLinks
-    else
-      out <- cbind(parentLinks, out)
-  }
-  if (!is.null(out))
-    rownames(out) <- rownames(internal)
-  return(out)
+# Accessors for the trees of one dimension, "row" or "col", of a
+# TreeSummarizedExperiment (#35)
+.treeDim <- function(dim) {
+  if (dim == "row")
+    return(list(name = "rowTree", namesWord = "rowname", tree = rowTree,
+                links = rowLinks, indices = .rowIndices, names = rownames,
+                parentArg = "parentRowLinkData"))
+  list(name = "colTree", namesWord = "column name", tree = colTree,
+       links = colLinks, indices = .colIndices, names = colnames,
+       parentArg = "parentColLinkData")
 }
 
-.subsetColLinkData <- function(x, subsetName, parentLinkColData){
-  .isSubset(x, subsetName)
-  if(missing(parentLinkColData)
-     || is.null(parentLinkColData))
-    parentLinkColData = FALSE
-  internal <- .internalAssay(.subsets(x)[[subsetName]])
-  out <- colLinks(internal)
-  # a main object without a column tree has no links to add
-  if (parentLinkColData && !is.null(colLinks(x))) {
-    rootIndices <- .rootIndices(x, subsetName, .colIndices)
-    parentLinks <- colLinks(x)[rootIndices, , drop = FALSE]
-    if (is.null(out))
-      out <- parentLinks
-    else
-      out <- cbind(parentLinks, out)
+# The nearest subset in subsetName's chain, itself first, whose internal
+# object has() what it looks for, or NULL if none does
+.nearestOwner <- function(x, subsetName, has) {
+  for (subset in rev(.subsetChain(x, subsetName))) {
+    if (has(.internalAssay(.subsets(x)[[subset]])))
+      return(subset)
   }
-  if (!is.null(out))
-    rownames(out) <- colnames(internal)
-  return(out)
+  NULL
+}
+
+# Positions in owner, a subset in subsetName's chain, of subsetName's rows
+# or columns
+.ownerPositions <- function(x, subsetName, owner, getIndices) {
+  match(.rootIndices(x, subsetName, getIndices),
+        .rootIndices(x, owner, getIndices))
+}
+
+# The subset in subsetName's chain that stores the trees along dim that
+# apply to it, or NULL if the main object's apply
+.treeOwner <- function(x, subsetName, dim) {
+  tree <- .treeDim(dim)$tree
+  .nearestOwner(x, subsetName,
+                function(internal) length(tree(internal, NULL)) > 0)
+}
+
+# The object that holds the trees of owner, from .treeOwner()
+.treeHolder <- function(x, owner) {
+  if (is.null(owner))
+    return(x)
+  .internalAssay(.subsets(x)[[owner]])
+}
+
+.subsetTree <- function(x, subsetName, dim, whichTree = 1,
+                        owner = .treeOwner(x, subsetName, dim)) {
+  .isSubset(x, subsetName)
+  .treeDim(dim)$tree(.treeHolder(x, owner), whichTree)
+}
+
+# The links of subsetName's rows or columns to the tree that applies to
+# them; with parentLinkData FALSE, only to a tree a subset stores
+.subsetLinks <- function(x, subsetName, dim, parentLinkData = TRUE,
+                         owner = .treeOwner(x, subsetName, dim)) {
+  .isSubset(x, subsetName)
+  d <- .treeDim(dim)
+  if (!isTRUE(parentLinkData) && !isFALSE(parentLinkData))
+    stop("'", d$parentArg, "' must be TRUE or FALSE.")
+  if (!is.null(owner)) {
+    out <- d$links(.treeHolder(x, owner))
+    out <- out[.ownerPositions(x, subsetName, owner, d$indices), ,
+               drop = FALSE]
+  } else if (parentLinkData && !is.null(d$links(x))) {
+    out <- d$links(x)[.rootIndices(x, subsetName, d$indices), , drop = FALSE]
+  } else {
+    return(NULL)
+  }
+  rownames(out) <- d$names(.internalAssay(.subsets(x)[[subsetName]]))
+  out
+}
+
+'.subsetTree<-' <- function(x, subsetName, dim, value) {
+  .isSubset(x, subsetName)
+  if (!is.null(value) && !inherits(value, "phylo"))
+    stop("'value' must be a phylo tree or NULL.")
+  d <- .treeDim(dim)
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  labels <- d$names(internal)
+  if (!is.null(value)) {
+    if (is.null(labels))
+      stop("Subset '", subsetName, "' has no ", d$namesWord, "s to match ",
+           "to the node labels of 'value'.")
+    nodeLabels <- c(value$tip.label, value$node.label)
+    notFound <- unique(labels[!labels %in% nodeLabels])
+    if (length(notFound))
+      stop("Every ", d$namesWord, " of subset '", subsetName, "' must be ",
+           "a node label of 'value'. Not found: ", .listNames(notFound), ".")
+    repeated <- .repeatedLabels(value, labels)
+    if (length(repeated))
+      stop("Each ", d$namesWord, " of subset '", subsetName, "' must be ",
+           "the label of only one node of 'value'. Repeated: ",
+           .listNames(repeated), ".")
+  }
+  .internalAssay(.subsets(x)[[subsetName]]) <-
+    .replaceTree(internal, dim, value, labels)
+  x
+}
+
+# Those of labels that label more than one node of tree; rows are linked
+# by label, so such a row could go to the wrong node
+.repeatedLabels <- function(tree, labels) {
+  nodeLabels <- c(tree$tip.label, tree$node.label)
+  unique(labels[labels %in% nodeLabels[duplicated(nodeLabels)]])
+}
+
+# Up to ten of names, comma-separated
+.listNames <- function(names) {
+  shown <- paste(names[seq_len(min(10, length(names)))], collapse = ", ")
+  if (length(names) > 10) paste0(shown, ", ...") else shown
+}
+
+# object with tree, linking each row or column to the node labelled by
+# labels, as its only tree along dim; a NULL tree removes them all.
+# Setting the names again gives the links the names changeTree() drops
+#' @importFrom TreeSummarizedExperiment changeTree
+.replaceTree <- function(object, dim, tree, labels) {
+  if (dim == "row") {
+    rowTree(object) <- NULL
+    if (!is.null(tree)) {
+      object <- changeTree(object, rowTree = tree, rowNodeLab = labels)
+      rownames(object) <- rownames(object)
+    }
+  } else {
+    colTree(object) <- NULL
+    if (!is.null(tree)) {
+      object <- changeTree(object, colTree = tree, colNodeLab = labels)
+      colnames(object) <- colnames(object)
+    }
+  }
+  object
+}
+
+# out, from .getSubsetExperiment(), with the trees that subsetName or a
+# subset it was made from stores in place of the main object's
+.withSubsetTrees <- function(x, subsetName, out) {
+  for (dim in c("row", "col")) {
+    owner <- .treeOwner(x, subsetName, dim)
+    if (!is.null(owner))
+      out <- .replaceTree(out, dim, .subsetTree(x, subsetName, dim, 1, owner),
+                          .subsetLinks(x, subsetName, dim, TRUE,
+                                       owner)$nodeLab)
+  }
+  out
+}
+
+# Stores as subsetName's own, for setSubsetExperiment(), a row or column
+# tree of value that differs from the one the subset sees; both are
+# checked before either is stored
+.storeChangedTrees <- function(x, subsetName, value) {
+  if (!methods::is(value, "TreeSummarizedExperiment"))
+    return(x)
+  changed <- Filter(function(dim) .treeChanged(x, subsetName, value, dim),
+                    c("row", "col"))
+  for (dim in changed) {
+    d <- .treeDim(dim)
+    trees <- d$tree(value, NULL)
+    labels <- d$links(value)$nodeLab
+    if (length(trees) > 1 || anyNA(labels)
+        || (length(trees) && length(.repeatedLabels(trees[[1]], labels))))
+      stop("Subset '", subsetName, "' can store only a single ", d$name,
+           " with a node label for each of its ", d$namesWord, "s that ",
+           "labels only one node.")
+  }
+  for (dim in changed) {
+    d <- .treeDim(dim)
+    trees <- d$tree(value, NULL)
+    if (!length(trees)) {
+      message("Subset '", subsetName, "' keeps its ", d$name, "; a subset ",
+              "always uses its own tree, a parent's or the main object's.")
+      next
+    }
+    internal <- .internalAssay(.subsets(x)[[subsetName]])
+    .internalAssay(.subsets(x)[[subsetName]]) <-
+      .replaceTree(internal, dim, trees[[1]], d$links(value)$nodeLab)
+    message("Subset '", subsetName, "' now stores its own ", d$name, ".")
+  }
+  x
+}
+
+# Whether value's trees and links along dim differ from those the subset
+# sees: the trees its links use, which TreeSummarizedExperiment's [ keeps,
+# in any order
+.treeChanged <- function(x, subsetName, value, dim) {
+  d <- .treeDim(dim)
+  trees <- d$tree(value, NULL)
+  links <- d$links(value)
+  owner <- .treeOwner(x, subsetName, dim)
+  seen <- .subsetLinks(x, subsetName, dim, TRUE, owner)
+  if (!length(trees) || is.null(seen))
+    return(length(trees) > 0 || !is.null(seen))
+  held <- d$tree(.treeHolder(x, owner), NULL)
+  used <- held[names(held) %in% seen$whichTree]
+  byName <- function(trees) trees[order(names(trees))]
+  !(identical(byName(trees), byName(used))
+    && identical(as.integer(links$nodeNum), as.integer(seen$nodeNum))
+    && identical(as.character(links$whichTree),
+                 as.character(seen$whichTree)))
 }
 
 # The nearest subset in subsetName's chain, itself first, that stores its
 # own spatialCoords, or NULL if none does and the main object's apply (#72)
 .spatialCoordsOwner <- function(x, subsetName) {
-  for (subset in rev(.subsetChain(x, subsetName))) {
-    internal <- .internalAssay(.subsets(x)[[subset]])
-    # isTRUE() for an internal object without spatialCoords at all
-    if (isTRUE(ncol(spatialCoords(internal)) > 0))
-      return(subset)
-  }
-  NULL
+  # isTRUE() for an internal object without spatialCoords at all
+  .nearestOwner(x, subsetName,
+                function(internal) isTRUE(ncol(spatialCoords(internal)) > 0))
 }
 
 # The coordinates subsetName sees: its own, or those of the nearest subset
@@ -2654,8 +2811,8 @@ NULL
   if (is.null(owner))
     return(spatialCoords(x)[rootCols, , drop = FALSE])
   ownerCoords <- spatialCoords(.internalAssay(.subsets(x)[[owner]]))
-  ownerCols <- .rootIndices(x, owner, .colIndices)
-  out <- ownerCoords[match(rootCols, ownerCols), , drop = FALSE]
+  out <- ownerCoords[.ownerPositions(x, subsetName, owner, .colIndices), ,
+                     drop = FALSE]
   # the subset's own spot names, which subsetColnames<- may have changed
   rownames(out) <- colnames(.internalAssay(.subsets(x)[[subsetName]]))
   out

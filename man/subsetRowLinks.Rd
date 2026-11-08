@@ -6,9 +6,9 @@
 \alias{subsetRowLinks,SubsetTreeSummarizedExperiment-method}
 \title{Accessor method for rowLinks from subsets in ExperimentSubset objects}
 \usage{
-subsetRowLinks(x, subsetName, parentRowLinkData)
+subsetRowLinks(x, subsetName, parentRowLinkData = TRUE)
 
-\S4method{subsetRowLinks}{SubsetTreeSummarizedExperiment}(x, subsetName, parentRowLinkData)
+\S4method{subsetRowLinks}{SubsetTreeSummarizedExperiment}(x, subsetName, parentRowLinkData = TRUE)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
@@ -16,14 +16,19 @@ subsetRowLinks(x, subsetName, parentRowLinkData)
 \item{subsetName}{\code{character(1)} Name of the subset to get
 \code{rowLinks} from.}
 
-\item{parentRowLinkData}{\code{logical(1)} Logical value indicating if parent
-rowLinks should be combined or not. Default \code{FALSE}.}
+\item{parentRowLinkData}{\code{logical(1)} If \code{TRUE} (the default),
+a subset without a row tree of its own, or one it was made from, gets
+the links to the main object's row tree. If \code{FALSE}, it gets only
+links to a row tree stored by the subset or one it was made from, and
+\code{NULL} if there is none.}
 }
 \value{
-The \code{rowLinks} from input object.
+The \code{rowLinks} of the subset's rows, with the subset's
+  rownames, or \code{NULL}.
 }
 \description{
-Get \code{rowLinks} from a subset.
+Get \code{rowLinks} from a subset: the links of its rows to
+  the nodes of the tree that \code{\link{subsetRowTree}} returns.
 }
 \examples{
 # a small TreeSummarizedExperiment with a tree on both rows and columns
@@ -36,5 +41,5 @@ tse <- TreeSummarizedExperiment(assays = list(counts = counts),
                                 rowTree = tinyTree, colTree = tinyTree)
 es <- ExperimentSubset(tse)
 es <- createSubset(es, "subset1", rows = 1:5, cols = 1:5)
-subsetRowLinks(es, "subset1", parentRowLinkData = TRUE)
+subsetRowLinks(es, subsetName = "subset1")
 }

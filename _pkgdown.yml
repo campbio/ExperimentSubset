@@ -48,6 +48,8 @@ reference:
   contents:
   - subsetRowLinks
   - subsetColLinks
+  - subsetRowTree
+  - subsetColTree
   - subsetSpatialCoords
   - subsetImgData
   - subsetSpatialData

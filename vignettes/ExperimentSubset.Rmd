@@ -332,7 +332,10 @@ these methods can be used with the subsets by providing the optional
 `subsetName` parameter.
 For `SpatialExperiment` objects, `subsetSpatialCoords<-` also stores a
 subset's own coordinates, for example after a transformation, and
-`subsetImgData()` returns the images of the subset's samples.
+`subsetImgData()` returns the images of the subset's samples. For
+`TreeSummarizedExperiment` objects, `subsetRowTree()` and `subsetColTree()`
+return the tree a subset uses, and `subsetRowTree<-` and `subsetColTree<-`
+store a tree of its own.
 
 ### assay-get & assay-set inherited methods
 An exception to the above approach is the use of `assay` and `assay<-` methods,
@@ -616,11 +619,15 @@ subsetSummary(es)
 47. `subsetSpatialData<-` (defunct; use `colData` with `subsetName`)
 48. `subsetRowLinks`
 49. `subsetColLinks`
-50. `spatialCoords`
-51. `spatialData` (deprecated with `subsetName`; use `subsetColData`)
-52. `spatialData<-`
-53. `rowLinks`
-54. `colLinks`
+50. `subsetRowTree`
+51. `subsetRowTree<-`
+52. `subsetColTree`
+53. `subsetColTree<-`
+54. `spatialCoords`
+55. `spatialData` (deprecated with `subsetName`; use `subsetColData`)
+56. `spatialData<-`
+57. `rowLinks`
+58. `colLinks`
 
 # Implementation Details
 
