@@ -717,14 +717,16 @@ NULL
     if (is.null(subsetAssayName))
       stop("'subsetAssayName' is needed to store an assay inside subset '",
            i, "'.")
-    message("Storing assay inside subset '", i, "'.")
-    setSubsetAssay(
+    x <- setSubsetAssay(
       x = x,
       subsetName = i,
       inputMatrix = value,
       subsetAssayName = subsetAssayName,
       unlink = unlink
     )
+    # only after setSubsetAssay() has checked and stored value
+    message("Storing assay inside subset '", i, "'.")
+    x
   }
   else{
     if (!is.null(subsetAssayName))

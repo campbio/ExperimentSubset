@@ -1643,6 +1643,12 @@ test_that("assay<- stores linked names only with unlink = TRUE", {
   filteredLog <- as.matrix(assay(es, "filtered/logcounts"))
   expect_error(assay(es, "filtered/logcounts") <- filteredLog,
                regexp = "unlink = TRUE")
+  expect_no_message(
+    expect_error(
+      assay(es, "filtered", subsetAssayName = "logcounts") <- filteredLog,
+      regexp = "unlink = TRUE"
+    )
+  )
   expect_message(
     assay(es, "filtered/logcounts", unlink = TRUE) <- filteredLog + 1,
     regexp = paste0("Subset 'filtered' now stores its own 'logcounts', ",
@@ -1821,12 +1827,15 @@ test_that("setSubsetAssay keeps the subset's row and column names", {
   rownames(renamed) <- paste0("other", 1:5)
   expect_error(setSubsetAssay(es, "s1", renamed, "renamed"),
                regexp = "inputMatrix")
-  # assay<- says it is storing the assay before setSubsetAssay() stops
-  suppressMessages(
+  # assay<- says it stored the assay only after setSubsetAssay() succeeds
+  expect_no_message(
     expect_error(assay(es, "s1", subsetAssayName = "x") <- reordered,
                  regexp = "inputMatrix")
   )
   expect_equal(subsetColnames(es, "s1"), cells)
+  expect_message(assay(es, "s1", subsetAssayName = "viaAssay") <- counts,
+                 regexp = "Storing assay inside subset 's1'.", fixed = TRUE)
+  expect_equal(assay(es, "s1/viaAssay"), counts)
 
   # a matrix of the wrong size gets a dimension error, not a names error
   expect_error(setSubsetAssay(es, "s1", counts[1:3, ], "small"),
