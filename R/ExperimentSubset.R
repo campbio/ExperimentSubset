@@ -333,7 +333,8 @@ NULL
       tempAssay <- parentAssay
     }
     else{
-      stop("Input parentAssay does not exist.")
+      stop("'parentAssay' must be NULL or name an assay, a subset or a ",
+           "\"subset/assay\"; '", parentAssay, "' is none of these.")
     }
   }
 
@@ -406,10 +407,7 @@ NULL
                          unlink = FALSE,
                          quiet = FALSE) {
 
-  .checkSubsetName(subsetName)
-  if (!subsetName %in% subsetNames(x))
-    stop(subsetName, " does not exist in the subsets slot of the object. ",
-         "You need to create a new subset with createSubset() function.")
+  .isSubset(x, subsetName)
   x <- .qualifyParents(x)
   if (!is.character(subsetAssayName) || length(subsetAssayName) != 1
       || is.na(subsetAssayName) || !nzchar(subsetAssayName))
@@ -741,8 +739,8 @@ NULL
   .checkSubsetName(subsetName)
   ref <- .resolveAssay(x, subsetName)
   if (is.null(ref) || ref$kind == "main") {
-    stop(subsetName,
-         " does not exist in the subsets slot of the object.")
+    stop(subsetName, " subset does not exist. 'subsetName' must be the ",
+         "name of a subset or a \"subset/assay\".")
   }
   current <- ref$subset
   parentList <- list()
@@ -2799,8 +2797,7 @@ NULL
                                   rows,
                                   cols,
                                   parentAssay){
-  if (!is.character(subsetName) || length(subsetName) != 1
-      || is.na(subsetName) || !nzchar(subsetName))
+  if (!.isOneString(subsetName) || !nzchar(subsetName))
     stop("'subsetName' must be a single, non-empty character string.")
 
   if(subsetName %in% subsetNames(x))
