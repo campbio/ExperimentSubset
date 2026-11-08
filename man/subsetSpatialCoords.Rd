@@ -25,10 +25,10 @@ subsetSpatialCoords(x, subsetName) <- value
 \code{spatialCoords} from, or to store them in.}
 
 \item{value}{A numeric \code{matrix} with one row for each spot in the
-subset. Its rownames must be \code{NULL} or the subset's column names,
-in the same order. \code{NULL} removes the subset's own coordinates,
-so it sees those of the subset it was made from, or the main object's,
-again.}
+subset and one or more columns. Its rownames must be \code{NULL} or
+the subset's column names, in the same order. \code{NULL} removes the
+subset's own coordinates, so it sees those of the subset it was made
+from, or the main object's, again.}
 
 \item{...}{For \code{spatialCoords()}: \describe{
   \item{\code{subsetName}}{\code{character(1)} Name of the subset to

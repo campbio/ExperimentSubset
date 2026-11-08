@@ -794,10 +794,10 @@ setGeneric(
 #'   the nearest subset it was made from that has them, or else the main
 #'   object's.
 #' @param value A numeric \code{matrix} with one row for each spot in the
-#'   subset. Its rownames must be \code{NULL} or the subset's column names,
-#'   in the same order. \code{NULL} removes the subset's own coordinates,
-#'   so it sees those of the subset it was made from, or the main object's,
-#'   again.
+#'   subset and one or more columns. Its rownames must be \code{NULL} or
+#'   the subset's column names, in the same order. \code{NULL} removes the
+#'   subset's own coordinates, so it sees those of the subset it was made
+#'   from, or the main object's, again.
 #' @return For \code{subsetSpatialCoords<-}, the input object with the
 #'   subset's \code{spatialCoords} stored.
 #' @rdname subsetSpatialCoords

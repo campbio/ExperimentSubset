@@ -915,10 +915,15 @@ test_that("A subset can store its own spatialCoords", {
   expect_equal(colnames(subsetSpatialCoords(es, "s1")), c("x", "y"))
   expect_equal(spatialCoords(es), mainCoords)
 
-  # a subset made from it sees its coordinates, cut to its spots
+  # a subset made from it sees its coordinates, cut to its spots, also
+  # when made from one of its assays
   es <- createSubset(es, "child", cols = 2:3, parentAssay = "s1")
   expect_equal(unname(subsetSpatialCoords(es, "child")),
                unname(shifted[2:3, ]))
+  es <- setSubsetAssay(es, "s1", assay(es, "s1") * 2, "doubled")
+  es <- createSubset(es, "fromAssay", cols = 4, parentAssay = "s1/doubled")
+  expect_equal(unname(subsetSpatialCoords(es, "fromAssay")),
+               unname(shifted[4, , drop = FALSE]))
 
   # the subset's own coordinates follow [ on the main object
   cut <- es[, 2:6]
@@ -926,6 +931,19 @@ test_that("A subset can store its own spatialCoords", {
   withoutSpot3 <- es[, c(1, 2, 4, 5, 6)]
   expect_equal(unname(subsetSpatialCoords(withoutSpot3, "s1")),
                unname(shifted[2:4, ]))
+  # and cbind(), where the first object's subsets keep their spots
+  other <- ExperimentSubset(makeImageSpe())
+  colnames(other) <- paste0("other", 1:6)
+  combined <- cbind(es, other)
+  expect_equal(unname(subsetSpatialCoords(combined, "s1")), unname(shifted))
+
+  # renamed spots rename the coordinates
+  renamed <- es
+  subsetColnames(renamed, "s1") <- paste0("new", 1:4)
+  expect_equal(rownames(subsetSpatialCoords(renamed, "s1")),
+               paste0("new", 1:4))
+  expect_equal(rownames(spatialCoords(getSubsetExperiment(renamed, "s1"))),
+               paste0("new", 1:4))
 
   # getSubsetExperiment() carries them
   standalone <- getSubsetExperiment(es, "s1")
@@ -960,6 +978,10 @@ test_that("subsetSpatialCoords<- checks value", {
   expect_error(subsetSpatialCoords(es, "s1") <- matrix("a", 4, 2),
                regexp = "'value' must be a numeric matrix or NULL.",
                fixed = TRUE)
+  expect_error(subsetSpatialCoords(es, "s1") <- matrix(1, 4, 0),
+               regexp = paste0("'value' must have one or more columns; use ",
+                               "NULL to remove the subset's own ",
+                               "coordinates."), fixed = TRUE)
   expect_error(subsetSpatialCoords(es, "s1") <- matrix(1, 3, 2),
                regexp = paste0("'value' must have one row for each of the ",
                                "4 spots in subset 's1'."), fixed = TRUE)
@@ -975,7 +997,7 @@ test_that("setSubsetExperiment stores changed spatialCoords only", {
   # unchanged coordinates are not stored: the subset still follows the
   # main object's
   standalone <- getSubsetExperiment(es, "s1")
-  es <- setSubsetExperiment(es, "s1", standalone)
+  expect_no_message(es <- setSubsetExperiment(es, "s1", standalone))
   expect_equal(subsetSpatialCoords(es, "s1"),
                mainCoords[3:6, , drop = FALSE])
   doubled <- es
@@ -985,7 +1007,9 @@ test_that("setSubsetExperiment stores changed spatialCoords only", {
 
   # changed coordinates are stored as the subset's own
   spatialCoords(standalone) <- spatialCoords(standalone) + 1
-  es <- setSubsetExperiment(es, "s1", standalone)
+  expect_message(es <- setSubsetExperiment(es, "s1", standalone),
+                 regexp = "Subset 's1' now stores its own spatialCoords.",
+                 fixed = TRUE)
   expect_equal(unname(subsetSpatialCoords(es, "s1")),
                unname(mainCoords[3:6, ] + 1))
   expect_equal(spatialCoords(es), mainCoords)
@@ -998,7 +1022,9 @@ test_that("setSubsetExperiment stores changed spatialCoords only", {
   spatialCoords(es) <- namedCoords
   standalone <- getSubsetExperiment(es, "s2")
   spatialCoords(standalone) <- spatialCoords(standalone) * 3
-  es <- setSubsetExperiment(es, "s2", standalone)
+  expect_message(es <- setSubsetExperiment(es, "s2", standalone),
+                 regexp = "Subset 's2' now stores its own spatialCoords.",
+                 fixed = TRUE)
   expect_equal(unname(subsetSpatialCoords(es, "s2")),
                unname(mainCoords[1:2, ] * 3))
   expect_equal(rownames(subsetSpatialCoords(es, "s2")), c("spot1", "spot2"))

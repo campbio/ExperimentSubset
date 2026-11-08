@@ -614,14 +614,7 @@ NULL
     SingleCellExperiment::reducedDims(internal) <- reducedDims(value)
   metadata(internal) <- metadata(value)
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
-  # coordinates are stored only if they differ from those the subset sees
-  # (their rownames may be the main object's, so they are dropped)
-  if (methods::is(internal, "SpatialExperiment")
-      && !.sameSpatialCoords(x, subsetName, value)) {
-    coords <- spatialCoords(value)
-    rownames(coords) <- NULL
-    .subsetSpatialCoords(x, subsetName) <- coords
-  }
+  x <- .storeChangedSpatialCoords(x, subsetName, value)
   if (isSce) {
     x <- .applyAltExps(x, subsetName, altExpPlan)
     x <- .carryAltExpParts(before, x, subsetName)
@@ -2644,7 +2637,8 @@ NULL
 .spatialCoordsOwner <- function(x, subsetName) {
   for (subset in rev(.subsetChain(x, subsetName))) {
     internal <- .internalAssay(.subsets(x)[[subset]])
-    if (ncol(spatialCoords(internal)) > 0)
+    # isTRUE() for an internal object without spatialCoords at all
+    if (isTRUE(ncol(spatialCoords(internal)) > 0))
       return(subset)
   }
   NULL
@@ -2675,6 +2669,9 @@ NULL
   if (!is.null(value)) {
     if (!is.matrix(value) || !is.numeric(value))
       stop("'value' must be a numeric matrix or NULL.")
+    if (ncol(value) == 0)
+      stop("'value' must have one or more columns; use NULL to remove ",
+           "the subset's own coordinates.")
     if (nrow(value) != ncol(internal))
       stop("'value' must have one row for each of the ", ncol(internal),
            " spots in subset '", subsetName, "'.")
@@ -2689,12 +2686,21 @@ NULL
   x
 }
 
-# TRUE if value, from setSubsetExperiment(), has the coordinates
-# subsetName sees, whatever their rownames or type
-.sameSpatialCoords <- function(x, subsetName, value) {
+# For setSubsetExperiment(): stores value's coordinates as subsetName's
+# own, with a message, if value is a SpatialExperiment whose coordinates
+# differ from those subsetName sees, whatever their rownames or type.
+# Their rownames may be the main object's, so they are dropped.
+.storeChangedSpatialCoords <- function(x, subsetName, value) {
+  if (!methods::is(value, "SpatialExperiment"))
+    return(x)
   seen <- .subsetSpatialCoords(x, subsetName)
   coords <- spatialCoords(value)
-  identical(colnames(coords), colnames(seen)) && .sameAssay(coords, seen)
+  if (identical(colnames(coords), colnames(seen)) && .sameAssay(coords, seen))
+    return(x)
+  rownames(coords) <- NULL
+  .subsetSpatialCoords(x, subsetName) <- coords
+  message("Subset '", subsetName, "' now stores its own spatialCoords.")
+  x
 }
 
 # The rows of the main object's imgData for the samples of subsetName's
