@@ -85,8 +85,11 @@ or deploy the site locally. Add new exports to `_pkgdown.yml` and run
 ## Tests
 
 - One file, `tests/testthat/test-ExperimentSubset.R` (testthat edition
-  2, with `context()`), so `make test-one FILTER=ExperimentSubset` runs
-  the whole suite.
+  3, set in DESCRIPTION), so `make test-one FILTER=ExperimentSubset`
+  runs the whole suite.
+- Edition 3 prints messages that a test doesn't catch. Check an expected
+  message with `expect_message()`, or wrap setup code in
+  `suppressMessages()`, so the run prints nothing but the results.
 - It runs offline: a small simulated data set stands in for the PBMC
   data the vignette downloads.
 - The whole file skips when scds (for `sce_chcl`) is missing; tests that
