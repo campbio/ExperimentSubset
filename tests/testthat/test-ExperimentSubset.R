@@ -132,24 +132,33 @@ testthat::test_that("Testing ExperimentSubset constructor by implicitly providin
   testthat::expect_equal(ncol(rowData(es, subsetName = "s2")), 1)
   testthat::expect_equal(rowData(es, subsetName = "s2")$col1, seq_len(15))
   
-  # match the start of each message: the rest has line breaks and indents
-  testthat::expect_error(
-    es <- createSubset(es, "s2", rows = c(1:15)),
-    regexp = "A subset with the specified 'subsetName' parameter already"
+  # compare the whole message, so it is one line with no runs of spaces
+  testthat::expect_equal(
+    tryCatch(createSubset(es, "s2", rows = c(1:15)),
+             error = conditionMessage),
+    paste0("'subsetName' must differ from the names of existing subsets; ",
+           "'s2' is already a subset name.")
   )
   testthat::expect_error(es <- createSubset(es, subsetName = 12, rows = c(1:15)),
                          "'subsetName' must be a single, non-empty")
-  testthat::expect_error(
-    es <- createSubset(es, subsetName = "s3", rows = list()),
-    regexp = "'rows' parameter must be either a 'NULL'"
+  testthat::expect_equal(
+    tryCatch(createSubset(es, subsetName = "s3", rows = list()),
+             error = conditionMessage),
+    paste0("'rows' must be NULL, to include all rows, or a numeric or ",
+           "character vector of the rows to include.")
   )
-  testthat::expect_error(
-    es <- createSubset(es, subsetName = "s3", cols = list()),
-    regexp = "'cols' parameter must be either a 'NULL'"
+  testthat::expect_equal(
+    tryCatch(createSubset(es, subsetName = "s3", cols = list()),
+             error = conditionMessage),
+    paste0("'cols' must be NULL, to include all columns, or a numeric or ",
+           "character vector of the columns to include.")
   )
-  testthat::expect_error(
-    es <- createSubset(es, subsetName = "s3", parentAssay = 1),
-    regexp = "'parentAssay' parameter can either be 'NULL'"
+  testthat::expect_equal(
+    tryCatch(createSubset(es, subsetName = "s3", parentAssay = 1),
+             error = conditionMessage),
+    paste0("'parentAssay' must be NULL, to use the default assay, or a ",
+           "single character string naming the assay or subset to make ",
+           "the subset from.")
   )
   testthat::expect_error(es <- createSubset(es, subsetName = "s3", rows = c(64103:64103)),
                          "Selected rows not available in the specified assay.")
@@ -212,6 +221,13 @@ testthat::test_that("Testing createSubset and setSubsetAssay",{
   counts1p[,] <- counts1p[,] + 1
   expect_error(es <- setSubsetAssay(es, "subset4", counts1p, "scaledSubset1"),
                "subset4 does not exist in the subsets slot of the object.")
+  # the whole message is one line with no runs of spaces
+  testthat::expect_equal(
+    tryCatch(setSubsetAssay(es, "subset4", counts1p, "scaledSubset1"),
+             error = conditionMessage),
+    paste0("subset4 does not exist in the subsets slot of the object. ",
+           "You need to create a new subset with createSubset() function.")
+  )
   es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
   testthat::expect_true("subset1/scaledSubset1" %in% subsetAssayNames(es))
   testthat::expect_equal(
@@ -1840,7 +1856,8 @@ testthat::test_that("Spaces are removed from a new subset's name", {
                          list("mysubset", "counts"))
   # the cleaned name can't overwrite an existing subset
   testthat::expect_error(suppressWarnings(createSubset(es, spaced, 1:2, 1:2)),
-                         regexp = "already exists")
+                         regexp = "'mysubset' is already a subset name.",
+                         fixed = TRUE)
 })
 
 testthat::test_that("createSubset rejects invalid rows and cols", {

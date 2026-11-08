@@ -408,8 +408,8 @@ NULL
 
   .checkSubsetName(subsetName)
   if (!subsetName %in% subsetNames(x))
-    stop(subsetName, " does not exist in the subsets slot of the object. 
-         You need to create a new subset with createSubset() function. ")
+    stop(subsetName, " does not exist in the subsets slot of the object. ",
+         "You need to create a new subset with createSubset() function.")
   x <- .qualifyParents(x)
   if (!is.character(subsetAssayName) || length(subsetAssayName) != 1
       || is.na(subsetAssayName) || !nzchar(subsetAssayName))
@@ -2802,8 +2802,8 @@ NULL
     stop("'subsetName' must be a single, non-empty character string.")
 
   if(subsetName %in% subsetNames(x))
-    stop("A subset with the specified 'subsetName' parameter already exists
-         in the object. Subset names must be unique.")
+    stop("'subsetName' must differ from the names of existing subsets; '",
+         subsetName, "' is already a subset name.")
 
   if (grepl("/", subsetName, fixed = TRUE))
     stop("'subsetName' can't contain '/', which separates a subset from an ",
@@ -2815,23 +2815,21 @@ NULL
   
   testForRows <- is.null(rows) || is.numeric(rows) || is.character(rows)
   if(!testForRows)
-    stop("'rows' parameter must be either a 'NULL' to include all rows,
-         or a numeric vector or a character vector that specify the rows to 
-         include in the subset.")
+    stop("'rows' must be NULL, to include all rows, or a numeric or ",
+         "character vector of the rows to include.")
   
   testForCols <- is.null(cols) || is.numeric(cols) || is.character(cols)
   if(!testForCols)
-    stop("'cols' parameter must be either a 'NULL' to include all rows,
-         or a numeric vector or a character vector that specify the columns to 
-         include in the subset.")
+    stop("'cols' must be NULL, to include all columns, or a numeric or ",
+         "character vector of the columns to include.")
   
   testForParentAssay <- is.null(parentAssay) ||
     (is.character(parentAssay) && length(parentAssay) == 1 &&
        !is.na(parentAssay))
   if(!testForParentAssay)
-    stop("'parentAssay' parameter can either be 'NULL' to use the default
-         assay in the input object or a character value that specifies the
-         parentAssay to use from parent object.")
+    stop("'parentAssay' must be NULL, to use the default assay, or a single ",
+         "character string naming the assay or subset to make the subset ",
+         "from.")
   
 }
 
