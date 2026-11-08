@@ -861,6 +861,149 @@ test_that("SpatialExperiment subsets support all methods", {
   expect_equal(spatialCoords(es), spatialCoords(spe))
 })
 
+# A SpatialExperiment with six spots in two samples, A and B, and an
+# in-memory image for each sample
+makeImageSpe <- function() {
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(paste0("gene", 1:10),
+                                   paste0("spot", 1:6)))
+  image <- SpatialImage(as.raster(matrix(c(0, 0.5, 1, 0.5), nrow = 2)))
+  images <- S4Vectors::DataFrame(sample_id = c("A", "B"),
+                                 image_id = "lowres",
+                                 data = I(list(image, image)),
+                                 scaleFactor = c(1, 0.5))
+  SpatialExperiment(assays = list(counts = counts),
+                    sample_id = rep(c("A", "B"), each = 3),
+                    spatialCoords = cbind(x = as.numeric(1:6),
+                                          y = as.numeric(1:6) * 10),
+                    imgData = images)
+}
+
+test_that("subsetImgData returns the images of a subset's samples", {
+  es <- ExperimentSubset(makeImageSpe())
+  es <- createSubset(es, "sampleB", cols = 4:6)
+  es <- createSubset(es, "both", cols = 3:4)
+  expect_equal(subsetImgData(es, "sampleB"), imgData(es)[2, ])
+  expect_equal(subsetImgData(es, "both"), imgData(es))
+  # a subset of a subset
+  es <- createSubset(es, "childA", cols = 1, parentAssay = "both")
+  expect_equal(subsetImgData(es, "childA"), imgData(es)[1, ])
+  # the same images as getSubsetExperiment() carries
+  expect_equal(subsetImgData(es, "sampleB"),
+               imgData(getSubsetExperiment(es, "sampleB")))
+  expect_error(subsetImgData(es, "nope"),
+               regexp = "nope subset does not exist")
+  # an object without images gives none
+  noImages <- makeImageSpe()
+  imgData(noImages) <- NULL
+  es <- createSubset(ExperimentSubset(noImages), "s1", cols = 1:2)
+  expect_equal(nrow(subsetImgData(es, "s1")), 0L)
+})
+
+test_that("A subset can store its own spatialCoords", {
+  es <- ExperimentSubset(makeImageSpe())
+  es <- createSubset(es, "s1", cols = 3:6)
+  mainCoords <- spatialCoords(es)
+  shifted <- subsetSpatialCoords(es, "s1") + 100
+  rownames(shifted) <- NULL
+
+  # stored on the subset; the main object is unchanged
+  subsetSpatialCoords(es, "s1") <- shifted
+  expect_equal(unname(subsetSpatialCoords(es, "s1")), unname(shifted))
+  expect_equal(spatialCoords(es, subsetName = "s1"),
+               subsetSpatialCoords(es, "s1"))
+  expect_equal(colnames(subsetSpatialCoords(es, "s1")), c("x", "y"))
+  expect_equal(spatialCoords(es), mainCoords)
+
+  # a subset made from it sees its coordinates, cut to its spots
+  es <- createSubset(es, "child", cols = 2:3, parentAssay = "s1")
+  expect_equal(unname(subsetSpatialCoords(es, "child")),
+               unname(shifted[2:3, ]))
+
+  # the subset's own coordinates follow [ on the main object
+  cut <- es[, 2:6]
+  expect_equal(unname(subsetSpatialCoords(cut, "s1")), unname(shifted))
+  withoutSpot3 <- es[, c(1, 2, 4, 5, 6)]
+  expect_equal(unname(subsetSpatialCoords(withoutSpot3, "s1")),
+               unname(shifted[2:4, ]))
+
+  # getSubsetExperiment() carries them
+  standalone <- getSubsetExperiment(es, "s1")
+  expect_equal(unname(spatialCoords(standalone)), unname(shifted))
+
+  # NULL goes back to the main object's coordinates
+  subsetSpatialCoords(es, "s1") <- NULL
+  expect_equal(subsetSpatialCoords(es, "s1"),
+               mainCoords[3:6, , drop = FALSE])
+  expect_equal(unname(subsetSpatialCoords(es, "child")),
+               unname(mainCoords[4:5, ]))
+
+  # rownames must be NULL or the subset's spot names, in order
+  named <- shifted
+  rownames(named) <- paste0("spot", 3:6)
+  subsetSpatialCoords(es, "s1") <- named
+  expect_equal(rownames(subsetSpatialCoords(es, "s1")),
+               paste0("spot", 3:6))
+  rownames(named) <- paste0("spot", c(4, 3, 5, 6))
+  expect_error(subsetSpatialCoords(es, "s1") <- named,
+               regexp = paste0("The rownames of 'value' must be NULL or ",
+                               "the column names of subset 's1', in the ",
+                               "same order."), fixed = TRUE)
+})
+
+test_that("subsetSpatialCoords<- checks value", {
+  es <- ExperimentSubset(makeImageSpe())
+  es <- createSubset(es, "s1", cols = 3:6)
+  expect_error(subsetSpatialCoords(es, "s1") <- data.frame(x = 1:4),
+               regexp = "'value' must be a numeric matrix or NULL.",
+               fixed = TRUE)
+  expect_error(subsetSpatialCoords(es, "s1") <- matrix("a", 4, 2),
+               regexp = "'value' must be a numeric matrix or NULL.",
+               fixed = TRUE)
+  expect_error(subsetSpatialCoords(es, "s1") <- matrix(1, 3, 2),
+               regexp = paste0("'value' must have one row for each of the ",
+                               "4 spots in subset 's1'."), fixed = TRUE)
+  expect_error(subsetSpatialCoords(es, "nope") <- matrix(1, 4, 2),
+               regexp = "nope subset does not exist")
+})
+
+test_that("setSubsetExperiment stores changed spatialCoords only", {
+  es <- ExperimentSubset(makeImageSpe())
+  es <- createSubset(es, "s1", cols = 3:6)
+  mainCoords <- spatialCoords(es)
+
+  # unchanged coordinates are not stored: the subset still follows the
+  # main object's
+  standalone <- getSubsetExperiment(es, "s1")
+  es <- setSubsetExperiment(es, "s1", standalone)
+  expect_equal(subsetSpatialCoords(es, "s1"),
+               mainCoords[3:6, , drop = FALSE])
+  doubled <- es
+  spatialCoords(doubled) <- spatialCoords(doubled) * 2
+  expect_equal(unname(subsetSpatialCoords(doubled, "s1")),
+               unname(mainCoords[3:6, ] * 2))
+
+  # changed coordinates are stored as the subset's own
+  spatialCoords(standalone) <- spatialCoords(standalone) + 1
+  es <- setSubsetExperiment(es, "s1", standalone)
+  expect_equal(unname(subsetSpatialCoords(es, "s1")),
+               unname(mainCoords[3:6, ] + 1))
+  expect_equal(spatialCoords(es), mainCoords)
+
+  # also when the main object's coordinates have other rownames than its
+  # spot names
+  es <- createSubset(es, "s2", cols = 1:2)
+  namedCoords <- mainCoords
+  rownames(namedCoords) <- paste0("other", 1:6)
+  spatialCoords(es) <- namedCoords
+  standalone <- getSubsetExperiment(es, "s2")
+  spatialCoords(standalone) <- spatialCoords(standalone) * 3
+  es <- setSubsetExperiment(es, "s2", standalone)
+  expect_equal(unname(subsetSpatialCoords(es, "s2")),
+               unname(mainCoords[1:2, ] * 3))
+  expect_equal(rownames(subsetSpatialCoords(es, "s2")), c("spot1", "spot2"))
+})
+
 test_that("Subset spatialData is deprecated, its setter defunct", {
   counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
                    dimnames = list(paste0("gene", 1:10),
