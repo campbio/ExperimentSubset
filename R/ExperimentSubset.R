@@ -2675,7 +2675,7 @@ NULL
 
 # Up to ten of names, comma-separated
 .listNames <- function(names) {
-  shown <- paste(utils::head(names, 10), collapse = ", ")
+  shown <- paste(names[seq_len(min(10, length(names)))], collapse = ", ")
   if (length(names) > 10) paste0(shown, ", ...") else shown
 }
 
@@ -2707,33 +2707,49 @@ NULL
 }
 
 # Stores as subsetName's own, for setSubsetExperiment(), a row or column
-# tree of value that differs from the one the subset sees
+# tree of value that differs from the one the subset sees; both are
+# checked before either is stored
 .storeChangedTrees <- function(x, subsetName, value) {
   if (!methods::is(value, "TreeSummarizedExperiment"))
     return(x)
-  for (dim in c("row", "col")) {
+  changed <- Filter(function(dim) .treeChanged(x, subsetName, value, dim),
+                    c("row", "col"))
+  for (dim in changed) {
     d <- .treeDim(dim)
     trees <- d$tree(value, NULL)
-    links <- d$links(value)
-    seen <- .subsetLinks(x, subsetName, dim)
-    if (identical(trees, d$tree(.treeHolder(x, subsetName, dim), NULL))
-        && identical(links$nodeNum, seen$nodeNum)
-        && identical(links$whichTree, seen$whichTree))
-      next
-    if (!length(trees)) {
-      message("Subset '", subsetName, "' keeps its ", d$name, "; a ",
-              "subset can't store having none.")
-      next
-    }
-    if (length(trees) > 1 || anyNA(links$nodeLab))
+    if (length(trees) > 1 || anyNA(d$links(value)$nodeLab))
       stop("Subset '", subsetName, "' can store only a single ", d$name,
            " with a node label for each of its ", d$namesWord, "s.")
+  }
+  for (dim in changed) {
+    d <- .treeDim(dim)
+    trees <- d$tree(value, NULL)
+    if (!length(trees)) {
+      message("Subset '", subsetName, "' keeps its ", d$name, "; a subset ",
+              "always uses its own tree, a parent's or the main object's.")
+      next
+    }
     internal <- .internalAssay(.subsets(x)[[subsetName]])
     .internalAssay(.subsets(x)[[subsetName]]) <-
-      .replaceTree(internal, dim, trees[[1]], links$nodeLab)
+      .replaceTree(internal, dim, trees[[1]], d$links(value)$nodeLab)
     message("Subset '", subsetName, "' now stores its own ", d$name, ".")
   }
   x
+}
+
+# Whether value's trees and links along dim differ from those the subset
+# sees: the trees its links use, as TreeSummarizedExperiment's [ keeps
+.treeChanged <- function(x, subsetName, value, dim) {
+  d <- .treeDim(dim)
+  trees <- d$tree(value, NULL)
+  links <- d$links(value)
+  seen <- .subsetLinks(x, subsetName, dim)
+  if (!length(trees) || is.null(seen))
+    return(length(trees) > 0 || !is.null(seen))
+  held <- d$tree(.treeHolder(x, subsetName, dim), NULL)
+  !(identical(trees, held[names(held) %in% seen$whichTree])
+    && identical(links$nodeNum, seen$nodeNum)
+    && identical(links$whichTree, seen$whichTree))
 }
 
 # The nearest subset in subsetName's chain, itself first, that stores its

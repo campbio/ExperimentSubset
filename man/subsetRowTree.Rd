@@ -45,7 +45,12 @@ Get the row tree of a subset: its own, if it stores one;
   changing the main object or other subsets. Subsets made from it use
   the tree too, unless they store their own. \code{NULL} removes the
   subset's own tree. \code{setSubsetExperiment} also stores a row tree
-  that a tool changed.
+  that a tool changed, but not the removal of one, as a subset always
+  uses its own tree, a parent's or the main object's. A subset's own
+  tree is its only row tree, so get it with \code{whichTree = 1}.
+  \code{rbind} and \code{cbind} keep subsets' own trees;
+  \code{combineCols} and \code{combineRows} return classes without
+  trees (see \link{ExperimentSubset-combine}).
 }
 \examples{
 # a small TreeSummarizedExperiment with a tree on its rows

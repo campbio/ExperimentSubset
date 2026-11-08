@@ -766,7 +766,12 @@ setGeneric(
 #'   changing the main object or other subsets. Subsets made from it use
 #'   the tree too, unless they store their own. \code{NULL} removes the
 #'   subset's own tree. \code{setSubsetExperiment} also stores a row tree
-#'   that a tool changed.
+#'   that a tool changed, but not the removal of one, as a subset always
+#'   uses its own tree, a parent's or the main object's. A subset's own
+#'   tree is its only row tree, so get it with \code{whichTree = 1}.
+#'   \code{rbind} and \code{cbind} keep subsets' own trees;
+#'   \code{combineCols} and \code{combineRows} return classes without
+#'   trees (see \link{ExperimentSubset-combine}).
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get the tree
 #'   of, or to store it in.
@@ -830,7 +835,12 @@ setGeneric(
 #'   without changing the main object or other subsets. Subsets made from
 #'   it use the tree too, unless they store their own. \code{NULL} removes
 #'   the subset's own tree. \code{setSubsetExperiment} also stores a column
-#'   tree that a tool changed.
+#'   tree that a tool changed, but not the removal of one, as a subset
+#'   always uses its own tree, a parent's or the main object's. A subset's
+#'   own tree is its only column tree, so get it with \code{whichTree = 1}.
+#'   \code{rbind} and \code{cbind} keep subsets' own trees;
+#'   \code{combineCols} and \code{combineRows} return classes without
+#'   trees (see \link{ExperimentSubset-combine}).
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get the tree
 #'   of, or to store it in.
