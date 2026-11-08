@@ -1,5 +1,37 @@
 # Changelog
 
+## ExperimentSubset 1.23.45 (2026-11-08)
+
+- `assay(x, "s1", subsetAssayName = "x") <- value` now prints “Storing
+  assay inside subset ‘s1’.” only after the assay is stored. Before, it
+  printed the message first, so when `value` was rejected, for example
+  because its column names were in another order or because
+  `subsetAssayName` named an assay linked from the parent and `unlink`
+  wasn’t set, the message announced a store that didn’t happen, followed
+  by the error. Successful calls print the same message as before, now
+  after any message about unlinking
+  ([\#107](https://github.com/campbio/ExperimentSubset/issues/107))
+- [`setSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)
+  with a `subsetName` that isn’t a subset now gives the error “nope
+  subset does not exist. ‘subsetName’ must be the name of a subset.”,
+  the one most other functions already give, instead of “nope does not
+  exist in the subsets slot of the object. You need to create a new
+  subset with createSubset() function.”
+  [`subsetParent()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetParent.md)
+  with a `subsetName` that is neither a subset nor a “subset/assay” now
+  gives “nope subset does not exist. ‘subsetName’ must be the name of a
+  subset or a”subset/assay”.”, instead of “nope does not exist in the
+  subsets slot of the object.”
+  [`createSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md),
+  and
+  [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
+  with `subset =`, with a `parentAssay` that doesn’t exist now give
+  “‘parentAssay’ must be NULL or name an assay, a subset or
+  a”subset/assay”; ‘typo’ is none of these.”, instead of “Input
+  parentAssay does not exist.” Code that matched the old text needs the
+  new one
+  ([\#107](https://github.com/campbio/ExperimentSubset/issues/107))
+
 ## ExperimentSubset 1.23.44 (2026-11-08)
 
 - The tests use testthat edition 3, so `testthat (>= 3.0.0)` is now in

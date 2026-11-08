@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.44</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.45</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,13 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.45" id="experimentsubset-12345-2026-11-08">ExperimentSubset 1.23.45 (2026-11-08)<a class="anchor" aria-label="anchor" href="#experimentsubset-12345-2026-11-08"></a></h2>
+<ul><li>
+<code>assay(x, "s1", subsetAssayName = "x") &lt;- value</code> now prints “Storing assay inside subset ‘s1’.” only after the assay is stored. Before, it printed the message first, so when <code>value</code> was rejected, for example because its column names were in another order or because <code>subsetAssayName</code> named an assay linked from the parent and <code>unlink</code> wasn’t set, the message announced a store that didn’t happen, followed by the error. Successful calls print the same message as before, now after any message about unlinking (<a href="https://github.com/campbio/ExperimentSubset/issues/107" class="external-link">#107</a>)</li>
+<li>
+<code><a href="../reference/setSubsetAssay.html">setSubsetAssay()</a></code> with a <code>subsetName</code> that isn’t a subset now gives the error “nope subset does not exist. ‘subsetName’ must be the name of a subset.”, the one most other functions already give, instead of “nope does not exist in the subsets slot of the object. You need to create a new subset with createSubset() function.” <code><a href="../reference/subsetParent.html">subsetParent()</a></code> with a <code>subsetName</code> that is neither a subset nor a “subset/assay” now gives “nope subset does not exist. ‘subsetName’ must be the name of a subset or a”subset/assay”.”, instead of “nope does not exist in the subsets slot of the object.” <code><a href="../reference/createSubset.html">createSubset()</a></code>, and <code><a href="../reference/ExperimentSubset.html">ExperimentSubset()</a></code> with <code>subset =</code>, with a <code>parentAssay</code> that doesn’t exist now give “‘parentAssay’ must be NULL or name an assay, a subset or a”subset/assay”; ‘typo’ is none of these.”, instead of “Input parentAssay does not exist.” Code that matched the old text needs the new one (<a href="https://github.com/campbio/ExperimentSubset/issues/107" class="external-link">#107</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.44" id="experimentsubset-12344-2026-11-08">ExperimentSubset 1.23.44 (2026-11-08)<a class="anchor" aria-label="anchor" href="#experimentsubset-12344-2026-11-08"></a></h2>
 <ul><li>The tests use testthat edition 3, so <code>testthat (&gt;= 3.0.0)</code> is now in Suggests. Five tests that unlink an assay, whose message edition 3 no longer hides, now check it, such as “Subset ‘s1’ now stores its own ‘counts’, unlinked from the main assay ‘counts’.” No change in behavior (<a href="https://github.com/campbio/ExperimentSubset/issues/96" class="external-link">#96</a>)</li>
