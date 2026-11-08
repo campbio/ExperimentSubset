@@ -681,13 +681,18 @@ setGeneric(
 )
 
 #' @title Accessor method for rowLinks from subsets in ExperimentSubset objects
-#' @description Get \code{rowLinks} from a subset.
+#' @description Get \code{rowLinks} from a subset: the links of its rows to
+#'   the nodes of the tree that \code{\link{subsetRowTree}} returns.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{rowLinks} from.
-#' @param parentRowLinkData \code{logical(1)} Logical value indicating if parent
-#'   rowLinks should be combined or not. Default \code{FALSE}.
-#' @return The \code{rowLinks} from input object.
+#' @param parentRowLinkData \code{logical(1)} If \code{TRUE} (the default),
+#'   a subset without a row tree of its own, or one it was made from, gets
+#'   the links to the main object's row tree. If \code{FALSE}, it gets only
+#'   links to a row tree stored by the subset or one it was made from, and
+#'   \code{NULL} if there is none.
+#' @return The \code{rowLinks} of the subset's rows, with the subset's
+#'   rownames, or \code{NULL}.
 #' @rdname subsetRowLinks
 #' @importMethodsFrom TreeSummarizedExperiment rowLinks
 #' @export
@@ -702,10 +707,10 @@ setGeneric(
 #'                                 rowTree = tinyTree, colTree = tinyTree)
 #' es <- ExperimentSubset(tse)
 #' es <- createSubset(es, "subset1", rows = 1:5, cols = 1:5)
-#' subsetRowLinks(es, "subset1", parentRowLinkData = TRUE)
+#' subsetRowLinks(es, subsetName = "subset1")
 setGeneric(
   name = "subsetRowLinks",
-  def = function(x, subsetName, parentRowLinkData)
+  def = function(x, subsetName, parentRowLinkData = TRUE)
   {
     standardGeneric("subsetRowLinks")
   },
@@ -713,13 +718,18 @@ setGeneric(
 )
 
 #' @title Accessor method for colLinks from subsets in ExperimentSubset objects
-#' @description Get \code{colLinks} from a subset.
+#' @description Get \code{colLinks} from a subset: the links of its columns
+#'   to the nodes of the tree that \code{\link{subsetColTree}} returns.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get
 #'   \code{colLinks} from.
-#' @param parentColLinkData \code{logical(1)} Logical value indicating if parent
-#'   colLinks should be combined or not. Default \code{FALSE}.
-#' @return The \code{colLinks} from input object.
+#' @param parentColLinkData \code{logical(1)} If \code{TRUE} (the default),
+#'   a subset without a column tree of its own, or one it was made from,
+#'   gets the links to the main object's column tree. If \code{FALSE}, it
+#'   gets only links to a column tree stored by the subset or one it was
+#'   made from, and \code{NULL} if there is none.
+#' @return The \code{colLinks} of the subset's columns, with the subset's
+#'   column names, or \code{NULL}.
 #' @rdname subsetColLinks
 #' @importMethodsFrom TreeSummarizedExperiment colLinks
 #' @export
@@ -734,12 +744,137 @@ setGeneric(
 #'                                 rowTree = tinyTree, colTree = tinyTree)
 #' es <- ExperimentSubset(tse)
 #' es <- createSubset(es, "subset1", rows = 1:5, cols = 1:5)
-#' subsetColLinks(es, "subset1", parentColLinkData = TRUE)
+#' subsetColLinks(es, subsetName = "subset1")
 setGeneric(
   name = "subsetColLinks",
-  def = function(x, subsetName, parentColLinkData)
+  def = function(x, subsetName, parentColLinkData = TRUE)
   {
     standardGeneric("subsetColLinks")
+  },
+  signature = "x"
+)
+
+#' @title Get or set the rowTree of subsets in ExperimentSubset objects
+#' @description Get the row tree of a subset: its own, if it stores one;
+#'   otherwise that of the nearest subset it was made from that stores one;
+#'   otherwise the main object's. TreeSummarizedExperiment's
+#'   \code{rowTree} takes no \code{subsetName}, so subsets use
+#'   \code{subsetRowTree}.
+#'
+#'   \code{subsetRowTree<-} stores a tree of the subset's own, linking each
+#'   row to the node whose label is the row's name in the subset, without
+#'   changing the main object or other subsets. Subsets made from it use
+#'   the tree too, unless they store their own. \code{NULL} removes the
+#'   subset's own tree. \code{setSubsetExperiment} also stores a row tree
+#'   that a tool changed.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to get the tree
+#'   of, or to store it in.
+#' @param whichTree The name or position of the tree to get, as in
+#'   \code{rowTree}. Default \code{1}.
+#' @param value A \code{phylo} tree whose node labels include every rowname
+#'   of the subset, or \code{NULL}.
+#' @return For \code{subsetRowTree}, a \code{phylo} tree, or \code{NULL} if
+#'   there is none. For \code{subsetRowTree<-}, the input object with the
+#'   subset's tree stored.
+#' @rdname subsetRowTree
+#' @importMethodsFrom TreeSummarizedExperiment rowTree rowTree<-
+#' @export
+#' @examples
+#' # a small TreeSummarizedExperiment with a tree on its rows
+#' data("tinyTree", package = "TreeSummarizedExperiment")
+#' counts <- matrix(1:100, nrow = 10)
+#' rownames(counts) <- tinyTree$tip.label
+#' tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+#'                                 rowTree = tinyTree)
+#' es <- ExperimentSubset(tse)
+#' es <- createSubset(es, "subset1", rows = 1:5)
+#' # the subset uses the main object's tree
+#' subsetRowTree(es, subsetName = "subset1")
+#' # store a tree with the same labels on other tips
+#' ownTree <- tinyTree
+#' ownTree$tip.label <- rev(tinyTree$tip.label)
+#' subsetRowTree(es, subsetName = "subset1") <- ownTree
+#' subsetRowLinks(es, subsetName = "subset1")
+#' # the main object's links are unchanged
+#' rowLinks(es)[1:5, ]
+setGeneric(
+  name = "subsetRowTree",
+  def = function(x, subsetName, whichTree = 1)
+  {
+    standardGeneric("subsetRowTree")
+  },
+  signature = "x"
+)
+
+#' @rdname subsetRowTree
+#' @export
+setGeneric(
+  name = "subsetRowTree<-",
+  def = function(x, subsetName, value)
+  {
+    standardGeneric("subsetRowTree<-")
+  },
+  signature = "x"
+)
+
+#' @title Get or set the colTree of subsets in ExperimentSubset objects
+#' @description Get the column tree of a subset: its own, if it stores one;
+#'   otherwise that of the nearest subset it was made from that stores one;
+#'   otherwise the main object's. TreeSummarizedExperiment's
+#'   \code{colTree} takes no \code{subsetName}, so subsets use
+#'   \code{subsetColTree}.
+#'
+#'   \code{subsetColTree<-} stores a tree of the subset's own, linking each
+#'   column to the node whose label is the column's name in the subset,
+#'   without changing the main object or other subsets. Subsets made from
+#'   it use the tree too, unless they store their own. \code{NULL} removes
+#'   the subset's own tree. \code{setSubsetExperiment} also stores a column
+#'   tree that a tool changed.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to get the tree
+#'   of, or to store it in.
+#' @param whichTree The name or position of the tree to get, as in
+#'   \code{colTree}. Default \code{1}.
+#' @param value A \code{phylo} tree whose node labels include every column
+#'   name of the subset, or \code{NULL}.
+#' @return For \code{subsetColTree}, a \code{phylo} tree, or \code{NULL} if
+#'   there is none. For \code{subsetColTree<-}, the input object with the
+#'   subset's tree stored.
+#' @rdname subsetColTree
+#' @importMethodsFrom TreeSummarizedExperiment colTree colTree<-
+#' @export
+#' @examples
+#' # a small TreeSummarizedExperiment with a tree on its columns
+#' data("tinyTree", package = "TreeSummarizedExperiment")
+#' counts <- matrix(1:100, nrow = 10)
+#' colnames(counts) <- tinyTree$tip.label
+#' tse <- TreeSummarizedExperiment(assays = list(counts = counts),
+#'                                 colTree = tinyTree)
+#' es <- ExperimentSubset(tse)
+#' es <- createSubset(es, "subset1", cols = 1:5)
+#' # store a tree with the same labels on other tips
+#' ownTree <- tinyTree
+#' ownTree$tip.label <- rev(tinyTree$tip.label)
+#' subsetColTree(es, subsetName = "subset1") <- ownTree
+#' subsetColTree(es, subsetName = "subset1")
+#' subsetColLinks(es, subsetName = "subset1")
+setGeneric(
+  name = "subsetColTree",
+  def = function(x, subsetName, whichTree = 1)
+  {
+    standardGeneric("subsetColTree")
+  },
+  signature = "x"
+)
+
+#' @rdname subsetColTree
+#' @export
+setGeneric(
+  name = "subsetColTree<-",
+  def = function(x, subsetName, value)
+  {
+    standardGeneric("subsetColTree<-")
   },
   signature = "x"
 )

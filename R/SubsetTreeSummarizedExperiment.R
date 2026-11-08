@@ -555,9 +555,9 @@ setMethod(
 setMethod(
   f = "subsetRowLinks",
   signature = signature(x = "SubsetTreeSummarizedExperiment"),
-  definition = function(x, subsetName, parentRowLinkData)
+  definition = function(x, subsetName, parentRowLinkData = TRUE)
   {
-    .subsetRowLinkData(x, subsetName, parentRowLinkData)
+    .subsetLinks(x, subsetName, "row", parentRowLinkData)
   }
 )
 
@@ -565,9 +565,51 @@ setMethod(
 setMethod(
   f = "subsetColLinks",
   signature = signature(x = "SubsetTreeSummarizedExperiment"),
-  definition = function(x, subsetName, parentColLinkData)
+  definition = function(x, subsetName, parentColLinkData = TRUE)
   {
-    .subsetColLinkData(x, subsetName, parentColLinkData)
+    .subsetLinks(x, subsetName, "col", parentColLinkData)
+  }
+)
+
+#' @rdname subsetRowTree
+setMethod(
+  f = "subsetRowTree",
+  signature = signature(x = "SubsetTreeSummarizedExperiment"),
+  definition = function(x, subsetName, whichTree = 1)
+  {
+    .subsetTree(x, subsetName, "row", whichTree)
+  }
+)
+
+#' @rdname subsetRowTree
+setReplaceMethod(
+  f = "subsetRowTree",
+  signature = signature(x = "SubsetTreeSummarizedExperiment"),
+  definition = function(x, subsetName, value)
+  {
+    .subsetTree(x, subsetName, "row") <- value
+    x
+  }
+)
+
+#' @rdname subsetColTree
+setMethod(
+  f = "subsetColTree",
+  signature = signature(x = "SubsetTreeSummarizedExperiment"),
+  definition = function(x, subsetName, whichTree = 1)
+  {
+    .subsetTree(x, subsetName, "col", whichTree)
+  }
+)
+
+#' @rdname subsetColTree
+setReplaceMethod(
+  f = "subsetColTree",
+  signature = signature(x = "SubsetTreeSummarizedExperiment"),
+  definition = function(x, subsetName, value)
+  {
+    .subsetTree(x, subsetName, "col") <- value
+    x
   }
 )
 

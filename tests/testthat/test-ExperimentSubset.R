@@ -1031,6 +1031,184 @@ test_that("setSubsetExperiment stores changed spatialCoords only", {
   expect_equal(rownames(subsetSpatialCoords(es, "s2")), c("spot1", "spot2"))
 })
 
+# A TreeSummarizedExperiment with tinyTree on both rows and columns, and a
+# second tree with the same labels on other tips (#35)
+makeTreeTse <- function() {
+  data("tinyTree", package = "TreeSummarizedExperiment",
+       envir = environment())
+  counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
+                   dimnames = list(tinyTree$tip.label,
+                                   tinyTree$tip.label[1:6]))
+  TreeSummarizedExperiment(assays = list(counts = counts),
+                           rowTree = tinyTree, colTree = tinyTree)
+}
+makeOwnTree <- function(tse) {
+  tree <- rowTree(tse)
+  tree$tip.label <- rev(tree$tip.label)
+  tree
+}
+
+test_that("A subset can store its own rowTree and colTree", {
+  tse <- makeTreeTse()
+  ownTree <- makeOwnTree(tse)
+  es <- ExperimentSubset(tse)
+  es <- createSubset(es, "s1", rows = 2:7, cols = 1:4)
+  es <- createSubset(es, "s2", rows = 2:4, cols = 1:2, parentAssay = "s1")
+
+  # without trees of their own, subsets use the main object's
+  expect_identical(subsetRowTree(es, "s1"), rowTree(tse))
+  expect_identical(subsetColTree(es, "s2"), colTree(tse))
+  expect_equal(subsetRowLinks(es, "s1")$nodeNum, rowLinks(tse)$nodeNum[2:7])
+  expect_equal(subsetColLinks(es, "s2")$nodeNum, colLinks(tse)$nodeNum[1:2])
+  expect_null(subsetRowLinks(es, "s1", parentRowLinkData = FALSE))
+  expect_null(subsetColLinks(es, "s2", parentColLinkData = FALSE))
+
+  subsetRowTree(es, "s1") <- ownTree
+  expect_identical(subsetRowTree(es, "s1"), ownTree)
+  links <- subsetRowLinks(es, "s1")
+  expect_equal(links$nodeLab, rownames(tse)[2:7])
+  expect_equal(unname(links$nodeNum),
+               match(rownames(tse)[2:7], ownTree$tip.label))
+  expect_equal(rownames(links), rownames(tse)[2:7])
+  expect_equal(subsetRowLinks(es, "s1", parentRowLinkData = FALSE), links)
+  # the main object and the column tree are unchanged
+  expect_identical(rowTree(es), rowTree(tse))
+  expect_equal(rowLinks(es)$nodeNum, rowLinks(tse)$nodeNum)
+  expect_identical(subsetColTree(es, "s1"), colTree(tse))
+
+  # a subset made from s1 uses s1's tree
+  expect_identical(subsetRowTree(es, "s2"), ownTree)
+  expect_equal(subsetRowLinks(es, "s2")$nodeNum, links$nodeNum[2:4])
+  expect_equal(subsetRowLinks(es, "s2", parentRowLinkData = FALSE)$nodeNum,
+               links$nodeNum[2:4])
+  sub <- getSubsetExperiment(es, "s2")
+  expect_identical(rowTree(sub), ownTree)
+  expect_equal(rowLinks(sub)$nodeNum, links$nodeNum[2:4])
+  expect_identical(colTree(sub), colTree(tse))
+
+  # subsetting the main object keeps the subset's tree
+  cut <- es[c(1, 3:10), ]
+  expect_identical(subsetRowTree(cut, "s1"), ownTree)
+  expect_equal(subsetRowLinks(cut, "s1")$nodeLab, rownames(tse)[3:7])
+  # and so does combining it with another object
+  other <- createSubset(ExperimentSubset(tse), "o1", rows = 1:3, cols = 1:2)
+  combined <- rbind(es, other)
+  expect_identical(subsetRowTree(combined, "s1"), ownTree)
+  expect_equal(subsetRowLinks(combined, "s1")$nodeNum, links$nodeNum)
+  expect_identical(subsetRowTree(combined, "o1"), rowTree(tse))
+  combined <- cbind(es, other)
+  expect_identical(subsetRowTree(combined, "s1"), ownTree)
+  expect_equal(subsetRowLinks(combined, "s1")$nodeNum, links$nodeNum)
+
+  subsetColTree(es, "s1") <- ownTree
+  expect_identical(subsetColTree(es, "s1"), ownTree)
+  expect_equal(unname(subsetColLinks(es, "s1")$nodeNum),
+               match(colnames(tse)[1:4], ownTree$tip.label))
+  expect_identical(colTree(es), colTree(tse))
+
+  # NULL goes back to the main object's tree
+  subsetRowTree(es, "s1") <- NULL
+  expect_identical(subsetRowTree(es, "s1"), rowTree(tse))
+  expect_equal(subsetRowLinks(es, "s1")$nodeNum, rowLinks(tse)$nodeNum[2:7])
+  expect_identical(subsetRowTree(es, "s1", whichTree = "phylo"),
+                   rowTree(tse))
+})
+
+test_that("subsetRowTree<- and subsetColTree<- check value", {
+  tse <- makeTreeTse()
+  es <- ExperimentSubset(tse)
+  es <- createSubset(es, "s1", rows = 2:7, cols = 1:4)
+  expect_error(subsetRowTree(es, "s1") <- list(),
+               regexp = "'value' must be a phylo tree or NULL.", fixed = TRUE)
+  expect_error(subsetColTree(es, "s1") <- "tree",
+               regexp = "'value' must be a phylo tree or NULL.", fixed = TRUE)
+  # a tree missing one of the rows is refused, not used to drop the row
+  partTree <- rowTree(tse)
+  partTree$tip.label[partTree$tip.label == rownames(tse)[3]] <- "other"
+  expect_error(subsetRowTree(es, "s1") <- partTree,
+               regexp = paste0("Every rowname of subset 's1' must be a node ",
+                               "label of 'value'. Not found: ",
+                               rownames(tse)[3], "."), fixed = TRUE)
+  expect_equal(nrow(getSubsetAssay(es, "s1")), 6)
+  subsetRownames(es, "s1") <- paste0("row", 1:6)
+  expect_error(subsetRowTree(es, "s1") <- rowTree(tse),
+               regexp = "Not found: row1, row2, row3, row4, row5, row6.",
+               fixed = TRUE)
+  noNames <- TreeSummarizedExperiment(assays = list(counts = unname(
+    assay(tse))))
+  noNames <- createSubset(ExperimentSubset(noNames), "s1", rows = 1:3)
+  expect_error(subsetRowTree(noNames, "s1") <- rowTree(tse),
+               regexp = paste0("Subset 's1' has no rownames to match to the ",
+                               "node labels of 'value'."), fixed = TRUE)
+  expect_error(subsetRowTree(es, "nope") <- rowTree(tse),
+               regexp = "nope subset does not exist")
+  expect_error(subsetColTree(es, "nope"),
+               regexp = "nope subset does not exist")
+})
+
+test_that("setSubsetExperiment stores changed trees only", {
+  tse <- makeTreeTse()
+  ownTree <- makeOwnTree(tse)
+  es <- ExperimentSubset(tse)
+  es <- createSubset(es, "s1", rows = 2:7, cols = 1:4)
+
+  sub <- getSubsetExperiment(es, "s1")
+  expect_no_message(es <- setSubsetExperiment(es, "s1", sub))
+  expect_null(subsetRowLinks(es, "s1", parentRowLinkData = FALSE))
+
+  rowTree(sub) <- ownTree
+  expect_message(es <- setSubsetExperiment(es, "s1", sub),
+                 "Subset 's1' now stores its own rowTree.", fixed = TRUE)
+  expect_identical(subsetRowTree(es, "s1"), ownTree)
+  expect_equal(subsetRowLinks(es, "s1", parentRowLinkData = FALSE)$nodeNum,
+               rowLinks(sub)$nodeNum)
+  expect_identical(rowTree(es), rowTree(tse))
+  expect_null(subsetColLinks(es, "s1", parentColLinkData = FALSE))
+  # the subset's own tree comes back unchanged
+  expect_no_message(
+    es <- setSubsetExperiment(es, "s1", getSubsetExperiment(es, "s1"))
+  )
+
+  sub <- getSubsetExperiment(es, "s1")
+  colTree(sub) <- ownTree
+  expect_message(es <- setSubsetExperiment(es, "s1", sub),
+                 "Subset 's1' now stores its own colTree.", fixed = TRUE)
+  expect_identical(subsetColTree(es, "s1"), ownTree)
+
+  # rows renamed in the subset still link by node label
+  subsetRownames(es, "s1") <- paste0("row", 1:6)
+  subsetRowTree(es, "s1") <- NULL
+  sub <- getSubsetExperiment(es, "s1")
+  sub <- changeTree(sub, rowTree = ownTree,
+                    rowNodeLab = rowLinks(sub)$nodeLab)
+  expect_message(es <- setSubsetExperiment(es, "s1", sub),
+                 "Subset 's1' now stores its own rowTree.", fixed = TRUE)
+  links <- subsetRowLinks(es, "s1")
+  expect_equal(links$nodeLab, rownames(tse)[2:7])
+  expect_equal(rownames(links), paste0("row", 1:6))
+  expect_identical(subsetRowTree(es, "s1"), ownTree)
+
+  # a removed tree can't be stored, and the subset keeps its tree
+  sub <- getSubsetExperiment(es, "s1")
+  rowTree(sub) <- NULL
+  expect_message(es <- setSubsetExperiment(es, "s1", sub),
+                 paste0("Subset 's1' keeps its rowTree; a subset can't ",
+                        "store having none."), fixed = TRUE)
+  expect_identical(subsetRowTree(es, "s1"), ownTree)
+
+  # an object with two row trees can't be stored
+  subsetRowTree(es, "s1") <- NULL
+  sub <- getSubsetExperiment(es, "s1")
+  ownSub <- changeTree(sub, rowTree = ownTree,
+                       rowNodeLab = rowLinks(sub)$nodeLab)
+  twoTrees <- rbind(sub[1:3, ], ownSub[4:6, ])
+  expect_error(setSubsetExperiment(es, "s1", twoTrees),
+               regexp = paste0("Subset 's1' can store only a single rowTree ",
+                               "with a node label for each of its ",
+                               "rownames."), fixed = TRUE)
+  expect_identical(subsetRowTree(es, "s1"), rowTree(tse))
+})
+
 test_that("Subset spatialData is deprecated, its setter defunct", {
   counts <- matrix(as.numeric(seq_len(60)), nrow = 10,
                    dimnames = list(paste0("gene", 1:10),

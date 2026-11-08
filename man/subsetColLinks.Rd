@@ -6,9 +6,9 @@
 \alias{subsetColLinks,SubsetTreeSummarizedExperiment-method}
 \title{Accessor method for colLinks from subsets in ExperimentSubset objects}
 \usage{
-subsetColLinks(x, subsetName, parentColLinkData)
+subsetColLinks(x, subsetName, parentColLinkData = TRUE)
 
-\S4method{subsetColLinks}{SubsetTreeSummarizedExperiment}(x, subsetName, parentColLinkData)
+\S4method{subsetColLinks}{SubsetTreeSummarizedExperiment}(x, subsetName, parentColLinkData = TRUE)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
@@ -16,14 +16,19 @@ subsetColLinks(x, subsetName, parentColLinkData)
 \item{subsetName}{\code{character(1)} Name of the subset to get
 \code{colLinks} from.}
 
-\item{parentColLinkData}{\code{logical(1)} Logical value indicating if parent
-colLinks should be combined or not. Default \code{FALSE}.}
+\item{parentColLinkData}{\code{logical(1)} If \code{TRUE} (the default),
+a subset without a column tree of its own, or one it was made from,
+gets the links to the main object's column tree. If \code{FALSE}, it
+gets only links to a column tree stored by the subset or one it was
+made from, and \code{NULL} if there is none.}
 }
 \value{
-The \code{colLinks} from input object.
+The \code{colLinks} of the subset's columns, with the subset's
+  column names, or \code{NULL}.
 }
 \description{
-Get \code{colLinks} from a subset.
+Get \code{colLinks} from a subset: the links of its columns
+  to the nodes of the tree that \code{\link{subsetColTree}} returns.
 }
 \examples{
 # a small TreeSummarizedExperiment with a tree on both rows and columns
@@ -36,5 +41,5 @@ tse <- TreeSummarizedExperiment(assays = list(counts = counts),
                                 rowTree = tinyTree, colTree = tinyTree)
 es <- ExperimentSubset(tse)
 es <- createSubset(es, "subset1", rows = 1:5, cols = 1:5)
-subsetColLinks(es, "subset1", parentColLinkData = TRUE)
+subsetColLinks(es, subsetName = "subset1")
 }
