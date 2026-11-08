@@ -1084,6 +1084,7 @@ test_that("A subset can store its own rowTree and colTree", {
   sub <- getSubsetExperiment(es, "s2")
   expect_identical(rowTree(sub), ownTree)
   expect_equal(rowLinks(sub)$nodeNum, links$nodeNum[2:4])
+  expect_equal(rownames(rowLinks(sub)), rownames(sub))
   expect_identical(colTree(sub), colTree(tse))
 
   # subsetting the main object keeps the subset's tree
@@ -1147,6 +1148,13 @@ test_that("subsetRowTree<- and subsetColTree<- check value", {
                                "label of 'value'. Not found: ",
                                rownames(tse)[3], "."), fixed = TRUE)
   expect_equal(nrow(getSubsetAssay(es, "s1")), 6)
+  # rows are linked by label, so each must label only one node
+  repeatedTree <- rowTree(tse)
+  repeatedTree$node.label[1] <- rownames(tse)[3]
+  expect_error(subsetRowTree(es, "s1") <- repeatedTree,
+               regexp = paste0("Each rowname of subset 's1' must be the label ",
+                               "of only one node of 'value'. Repeated: ",
+                               rownames(tse)[3], "."), fixed = TRUE)
   subsetRownames(es, "s1") <- paste0("row", 1:6)
   expect_error(subsetRowTree(es, "s1") <- rowTree(tse),
                regexp = "Not found: row1, row2, row3, row4, row5, row6.",
@@ -1159,6 +1167,12 @@ test_that("subsetRowTree<- and subsetColTree<- check value", {
                                "node labels of 'value'."), fixed = TRUE)
   expect_error(subsetRowTree(es, "nope") <- rowTree(tse),
                regexp = "nope subset does not exist")
+  expect_error(subsetRowLinks(es, "s1", parentRowLinkData = "TRUE"),
+               regexp = "'parentRowLinkData' must be TRUE or FALSE.",
+               fixed = TRUE)
+  expect_error(subsetColLinks(es, "s1", parentColLinkData = NA),
+               regexp = "'parentColLinkData' must be TRUE or FALSE.",
+               fixed = TRUE)
   expect_error(subsetColTree(es, "nope"),
                regexp = "nope subset does not exist")
 })
@@ -1222,8 +1236,8 @@ test_that("setSubsetExperiment stores changed trees only", {
   twoTrees <- rbind(sub[1:3, ], ownSub[4:6, ])
   expect_error(setSubsetExperiment(es, "s1", twoTrees),
                regexp = paste0("Subset 's1' can store only a single rowTree ",
-                               "with a node label for each of its ",
-                               "rownames."), fixed = TRUE)
+                               "with a node label for each of its rownames ",
+                               "that labels only one node."), fixed = TRUE)
   expect_identical(subsetRowTree(es, "s1"), rowTree(tse))
 })
 
@@ -1243,6 +1257,16 @@ test_that("setSubsetExperiment checks trees first and keeps a child linked", {
     expect_error(setSubsetExperiment(es, "s1", twoColTrees),
                  regexp = "can store only a single colTree", fixed = TRUE)
   )
+  # nor a tree with a label on more than one node of those the rows use
+  repeatedTree <- ownTree
+  repeatedTree$node.label[1] <- rownames(sub)[2]
+  repeatedSub <- suppressWarnings(
+    changeTree(sub, rowTree = repeatedTree, rowNodeLab = rownames(sub))
+  )
+  expect_error(setSubsetExperiment(es, "s1", repeatedSub),
+               regexp = paste0("Subset 's1' can store only a single rowTree ",
+                               "with a node label for each of its rownames ",
+                               "that labels only one node."), fixed = TRUE)
 
   # a subset made from s1 keeps using s1's tree through a round trip
   subsetRowTree(es, "s1") <- ownTree
@@ -1269,6 +1293,12 @@ test_that("setSubsetExperiment keeps following a main object's two trees", {
   )
   expect_null(subsetRowLinks(es, "s1", parentRowLinkData = FALSE))
   expect_identical(subsetRowTree(es, "s1", whichTree = 2), ownTree)
+  # rows of the second tree first, so [ puts that tree first
+  es <- createSubset(es, "s2", rows = c(8, 1))
+  expect_no_message(
+    es <- setSubsetExperiment(es, "s2", getSubsetExperiment(es, "s2"))
+  )
+  expect_null(subsetRowLinks(es, "s2", parentRowLinkData = FALSE))
 })
 
 test_that("Subset spatialData is deprecated, its setter defunct", {
