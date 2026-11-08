@@ -333,11 +333,14 @@ makeHvgFixture <- function() {
                      cols = keptCells, parentAssay = "counts")
   filteredCounts <- assay(es, "filteredAssay")
   filteredSizeFactors <- scrapper::centerSizeFactors(colSums(filteredCounts))
-  assay(
-    es, "filteredAssay", withDimnames = FALSE,
-    subsetAssayName = "filteredAssayNormalized"
-  ) <- scrapper::normalizeCounts(
-    filteredCounts, size.factors = filteredSizeFactors
+  # a fixture, so its "Storing assay inside subset" message isn't tested
+  suppressMessages(
+    assay(
+      es, "filteredAssay", withDimnames = FALSE,
+      subsetAssayName = "filteredAssayNormalized"
+    ) <- scrapper::normalizeCounts(
+      filteredCounts, size.factors = filteredSizeFactors
+    )
   )
   geneVariances <- scrapper::modelGeneVariances(
     assay(es, "filteredAssay/filteredAssayNormalized")
@@ -1544,7 +1547,12 @@ test_that("Subsets see their parent's assays as linked views", {
   tcellScaled <- tcellLog + 1
   expect_error(setSubsetAssay(es, "tcells", tcellScaled, "scaled"),
                regexp = "linked to 'filtered/scaled'")
-  es <- setSubsetAssay(es, "tcells", tcellScaled, "scaled", unlink = TRUE)
+  expect_message(
+    es <- setSubsetAssay(es, "tcells", tcellScaled, "scaled", unlink = TRUE),
+    regexp = paste0("Subset 'tcells' now stores its own 'scaled', ",
+                    "unlinked from 'filtered/scaled'."),
+    fixed = TRUE
+  )
   expect_equal(as.matrix(assay(es, "tcells/scaled")), tcellScaled)
   # the parent's assay is unchanged
   expect_equal(as.matrix(assay(es, "filtered/scaled")),
@@ -1611,7 +1619,12 @@ test_that("A subset's own assay is used by it and its descendants", {
   es <- createSubset(es, "Q", rows = 1:5, cols = 1:4)
   mainCounts <- as.matrix(assay(es, "counts"))
   pCounts <- as.matrix(assay(es, "P")) + 100
-  es <- setSubsetAssay(es, "P", pCounts, "counts", unlink = TRUE)
+  expect_message(
+    es <- setSubsetAssay(es, "P", pCounts, "counts", unlink = TRUE),
+    regexp = paste0("Subset 'P' now stores its own 'counts', unlinked ",
+                    "from the main assay 'counts'."),
+    fixed = TRUE
+  )
   # P's primary assay is now its own counts
   expect_equal(as.matrix(assay(es, "P")), pCounts)
   es <- createSubset(es, "C", rows = 1:2, cols = 1:2, parentAssay = "P")
@@ -1630,7 +1643,12 @@ test_that("assay<- stores linked names only with unlink = TRUE", {
   filteredLog <- as.matrix(assay(es, "filtered/logcounts"))
   expect_error(assay(es, "filtered/logcounts") <- filteredLog,
                regexp = "unlink = TRUE")
-  assay(es, "filtered/logcounts", unlink = TRUE) <- filteredLog + 1
+  expect_message(
+    assay(es, "filtered/logcounts", unlink = TRUE) <- filteredLog + 1,
+    regexp = paste0("Subset 'filtered' now stores its own 'logcounts', ",
+                    "unlinked from the main assay 'logcounts'."),
+    fixed = TRUE
+  )
   expect_equal(as.matrix(assay(es, "filtered/logcounts")),
                filteredLog + 1)
   plusTwo <- filteredLog + 2
@@ -1803,8 +1821,11 @@ test_that("setSubsetAssay keeps the subset's row and column names", {
   rownames(renamed) <- paste0("other", 1:5)
   expect_error(setSubsetAssay(es, "s1", renamed, "renamed"),
                regexp = "inputMatrix")
-  expect_error(assay(es, "s1", subsetAssayName = "x") <- reordered,
-               regexp = "inputMatrix")
+  # assay<- says it is storing the assay before setSubsetAssay() stops
+  suppressMessages(
+    expect_error(assay(es, "s1", subsetAssayName = "x") <- reordered,
+                 regexp = "inputMatrix")
+  )
   expect_equal(subsetColnames(es, "s1"), cells)
 
   # a matrix of the wrong size gets a dimension error, not a names error
@@ -2133,7 +2154,12 @@ test_that("Changed linked assays are stored only with unlink", {
   logcounts(sub) <- changed
   expect_error(setSubsetExperiment(es, "s1", sub),
                regexp = "logcounts.*unlink = TRUE")
-  es <- setSubsetExperiment(es, "s1", sub, unlink = TRUE)
+  expect_message(
+    es <- setSubsetExperiment(es, "s1", sub, unlink = TRUE),
+    regexp = paste0("Subset 's1' now stores its own 'logcounts', ",
+                    "unlinked from the main assay 'logcounts'."),
+    fixed = TRUE
+  )
   expect_equal(subsetAssayNames(es), c("s1", "s1/logcounts"))
   expect_equal(as.matrix(assay(es, "s1/logcounts")), changed)
   # the main object's logcounts is unchanged
@@ -2206,7 +2232,12 @@ test_that("setSubsetExperiment keeps assays that descendants use", {
   es <- ExperimentSubset(simSce)
   es <- createSubset(es, "s1", rows = 1:20, cols = 1:10)
   ownCounts <- as.matrix(assay(es, "s1")) * 100
-  es <- setSubsetAssay(es, "s1", ownCounts, "counts", unlink = TRUE)
+  expect_message(
+    es <- setSubsetAssay(es, "s1", ownCounts, "counts", unlink = TRUE),
+    regexp = paste0("Subset 's1' now stores its own 'counts', unlinked ",
+                    "from the main assay 'counts'."),
+    fixed = TRUE
+  )
   es <- createSubset(es, "child", rows = 1:5, cols = 1:4, parentAssay = "s1")
   s1 <- getSubsetExperiment(es, "s1")
   assay(s1, "counts") <- NULL
