@@ -1,14 +1,17 @@
 # Accessor method for rowLinks from subsets in ExperimentSubset objects
 
-Get `rowLinks` from a subset.
+Get `rowLinks` from a subset: the links of its rows to the nodes of the
+tree that
+[`subsetRowTree`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetRowTree.md)
+returns.
 
 ## Usage
 
 ``` r
-subsetRowLinks(x, subsetName, parentRowLinkData)
+subsetRowLinks(x, subsetName, parentRowLinkData = TRUE)
 
 # S4 method for class 'SubsetTreeSummarizedExperiment'
-subsetRowLinks(x, subsetName, parentRowLinkData)
+subsetRowLinks(x, subsetName, parentRowLinkData = TRUE)
 ```
 
 ## Arguments
@@ -23,12 +26,15 @@ subsetRowLinks(x, subsetName, parentRowLinkData)
 
 - parentRowLinkData:
 
-  `logical(1)` Logical value indicating if parent rowLinks should be
-  combined or not. Default `FALSE`.
+  `logical(1)` If `TRUE` (the default), a subset without a row tree of
+  its own, or one it was made from, gets the links to the main object's
+  row tree. If `FALSE`, it gets only links to a row tree stored by the
+  subset or one it was made from, and `NULL` if there is none.
 
 ## Value
 
-The `rowLinks` from input object.
+The `rowLinks` of the subset's rows, with the subset's rownames, or
+`NULL`.
 
 ## Examples
 
@@ -43,7 +49,7 @@ tse <- TreeSummarizedExperiment(assays = list(counts = counts),
                                 rowTree = tinyTree, colTree = tinyTree)
 es <- ExperimentSubset(tse)
 es <- createSubset(es, "subset1", rows = 1:5, cols = 1:5)
-subsetRowLinks(es, "subset1", parentRowLinkData = TRUE)
+subsetRowLinks(es, subsetName = "subset1")
 #> LinkDataFrame with 5 rows and 5 columns
 #>        nodeLab nodeLab_alias   nodeNum    isLeaf   whichTree
 #>    <character>   <character> <integer> <logical> <character>

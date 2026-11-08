@@ -1,14 +1,17 @@
 # Accessor method for colLinks from subsets in ExperimentSubset objects
 
-Get `colLinks` from a subset.
+Get `colLinks` from a subset: the links of its columns to the nodes of
+the tree that
+[`subsetColTree`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColTree.md)
+returns.
 
 ## Usage
 
 ``` r
-subsetColLinks(x, subsetName, parentColLinkData)
+subsetColLinks(x, subsetName, parentColLinkData = TRUE)
 
 # S4 method for class 'SubsetTreeSummarizedExperiment'
-subsetColLinks(x, subsetName, parentColLinkData)
+subsetColLinks(x, subsetName, parentColLinkData = TRUE)
 ```
 
 ## Arguments
@@ -23,12 +26,16 @@ subsetColLinks(x, subsetName, parentColLinkData)
 
 - parentColLinkData:
 
-  `logical(1)` Logical value indicating if parent colLinks should be
-  combined or not. Default `FALSE`.
+  `logical(1)` If `TRUE` (the default), a subset without a column tree
+  of its own, or one it was made from, gets the links to the main
+  object's column tree. If `FALSE`, it gets only links to a column tree
+  stored by the subset or one it was made from, and `NULL` if there is
+  none.
 
 ## Value
 
-The `colLinks` from input object.
+The `colLinks` of the subset's columns, with the subset's column names,
+or `NULL`.
 
 ## Examples
 
@@ -43,7 +50,7 @@ tse <- TreeSummarizedExperiment(assays = list(counts = counts),
                                 rowTree = tinyTree, colTree = tinyTree)
 es <- ExperimentSubset(tse)
 es <- createSubset(es, "subset1", rows = 1:5, cols = 1:5)
-subsetColLinks(es, "subset1", parentColLinkData = TRUE)
+subsetColLinks(es, subsetName = "subset1")
 #> LinkDataFrame with 5 rows and 5 columns
 #>        nodeLab nodeLab_alias   nodeNum    isLeaf   whichTree
 #>    <character>   <character> <integer> <logical> <character>

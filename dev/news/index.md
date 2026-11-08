@@ -1,5 +1,55 @@
 # Changelog
 
+## ExperimentSubset 1.23.47 (2026-11-08)
+
+- New `subsetRowTree(x, subsetName)` and `subsetColTree(x, subsetName)`
+  return the row or column tree of a TreeSummarizedExperiment subset:
+  its own, if it stores one; otherwise that of the nearest subset it was
+  made from that stores one; otherwise the main object’s. `whichTree`
+  picks one of several trees, as in
+  [`rowTree()`](https://rdrr.io/pkg/TreeSummarizedExperiment/man/TreeSummarizedExperiment-accessor.html).
+  New `subsetRowTree(x, subsetName) <- value` and `subsetColTree<-`
+  store a `phylo` tree as the subset’s own, linking each row or column
+  to the node labelled with its name in the subset, without changing the
+  main object or other subsets; `NULL` removes it. Every row or column
+  name of the subset must be a node label of the tree, or it’s an error
+  such as “Every rowname of subset ‘s1’ must be a node label of ‘value’.
+  Not found: t3.”; TreeSummarizedExperiment’s `rowTree<-` would instead
+  drop those rows. Subsets made from a subset with its own tree use that
+  tree, cut to their rows or columns, and
+  [`getSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md)
+  returns it with its links.
+  [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md)
+  now stores a row or column tree that a tool changed in the object from
+  [`getSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md)
+  as the subset’s own, with the message “Subset ‘s1’ now stores its own
+  rowTree.”; before, a changed tree was dropped without a message.
+  Unchanged trees aren’t stored, so the subset still follows the main
+  object’s. A subset can store only one tree per dimension, with a node
+  label for each row or column, so an object with two row trees, or with
+  a label on more than one node of those its rows use, is an error; a
+  removed tree isn’t stored, with the message “Subset ‘s1’ keeps its
+  rowTree; a subset always uses its own tree, a parent’s or the main
+  object’s.” [`rbind()`](https://rdrr.io/r/base/cbind.html) and
+  [`cbind()`](https://rdrr.io/r/base/cbind.html) keep subsets’ own
+  trees. Rows and columns are linked by node label, so each must label
+  only one node of the tree, or it’s an error. This is a change:
+  [`subsetRowLinks()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetRowLinks.md)
+  and
+  [`subsetColLinks()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColLinks.md)
+  now default to `parentRowLinkData = TRUE` and
+  `parentColLinkData = TRUE`, and return the links to the tree that
+  [`subsetRowTree()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetRowTree.md)
+  or
+  [`subsetColTree()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetColTree.md)
+  returns. Before, they defaulted to `FALSE` and returned `NULL`,
+  because subsets never had trees of their own; code that relied on
+  `NULL` needs `parentRowLinkData = FALSE`, which now returns only links
+  to a tree stored by the subset or one it was made from. Both arguments
+  must now be `TRUE` or `FALSE`; before, `NULL`, `NA` or another value
+  meant `FALSE`.
+  ([\#35](https://github.com/campbio/ExperimentSubset/issues/35))
+
 ## ExperimentSubset 1.23.46 (2026-11-08)
 
 - New `subsetImgData(x, subsetName)` returns the images of a

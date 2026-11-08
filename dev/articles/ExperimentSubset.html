@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.46</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.47</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -557,8 +557,11 @@ with the subsets by providing the optional <code>subsetName</code>
 parameter. For <code>SpatialExperiment</code> objects,
 <code>subsetSpatialCoords&lt;-</code> also stores a subset’s own
 coordinates, for example after a transformation, and
-<code><a href="../reference/subsetImgData.html">subsetImgData()</a></code> returns the images of the subset’s
-samples.</p>
+<code><a href="../reference/subsetImgData.html">subsetImgData()</a></code> returns the images of the subset’s samples.
+For <code>TreeSummarizedExperiment</code> objects,
+<code><a href="../reference/subsetRowTree.html">subsetRowTree()</a></code> and <code><a href="../reference/subsetColTree.html">subsetColTree()</a></code> return the
+tree a subset uses, and <code>subsetRowTree&lt;-</code> and
+<code>subsetColTree&lt;-</code> store a tree of its own.</p>
 <div class="section level4">
 <h4 id="assay-get-assay-set-inherited-methods">assay-get &amp; assay-set inherited methods<a class="anchor" aria-label="anchor" href="#assay-get-assay-set-inherited-methods"></a>
 </h4>
@@ -874,6 +877,10 @@ object:</p>
 <code>colData</code> with <code>subsetName</code>)</li>
 <li><code>subsetRowLinks</code></li>
 <li><code>subsetColLinks</code></li>
+<li><code>subsetRowTree</code></li>
+<li><code>subsetRowTree&lt;-</code></li>
+<li><code>subsetColTree</code></li>
+<li><code>subsetColTree&lt;-</code></li>
 <li><code>spatialCoords</code></li>
 <li>
 <code>spatialData</code> (deprecated with <code>subsetName</code>;
@@ -1004,7 +1011,7 @@ keeping all subsets in one object.</li>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] ExperimentSubset_1.23.46        TreeSummarizedExperiment_2.21.0</span></span>
+<span><span class="co">##  [1] ExperimentSubset_1.23.47        TreeSummarizedExperiment_2.21.0</span></span>
 <span><span class="co">##  [3] Biostrings_2.81.9               XVector_0.53.0                 </span></span>
 <span><span class="co">##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    </span></span>
 <span><span class="co">##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 </span></span>

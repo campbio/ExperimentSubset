@@ -35,6 +35,7 @@
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetAssayNames.html</loc></url>
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetColData.html</loc></url>
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetColLinks.html</loc></url>
+<url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetColTree.html</loc></url>
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetColnames.html</loc></url>
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetCount.html</loc></url>
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.html</loc></url>
@@ -43,6 +44,7 @@
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetParent.html</loc></url>
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetRowData.html</loc></url>
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetRowLinks.html</loc></url>
+<url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetRowTree.html</loc></url>
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetRownames.html</loc></url>
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialCoords.html</loc></url>
 <url><loc>https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.html</loc></url>
