@@ -132,9 +132,11 @@ SpatialExperiment, for a subset.
   : Accessor method for colLinks from subsets in ExperimentSubset
   objects
 - [`subsetSpatialCoords()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialCoords.md)
+  [`` `subsetSpatialCoords<-`() ``](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialCoords.md)
   [`spatialCoords(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialCoords.md)
-  : Accessor method for spatialCoords from subsets in ExperimentSubset
-  objects
+  : Get or set spatialCoords of subsets in ExperimentSubset objects
+- [`subsetImgData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetImgData.md)
+  : Accessor method for imgData of subsets in ExperimentSubset objects
 - [`subsetSpatialData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md)
   [`` `subsetSpatialData<-`() ``](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md)
   [`spatialData(`*`<SubsetSpatialExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialData.md)

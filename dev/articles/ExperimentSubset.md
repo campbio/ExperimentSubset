@@ -453,7 +453,11 @@ The methods include `rowData`, `rowData<-`, `colData`, `colData<-`,
 `altExp<-`, `altExps`, `altExps<-`, `altExpNames` and `altExpNames<-`,
 and for `SpatialExperiment` objects `spatialCoords`. All of these
 methods can be used with the subsets by providing the optional
-`subsetName` parameter.
+`subsetName` parameter. For `SpatialExperiment` objects,
+`subsetSpatialCoords<-` also stores a subset’s own coordinates, for
+example after a transformation, and
+[`subsetImgData()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetImgData.md)
+returns the images of the subset’s samples.
 
 #### assay-get & assay-set inherited methods
 
@@ -784,15 +788,17 @@ Show the current condition of the `ExperimentSubset` object:
 41. `altExpNames`
 42. `altExpNames<-`
 43. `subsetSpatialCoords`
-44. `subsetSpatialData` (deprecated; use `subsetColData`)
-45. `subsetSpatialData<-` (defunct; use `colData` with `subsetName`)
-46. `subsetRowLinks`
-47. `subsetColLinks`
-48. `spatialCoords`
-49. `spatialData` (deprecated with `subsetName`; use `subsetColData`)
-50. `spatialData<-`
-51. `rowLinks`
-52. `colLinks`
+44. `subsetSpatialCoords<-`
+45. `subsetImgData`
+46. `subsetSpatialData` (deprecated; use `subsetColData`)
+47. `subsetSpatialData<-` (defunct; use `colData` with `subsetName`)
+48. `subsetRowLinks`
+49. `subsetColLinks`
+50. `spatialCoords`
+51. `spatialData` (deprecated with `subsetName`; use `subsetColData`)
+52. `spatialData<-`
+53. `rowLinks`
+54. `colLinks`
 
 ## Implementation Details
 
@@ -896,7 +902,7 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.45        TreeSummarizedExperiment_2.21.0
+    ##  [1] ExperimentSubset_1.23.46        TreeSummarizedExperiment_2.21.0
     ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
     ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
     ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 

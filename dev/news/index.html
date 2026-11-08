@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.45</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.46</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,10 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.46" id="experimentsubset-12346-2026-11-08">ExperimentSubset 1.23.46 (2026-11-08)<a class="anchor" aria-label="anchor" href="#experimentsubset-12346-2026-11-08"></a></h2>
+<ul><li>New <code>subsetImgData(x, subsetName)</code> returns the images of a SpatialExperiment subset: the rows of the main object’s <code><a href="https://rdrr.io/pkg/SpatialExperiment/man/SpatialExperiment-methods.html" class="external-link">imgData()</a></code> for the samples of the subset’s spots, looked up on each read. Before, a subset’s images had to be filtered from the main object’s by <code>sample_id</code> by hand. New <code>subsetSpatialCoords(x, subsetName) &lt;- value</code> stores a subset’s own spatial coordinates, such as after a transformation, without changing the main object’s; <code>value</code> is a numeric matrix with one row per spot and one or more columns, and <code>NULL</code> removes them. A subset with its own coordinates returns them from <code><a href="../reference/subsetSpatialCoords.html">subsetSpatialCoords()</a></code>, <code>spatialCoords(x, subsetName =)</code> and <code><a href="../reference/getSubsetExperiment.html">getSubsetExperiment()</a></code>, and subsets made from it see them, cut to their spots. <code><a href="../reference/setSubsetExperiment.html">setSubsetExperiment()</a></code> now stores coordinates that a tool changed in the object from <code><a href="../reference/getSubsetExperiment.html">getSubsetExperiment()</a></code> as the subset’s own, with the message “Subset ‘s1’ now stores its own spatialCoords.”; unchanged coordinates aren’t stored, so the subset still follows the main object’s. Subsets without their own coordinates are unchanged (<a href="https://github.com/campbio/ExperimentSubset/issues/72" class="external-link">#72</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.45" id="experimentsubset-12345-2026-11-08">ExperimentSubset 1.23.45 (2026-11-08)<a class="anchor" aria-label="anchor" href="#experimentsubset-12345-2026-11-08"></a></h2>
 <ul><li>

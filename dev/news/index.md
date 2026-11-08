@@ -1,5 +1,31 @@
 # Changelog
 
+## ExperimentSubset 1.23.46 (2026-11-08)
+
+- New `subsetImgData(x, subsetName)` returns the images of a
+  SpatialExperiment subset: the rows of the main object’s
+  [`imgData()`](https://rdrr.io/pkg/SpatialExperiment/man/SpatialExperiment-methods.html)
+  for the samples of the subset’s spots, looked up on each read. Before,
+  a subset’s images had to be filtered from the main object’s by
+  `sample_id` by hand. New `subsetSpatialCoords(x, subsetName) <- value`
+  stores a subset’s own spatial coordinates, such as after a
+  transformation, without changing the main object’s; `value` is a
+  numeric matrix with one row per spot and one or more columns, and
+  `NULL` removes them. A subset with its own coordinates returns them
+  from
+  [`subsetSpatialCoords()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSpatialCoords.md),
+  `spatialCoords(x, subsetName =)` and
+  [`getSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md),
+  and subsets made from it see them, cut to their spots.
+  [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md)
+  now stores coordinates that a tool changed in the object from
+  [`getSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md)
+  as the subset’s own, with the message “Subset ‘s1’ now stores its own
+  spatialCoords.”; unchanged coordinates aren’t stored, so the subset
+  still follows the main object’s. Subsets without their own coordinates
+  are unchanged
+  ([\#72](https://github.com/campbio/ExperimentSubset/issues/72))
+
 ## ExperimentSubset 1.23.45 (2026-11-08)
 
 - `assay(x, "s1", subsetAssayName = "x") <- value` now prints “Storing
