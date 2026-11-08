@@ -31,7 +31,7 @@ Suggests:
     BiocStyle,
     knitr,
     rmarkdown,
-    testthat,
+    testthat (>= 3.0.0),
     covr,
     scrapper,
     scater,
@@ -49,3 +49,4 @@ Collate:
     'SubsetSpatialExperiment.R'
     'SubsetTreeSummarizedExperiment.R'
 Config/roxygen2/version: 8.1.0
+Config/testthat/edition: 3
