@@ -217,14 +217,12 @@ test_that("Testing createSubset and setSubsetAssay",{
   #setSubsetAssay
   counts1p <- assay(es, "subset1")
   counts1p[,] <- counts1p[,] + 1
-  expect_error(es <- setSubsetAssay(es, "subset4", counts1p, "scaledSubset1"),
-               "subset4 does not exist in the subsets slot of the object.")
-  # the whole message is one line with no runs of spaces
+  # the same message as other functions give for an unknown subset
   expect_equal(
     tryCatch(setSubsetAssay(es, "subset4", counts1p, "scaledSubset1"),
              error = conditionMessage),
-    paste0("subset4 does not exist in the subsets slot of the object. ",
-           "You need to create a new subset with createSubset() function.")
+    paste0("subset4 subset does not exist. 'subsetName' must be the name ",
+           "of a subset.")
   )
   es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
   expect_true("subset1/scaledSubset1" %in% subsetAssayNames(es))
@@ -1643,6 +1641,12 @@ test_that("assay<- stores linked names only with unlink = TRUE", {
   filteredLog <- as.matrix(assay(es, "filtered/logcounts"))
   expect_error(assay(es, "filtered/logcounts") <- filteredLog,
                regexp = "unlink = TRUE")
+  expect_no_message(
+    expect_error(
+      assay(es, "filtered", subsetAssayName = "logcounts") <- filteredLog,
+      regexp = "unlink = TRUE"
+    )
+  )
   expect_message(
     assay(es, "filtered/logcounts", unlink = TRUE) <- filteredLog + 1,
     regexp = paste0("Subset 'filtered' now stores its own 'logcounts', ",
@@ -1821,12 +1825,15 @@ test_that("setSubsetAssay keeps the subset's row and column names", {
   rownames(renamed) <- paste0("other", 1:5)
   expect_error(setSubsetAssay(es, "s1", renamed, "renamed"),
                regexp = "inputMatrix")
-  # assay<- says it is storing the assay before setSubsetAssay() stops
-  suppressMessages(
+  # assay<- says it stored the assay only after setSubsetAssay() succeeds
+  expect_no_message(
     expect_error(assay(es, "s1", subsetAssayName = "x") <- reordered,
                  regexp = "inputMatrix")
   )
   expect_equal(subsetColnames(es, "s1"), cells)
+  expect_message(assay(es, "s1", subsetAssayName = "viaAssay") <- counts,
+                 regexp = "Storing assay inside subset 's1'.", fixed = TRUE)
+  expect_equal(assay(es, "s1/viaAssay"), counts)
 
   # a matrix of the wrong size gets a dimension error, not a names error
   expect_error(setSubsetAssay(es, "s1", counts[1:3, ], "small"),
@@ -1839,6 +1846,17 @@ test_that("setSubsetAssay keeps the subset's row and column names", {
   es <- setSubsetAssay(es, "s1", s1Counts, "roundTrip")
   roundTrip <- assay(es, "s1/roundTrip")
   expect_equal(colnames(roundTrip), paste0("cell", 1:4))
+
+  # assay<- says it stored the assay after saying it unlinked it
+  storeMessages <- capture_messages(
+    assay(es, "s1", subsetAssayName = "counts", unlink = TRUE) <-
+      s1Counts + 1
+  )
+  expect_equal(storeMessages, c(
+    paste0("Subset 's1' now stores its own 'counts', unlinked from the ",
+           "main assay 'counts'.\n"),
+    "Storing assay inside subset 's1'.\n"
+  ))
 })
 
 test_that("A subset of a subset round-trips through setSubsetAssay", {
@@ -1953,9 +1971,10 @@ test_that("Unknown subset names give a clear error", {
   expect_error(getSubsetAssay(es, "nope"), regexp = "nope")
   expect_error(subsetDim(es, "nope"),
                regexp = "nope subset does not exist")
-  expect_error(
-    subsetParent(es, "nope"),
-    regexp = "nope does not exist in the subsets slot of the object."
+  expect_equal(
+    tryCatch(subsetParent(es, "nope"), error = conditionMessage),
+    paste0("nope subset does not exist. 'subsetName' must be the name of ",
+           "a subset or a \"subset/assay\".")
   )
   expect_error(subsetColnames(es, "nope"),
                regexp = "nope subset does not exist")
@@ -1989,7 +2008,13 @@ test_that("assay<- stores into a subset chosen by its name", {
 
 test_that("Testing createSubset with multiple paramter options",{
   es <- ExperimentSubset(sce_chcl)
-  expect_error(es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c(20,21,40,45,90,99,100,123,166,299), parentAssay = "none"), "Input parentAssay does not exist.")
+  expect_equal(
+    tryCatch(createSubset(es, "subset1", rows = 1:5, cols = 1:5,
+                          parentAssay = "none"),
+             error = conditionMessage),
+    paste0("'parentAssay' must be NULL or name an assay, a subset or a ",
+           "\"subset/assay\"; 'none' is none of these.")
+  )
   
   #colnames
   es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts")
