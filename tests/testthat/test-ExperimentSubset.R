@@ -934,7 +934,8 @@ test_that("A subset can store its own spatialCoords", {
   # and cbind(), where the first object's subsets keep their spots
   other <- ExperimentSubset(makeImageSpe())
   colnames(other) <- paste0("other", 1:6)
-  combined <- cbind(es, other)
+  # SpatialExperiment notes the shared sample_ids
+  combined <- suppressMessages(cbind(es, other))
   expect_equal(unname(subsetSpatialCoords(combined, "s1")), unname(shifted))
 
   # renamed spots rename the coordinates
