@@ -1,5 +1,14 @@
 # Changelog
 
+## ExperimentSubset 1.23.44 (2026-11-08)
+
+- The tests use testthat edition 3, so `testthat (>= 3.0.0)` is now in
+  Suggests. Five tests that unlink an assay, whose message edition 3 no
+  longer hides, now check it, such as “Subset ‘s1’ now stores its own
+  ‘counts’, unlinked from the main assay ‘counts’.” No change in
+  behavior
+  ([\#96](https://github.com/campbio/ExperimentSubset/issues/96))
+
 ## ExperimentSubset 1.23.43 (2026-11-07)
 
 - Errors from
