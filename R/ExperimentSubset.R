@@ -775,7 +775,6 @@ NULL
     Dimensions <- list()
     Parent <- list()
     Assays <- list()
-    Metadata <- list()
     ReducedDims <- list()
     AltExperiments <- list()
 

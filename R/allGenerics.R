@@ -33,13 +33,15 @@
 #' es
 setGeneric(
   name = "createSubset",
+  # no braces, so createSubset stays a standardGeneric
+  # nolint start: brace_linter.
   def = function(x,
                  subsetName,
                  rows = NULL,
                  cols = NULL,
-                 parentAssay = NULL) {
-    standardGeneric("createSubset")
-  },
+                 parentAssay = NULL)
+    standardGeneric("createSubset"),
+  # nolint end
   signature = "x"
 )
 
