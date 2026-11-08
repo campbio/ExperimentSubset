@@ -1,5 +1,5 @@
 # ExperimentSubset 1.23.45 (2026-11-08)
-* `assay(x, "s1", subsetAssayName = "x") <- value` now prints "Storing assay inside subset 's1'." only after the assay is stored. Before, it printed the message first, so when `value` was rejected, for example because its column names were in another order or because it changed a linked assay without `unlink`, the message announced a store that didn't happen, followed by the error. Successful calls print the same message as before, now after any message about unlinking (#107)
+* `assay(x, "s1", subsetAssayName = "x") <- value` now prints "Storing assay inside subset 's1'." only after the assay is stored. Before, it printed the message first, so when `value` was rejected, for example because its column names were in another order or because `subsetAssayName` named an assay linked from the parent and `unlink` wasn't set, the message announced a store that didn't happen, followed by the error. Successful calls print the same message as before, now after any message about unlinking (#107)
 
 # ExperimentSubset 1.23.44 (2026-11-08)
 * The tests use testthat edition 3, so `testthat (>= 3.0.0)` is now in Suggests. Five tests that unlink an assay, whose message edition 3 no longer hides, now check it, such as "Subset 's1' now stores its own 'counts', unlinked from the main assay 'counts'." No change in behavior (#96)

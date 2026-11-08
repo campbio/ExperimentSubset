@@ -1848,6 +1848,17 @@ test_that("setSubsetAssay keeps the subset's row and column names", {
   es <- setSubsetAssay(es, "s1", s1Counts, "roundTrip")
   roundTrip <- assay(es, "s1/roundTrip")
   expect_equal(colnames(roundTrip), paste0("cell", 1:4))
+
+  # assay<- says it stored the assay after saying it unlinked it
+  storeMessages <- capture_messages(
+    assay(es, "s1", subsetAssayName = "counts", unlink = TRUE) <-
+      s1Counts + 1
+  )
+  expect_equal(storeMessages, c(
+    paste0("Subset 's1' now stores its own 'counts', unlinked from the ",
+           "main assay 'counts'.\n"),
+    "Storing assay inside subset 's1'.\n"
+  ))
 })
 
 test_that("A subset of a subset round-trips through setSubsetAssay", {
