@@ -744,7 +744,7 @@ setGeneric(
   signature = "x"
 )
 
-#' @title Accessor method for spatialCoords from subsets in ExperimentSubset objects
+#' @title Get or set spatialCoords of subsets in ExperimentSubset objects
 #' @description Get \code{spatialCoords} from a subset, with
 #'   \code{subsetSpatialCoords(x, subsetName)} or
 #'   \code{spatialCoords(x, subsetName = )}. Without \code{subsetName},
@@ -752,14 +752,15 @@ setGeneric(
 #'   \code{SpatialExperiment}.
 #' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
 #' @param subsetName \code{character(1)} Name of the subset to get
-#'   \code{spatialCoords} from.
+#'   \code{spatialCoords} from, or to store them in.
 #' @param ... For \code{spatialCoords()}: \describe{
 #'     \item{\code{subsetName}}{\code{character(1)} Name of the subset to
 #'       get \code{spatialCoords} from. Leave it out for the main object's.}
 #'   }
 #'   Without \code{subsetName}, all arguments are passed on to the
 #'   \code{SpatialExperiment} method.
-#' @return The \code{spatialCoords} from input object.
+#' @return For \code{subsetSpatialCoords()} and \code{spatialCoords()}, the
+#'   \code{spatialCoords} the subset sees.
 #' @rdname subsetSpatialCoords
 #' @importMethodsFrom SpatialExperiment spatialCoords
 #' @export
@@ -779,6 +780,87 @@ setGeneric(
   def = function(x, subsetName)
   {
     standardGeneric("subsetSpatialCoords")
+  },
+  signature = "x"
+)
+
+#' @description \code{subsetSpatialCoords(x, subsetName) <- value} stores
+#'   a subset's own \code{spatialCoords}, for example
+#'   after a transformation, without changing the main object's. A subset
+#'   with its own coordinates returns them from
+#'   \code{subsetSpatialCoords()}, \code{spatialCoords(x, subsetName = )}
+#'   and \code{getSubsetExperiment()}, and subsets made from it see them,
+#'   cut to their spots. A subset without its own coordinates sees those of
+#'   the nearest subset it was made from that has them, or else the main
+#'   object's.
+#' @param value A numeric \code{matrix} with one row for each spot in the
+#'   subset and one or more columns. Its rownames must be \code{NULL} or
+#'   the subset's column names, in the same order. \code{NULL} removes the
+#'   subset's own coordinates, so it sees those of the subset it was made
+#'   from, or the main object's, again.
+#' @return For \code{subsetSpatialCoords<-}, the input object with the
+#'   subset's \code{spatialCoords} stored.
+#' @rdname subsetSpatialCoords
+#' @export
+#' @examples
+#' # a small SpatialExperiment with six spots
+#' counts <- matrix(1:60, nrow = 10)
+#' coords <- cbind(x = 1:6, y = 6:1)
+#' spe <- SpatialExperiment(assays = list(counts = counts),
+#'                          spatialCoords = coords)
+#' es <- ExperimentSubset(spe)
+#' es <- createSubset(es, "subset1", cols = 2:4)
+#' # store coordinates moved 100 to the right
+#' movedCoords <- subsetSpatialCoords(es, subsetName = "subset1")
+#' movedCoords[, "x"] <- movedCoords[, "x"] + 100
+#' subsetSpatialCoords(es, subsetName = "subset1") <- movedCoords
+#' subsetSpatialCoords(es, subsetName = "subset1")
+#' # the main object's coordinates are unchanged
+#' spatialCoords(es)
+setGeneric(
+  name = "subsetSpatialCoords<-",
+  def = function(x, subsetName, value)
+  {
+    standardGeneric("subsetSpatialCoords<-")
+  },
+  signature = "x"
+)
+
+#' @title Accessor method for imgData of subsets in ExperimentSubset objects
+#' @description Get the images of a subset: the rows of the main object's
+#'   \code{imgData} whose \code{sample_id} is the sample of one or more of
+#'   the subset's spots. They are looked up from the main object each time,
+#'   so they are always current; subsets don't store images of their own.
+#' @param x \code{ExperimentSubset} Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character(1)} Name of the subset to get
+#'   \code{imgData} from.
+#' @return A \code{DataFrame} of the subset's images, with the columns of
+#'   \code{imgData()}.
+#' @rdname subsetImgData
+#' @importMethodsFrom SpatialExperiment imgData
+#' @export
+#' @examples
+#' # a small SpatialExperiment with six spots in two samples, and an image
+#' # of each sample
+#' counts <- matrix(1:60, nrow = 10)
+#' coords <- cbind(x = 1:6, y = 6:1)
+#' sampleIds <- rep(c("A", "B"), each = 3)
+#' image <- SpatialImage(as.raster(matrix(c(0, 1, 1, 0), nrow = 2)))
+#' images <- DataFrame(sample_id = c("A", "B"), image_id = "lowres",
+#'                     data = I(list(image, image)), scaleFactor = 1)
+#' spe <- SpatialExperiment(assays = list(counts = counts),
+#'                          sample_id = sampleIds,
+#'                          spatialCoords = coords,
+#'                          imgData = images)
+#' es <- ExperimentSubset(spe)
+#' # a subset of spots from sample B only
+#' es <- createSubset(es, "sampleB", cols = 4:6)
+#' subsetImgData(es, subsetName = "sampleB")
+setGeneric(
+  name = "subsetImgData",
+  def = function(x, subsetName)
+  {
+    standardGeneric("subsetImgData")
   },
   signature = "x"
 )

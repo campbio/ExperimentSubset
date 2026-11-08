@@ -564,6 +564,10 @@ NULL
       altExps(.withSubsetAltExps(x, subsetName), withDimnames = FALSE)
   }
   metadata(out) <- metadata(internal)
+  # coordinates the subset, or one it was made from, stores (#72)
+  if (methods::is(out, "SpatialExperiment")
+      && !is.null(.spatialCoordsOwner(x, subsetName)))
+    spatialCoords(out) <- .subsetSpatialCoords(x, subsetName)
   out
 }
 
@@ -610,6 +614,7 @@ NULL
     SingleCellExperiment::reducedDims(internal) <- reducedDims(value)
   metadata(internal) <- metadata(value)
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  x <- .storeChangedSpatialCoords(x, subsetName, value)
   if (isSce) {
     x <- .applyAltExps(x, subsetName, altExpPlan)
     x <- .carryAltExpParts(before, x, subsetName)
@@ -2627,11 +2632,84 @@ NULL
   return(out)
 }
 
+# The nearest subset in subsetName's chain, itself first, that stores its
+# own spatialCoords, or NULL if none does and the main object's apply (#72)
+.spatialCoordsOwner <- function(x, subsetName) {
+  for (subset in rev(.subsetChain(x, subsetName))) {
+    internal <- .internalAssay(.subsets(x)[[subset]])
+    # isTRUE() for an internal object without spatialCoords at all
+    if (isTRUE(ncol(spatialCoords(internal)) > 0))
+      return(subset)
+  }
+  NULL
+}
+
+# The coordinates subsetName sees: its own, or those of the nearest subset
+# it was made from that has its own, cut to its spots, or else the main
+# object's
 .subsetSpatialCoords <- function(x, subsetName){
   .isSubset(x, subsetName)
   rootCols <- .rootIndices(x, subsetName, .colIndices)
-  out <- spatialCoords(x)[rootCols, , drop = FALSE]
-  return(out)
+  owner <- .spatialCoordsOwner(x, subsetName)
+  if (is.null(owner))
+    return(spatialCoords(x)[rootCols, , drop = FALSE])
+  ownerCoords <- spatialCoords(.internalAssay(.subsets(x)[[owner]]))
+  ownerCols <- .rootIndices(x, owner, .colIndices)
+  out <- ownerCoords[match(rootCols, ownerCols), , drop = FALSE]
+  # the subset's own spot names, which subsetColnames<- may have changed
+  rownames(out) <- colnames(.internalAssay(.subsets(x)[[subsetName]]))
+  out
+}
+
+# Stores value as subsetName's own coordinates; NULL removes them (#72)
+#' @importMethodsFrom SpatialExperiment spatialCoords<-
+'.subsetSpatialCoords<-' <- function(x, subsetName, value) {
+  .isSubset(x, subsetName)
+  internal <- .internalAssay(.subsets(x)[[subsetName]])
+  if (!is.null(value)) {
+    if (!is.matrix(value) || !is.numeric(value))
+      stop("'value' must be a numeric matrix or NULL.")
+    if (ncol(value) == 0)
+      stop("'value' must have one or more columns; use NULL to remove ",
+           "the subset's own coordinates.")
+    if (nrow(value) != ncol(internal))
+      stop("'value' must have one row for each of the ", ncol(internal),
+           " spots in subset '", subsetName, "'.")
+    value <- .keepSubsetNames(value, colnames(internal), subsetName,
+                              "column")
+  } else {
+    # an empty matrix, as a subset without its own coordinates has
+    value <- matrix(numeric(0), nrow = ncol(internal), ncol = 0)
+  }
+  spatialCoords(internal) <- value
+  .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  x
+}
+
+# For setSubsetExperiment(): stores value's coordinates as subsetName's
+# own, with a message, if value is a SpatialExperiment whose coordinates
+# differ from those subsetName sees, whatever their rownames or type.
+# Their rownames may be the main object's, so they are dropped.
+.storeChangedSpatialCoords <- function(x, subsetName, value) {
+  if (!methods::is(value, "SpatialExperiment"))
+    return(x)
+  seen <- .subsetSpatialCoords(x, subsetName)
+  coords <- spatialCoords(value)
+  if (identical(colnames(coords), colnames(seen)) && .sameAssay(coords, seen))
+    return(x)
+  rownames(coords) <- NULL
+  .subsetSpatialCoords(x, subsetName) <- coords
+  message("Subset '", subsetName, "' now stores its own spatialCoords.")
+  x
+}
+
+# The rows of the main object's imgData for the samples of subsetName's
+# spots, looked up on each read (#72)
+.subsetImgData <- function(x, subsetName) {
+  .isSubset(x, subsetName)
+  rootCols <- .rootIndices(x, subsetName, .colIndices)
+  images <- imgData(x)
+  images[images$sample_id %in% x$sample_id[rootCols], , drop = FALSE]
 }
 
 #' @importMethodsFrom SpatialExperiment spatialCoords

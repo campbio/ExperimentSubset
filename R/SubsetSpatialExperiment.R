@@ -560,6 +560,27 @@ setMethod(
 )
 
 #' @rdname subsetSpatialCoords
+setReplaceMethod(
+  f = "subsetSpatialCoords",
+  signature = signature(x = "SubsetSpatialExperiment"),
+  definition = function(x, subsetName, value)
+  {
+    .subsetSpatialCoords(x, subsetName) <- value
+    return(x)
+  }
+)
+
+#' @rdname subsetImgData
+setMethod(
+  f = "subsetImgData",
+  signature = signature(x = "SubsetSpatialExperiment"),
+  definition = function(x, subsetName)
+  {
+    .subsetImgData(x, subsetName)
+  }
+)
+
+#' @rdname subsetSpatialCoords
 setMethod(
   f = "spatialCoords",
   signature = signature(x = "SubsetSpatialExperiment"),

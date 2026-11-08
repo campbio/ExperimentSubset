@@ -49,6 +49,7 @@ reference:
   - subsetRowLinks
   - subsetColLinks
   - subsetSpatialCoords
+  - subsetImgData
   - subsetSpatialData
 - title: Methods that take subsetName
   desc: >

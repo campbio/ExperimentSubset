@@ -2,13 +2,19 @@
 % Please edit documentation in R/allGenerics.R, R/SubsetSpatialExperiment.R
 \name{subsetSpatialCoords}
 \alias{subsetSpatialCoords}
+\alias{subsetSpatialCoords<-}
 \alias{subsetSpatialCoords,SubsetSpatialExperiment-method}
+\alias{subsetSpatialCoords<-,SubsetSpatialExperiment-method}
 \alias{spatialCoords,SubsetSpatialExperiment-method}
-\title{Accessor method for spatialCoords from subsets in ExperimentSubset objects}
+\title{Get or set spatialCoords of subsets in ExperimentSubset objects}
 \usage{
 subsetSpatialCoords(x, subsetName)
 
+subsetSpatialCoords(x, subsetName) <- value
+
 \S4method{subsetSpatialCoords}{SubsetSpatialExperiment}(x, subsetName)
+
+\S4method{subsetSpatialCoords}{SubsetSpatialExperiment}(x, subsetName) <- value
 
 \S4method{spatialCoords}{SubsetSpatialExperiment}(x, ...)
 }
@@ -16,7 +22,13 @@ subsetSpatialCoords(x, subsetName)
 \item{x}{\code{ExperimentSubset} Input \code{ExperimentSubset} object.}
 
 \item{subsetName}{\code{character(1)} Name of the subset to get
-\code{spatialCoords} from.}
+\code{spatialCoords} from, or to store them in.}
+
+\item{value}{A numeric \code{matrix} with one row for each spot in the
+subset and one or more columns. Its rownames must be \code{NULL} or
+the subset's column names, in the same order. \code{NULL} removes the
+subset's own coordinates, so it sees those of the subset it was made
+from, or the main object's, again.}
 
 \item{...}{For \code{spatialCoords()}: \describe{
   \item{\code{subsetName}}{\code{character(1)} Name of the subset to
@@ -26,7 +38,11 @@ Without \code{subsetName}, all arguments are passed on to the
 \code{SpatialExperiment} method.}
 }
 \value{
-The \code{spatialCoords} from input object.
+For \code{subsetSpatialCoords()} and \code{spatialCoords()}, the
+  \code{spatialCoords} the subset sees.
+
+For \code{subsetSpatialCoords<-}, the input object with the
+  subset's \code{spatialCoords} stored.
 }
 \description{
 Get \code{spatialCoords} from a subset, with
@@ -34,6 +50,16 @@ Get \code{spatialCoords} from a subset, with
   \code{spatialCoords(x, subsetName = )}. Without \code{subsetName},
   \code{spatialCoords()} returns the main object's, as for
   \code{SpatialExperiment}.
+
+\code{subsetSpatialCoords(x, subsetName) <- value} stores
+  a subset's own \code{spatialCoords}, for example
+  after a transformation, without changing the main object's. A subset
+  with its own coordinates returns them from
+  \code{subsetSpatialCoords()}, \code{spatialCoords(x, subsetName = )}
+  and \code{getSubsetExperiment()}, and subsets made from it see them,
+  cut to their spots. A subset without its own coordinates sees those of
+  the nearest subset it was made from that has them, or else the main
+  object's.
 }
 \examples{
 # a small SpatialExperiment with six spots
@@ -46,4 +72,18 @@ es <- createSubset(es, "subset1", cols = 2:4)
 subsetSpatialCoords(es, "subset1")
 # the same, through spatialCoords()
 spatialCoords(es, subsetName = "subset1")
+# a small SpatialExperiment with six spots
+counts <- matrix(1:60, nrow = 10)
+coords <- cbind(x = 1:6, y = 6:1)
+spe <- SpatialExperiment(assays = list(counts = counts),
+                         spatialCoords = coords)
+es <- ExperimentSubset(spe)
+es <- createSubset(es, "subset1", cols = 2:4)
+# store coordinates moved 100 to the right
+movedCoords <- subsetSpatialCoords(es, subsetName = "subset1")
+movedCoords[, "x"] <- movedCoords[, "x"] + 100
+subsetSpatialCoords(es, subsetName = "subset1") <- movedCoords
+subsetSpatialCoords(es, subsetName = "subset1")
+# the main object's coordinates are unchanged
+spatialCoords(es)
 }
