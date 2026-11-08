@@ -11,7 +11,9 @@ setMethod(
 #' @rdname ExperimentSubset-assay
 setMethod(
   f = "assay",
-  signature = signature(x = "SubsetRangedSummarizedExperiment", i = "character"),
+  signature = signature(
+    x = "SubsetRangedSummarizedExperiment", i = "character"
+  ),
   definition = function(x, i, withDimnames = TRUE, ...) {
     .assay(x, i, withDimnames = withDimnames, ...)
   }
@@ -27,8 +29,7 @@ setMethod(
                         subsetName,
                         rows,
                         cols,
-                        parentAssay)
-  {
+                        parentAssay) {
     return(.createSubset(x,
                          subsetName,
                          rows,
@@ -41,8 +42,7 @@ setMethod(
 setMethod(
   f = "subsetAssayNames",
   signature = "SubsetRangedSummarizedExperiment",
-  definition = function(x, subsetName = NULL)
-  {
+  definition = function(x, subsetName = NULL) {
     .subsetAssayNames(x, subsetName)
   }
 )
@@ -54,8 +54,7 @@ setMethod(
 setMethod(
   f = "show",
   signature = "SubsetRangedSummarizedExperiment",
-  definition = function(object)
-  {
+  definition = function(object) {
     .show(object)
   }
 )
@@ -64,8 +63,7 @@ setMethod(
 setMethod(
   f = "subsetNames",
   signature = "SubsetRangedSummarizedExperiment",
-  definition = function(x)
-  {
+  definition = function(x) {
     return(names(.subsets(x)))
   }
 )
@@ -78,8 +76,7 @@ setMethod(
                         subsetName,
                         inputMatrix,
                         subsetAssayName,
-                        unlink = FALSE)
-  {
+                        unlink = FALSE) {
     .setSubsetAssay(x,
                     subsetName,
                     inputMatrix,
@@ -104,8 +101,7 @@ setReplaceMethod("assay",
 setMethod(
   f = "subsetParent",
   signature = "SubsetRangedSummarizedExperiment",
-  definition = function(x, subsetName)
-  {
+  definition = function(x, subsetName) {
     .subsetParent(x, subsetName)
   }
 )
@@ -114,8 +110,7 @@ setMethod(
 setMethod(
   f = "subsetSummary",
   signature = "SubsetRangedSummarizedExperiment",
-  definition = function(x)
-  {
+  definition = function(x) {
     .subsetSummary(x)
   }
 )
@@ -124,8 +119,7 @@ setMethod(
 setMethod(
   f = "subsetDim",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
-  definition = function(x, subsetName)
-  {
+  definition = function(x, subsetName) {
     .isSubset(x, subsetName)
     dim(.internalAssay(.subsets(x)[[subsetName]]))
   }
@@ -135,8 +129,7 @@ setMethod(
 setMethod(
   f = "subsetCount",
   signature = "SubsetRangedSummarizedExperiment",
-  definition = function(x)
-  {
+  definition = function(x) {
     return(length(subsetNames(x)))
   }
 )
@@ -155,8 +148,7 @@ setReplaceMethod(
 setMethod(
   f = "subsetAssayCount",
   signature = "SubsetRangedSummarizedExperiment",
-  definition = function(x)
-  {
+  definition = function(x) {
     return(length(subsetAssayNames(x)))
   }
 )
@@ -165,8 +157,7 @@ setMethod(
 setMethod(
   f = "subsetRowData",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
-  definition = function(x, subsetName, parentRowData)
-  {
+  definition = function(x, subsetName, parentRowData) {
     .subsetRowData(x, subsetName, parentRowData)
   }
 )
@@ -175,8 +166,7 @@ setMethod(
 setMethod(
   f = "subsetColData",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
-  definition = function(x, subsetName, parentColData)
-  {
+  definition = function(x, subsetName, parentColData) {
     .subsetColData(x, subsetName, parentColData)
   }
 )
@@ -216,7 +206,9 @@ setReplaceMethod(
 #' @rdname ExperimentSubset-rowData-colData
 setReplaceMethod(
   f = "colData",
-  signature = signature(x = "SubsetRangedSummarizedExperiment", value = "DataFrame"),
+  signature = signature(
+    x = "SubsetRangedSummarizedExperiment", value = "DataFrame"
+  ),
   definition = function(x, ..., value) {
     .colData(x, ...) <- value
     return(x)
@@ -258,8 +250,7 @@ setReplaceMethod(
 setMethod(
   f = "subsetColnames",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
-  definition = function(x, subsetName)
-  {
+  definition = function(x, subsetName) {
     .subsetColnames(x, subsetName)
   }
 )
@@ -268,8 +259,7 @@ setMethod(
 setReplaceMethod(
   f = "subsetColnames",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
-  definition = function(x, subsetName, value)
-  {
+  definition = function(x, subsetName, value) {
     .subsetColnames(x, subsetName) <- value
     return(x)
   }
@@ -279,8 +269,7 @@ setReplaceMethod(
 setMethod(
   f = "subsetRownames",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
-  definition = function(x, subsetName)
-  {
+  definition = function(x, subsetName) {
     .subsetRownames(x, subsetName)
   }
 )
@@ -289,8 +278,7 @@ setMethod(
 setReplaceMethod(
   f = "subsetRownames",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
-  definition = function(x, subsetName, value)
-  {
+  definition = function(x, subsetName, value) {
     .subsetRownames(x, subsetName) <- value
     return(x)
   }
@@ -300,8 +288,7 @@ setReplaceMethod(
 setReplaceMethod(
   f = "subsetColData",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
-  definition = function(x, subsetName, value)
-  {
+  definition = function(x, subsetName, value) {
     .subsetColData(x, subsetName) <- value
     return(x)
   }
@@ -311,8 +298,7 @@ setReplaceMethod(
 setReplaceMethod(
   f = "subsetRowData",
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
-  definition = function(x, subsetName, value)
-  {
+  definition = function(x, subsetName, value) {
     .subsetRowData(x, subsetName) <- value
     return(x)
   }
@@ -324,8 +310,7 @@ setMethod(
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
   definition = function(x,
                         subsetName,
-                        subsetAssayName = NULL)
-  {
+                        subsetAssayName = NULL) {
     # so a bad subsetName isn't reported as assay()'s i (#85)
     .checkSubsetName(subsetName)
     if (is.null(subsetAssayName))
@@ -342,8 +327,7 @@ setMethod(
   signature = signature(x = "SubsetRangedSummarizedExperiment"),
   definition = function(x,
                         subsetName,
-                        parentData = TRUE)
-  {
+                        parentData = TRUE) {
     .getSubsetExperiment(x, subsetName, parentData = parentData)
   }
 )
@@ -355,8 +339,7 @@ setMethod(
   definition = function(x,
                         subsetName,
                         value,
-                        unlink = FALSE)
-  {
+                        unlink = FALSE) {
     .setSubsetExperiment(x, subsetName, value, unlink = unlink)
   }
 )

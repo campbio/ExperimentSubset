@@ -6,8 +6,8 @@
 \alias{SubsetTreeSummarizedExperiment-class}
 \alias{.SubsetTreeSummarizedExperiment}
 \alias{show,SubsetTreeSummarizedExperiment-method}
-\title{An S4 class for \code{TreeSummarizedExperiment} objects with added support for
-  subsets.}
+\title{An S4 class for \code{TreeSummarizedExperiment} objects with added support
+for subsets.}
 \usage{
 \S4method{show}{SubsetTreeSummarizedExperiment}(object)
 }
@@ -19,8 +19,8 @@
   invisibly.
 }
 \description{
-An S4 class for \code{TreeSummarizedExperiment} objects with added support for
-  subsets.
+An S4 class for \code{TreeSummarizedExperiment} objects with added support
+for subsets.
 }
 \section{Slots}{
 

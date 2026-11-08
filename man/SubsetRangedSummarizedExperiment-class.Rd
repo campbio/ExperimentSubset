@@ -6,8 +6,8 @@
 \alias{SubsetRangedSummarizedExperiment-class}
 \alias{.SubsetRangedSummarizedExperiment}
 \alias{show,SubsetRangedSummarizedExperiment-method}
-\title{An S4 class for \code{RangedSummarizedExperiment} objects with added support for
-  subsets.}
+\title{An S4 class for \code{RangedSummarizedExperiment} objects with added support
+for subsets.}
 \usage{
 \S4method{show}{SubsetRangedSummarizedExperiment}(object)
 }
@@ -19,8 +19,8 @@
   invisibly.
 }
 \description{
-An S4 class for \code{RangedSummarizedExperiment} objects with added support for
-  subsets.
+An S4 class for \code{RangedSummarizedExperiment} objects with added support
+for subsets.
 }
 \section{Slots}{
 
