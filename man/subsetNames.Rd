@@ -31,7 +31,7 @@ subsetNames(x)
 A \code{vector} of subset names.
 }
 \description{
-Retrieves the names of the available subsets (not the subset 
+Retrieves the names of the available subsets (not the subset
   assays) in an \code{ExperimentSubset} object.
 }
 \examples{

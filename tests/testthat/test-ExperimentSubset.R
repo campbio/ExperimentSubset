@@ -24,16 +24,24 @@ expectSubsetOf <- function(es, subsetName, rows, cols) {
                assay(es, "counts")[rows, cols, drop = FALSE])
 }
 
-test_that("Testing ExperimentSubset constructor by implicitly providing a SingleCellExperiment object",{
+test_that("ExperimentSubset() wraps a SingleCellExperiment", {
   es <- ExperimentSubset(sce_chcl)
   expect_true(validObject(es))
   expect_equal(class(es)[1], "SubsetSingleCellExperiment")
 })
 
-test_that("Testing ExperimentSubset constructor by implicitly providing a SummarizedExperiment object",{
+test_that("ExperimentSubset() wraps a SummarizedExperiment", {
   se <- SummarizedExperiment::SummarizedExperiment(sce_chcl)
-  expect_error(es <- ExperimentSubset(se), "Experiment objects with unnamed assays are not supported. Use assayNames<- setter method to set assay names before creating ES object.")
-  se <- SummarizedExperiment::SummarizedExperiment(list(counts = assay(sce_chcl, "counts"), logcounts = assay(sce_chcl, "logcounts")))
+  expect_error(
+    es <- ExperimentSubset(se),
+    paste0("Experiment objects with unnamed assays are not supported. Use ",
+           "assayNames<- setter method to set assay names before creating ",
+           "ES object.")
+  )
+  se <- SummarizedExperiment::SummarizedExperiment(list(
+    counts = assay(sce_chcl, "counts"),
+    logcounts = assay(sce_chcl, "logcounts")
+  ))
   expect_s4_class(es <- ExperimentSubset(se), "SubsetSummarizedExperiment")
   expect_true(validObject(es))
   expect_equal(length(metadata(es)), 0)
@@ -59,7 +67,7 @@ test_that("Testing ExperimentSubset constructor by implicitly providing a Summar
   expect_equal(subsetDim(es, "s1")[1], 10)
   expect_equal(subsetDim(es, "s1")[2], 2000)
   expect_equal(subsetCount(es), 1)
-  metadata(es) <- list(a="meta")
+  metadata(es) <- list(a = "meta")
   expect_equal(length(metadata(es)), 1)
   expect_s4_class(getSubsetAssay(es, "s1"), "dgCMatrix")
   expect_equal(getSubsetAssay(es, "s1"),
@@ -72,20 +80,25 @@ test_that("Testing ExperimentSubset constructor by implicitly providing a Summar
   expect_equal(subsetRownames(es, "s1/newS1"), rownames(se)[1:10])
   subsetColnames(es, "s1/newS1") <- subsetColnames(es, "s1/newS1")
   expect_equal(subsetColnames(es, "s1/newS1"), colnames(se))
-  colData(es, subsetName = "s1") <- cbind(colData(es, subsetName = "s1"), 
-                                          DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s1")[2]))))
+  colData(es, subsetName = "s1") <- cbind(
+    colData(es, subsetName = "s1"),
+    DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s1")[2])))
+  )
   expect_equal(ncol(colData(es, subsetName = "s1")), 1)
   expect_equal(colData(es, subsetName = "s1")$col1, seq_len(2000))
-  rowData(es, subsetName = "s1") <- cbind(rowData(es, subsetName = "s1"), 
-                                          DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s1")[1]))))
+  rowData(es, subsetName = "s1") <- cbind(
+    rowData(es, subsetName = "s1"),
+    DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s1")[1])))
+  )
   expect_equal(ncol(rowData(es, subsetName = "s1")), 1)
   expect_equal(rowData(es, subsetName = "s1")$col1, seq_len(10))
-  
-  
+
+
   skip_if_not_installed("airway")
-  data(airway, package="airway")
+  data(airway, package = "airway")
   rse <- airway
-  expect_s4_class(es <- ExperimentSubset(rse), "SubsetRangedSummarizedExperiment")
+  expect_s4_class(es <- ExperimentSubset(rse),
+                  "SubsetRangedSummarizedExperiment")
   expect_output(subsetSummary(es),
                 "Main assay\\(s\\):\n counts.*Subset\\(s\\):\nNULL")
   expect_equal(length(metadata(es)), 1)
@@ -109,7 +122,7 @@ test_that("Testing ExperimentSubset constructor by implicitly providing a Summar
   expect_equal(subsetDim(es, "s2")[1], 15)
   expect_equal(subsetDim(es, "s2")[2], 8)
   expect_equal(subsetCount(es), 1)
-  metadata(es) <- list(a="meta")
+  metadata(es) <- list(a = "meta")
   expect_equal(length(metadata(es)), 1)
 
   subsetRownames(es, "s2") <- subsetRownames(es, "s2")
@@ -121,15 +134,19 @@ test_that("Testing ExperimentSubset constructor by implicitly providing a Summar
                rownames(rse)[1:15])
   subsetColnames(es, "s2/newS2") <- subsetColnames(es, "s2/newS2")
   expect_equal(subsetColnames(es, "s2/newS2"), colnames(rse))
-  colData(es, subsetName = "s2") <- cbind(colData(es, subsetName = "s2"), 
-                                          DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[2]))))
+  colData(es, subsetName = "s2") <- cbind(
+    colData(es, subsetName = "s2"),
+    DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[2])))
+  )
   expect_equal(ncol(colData(es, subsetName = "s2", parentColData = TRUE)), 10)
   expect_equal(colData(es, subsetName = "s2")$col1, seq_len(8))
-  rowData(es, subsetName = "s2") <- cbind(rowData(es, subsetName = "s2"), 
-                                          DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[1]))))
+  rowData(es, subsetName = "s2") <- cbind(
+    rowData(es, subsetName = "s2"),
+    DataFrame(col1 = c(seq(subsetDim(es, subsetName = "s2")[1])))
+  )
   expect_equal(ncol(rowData(es, subsetName = "s2")), 1)
   expect_equal(rowData(es, subsetName = "s2")$col1, seq_len(15))
-  
+
   # compare the whole message, so it is one line with no runs of spaces
   expect_equal(
     tryCatch(createSubset(es, "s2", rows = c(1:15)),
@@ -160,24 +177,28 @@ test_that("Testing ExperimentSubset constructor by implicitly providing a Summar
   )
   expect_error(es <- createSubset(es, subsetName = "s3", rows = c(64103:64103)),
                "Selected rows not available in the specified assay.")
-  expect_error(es <- createSubset(es, subsetName = "s3", rows = c(seq(1:64102), 64102)),
+  expect_error(es <- createSubset(es, subsetName = "s3",
+                                  rows = c(seq(1:64102), 64102)),
                "Selected rows not available in the specified assay.")
-  expect_error(es <- createSubset(es, subsetName = "s3", rows = c(1,3, NA)),
+  expect_error(es <- createSubset(es, subsetName = "s3", rows = c(1, 3, NA)),
                "Selected rows not available in the specified assay.")
   expect_error(es <- createSubset(es, subsetName = "s3", cols = c(10:12)),
                "Selected columns not available in the specified assay.")
   expect_error(es <- createSubset(es, subsetName = "s3", cols = c(seq(1:8), 8)),
                "Selected columns not available in the specified assay.")
-  expect_error(es <- createSubset(es, subsetName = "s3", cols = c(1,3, NA)),
+  expect_error(es <- createSubset(es, subsetName = "s3", cols = c(1, 3, NA)),
                "Selected columns not available in the specified assay.")
-  
+
 })
 
-test_that("Testing ExperimentSubset constructor with subset & createSubset without parentAssay",{
-  es <- ExperimentSubset(sce_chcl, subset = list(subsetName = "subset10", rows = c(1:10), cols = c(1:2), parentAssay = "counts"))
+test_that("ExperimentSubset(subset =) and createSubset() without parentAssay", {
+  es <- ExperimentSubset(sce_chcl, subset = list(subsetName = "subset10",
+                                                 rows = c(1:10),
+                                                 cols = c(1:2),
+                                                 parentAssay = "counts"))
   expect_equal(subsetNames(es), "subset10")
   expectSubsetOf(es, "subset10", rows = 1:10, cols = 1:2)
-  
+
   rows1 <- c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200)
   cols1 <- c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299)
   es <- createSubset(es, "subset1", rows = rows1, cols = cols1)
@@ -186,7 +207,7 @@ test_that("Testing ExperimentSubset constructor with subset & createSubset witho
   expectSubsetOf(es, "subset10", rows = 1:10, cols = 1:2)
 })
 
-test_that("Testing createSubset and setSubsetAssay",{
+test_that("Testing createSubset and setSubsetAssay", {
   es <- ExperimentSubset(sce_chcl)
   rows1 <- c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200)
   cols1 <- c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299)
@@ -194,29 +215,35 @@ test_that("Testing createSubset and setSubsetAssay",{
   es <- createSubset(es, "subset1", rows = rows1, cols = cols1,
                      parentAssay = "counts")
   expectSubsetOf(es, "subset1", rows = rows1, cols = cols1)
-  
+
   subsetRownames(es, "subset1") <- subsetRownames(es, "subset1")
   subsetColnames(es, "subset1") <- subsetColnames(es, "subset1")
   expect_equal(subsetRownames(es, "subset1"), rownames(es)[rows1])
   expect_equal(subsetColnames(es, "subset1"), colnames(es)[cols1])
-  
+
   # the same rows and columns, given by name
   es <- createSubset(es, "subset2",
-                                       rows = c("OPCML", "RP11-338K17.8", "RP11-770J1.3", "NPSR1", "AC060835.1", "GABRA2", "PRDM16", "CAB39", "LYRM1", "RP1-178F10.3"),
-                                       cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC", "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG", "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC", "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC", "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
-                                       parentAssay = "counts")
+                     rows = c("OPCML", "RP11-338K17.8", "RP11-770J1.3",
+                              "NPSR1", "AC060835.1", "GABRA2", "PRDM16",
+                              "CAB39", "LYRM1", "RP1-178F10.3"),
+                     cols = c("TTAGTTCTCGTAGGAG", "GGCTGGTGTCTCGTTC",
+                              "TCGCGTTGTTAAGTAG", "GGATGTTGTAGGCATG",
+                              "AATCGGTTCTGATACG", "GTTCTCGGTATGAAAC",
+                              "TCCACACTCTTTAGTC", "GCGCAGTAGATGCGAC",
+                              "CGGACACTCAAGAAGT", "TGACTTTGTCGCGAAA"),
+                     parentAssay = "counts")
   expectSubsetOf(es, "subset2", rows = rows1, cols = cols1)
-  
+
   # numbers given as names are not row names
   expect_error(
     createSubset(es, "subset3", rows = c("OPCML", "RP11-338K17.8", "50"),
                  cols = 1:2, parentAssay = "counts"),
     regexp = "Selected rows not available in the specified assay."
   )
-  
+
   #setSubsetAssay
   counts1p <- assay(es, "subset1")
-  counts1p[,] <- counts1p[,] + 1
+  counts1p[, ] <- counts1p[, ] + 1
   # the same message as other functions give for an unknown subset
   expect_equal(
     tryCatch(setSubsetAssay(es, "subset4", counts1p, "scaledSubset1"),
@@ -243,16 +270,16 @@ test_that("Testing createSubset and setSubsetAssay",{
   }
 })
 
-test_that("Testing rownames, colnames, rowData and colData",{
+test_that("Testing rownames, colnames, rowData and colData", {
   es <- ExperimentSubset(sce_chcl)
   rows1 <- c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200)
   cols1 <- c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299)
   es <- createSubset(es, "subset1", rows = rows1, cols = cols1,
                      parentAssay = "counts")
   counts1p <- assay(es, "subset1")
-  counts1p[,] <- counts1p[,] + 1
+  counts1p[, ] <- counts1p[, ] + 1
   es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
-  
+
   expect_equal(subsetRownames(es, "subset1/scaledSubset1"),
                rownames(es)[rows1])
   expect_equal(subsetColnames(es, "subset1/scaledSubset1"),
@@ -263,11 +290,22 @@ test_that("Testing rownames, colnames, rowData and colData",{
                "subset1Internal subset does not exist.")
   expect_error(rowData(es, subsetName = "subset1Internal"),
                "subset1Internal subset does not exist.")
-  rowData(es, subsetName = "subset1") <- DataFrame(col1 = c(seq(subsetDim(es, subsetName = "subset1")[1])))
-  colData(es, subsetName = "subset1") <- DataFrame(col1 = c(seq(subsetDim(es, subsetName = "subset1")[2])))
-  expect_equal(ncol(rowData(es, subsetName = "subset1", parentRowData = TRUE)), 2)
-  expect_equal(nrow(rowData(es, subsetName = "subset1", parentRowData = TRUE)), subsetDim(es, subsetName = "subset1")[1])
-  expect_equal(ncol(colData(es, subsetName = "subset1", parentColData = TRUE)), 12)
+  rowData(es, subsetName = "subset1") <- DataFrame(
+    col1 = c(seq(subsetDim(es, subsetName = "subset1")[1]))
+  )
+  colData(es, subsetName = "subset1") <- DataFrame(
+    col1 = c(seq(subsetDim(es, subsetName = "subset1")[2]))
+  )
+  expect_equal(
+    ncol(rowData(es, subsetName = "subset1", parentRowData = TRUE)), 2
+  )
+  expect_equal(
+    nrow(rowData(es, subsetName = "subset1", parentRowData = TRUE)),
+    subsetDim(es, subsetName = "subset1")[1]
+  )
+  expect_equal(
+    ncol(colData(es, subsetName = "subset1", parentColData = TRUE)), 12
+  )
   expect_equal(nrow(colData(es, subsetName = "subset1", parentColData = TRUE)),
                subsetDim(es, subsetName = "subset1")[2])
   expect_equal(rowData(es, subsetName = "subset1")$col1,
@@ -285,14 +323,14 @@ test_that("Testing rownames, colnames, rowData and colData",{
   )
 })
 
-test_that("Testing subset helper/supplementary functions",{
+test_that("Testing subset helper/supplementary functions", {
   es <- ExperimentSubset(sce_chcl)
   es <- createSubset(es, "subset1",
-                                       rows = c(10,11,50,56,98,99,102,105,109,200),
-                                       cols = c(20,21,40,45,90,99,100,123,166,299),
-                                       parentAssay = "counts")
+                     rows = c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200),
+                     cols = c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299),
+                     parentAssay = "counts")
   counts1p <- assay(es, "subset1")
-  counts1p[,] <- counts1p[,] + 1
+  counts1p[, ] <- counts1p[, ] + 1
   es <- setSubsetAssay(es, "subset1", counts1p, "scaledSubset1")
   expect_equal(subsetCount(es), 1)
   expect_equal(subsetAssayCount(es), 2)
@@ -306,7 +344,7 @@ test_that("Testing subset helper/supplementary functions",{
                 "subsetAssays\\(2\\): subset1 subset1/scaledSubset1")
 })
 
-test_that("Testing assay function",{
+test_that("Testing assay function", {
   es <- ExperimentSubset(sce_chcl)
   rows1 <- c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200)
   cols1 <- c(20, 21, 40, 45, 90, 99, 100, 123, 166, 299)
@@ -356,12 +394,15 @@ makeHvgFixture <- function() {
   )
 }
 
-test_that("Testing reducedDims",{
+test_that("Testing reducedDims", {
   skip_if_not_installed("scrapper")
   skip_if_not_installed("scater")
   es <- makeHvgFixture()
   set.seed(20)
-  colData(es, subsetName = "hvg1000") <- cbind(colData(es, subsetName = "hvg1000"), cluster = kmeans(t(assay(es, "hvg1000")), 5)$cluster)
+  colData(es, subsetName = "hvg1000") <- cbind(
+    colData(es, subsetName = "hvg1000"),
+    cluster = kmeans(t(assay(es, "hvg1000")), 5)$cluster
+  )
   expect_true("cluster" %in% colnames(colData(es, subsetName = "hvg1000")))
 
   hvgPca <- scater::calculatePCA(assay(es, "hvg1000"))
@@ -372,7 +413,7 @@ test_that("Testing reducedDims",{
   expect_equal(reducedDimNames(es, subsetName = "hvg1000"),
                c("a", "b"))
   expect_equal(reducedDim(es, "b", subsetName = "hvg1000"), hvgPca)
-  
+
   reducedDimNames(es, subsetName = "hvg1000") <- c("PCA_1", "PCA_2")
   expect_equal(reducedDimNames(es, subsetName = "hvg1000"),
                c("PCA_1", "PCA_2"))
@@ -381,10 +422,10 @@ test_that("Testing reducedDims",{
 
   expect_error(reducedDimNames(es, subsetName = "hvg123"),
                "hvg123 subset does not exist.")
-  
+
   expect_error(reducedDimNames(es, subsetName = "hvg123") <- c("PCA_1"),
                "hvg123 subset does not exist.")
-  
+
   countsPca <- scater::calculatePCA(assay(es, "counts"))
   reducedDim(es, type = "PCA") <- countsPca
   expect_equal(reducedDim(es, type = "PCA"), countsPca)
@@ -400,25 +441,34 @@ test_that("Testing reducedDims",{
 
 })
 
-test_that("Testing metadata",{
+test_that("Testing metadata", {
   skip_if_not_installed("scrapper")
   es <- makeHvgFixture()
-  metadata(es, subsetName = "hvg1000") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
-  expect_equal(metadata(es, subsetName = "hvg1000")$meta1, "This is testing meta1")
-  expect_equal(metadata(es, subsetName = "hvg1000")$meta2, "This is testing meta2")
-  
-  expect_error(metadata(es, subsetName = "hvg") <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2"),
-               "hvg subset does not exist.")
-  
+  metadata(es, subsetName = "hvg1000") <- list(
+    meta1 = "This is testing meta1",
+    meta2 = "This is testing meta2"
+  )
+  expect_equal(metadata(es, subsetName = "hvg1000")$meta1,
+               "This is testing meta1")
+  expect_equal(metadata(es, subsetName = "hvg1000")$meta2,
+               "This is testing meta2")
+
+  expect_error(
+    metadata(es, subsetName = "hvg") <- list(meta1 = "This is testing meta1",
+                                             meta2 = "This is testing meta2"),
+    "hvg subset does not exist."
+  )
+
   expect_error(metadata(es, subsetName = "hvg"),
                "hvg subset does not exist.")
-  
-  metadata(es) <- list(meta1 = "This is testing meta1", meta2 = "This is testing meta2")
+
+  metadata(es) <- list(meta1 = "This is testing meta1",
+                       meta2 = "This is testing meta2")
   expect_equal(metadata(es)$meta1, "This is testing meta1")
   expect_equal(metadata(es)$meta2, "This is testing meta2")
 })
 
-test_that("Testing altExperiments",{
+test_that("Testing altExperiments", {
   skip_if_not_installed("scrapper")
   es <- makeHvgFixture()
   # altExps for the subset's cells, told apart by their counts
@@ -436,11 +486,11 @@ test_that("Testing altExperiments",{
 
   expect_error(altExp(es, "alt1", subsetName = "hvg") <- hvgAlt,
                "hvg subset does not exist.")
-  
+
   # without a name, altExp<- replaces the first altExp
   altExp(es, subsetName = "hvg1000") <- makeHvgAlt(2)
   expect_equal(length(altExpNames(es, subsetName = "hvg1000")), 2)
-  
+
   expect_equal(
     assay(altExp(es, subsetName = "hvg1000"), "counts"),
     assay(makeHvgAlt(2), "counts")
@@ -449,26 +499,26 @@ test_that("Testing altExperiments",{
     assay(altExp(es, "alt2", subsetName = "hvg1000"), "counts"),
     assay(hvgAlt, "counts")
   )
-  
+
   altExp(es) <- simSce
   expect_equal(assay(altExp(es), "counts"), simCounts)
 
   altExp(es, "a1") <- simSce
   expect_true("a1" %in% altExpNames(es))
   expect_equal(assay(altExp(es, "a1"), "counts"), simCounts)
-  
+
   expect_error(altExpNames(es, subsetName = "na"),
                "na subset does not exist.")
-  
+
   expect_error(altExpNames(es, subsetName = "na") <- c("na2"),
                "na subset does not exist.")
-  
+
   altExpNames(es) <- c("a1", "a2")
   expect_equal(altExpNames(es), c("a1", "a2"))
-  
+
   expect_error(altExp(es, "alt1", subsetName = "hvg10002"),
                "hvg10002 subset does not exist.")
-  
+
   # the subset sees the main object's altExps a1 and a2, then its own
   # alt1 and alt2, and renames only its own (#58)
   altExpNames(es, subsetName = "hvg1000") <- c("a1", "a2", "b1", "b2")
@@ -477,7 +527,7 @@ test_that("Testing altExperiments",{
 
   expect_error(altExpNames(es, subsetName = "hvg1000x"),
                "hvg1000x subset does not exist.")
-  
+
   altExps(es, subsetName = "hvg1000") <- list(a = hvgAlt, b = makeHvgAlt(3))
   # its own altExps are replaced; the main object's stay visible (#58)
   expect_equal(altExpNames(es, subsetName = "hvg1000"),
@@ -489,13 +539,13 @@ test_that("Testing altExperiments",{
 
   expect_error(altExps(es, subsetName = "hvg") <- list(a = hvgAlt),
                "hvg subset does not exist.")
-  
+
   expect_error(altExps(es, subsetName = "hvg10002"),
                "hvg10002 subset does not exist.")
-  
+
   altExps(es) <- list(a = simSce, b = simSce)
   expect_equal(altExpNames(es), c("a", "b"))
-} 
+}
 )
 
 test_that("altExp gets and sets the altExp chosen by name or index", {
@@ -1160,7 +1210,8 @@ test_that("subsetRowTree<- and subsetColTree<- check value", {
                regexp = "Not found: row1, row2, row3, row4, row5, row6.",
                fixed = TRUE)
   noNames <- TreeSummarizedExperiment(assays = list(counts = unname(
-    assay(tse))))
+    assay(tse)
+  )))
   noNames <- createSubset(ExperimentSubset(noNames), "s1", rows = 1:3)
   expect_error(subsetRowTree(noNames, "s1") <- rowTree(tse),
                regexp = paste0("Subset 's1' has no rownames to match to the ",
@@ -2446,7 +2497,7 @@ test_that("assay<- stores into a subset chosen by its name", {
                regexp = "not a subset")
 })
 
-test_that("Testing createSubset with multiple paramter options",{
+test_that("Testing createSubset with multiple paramter options", {
   es <- ExperimentSubset(sce_chcl)
   expect_equal(
     tryCatch(createSubset(es, "subset1", rows = 1:5, cols = 1:5,
@@ -2455,21 +2506,24 @@ test_that("Testing createSubset with multiple paramter options",{
     paste0("'parentAssay' must be NULL or name an assay, a subset or a ",
            "\"subset/assay\"; 'none' is none of these.")
   )
-  
+
   #colnames
-  es <- createSubset(es, "subset1", rows = c(10,11,50,56,98,99,102,105,109, 200), cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"), parentAssay = "counts")
+  es <- createSubset(es, "subset1",
+                     rows = c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200),
+                     cols = c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC"),
+                     parentAssay = "counts")
   namedCols <- c("CTGCTGTCAGGGTATG", "CAGTCCTTCGGTTAAC")
   expect_equal(subsetNames(es), "subset1")
   expectSubsetOf(es, "subset1",
                  rows = c(10, 11, 50, 56, 98, 99, 102, 105, 109, 200),
                  cols = match(namedCols, colnames(es)))
-  
+
   #null rows and null cols
   es <- createSubset(es, "subset2", parentAssay = "counts")
   expect_equal(subsetNames(es), c("subset1", "subset2"))
   expectSubsetOf(es, "subset2", rows = seq_len(nrow(es)),
                  cols = seq_len(ncol(es)))
-  
+
   # rows or columns given by names that the parent doesn't have
   expect_error(
     createSubset(es, "subset22", rows = c("as", "asd", "asd"),
@@ -2483,12 +2537,14 @@ test_that("Testing createSubset with multiple paramter options",{
   )
 })
 
-test_that("Completing test coverage, move this into relevant places later",{
+test_that("Completing test coverage, move this into relevant places later", {
   es <- ExperimentSubset(sce_chcl)
-  expect_warning(es <- createSubset(es, "subset 1", rows = c(1:5), cols = (1:5)),
-                 "Removing spaces from the specified subsetName.")
+  expect_warning(
+    es <- createSubset(es, "subset 1", rows = c(1:5), cols = (1:5)),
+    "Removing spaces from the specified subsetName."
+  )
   expect_equal(subsetNames(es), "subset1")
-  
+
   # a named list of assays gives a SubsetSingleCellExperiment of them
   es <- ExperimentSubset(list(counts = assay(sce_chcl, "counts")))
   expect_s4_class(es, "SubsetSingleCellExperiment")
@@ -3755,7 +3811,8 @@ makeAdtFixture <- function(class = "SingleCellExperiment") {
 # The part of an altExp a subset stores itself, NULL if none
 ownAltExp <- function(es, subsetName, name) {
   internal <- ExperimentSubset:::.internalAssay(
-    ExperimentSubset:::.subsets(es)[[subsetName]])
+    ExperimentSubset:::.subsets(es)[[subsetName]]
+  )
   if (!name %in% altExpNames(internal))
     return(NULL)
   altExp(internal, name, withDimnames = FALSE)
@@ -3770,9 +3827,11 @@ test_that("A subset sees the main object's altExps (#58)", {
   expect_equal(assay(adt, "counts"), adtCounts[, 1:8])
   # by position and in altExps(), in the same order
   expect_equal(
-    assay(altExp(es, 1, subsetName = "s1"), "counts"), adtCounts[, 1:8])
+    assay(altExp(es, 1, subsetName = "s1"), "counts"), adtCounts[, 1:8]
+  )
   expect_equal(
-    assay(altExp(es, subsetName = "s1"), "counts"), adtCounts[, 1:8])
+    assay(altExp(es, subsetName = "s1"), "counts"), adtCounts[, 1:8]
+  )
   expect_equal(names(altExps(es, subsetName = "s1")), "ADT")
   # and in getSubsetExperiment()
   sub <- getSubsetExperiment(es, "s1")
@@ -3783,10 +3842,12 @@ test_that("A subset sees the main object's altExps (#58)", {
   altExp(es, "ADT") <- SummarizedExperiment(list(counts = adtCounts * 2L))
   expect_equal(
     assay(altExp(es, "ADT", subsetName = "s1"), "counts"),
-    adtCounts[, 1:8] * 2L)
+    adtCounts[, 1:8] * 2L
+  )
   # the subset's own altExps come after the linked ones
   spikes <- SummarizedExperiment(
-    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8)))))
+    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8))))
+  )
   altExp(es, "spikes", subsetName = "s1") <- spikes
   expect_equal(altExpNames(es, subsetName = "s1"),
                c("ADT", "spikes"))
@@ -3824,11 +3885,13 @@ test_that("A subset stores only the altExp assays it adds (#58)", {
   adt <- altExp(es, "ADT", subsetName = "s1")
   assay(adt, "decontPro") <- assay(adt, "counts") / 2
   messages <- capture_messages(
-    altExp(es, "ADT", subsetName = "s1") <- adt)
+    altExp(es, "ADT", subsetName = "s1") <- adt
+  )
   expect_length(messages, 0)
   expect_equal(
     assayNames(altExp(es, "ADT", subsetName = "s1")),
-    c("counts", "decontPro"))
+    c("counts", "decontPro")
+  )
   expect_equal(assayNames(altExp(es, "ADT")), "counts")
   expect_equal(assayNames(ownAltExp(es, "s1", "ADT")),
                "decontPro")
@@ -3859,49 +3922,59 @@ test_that("A changed linked altExp assay needs unlink (#58)", {
   # a bare name is a main assay, not the altExp's
   expect_error(
     altExp(es, "ADT", subsetName = "s1", unlink = "counts") <- adt,
-    regexp = "'ADT/counts' in subset 's1' is linked", fixed = TRUE)
+    regexp = "'ADT/counts' in subset 's1' is linked", fixed = TRUE
+  )
   for (unlink in list(TRUE, "ADT/counts")) {
     es2 <- es
     messages <- capture_messages(
-      altExp(es2, "ADT", subsetName = "s1", unlink = unlink) <- adt)
+      altExp(es2, "ADT", subsetName = "s1", unlink = unlink) <- adt
+    )
     expect_equal(
       messages,
       paste0("Subset 's1' now stores its own 'ADT/counts', unlinked from ",
-             "the main altExp 'ADT'.\n"))
+             "the main altExp 'ADT'.\n")
+    )
     expect_equal(
       assay(altExp(es2, "ADT", subsetName = "s1"), "counts"),
-      adtCounts[, 1:8] + 100L)
+      adtCounts[, 1:8] + 100L
+    )
     expect_equal(assay(altExp(es2, "ADT"), "counts"), adtCounts)
   }
   # also through altExps<-
   expect_error(
     altExps(es, subsetName = "s1") <- list(ADT = adt),
-    regexp = "'ADT/counts' in subset 's1' is linked", fixed = TRUE)
+    regexp = "'ADT/counts' in subset 's1' is linked", fixed = TRUE
+  )
   # unlink only applies in a subset
   expect_error(
     altExp(es, "ADT", unlink = TRUE) <- altExp(es, "ADT"),
-    regexp = "'unlink' only applies when storing in a subset.", fixed = TRUE)
+    regexp = "'unlink' only applies when storing in a subset.", fixed = TRUE
+  )
   expect_error(
     altExp(es, "ADT", subsetName = "s1", unlink = NA) <- adt,
-    regexp = "'unlink' must be TRUE, FALSE", fixed = TRUE)
+    regexp = "'unlink' must be TRUE, FALSE", fixed = TRUE
+  )
 })
 
 test_that("An altExp of another shape replaces the linked one (#58)", {
   es <- makeAdtFixture()
   small <- SummarizedExperiment(list(
-    counts = matrix(1L, 1, 8, dimnames = list("p9", paste0("c", 1:8)))))
+    counts = matrix(1L, 1, 8, dimnames = list("p9", paste0("c", 1:8)))
+  ))
   expect_error(
     altExp(es, "ADT", subsetName = "s1") <- small,
-    regexp = "'ADT/counts' in subset 's1' is linked", fixed = TRUE)
+    regexp = "'ADT/counts' in subset 's1' is linked", fixed = TRUE
+  )
   suppressMessages(
-    altExp(es, "ADT", subsetName = "s1", unlink = "ADT/counts") <- small)
+    altExp(es, "ADT", subsetName = "s1", unlink = "ADT/counts") <- small
+  )
   adt <- altExp(es, "ADT", subsetName = "s1")
   expect_equal(rownames(adt), "p9")
   expect_equal(assayNames(adt), "counts")
   expect_equal(assay(altExp(es, "ADT"), "counts"), adtCounts)
 })
 
-test_that("A subset's altExp rowData and metadata replace the linked ones (#58)", {
+test_that("A subset's altExp rowData and metadata replace linked ones (#58)", {
   es <- makeAdtFixture()
   adt <- altExp(es, "ADT", subsetName = "s1")
   rowData(adt)$target <- c("CD3", "CD4")
@@ -3923,7 +3996,8 @@ test_that("A chained subset sees altExps through its parent (#58)", {
   altExp(es, "ADT", subsetName = "s1") <- adt
   spikes <- SummarizedExperiment(
     list(counts = matrix(seq_len(24), 3, 8,
-                         dimnames = list(NULL, paste0("c", 1:8)))))
+                         dimnames = list(NULL, paste0("c", 1:8))))
+  )
   altExp(es, "spikes", subsetName = "s1") <- spikes
   es <- createSubset(es, "s2", cols = 3:5, parentAssay = "s1")
   expect_equal(altExpNames(es, subsetName = "s2"),
@@ -3934,20 +4008,24 @@ test_that("A chained subset sees altExps through its parent (#58)", {
   expect_equal(assay(view, "decontPro"), adtCounts[, 3:5] / 2)
   expect_equal(
     as.vector(assay(altExp(es, "spikes", subsetName = "s2"), "counts")),
-    as.vector(matrix(seq_len(24), 3, 8)[, 3:5]))
+    as.vector(matrix(seq_len(24), 3, 8)[, 3:5])
+  )
   # a change to an assay of the parent subset names where it is stored
   assay(view, "decontPro") <- assay(view, "decontPro") + 1
   expect_error(
     altExp(es, "ADT", subsetName = "s2") <- view,
     regexp = paste0("'ADT/decontPro' in subset 's2' is linked to altExp ",
                     "'ADT' of subset 's1'"),
-    fixed = TRUE)
+    fixed = TRUE
+  )
   messages <- capture_messages(
-    altExp(es, "ADT", subsetName = "s2", unlink = TRUE) <- view)
+    altExp(es, "ADT", subsetName = "s2", unlink = TRUE) <- view
+  )
   expect_equal(
     messages,
     paste0("Subset 's2' now stores its own 'ADT/decontPro', unlinked from ",
-           "altExp 'ADT' of subset 's1'.\n"))
+           "altExp 'ADT' of subset 's1'.\n")
+  )
 })
 
 test_that("A subset removes and renames only its own altExps (#58)", {
@@ -3963,7 +4041,8 @@ test_that("A subset removes and renames only its own altExps (#58)", {
                "counts")
   # altExps<- can't remove a linked altExp
   spikes <- SummarizedExperiment(
-    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8)))))
+    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8))))
+  )
   altExps(es, subsetName = "s1") <- list(spikes = spikes)
   expect_equal(altExpNames(es, subsetName = "s1"),
                c("ADT", "spikes"))
@@ -3979,18 +4058,22 @@ test_that("A subset removes and renames only its own altExps (#58)", {
     altExpNames(es, subsetName = "s1") <- c("protein", "ercc"),
     regexp = paste0("Subset 's1' can't rename 'ADT', which is linked to ",
                     "the main altExp 'ADT'."),
-    fixed = TRUE)
+    fixed = TRUE
+  )
   # names must differ, so an own altExp can't take a linked name, which
   # would hide the linked altExp without unlink
   expect_error(
     altExpNames(es, subsetName = "s1") <- c("ADT", "ADT"),
-    regexp = "one different name for each of the 2 altExps", fixed = TRUE)
+    regexp = "one different name for each of the 2 altExps", fixed = TRUE
+  )
   expect_error(
     altExpNames(es, subsetName = "s1") <- c("ADT", NA),
-    regexp = "one different name for each of the 2 altExps", fixed = TRUE)
+    regexp = "one different name for each of the 2 altExps", fixed = TRUE
+  )
   expect_error(
     altExpNames(es, subsetName = "s1") <- c("ADT", "ercc", "x"),
-    regexp = "one different name for each of the 2 altExps", fixed = TRUE)
+    regexp = "one different name for each of the 2 altExps", fixed = TRUE
+  )
   expect_equal(altExpNames(es, subsetName = "s1"),
                c("ADT", "ercc"))
 })
@@ -4038,33 +4121,41 @@ test_that("Writes after an unlink don't need unlink again (#58)", {
   adt <- altExp(es, "ADT", subsetName = "s1")
   assay(adt, "decontPro") <- assay(adt, "counts") / 2
   messages <- capture_messages(
-    altExp(es, "ADT", subsetName = "s1") <- adt)
+    altExp(es, "ADT", subsetName = "s1") <- adt
+  )
   expect_length(messages, 0)
   expect_equal(assayNames(ownAltExp(es, "s1", "ADT")),
                c("counts", "decontPro"))
   spikes <- SummarizedExperiment(
-    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8)))))
+    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8))))
+  )
   messages <- capture_messages(
-    altExp(es, "spikes", subsetName = "s1") <- spikes)
+    altExp(es, "spikes", subsetName = "s1") <- spikes
+  )
   expect_length(messages, 0)
   messages <- capture_messages(
-    es2 <- setSubsetExperiment(es, "s1", getSubsetExperiment(es, "s1")))
+    es2 <- setSubsetExperiment(es, "s1", getSubsetExperiment(es, "s1"))
+  )
   expect_length(messages, 0)
   expect_equal(
     assay(altExp(es2, "ADT", subsetName = "s1"), "counts"),
-    adtCounts[, 1:8] + 100L)
+    adtCounts[, 1:8] + 100L
+  )
   # also after storing an altExp of another shape
   es <- makeAdtFixture()
   small <- SummarizedExperiment(list(
-    counts = matrix(1L, 1, 8, dimnames = list("p9", paste0("c", 1:8)))))
+    counts = matrix(1L, 1, 8, dimnames = list("p9", paste0("c", 1:8)))
+  ))
   suppressMessages(altExp(es, "ADT", subsetName = "s1", unlink = TRUE) <- small)
   assay(small, "counts") <- assay(small, "counts") + 1L
   messages <- capture_messages(
-    altExp(es, "ADT", subsetName = "s1") <- small)
+    altExp(es, "ADT", subsetName = "s1") <- small
+  )
   expect_length(messages, 0)
   expect_equal(
     as.vector(assay(altExp(es, "ADT", subsetName = "s1"), "counts")),
-    rep(2L, 8))
+    rep(2L, 8)
+  )
 })
 
 test_that("A subset's altExp reducedDims replace the linked ones (#58)", {
@@ -4109,10 +4200,12 @@ test_that("A rename carries what subsets store along (#58)", {
   expect_equal(altExpNames(es, subsetName = "s1"), "protein")
   expect_equal(
     assayNames(altExp(es, "protein", subsetName = "s2")),
-    c("counts", "decontPro", "zero"))
+    c("counts", "decontPro", "zero")
+  )
   # a parent subset's own altExp: its children's parts follow it
   spikes <- SummarizedExperiment(
-    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8)))))
+    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8))))
+  )
   altExp(es, "spikes", subsetName = "s1") <- spikes
   child <- altExp(es, "spikes", subsetName = "s2")
   assay(child, "logcounts") <- log1p(assay(child, "counts"))
@@ -4124,22 +4217,26 @@ test_that("A rename carries what subsets store along (#58)", {
                c("counts", "logcounts"))
   # a rename onto a name a child already stores is an error
   other <- SummarizedExperiment(
-    list(counts = matrix(1L, 1, 3, dimnames = list(NULL, paste0("c", 1:3)))))
+    list(counts = matrix(1L, 1, 3, dimnames = list(NULL, paste0("c", 1:3))))
+  )
   altExp(es, "other", subsetName = "s2") <- other
   expect_error(
     altExpNames(es, subsetName = "s1") <- c("protein", "other"),
     regexp = "Subset 's2' already stores an altExp called 'other'.",
-    fixed = TRUE)
+    fixed = TRUE
+  )
   # also when the subset stores only the new name, an altExp of its own
   es <- makeAdtFixture()
   own <- SummarizedExperiment(
     list(counts = matrix(1L, 2, 8, dimnames = list(c("p1", "p2"),
-                                                   paste0("c", 1:8)))))
+                                                   paste0("c", 1:8))))
+  )
   altExp(es, "X", subsetName = "s1") <- own
   expect_error(
     altExpNames(es) <- "X",
     regexp = "Subset 's1' already stores an altExp called 'X'.",
-    fixed = TRUE)
+    fixed = TRUE
+  )
   expect_equal(altExpNames(es), "ADT")
 })
 
@@ -4147,7 +4244,7 @@ test_that("A subset's whole altExp stays whole (#58)", {
   es <- makeAdtFixture()
   twoRows <- function(value, assays = "counts") {
     m <- matrix(value, 2, 20, dimnames = list(c("r1", "r2"),
-                                             paste0("c", 1:20)))
+                                              paste0("c", 1:20)))
     SummarizedExperiment(stats::setNames(rep(list(m), length(assays)),
                                          assays))
   }
@@ -4155,14 +4252,16 @@ test_that("A subset's whole altExp stays whole (#58)", {
   suppressMessages(altExp(es, "ADT", subsetName = "s1", unlink = TRUE) <- own)
   # the main ADT takes the same rows: s1's ADT still replaces it
   expect_warning(
-    altExp(es, "ADT") <- twoRows(1L, c("counts", "other")), regexp = NA)
+    altExp(es, "ADT") <- twoRows(1L, c("counts", "other")), regexp = NA
+  )
   adt <- altExp(es, "ADT", subsetName = "s1")
   expect_equal(assayNames(adt), "counts")
   expect_equal(as.vector(assay(adt, "counts")), rep(5L, 16))
   # and is kept when the main ADT is reshaped
   expect_warning(
     altExp(es, "ADT") <- SummarizedExperiment(list(counts = adtCounts)),
-    regexp = NA)
+    regexp = NA
+  )
   expect_equal(rownames(altExp(es, "ADT", subsetName = "s1")),
                c("r1", "r2"))
   # and stays whole through later writes of other altExps and round trips
@@ -4173,7 +4272,8 @@ test_that("A subset's whole altExp stays whole (#58)", {
                "counts")
   expect_warning(
     altExp(es, "ADT") <- SummarizedExperiment(list(counts = adtCounts)),
-    regexp = NA)
+    regexp = NA
+  )
   expect_equal(rownames(altExp(es, "ADT", subsetName = "s1")),
                c("r1", "r2"))
   # an altExp the main object adds under a name s1 already stores is
@@ -4192,10 +4292,12 @@ test_that("Objects saved before pieces were recorded read as before (#58)", {
   copy <- SummarizedExperiment(list(counts = adtCounts[, 1:8] + 5L))
   altExp(internal, "ADT") <- copy
   subsets[["s1"]] <- ExperimentSubset:::`.internalAssay<-`(
-    subsets[["s1"]], value = internal)
+    subsets[["s1"]], value = internal
+  )
   es <- ExperimentSubset:::`.subsets<-`(es, value = subsets)
   altExp(es, "ADT") <- SummarizedExperiment(
-    list(counts = adtCounts, other = adtCounts * 2L))
+    list(counts = adtCounts, other = adtCounts * 2L)
+  )
   # the copy's counts hide the main ADT's, whose other assay shows too
   adt <- altExp(es, "ADT", subsetName = "s1")
   expect_equal(assayNames(adt), c("counts", "other"))
@@ -4210,29 +4312,32 @@ test_that("combineCols carries what subsets store along (#58)", {
   # a plain object of 3 cells whose ADT has the given proteins
   makeOther <- function(proteins) {
     counts <- matrix(1L, 10, 3, dimnames = list(paste0("g", 1:10),
-                                               paste0("n", 1:3)))
+                                                paste0("n", 1:3)))
     other <- SingleCellExperiment(list(counts = counts))
     altExp(other, "ADT") <- SummarizedExperiment(list(
       counts = matrix(1L, length(proteins), 3,
-                      dimnames = list(proteins, paste0("n", 1:3)))))
+                      dimnames = list(proteins, paste0("n", 1:3)))
+    ))
     other
   }
   # the same proteins: nothing changes
   expect_warning(
-    out <- combineCols(es, makeOther(c("p1", "p2"))), regexp = NA)
+    out <- combineCols(es, makeOther(c("p1", "p2"))), regexp = NA
+  )
   expect_equal(assayNames(altExp(out, "ADT", subsetName = "s1")),
                c("counts", "decontPro"))
   # a third protein: ADT gets another row, and s1's part is dropped
   expect_warning(
     out <- combineCols(es, makeOther(c("p1", "p2", "p3"))),
-    regexp = "Dropped what subset 's1' stored in altExp 'ADT'", fixed = TRUE)
+    regexp = "Dropped what subset 's1' stored in altExp 'ADT'", fixed = TRUE
+  )
   expect_equal(dim(altExp(out, "ADT", subsetName = "s1")),
                c(3L, 8L))
   expect_equal(assayNames(altExp(out, "ADT", subsetName = "s1")),
                "counts")
 })
 
-test_that("Removing or reshaping an altExp drops what subsets added to it (#58)", {
+test_that("Removing or reshaping an altExp drops what subsets added (#58)", {
   es <- makeAdtFixture()
   adt <- altExp(es, "ADT", subsetName = "s1")
   assay(adt, "decontPro") <- assay(adt, "counts") / 2
@@ -4240,7 +4345,8 @@ test_that("Removing or reshaping an altExp drops what subsets added to it (#58)"
   # new values keep the subset's part
   expect_warning(
     altExp(es, "ADT") <- SummarizedExperiment(list(counts = adtCounts + 1L)),
-    regexp = NA)
+    regexp = NA
+  )
   expect_equal(assayNames(altExp(es, "ADT", subsetName = "s1")),
                c("counts", "decontPro"))
   dropped <- paste0("Dropped what subset 's1' stored in altExp 'ADT': the ",
@@ -4265,8 +4371,11 @@ test_that("Removing or reshaping an altExp drops what subsets added to it (#58)"
   # a whole altExp of the subset's own is kept
   es3 <- makeAdtFixture()
   small <- SummarizedExperiment(list(
-    counts = matrix(1L, 1, 8, dimnames = list("p9", paste0("c", 1:8)))))
-  suppressMessages(altExp(es3, "ADT", subsetName = "s1", unlink = TRUE) <- small)
+    counts = matrix(1L, 1, 8, dimnames = list("p9", paste0("c", 1:8)))
+  ))
+  suppressMessages(
+    altExp(es3, "ADT", subsetName = "s1", unlink = TRUE) <- small
+  )
   expect_warning(altExp(es3, "ADT") <- NULL, regexp = NA)
   expect_equal(rownames(altExp(es3, "ADT", subsetName = "s1")),
                "p9")
@@ -4279,11 +4388,14 @@ test_that("Removing or reshaping an altExp drops what subsets added to it (#58)"
   altExp(es4, "ADT", subsetName = "s2") <- adt
   expect_warning(
     suppressMessages(
-      altExp(es4, "ADT", subsetName = "s1", unlink = TRUE) <- small),
-    regexp = "Dropped what subset 's2' stored in altExp 'ADT'", fixed = TRUE)
+      altExp(es4, "ADT", subsetName = "s1", unlink = TRUE) <- small
+    ),
+    regexp = "Dropped what subset 's2' stored in altExp 'ADT'", fixed = TRUE
+  )
   es5 <- makeAdtFixture()
   spikes <- SummarizedExperiment(
-    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8)))))
+    list(counts = matrix(1L, 3, 8, dimnames = list(NULL, paste0("c", 1:8))))
+  )
   altExp(es5, "spikes", subsetName = "s1") <- spikes
   es5 <- createSubset(es5, "s2", cols = 1:3, parentAssay = "s1")
   child <- altExp(es5, "spikes", subsetName = "s2")
@@ -4294,7 +4406,8 @@ test_that("Removing or reshaping an altExp drops what subsets added to it (#58)"
   expect_warning(
     es5 <- setSubsetExperiment(es5, "s1", sub),
     regexp = "Dropped what subset 's2' stored in altExp 'spikes'",
-    fixed = TRUE)
+    fixed = TRUE
+  )
   expect_equal(altExpNames(es5, subsetName = "s2"), "ADT")
 })
 
@@ -4320,18 +4433,22 @@ test_that("setSubsetExperiment stores only changed altExp assays (#58)", {
                     "'counts' and 'ADT/counts' to the main altExp 'ADT'. ",
                     "Set unlink = TRUE or unlink = c(\"counts\", ",
                     "\"ADT/counts\")"),
-    fixed = TRUE))
+    fixed = TRUE
+  ))
   expect_length(messages, 0)
   expect_error(
     setSubsetExperiment(es, "s1", changed, unlink = "counts"),
-    regexp = "'ADT/counts' in subset 's1' is linked", fixed = TRUE)
+    regexp = "'ADT/counts' in subset 's1' is linked", fixed = TRUE
+  )
   messages <- capture_messages(
-    es2 <- setSubsetExperiment(es, "s1", changed, unlink = TRUE))
+    es2 <- setSubsetExperiment(es, "s1", changed, unlink = TRUE)
+  )
   expect_length(messages, 2)
   expect_match(messages[2], "its own 'ADT/counts'", fixed = TRUE)
   expect_equal(
     assay(altExp(es2, "ADT", subsetName = "s1"), "counts"),
-    adtCounts[, 1:8] + 1L)
+    adtCounts[, 1:8] + 1L
+  )
 })
 
 test_that("TreeSE and SpatialExperiment subsets see altExps (#58)", {
@@ -4341,7 +4458,8 @@ test_that("TreeSE and SpatialExperiment subsets see altExps (#58)", {
                  info = class)
     expect_equal(
       assay(altExp(es, "ADT", subsetName = "s1"), "counts"),
-      adtCounts[, 1:8], info = class)
+      adtCounts[, 1:8], info = class
+    )
     sub <- getSubsetExperiment(es, "s1")
     expect_equal(altExpNames(sub), "ADT", info = class)
   }

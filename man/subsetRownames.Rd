@@ -56,7 +56,8 @@ A \code{vector} of \code{rownames}.
 Input object with rownames set to a subset.
 }
 \description{
-Get \code{rownames} from a subset in the \code{ExperimentSubset} object.
+Get \code{rownames} from a subset in the \code{ExperimentSubset}
+  object.
 
 Set \code{rownames} to a subset in the
   \code{ExperimentSubset} object.

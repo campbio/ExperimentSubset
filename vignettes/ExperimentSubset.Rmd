@@ -16,7 +16,7 @@ vignette: |
   %\VignetteEncoding{UTF-8}
 ---
 ```{r options, include=FALSE, echo=FALSE}
-knitr::opts_chunk$set(warning=FALSE, error=FALSE, message=FALSE)
+knitr::opts_chunk$set(warning = FALSE, error = FALSE, message = FALSE)
 ```
 
 This vignette is a short introduction. The
@@ -117,7 +117,7 @@ created from within the constructor by providing input a named list to the
 ```{r construct-from-sce}
 #set a seed so the random counts below are reproducible
 set.seed(1)
-counts <- matrix(rpois(100, lambda = 10), ncol=10, nrow=10)
+counts <- matrix(rpois(100, lambda = 10), ncol = 10, nrow = 10)
 sce <- SingleCellExperiment(list(counts = counts))
 es <- ExperimentSubset(sce)
 es
@@ -128,7 +128,7 @@ generally loaded data such as counts matrices, which can be passed to the
 constructor function in a list.
 
 ```{r construct-from-list}
-counts <- matrix(rpois(100, lambda = 10), ncol=10, nrow=10)
+counts <- matrix(rpois(100, lambda = 10), ncol = 10, nrow = 10)
 ExperimentSubset(list(counts = counts))
 ```
 
@@ -146,7 +146,7 @@ assay from the parent object is linked as the parent of this subset. The
 seen in a subset, written as `"subset/assay"`.
 
 ```{r create-subset}
-es <- createSubset(es, 
+es <- createSubset(es,
                    subsetName = "subset1",
                    rows = c(1:2),
                    cols = c(1:5),
@@ -166,11 +166,11 @@ experiment object of the same class as the parent object.
 
 ```{r set-subset-assay}
 subset1Assay <- assay(es, "subset1")
-subset1Assay[,] <- subset1Assay[,] + 1
-es <- setSubsetAssay(es, 
-                  subsetName = "subset1", 
-                  inputMatrix = subset1Assay, 
-                  subsetAssayName = "subset1Assay")
+subset1Assay[, ] <- subset1Assay[, ] + 1
+es <- setSubsetAssay(es,
+                     subsetName = "subset1",
+                     inputMatrix = subset1Assay,
+                     subsetAssayName = "subset1Assay")
 es
 ```
 
@@ -348,7 +348,7 @@ assay as the additional `subsetAssayName` parameter.
 
 ```{r assay-setter}
 #creating a dummy ES object
-counts <- matrix(rpois(100, lambda = 10), ncol=10, nrow=10)
+counts <- matrix(rpois(100, lambda = 10), ncol = 10, nrow = 10)
 sce <- SingleCellExperiment(list(counts = counts))
 es <- ExperimentSubset(sce)
 
@@ -362,10 +362,10 @@ es <- createSubset(es, subsetName = "subset1", rows = c(1:2), cols = c(1:4))
 #should be stored and an additional 'subsetAssayName' parameter which defines
 #the name of the new assay
 assay(
-  x = es, 
-  i = "subset1", 
-  subsetAssayName = "subset1InternalAssay") <- matrix(rpois(8, lambda = 10), 
-                                                      ncol=4, nrow=2)
+  x = es,
+  i = "subset1",
+  subsetAssayName = "subset1InternalAssay"
+) <- matrix(rpois(8, lambda = 10), ncol = 4, nrow = 2)
 ```
 
 Using `assay` getter method is simple, as no additional parameter is required
@@ -402,7 +402,7 @@ Creating the `ExperimentSubset` object is as simple as passing an experiment
 object to the `ExperimentSubset` constructor:
 
 ```{r toy-object}
-counts <- matrix(rpois(100, lambda = 10), ncol=10, nrow=10)
+counts <- matrix(rpois(100, lambda = 10), ncol = 10, nrow = 10)
 sce <- SingleCellExperiment(list(counts = counts))
 es <- ExperimentSubset(sce)
 subsetSummary(es)
@@ -411,7 +411,7 @@ subsetSummary(es)
 Create a subset that includes the first 5 rows and columns only:
 
 ```{r create-subset1}
-es <- createSubset(es, 
+es <- createSubset(es,
                    subsetName = "subset1",
                    rows = c(1:5),
                    cols = c(1:5),
@@ -422,7 +422,7 @@ subsetSummary(es)
 Create another subset from `subset1` by only keeping the first two rows:
 
 ```{r create-subset2}
-es <- createSubset(es, 
+es <- createSubset(es,
                    subsetName = "subset2",
                    rows = c(1:2),
                    cols = c(1:5),
@@ -434,17 +434,17 @@ Get `assay` from `subset2` and update values:
 
 ```{r modify-subset2-assay}
 subset2Assay <- assay(es, "subset2")
-subset2Assay[,] <- subset2Assay[,] + 1
+subset2Assay[, ] <- subset2Assay[, ] + 1
 ```
 
 Store the updated `assay` back to `subset2` using one of the two approaches:
 
 ```{r store-subset2-assay}
 #approach 1
-es <- setSubsetAssay(es, 
-                  subsetName = "subset2", 
-                  inputMatrix = subset2Assay, 
-                  subsetAssayName = "subset2Assay_a1")
+es <- setSubsetAssay(es,
+                     subsetName = "subset2",
+                     inputMatrix = subset2Assay,
+                     subsetAssayName = "subset2Assay_a1")
 
 #approach 2
 assay(es, "subset2", subsetAssayName = "subset2Assay_a2") <- subset2Assay
@@ -459,11 +459,11 @@ changes in them, as for assays: a changed linked assay of an `altExp` needs
 `altExp` slot of `subset2`:
 
 ```{r subset-altexp}
-altExp(x = es,
-       e = "subset2_alt1",
-       subsetName = "subset2") <- SingleCellExperiment(assays = list(
-         counts = assay(es, "subset2")
-       ))
+# an experiment object holding the counts of subset2
+subset2Counts <- assay(es, "subset2")
+subset2Alt <- SingleCellExperiment(assays = list(counts = subset2Counts))
+# store it as an altExp of subset2
+altExp(x = es, e = "subset2_alt1", subsetName = "subset2") <- subset2Alt
 ```
 
 Show the current condition of `ExperimentSubset` object:

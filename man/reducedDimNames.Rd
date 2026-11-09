@@ -10,7 +10,9 @@ reducedDimNames(x, ...)
 \S4method{reducedDimNames}{ANY}(x, ...)
 }
 \arguments{
-\item{x}{Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.}
+\item{x}{Input \code{ExperimentSubset} object or any object supported by
+\code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims}
+method.}
 
 \item{...}{Only \code{subsetName}, the name of the subset whose
 \code{reducedDimNames} to get, given by name. Leave it out for the main
@@ -18,10 +20,14 @@ object's. A subset name by position, or any other argument, is an
 error.}
 }
 \value{
-The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
+The \code{reducedDimNames} from the specified subset or same as
+  \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when
+  \code{subsetName} is \code{missing}.
 }
 \description{
-A wrapper to the \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
+A wrapper to the \code{reducedDimNames} from
+  \link[SingleCellExperiment]{reducedDims} method with additional support for
+  subsets.
 }
 \examples{
 data(sce_chcl, package = "scds")

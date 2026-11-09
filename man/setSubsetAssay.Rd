@@ -10,7 +10,7 @@
 \alias{setSubsetAssay,SubsetSummarizedExperiment-method}
 \alias{setSubsetAssay,SubsetSpatialExperiment-method}
 \alias{setSubsetAssay,SubsetTreeSummarizedExperiment-method}
-\title{Method for storing new assays inside subsets in ExperimentSubset 
+\title{Method for storing new assays inside subsets in ExperimentSubset
   objects}
 \usage{
 setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)

@@ -55,9 +55,11 @@ A \code{vector} of \code{colnames}.
 Input object with colnames set to a subset.
 }
 \description{
-Get \code{colnames} from a subset in the \code{ExperimentSubset} object.
+Get \code{colnames} from a subset in the \code{ExperimentSubset}
+  object.
 
-Set \code{colnames} to a subset in the \code{ExperimentSubset} object.
+Set \code{colnames} to a subset in the \code{ExperimentSubset}
+  object.
 }
 \examples{
 data(sce_chcl, package = "scds")

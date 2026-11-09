@@ -16,8 +16,7 @@ AssaySubset <- function(subsetName = "subset",
                         rowIndices = NULL,
                         colIndices = NULL,
                         parentAssay = "counts",
-                        internalAssay = NULL)
-{
+                        internalAssay = NULL) {
   x <- .AssaySubset(
     subsetName = subsetName,
     rowIndices = rowIndices,
@@ -25,7 +24,7 @@ AssaySubset <- function(subsetName = "subset",
     parentAssay = parentAssay,
     internalAssay = internalAssay
   )
-  
+
   return(x)
 }
 
@@ -73,8 +72,7 @@ ExperimentSubset <- function(x,
                                rows = NA,
                                cols = NA,
                                parentAssay = NA
-                             ))
-{
+                             )) {
   if (methods::is(x, "ExperimentSubset")) {
     es <- x
   } else if (!is.list(x)) {
@@ -94,13 +92,12 @@ ExperimentSubset <- function(x,
       x <- methods::as(x, baseClass, strict = TRUE)
     }
     es <- as(x, paste0("Subset", baseClass))
-  }
-  else{
+  } else {
     sce <- SingleCellExperiment::SingleCellExperiment(x)
     .checkAssayNames(sce)
     es <- .SubsetSingleCellExperiment(sce)
   }
-  
+
   # the default subset is all NA, which means no subset
   if (!all(is.na(subset))) {
     if (anyNA(subset))
@@ -162,11 +159,11 @@ ExperimentSubset <- function(x,
 NULL
 
 #' @importMethodsFrom S4Vectors metadata
-.metadata <- function(x, ...){
+.metadata <- function(x, ...) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ...))
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
   metadata(.internalAssay(.subsets(x)[[subsetName]]))
 }
@@ -264,7 +261,7 @@ NULL
   parts
 }
 
-.assay <- function(x, i, ...){
+.assay <- function(x, i, ...) {
   .checkAssayI(i)
   args <- list(...)
   withDimnames <- !isFALSE(args$withDimnames)
@@ -308,7 +305,7 @@ NULL
                           subsetName,
                           rows,
                           cols,
-                          parentAssay){
+                          parentAssay) {
   x <- .qualifyParents(x)
   # clean the name before the uniqueness check and use it as the key
   if (is.character(subsetName) && any(grepl("\\s", subsetName))) {
@@ -317,48 +314,42 @@ NULL
   }
 
   .subsetParamsValidity(x,
-                 subsetName,
-                 rows,
-                 cols,
-                 parentAssay)
-  
-  tempAssay <- ""
+                        subsetName,
+                        rows,
+                        cols,
+                        parentAssay)
+
   if (is.null(parentAssay)) {
-    tempAssay <- assayNames(x)[1]
-    parentAssay <- tempAssay
-  }
-  else{
-    # stops if parentAssay is a bare name of an assay stored in a subset
-    if (!is.null(.resolveAssay(x, parentAssay))) {
-      tempAssay <- parentAssay
-    }
-    else{
-      stop("'parentAssay' must be NULL or name an assay, a subset or a ",
-           "\"subset/assay\"; '", parentAssay, "' is none of these.")
-    }
+    parentAssay <- assayNames(x)[1]
+  } else if (is.null(.resolveAssay(x, parentAssay))) {
+    # .resolveAssay() itself stops for a bare name of an assay stored in a
+    # subset
+    stop("'parentAssay' must be NULL or name an assay, a subset or a ",
+         "\"subset/assay\"; '", parentAssay, "' is none of these.")
   }
 
-  rows <- .rows(x, rows, tempAssay)
-  cols <- .cols(x, cols, tempAssay)
+  rows <- .rows(x, rows, parentAssay)
+  cols <- .cols(x, cols, parentAssay)
   # rows and cols are relative to the parent; names come from the main object
   rootRows <- .toRootIndices(x, parentAssay, rows, .rowIndices)
   rootCols <- .toRootIndices(x, parentAssay, cols, .colIndices)
-  
+
   a <- list(Matrix(
     nrow = length(rows),
     ncol = length(cols),
     data = 0,
-    sparse = TRUE))
+    sparse = TRUE
+  ))
   names(a) <- "temp"
-  
+
   internalAssay <- SingleCellExperiment(assays = a)
-  if(inherits(x, "SpatialExperiment"))
+  if (inherits(x, "SpatialExperiment"))
     internalAssay$sample_id <- x$sample_id[rootCols]
   internalAssay <- as(internalAssay, .baseClass(x))
-  
+
   rownames(internalAssay) <- rownames(x)[rootRows]
   colnames(internalAssay) <- colnames(x)[rootCols]
-  
+
   scs <- AssaySubset(
     subsetName = subsetName,
     rowIndices = rows,
@@ -366,10 +357,10 @@ NULL
     parentAssay = parentAssay,
     internalAssay = internalAssay
   )
-  
+
   assay(.internalAssay(scs),
         withDimnames = FALSE, "temp") <- NULL
-  
+
   .subsets(x)[[subsetName]] <- scs
   return(x)
 }
@@ -390,7 +381,7 @@ NULL
   return(tempNames)
 }
 
-.show <- function(object){
+.show <- function(object) {
   callNextMethod()
   cat("subsets(", length(subsetNames(object)), "): ",
       sep = "")
@@ -401,11 +392,11 @@ NULL
 }
 
 .setSubsetAssay <- function(x,
-                         subsetName,
-                         inputMatrix,
-                         subsetAssayName = NULL,
-                         unlink = FALSE,
-                         quiet = FALSE) {
+                            subsetName,
+                            inputMatrix,
+                            subsetAssayName = NULL,
+                            unlink = FALSE,
+                            quiet = FALSE) {
 
   .isSubset(x, subsetName)
   x <- .qualifyParents(x)
@@ -706,7 +697,7 @@ NULL
          what, " of subset '", subsetName, "', in the same order.")
 }
 
-'.assay<-' <- function(x, i, ..., subsetAssayName = NULL, value){
+`.assay<-` <- function(x, i, ..., subsetAssayName = NULL, value) {
   .checkAssayI(i)
   unlink <- list(...)[["unlink"]]
   if (is.null(unlink))
@@ -734,8 +725,7 @@ NULL
     # only after setSubsetAssay() has checked and stored value
     message("Storing assay inside subset '", i, "'.")
     x
-  }
-  else{
+  } else {
     if (!is.null(subsetAssayName))
       stop(.subsetAssayNameMisuse(i, qualified = FALSE))
     if (!isFALSE(unlink) && length(unlink) > 0)
@@ -744,7 +734,7 @@ NULL
   }
 }
 
-.subsetParent <- function(x, subsetName){
+.subsetParent <- function(x, subsetName) {
   .checkSubsetName(subsetName)
   ref <- .resolveAssay(x, subsetName)
   if (is.null(ref) || ref$kind == "main") {
@@ -775,65 +765,65 @@ NULL
        "assay.")
 }
 
-.subsetSummary <- function(x){
+.subsetSummary <- function(x) {
   cat("Main assay(s):\n",
       assayNames(x),
       "\n\n")
   cat("Subset(s):\n")
   if (!is.null(subsetNames(x))) {
-    Name <- list()
-    Dimensions <- list()
-    Parent <- list()
-    Assays <- list()
-    Metadata <- list()
-    ReducedDims <- list()
-    AltExperiments <- list()
-    
-    for (i in seq(length(subsetNames(x)))) {
+    nameCol <- list()
+    dimCol <- list()
+    parentCol <- list()
+    assaysCol <- list()
+    reducedDimsCol <- list()
+    altExpsCol <- list()
+
+    for (i in seq_along(subsetNames(x))) {
       parent <- subsetParent(x, subsetNames(x)[i])
-      Name[[i]] <- subsetNames(x)[i]
-      Parent[[i]] <-
-        paste(unlist(parent), collapse = ' -> ')
+      nameCol[[i]] <- subsetNames(x)[i]
+      parentCol[[i]] <-
+        paste(unlist(parent), collapse = " -> ")
       if (is.null(assayNames(.internalAssay(.subsets(x)[[i]])))) {
-        Assays[[i]] <- ""
+        assaysCol[[i]] <- ""
+      } else {
+        assaysCol[[i]] <-
+          paste(unlist(assayNames(.internalAssay(.subsets(x)[[i]]))),
+                collapse = ", ")
       }
-      else{
-        Assays[[i]] <-
-          paste(unlist(assayNames(.internalAssay(.subsets(x)[[i]]))), collapse = ", ")
-      }
-      Dimensions[[i]] <-
-        paste(unlist(subsetDim(x, subsetNames(x)[i])), collapse = ', ')
-      if(inherits(x, "SingleCellExperiment")){
-        ReducedDims[[i]] <-
-          paste(unlist(reducedDimNames(x, subsetName = subsetNames(x)[i])), collapse = ", ")
-        AltExperiments[[i]] <-
-          paste(unlist(altExpNames(x, subsetName = subsetNames(x)[i])), collapse = ", ")
+      dimCol[[i]] <-
+        paste(unlist(subsetDim(x, subsetNames(x)[i])), collapse = ", ")
+      if (inherits(x, "SingleCellExperiment")) {
+        reducedDimsCol[[i]] <-
+          paste(unlist(reducedDimNames(x, subsetName = subsetNames(x)[i])),
+                collapse = ", ")
+        altExpsCol[[i]] <-
+          paste(unlist(altExpNames(x, subsetName = subsetNames(x)[i])),
+                collapse = ", ")
       }
     }
-    
+
     df <- data.frame(
-      Name = as.character(Name),
-      Dim = as.character(Dimensions),
-      Parent = as.character(Parent)
+      Name = as.character(nameCol),
+      Dim = as.character(dimCol),
+      Parent = as.character(parentCol)
     )
-    
-    if (length(which(as.character(Assays) == "")) != subsetCount(x)) {
-      df <- cbind(df, Assays = as.character(Assays))
+
+    if (length(which(as.character(assaysCol) == "")) != subsetCount(x)) {
+      df <- cbind(df, Assays = as.character(assaysCol))
     }
-    
-    if(inherits(x, "SingleCellExperiment")){
-      if (length(which(as.character(AltExperiments) == "")) != subsetCount(x)) {
-        df <- cbind(df, AltExperiments = as.character(AltExperiments))
+
+    if (inherits(x, "SingleCellExperiment")) {
+      if (length(which(as.character(altExpsCol) == "")) != subsetCount(x)) {
+        df <- cbind(df, AltExperiments = as.character(altExpsCol))
       }
-      
-      if (length(which(as.character(ReducedDims) == "")) != subsetCount(x)) {
-        df <- cbind(df, ReducedDims = as.character(ReducedDims))
+
+      if (length(which(as.character(reducedDimsCol) == "")) != subsetCount(x)) {
+        df <- cbind(df, ReducedDims = as.character(reducedDimsCol))
       }
     }
-    
+
     print(df)
-  }
-  else{
+  } else {
     cat("NULL\n")
   }
 }
@@ -1501,11 +1491,11 @@ NULL
 }
 
 #' @importMethodsFrom S4Vectors metadata<-
-'.metadata<-' <- function(x, ..., value){
+`.metadata<-` <- function(x, ..., value) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ..., value = value))
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
   metadata(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
@@ -2095,11 +2085,11 @@ NULL
   list(indices = newIndices[kept], kept = kept)
 }
 
-.subsetRowData <- function(x, subsetName, parentRowData){
+.subsetRowData <- function(x, subsetName, parentRowData) {
   .isSubset(x, subsetName)
-  if(missing(parentRowData)
-     || is.null(parentRowData))
-    parentRowData = FALSE
+  if (missing(parentRowData)
+      || is.null(parentRowData))
+    parentRowData <- FALSE
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   out <- rowData(internal)
   if (parentRowData) {
@@ -2113,11 +2103,11 @@ NULL
   return(out)
 }
 
-.subsetColData <- function(x, subsetName, parentColData){
+.subsetColData <- function(x, subsetName, parentColData) {
   .isSubset(x, subsetName)
-  if(missing(parentColData)
-     || is.null(parentColData))
-    parentColData = FALSE
+  if (missing(parentColData)
+      || is.null(parentColData))
+    parentColData <- FALSE
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   out <- colData(internal)
   if (parentColData) {
@@ -2135,7 +2125,7 @@ NULL
   return(out)
 }
 
-'.subsetColData<-' <- function(x, subsetName, value){
+`.subsetColData<-` <- function(x, subsetName, value) {
   .isSubset(x, subsetName)
   value <- .asSubsetData(value)
   value <- .dropParentColumns(value, "colData")
@@ -2146,7 +2136,7 @@ NULL
   return(x)
 }
 
-'.subsetRowData<-' <- function(x, subsetName, value){
+`.subsetRowData<-` <- function(x, subsetName, value) {
   .isSubset(x, subsetName)
   value <- .asSubsetData(value)
   value <- .dropParentColumns(value, "rowData")
@@ -2329,11 +2319,11 @@ NULL
 NULL
 
 #' @importMethodsFrom SingleCellExperiment reducedDim
-.reducedDim <- function(x, type, ...){
+.reducedDim <- function(x, type, ...) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, type, ...))
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   # a missing type can't be passed into a second S4 dispatch
@@ -2343,11 +2333,11 @@ NULL
 }
 
 #' @importMethodsFrom SingleCellExperiment reducedDim<-
-'.reducedDim<-' <- function(x, type, ..., value){
+`.reducedDim<-` <- function(x, type, ..., value) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, type, ..., value = value))
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   if (missing(type))
@@ -2359,11 +2349,11 @@ NULL
 }
 
 #' @importMethodsFrom SingleCellExperiment reducedDims
-.reducedDims <- function(x, ...){
+.reducedDims <- function(x, ...) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ...))
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   do.call(reducedDims, c(list(internal), .otherArgs(...)))
@@ -2522,12 +2512,12 @@ setReplaceMethod(
 #' rowData(es, subsetName = "first")
 NULL
 
-.rowData <- function(x, ...){
+.rowData <- function(x, ...) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ...))
-  subsetName = arglist[["subsetName"]]
-  parentRowData = arglist[["parentRowData"]]
+  subsetName <- arglist[["subsetName"]]
+  parentRowData <- arglist[["parentRowData"]]
   .isSubset(x, subsetName)
   out <- .subsetRowData(x, subsetName, parentRowData)
   if (isFALSE(arglist$use.names))
@@ -2535,30 +2525,30 @@ NULL
   out
 }
 
-.colData <- function(x, ...){
+.colData <- function(x, ...) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ...))
-  subsetName = arglist[["subsetName"]]
-  parentColData = arglist[["parentColData"]]
+  subsetName <- arglist[["subsetName"]]
+  parentColData <- arglist[["parentColData"]]
   .isSubset(x, subsetName)
   .subsetColData(x, subsetName, parentColData)
 }
 
 #' @importMethodsFrom SummarizedExperiment rowData<-
-'.rowData<-' <- function(x, ..., value){
+`.rowData<-` <- function(x, ..., value) {
   arglist <- list(...)
   if (!"subsetName" %in% names(arglist)) {
     value <- .untagParentColumns(value)
     return(callNextMethod(x, ..., value = value))
   }
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .subsetRowData(x, subsetName) <- value
   return(x)
 }
 
 #' @importMethodsFrom SummarizedExperiment colData<-
-'.colData<-' <- function(x, ..., value){
+`.colData<-` <- function(x, ..., value) {
   arglist <- list(...)
   if (!"subsetName" %in% names(arglist)) {
     # as SummarizedExperiment, which has no method for other values (#99)
@@ -2567,28 +2557,28 @@ NULL
     value <- .untagParentColumns(value)
     return(callNextMethod(x, ..., value = value))
   }
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .subsetColData(x, subsetName) <- value
   return(x)
 }
 
-.subsetColnames <- function(x, subsetName){
+.subsetColnames <- function(x, subsetName) {
   subsetName <- .owningSubset(x, subsetName)
   colnames(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
-'.subsetColnames<-' <- function(x, subsetName, value){
+`.subsetColnames<-` <- function(x, subsetName, value) {
   subsetName <- .owningSubset(x, subsetName)
   colnames(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
 }
 
-.subsetRownames <- function(x, subsetName){
+.subsetRownames <- function(x, subsetName) {
   subsetName <- .owningSubset(x, subsetName)
   rownames(.internalAssay(.subsets(x)[[subsetName]]))
 }
 
-'.subsetRownames<-' <- function(x, subsetName, value){
+`.subsetRownames<-` <- function(x, subsetName, value) {
   subsetName <- .owningSubset(x, subsetName)
   rownames(.internalAssay(.subsets(x)[[subsetName]])) <- value
   return(x)
@@ -2665,7 +2655,7 @@ NULL
   out
 }
 
-'.subsetTree<-' <- function(x, subsetName, dim, value) {
+`.subsetTree<-` <- function(x, subsetName, dim, value) {
   .isSubset(x, subsetName)
   if (!is.null(value) && !inherits(value, "phylo"))
     stop("'value' must be a phylo tree or NULL.")
@@ -2804,7 +2794,7 @@ NULL
 # The coordinates subsetName sees: its own, or those of the nearest subset
 # it was made from that has its own, cut to its spots, or else the main
 # object's
-.subsetSpatialCoords <- function(x, subsetName){
+.subsetSpatialCoords <- function(x, subsetName) {
   .isSubset(x, subsetName)
   rootCols <- .rootIndices(x, subsetName, .colIndices)
   owner <- .spatialCoordsOwner(x, subsetName)
@@ -2820,7 +2810,7 @@ NULL
 
 # Stores value as subsetName's own coordinates; NULL removes them (#72)
 #' @importMethodsFrom SpatialExperiment spatialCoords<-
-'.subsetSpatialCoords<-' <- function(x, subsetName, value) {
+`.subsetSpatialCoords<-` <- function(x, subsetName, value) {
   .isSubset(x, subsetName)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   if (!is.null(value)) {
@@ -2870,18 +2860,18 @@ NULL
 }
 
 #' @importMethodsFrom SpatialExperiment spatialCoords
-.spatialCoords <- function(x, ...){
+.spatialCoords <- function(x, ...) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ...))
-  subsetName = arglist[["subsetName"]]
+  subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
   .subsetSpatialCoords(x, subsetName)
 }
 
 # Used by both subsetSpatialData() and spatialData(x, subsetName =), which
 # are deprecated in step with SpatialExperiment's spatialData() (#34)
-.subsetSpatialData <- function(x, subsetName, parentSpatialData){
+.subsetSpatialData <- function(x, subsetName, parentSpatialData) {
   .isSubset(x, subsetName)
   msg <- paste0(
     "subsetSpatialData() and spatialData(x, subsetName =) are deprecated, ",
@@ -2893,20 +2883,20 @@ NULL
   # through do.call() so BiocCheck, which flags any .Deprecated() call,
   # stays clean (#34)
   do.call(".Deprecated", list(msg = msg))
-  if(missing(parentSpatialData)
-     || is.null(parentSpatialData))
-    parentSpatialData = FALSE
+  if (missing(parentSpatialData)
+      || is.null(parentSpatialData))
+    parentSpatialData <- FALSE
   # a DataFrame, since spot names can repeat across samples
   nSpots <- subsetDim(x, subsetName)[2]
   out <- S4Vectors::DataFrame(row.names = as.character(seq_len(nSpots)))
-  if(parentSpatialData) {
+  if (parentSpatialData) {
     rootCols <- .rootIndices(x, subsetName, .colIndices)
     # SpatialExperiment's note repeats the warning above
     out <- suppressMessages(spatialData(x))[rootCols, , drop = FALSE]
   }
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   subsetSpatialData <- suppressMessages(spatialData(internal))
-  if(ncol(subsetSpatialData) > 0)
+  if (ncol(subsetSpatialData) > 0)
     out <- cbind(out, subsetSpatialData)
   # the subset's own column names, which subsetColnames<- may have changed
   spots <- colnames(.internalAssay(.subsets(x)[[subsetName]]))
@@ -2916,12 +2906,12 @@ NULL
 }
 
 #' @importMethodsFrom SpatialExperiment spatialData
-.spatialData <- function(x, ...){
+.spatialData <- function(x, ...) {
   arglist <- list(...)
-  if(!"subsetName" %in% names(arglist))
+  if (!"subsetName" %in% names(arglist))
     return(callNextMethod(x, ...))
-  subsetName = arglist[["subsetName"]]
-  parentSpatialData = arglist[["parentSpatialData"]]
+  subsetName <- arglist[["subsetName"]]
+  parentSpatialData <- arglist[["parentSpatialData"]]
   .isSubset(x, subsetName)
   .subsetSpatialData(x, subsetName, parentSpatialData)
 }
@@ -2929,7 +2919,7 @@ NULL
 # Defunct without a deprecation release: it failed for every value, since
 # SpatialExperiment's spatialData<- takes no data.frame, and the method
 # took no DataFrame (#34)
-'.subsetSpatialData<-' <- function(x, subsetName, value){
+`.subsetSpatialData<-` <- function(x, subsetName, value) {
   msg <- paste0(
     "subsetSpatialData<- is defunct, as spatialData<- is deprecated in ",
     "SpatialExperiment. Add each column to the subset's colData instead, ",
@@ -2972,14 +2962,14 @@ NULL
 }
 
 #checks if is a subset
-.isSubset <- function(x, subsetName){
+.isSubset <- function(x, subsetName) {
   # only the "ANY" reducedDimNames methods can get such an x (#82); that
   # comes first, as no subsetName would work on it
   if (!.hasSubsets(list(x)))
     stop("'x' is a ", class(x)[1], ", which has no subsets. Convert it ",
          "with ExperimentSubset() before using subsetName =.")
   .checkSubsetName(subsetName)
-  if(!subsetName %in% subsetNames(x))
+  if (!subsetName %in% subsetNames(x))
     stop(subsetName, " subset does not exist. 'subsetName' must be the ",
          "name of a subset.")
 }
@@ -3000,7 +2990,7 @@ NULL
 .subsets <- function(x) x@subsets
 
 #subsets setter (ExperimentSubset)
-'.subsets<-' <- function(x, value){
+`.subsets<-` <- function(x, value) {
   x@subsets <- value
   return(x)
 }
@@ -3021,7 +3011,7 @@ NULL
 .internalAssay <- function(x) x@internalAssay
 
 #internalAssay setter (AssaySubset)
-'.internalAssay<-' <- function(x, value){
+`.internalAssay<-` <- function(x, value) {
   x@internalAssay <- value
   return(x)
 }
@@ -3031,11 +3021,11 @@ NULL
                                   subsetName,
                                   rows,
                                   cols,
-                                  parentAssay){
+                                  parentAssay) {
   if (!.isOneString(subsetName) || !nzchar(subsetName))
     stop("'subsetName' must be a single, non-empty character string.")
 
-  if(subsetName %in% subsetNames(x))
+  if (subsetName %in% subsetNames(x))
     stop("'subsetName' must differ from the names of existing subsets; '",
          subsetName, "' is already a subset name.")
 
@@ -3046,28 +3036,28 @@ NULL
   if (subsetName %in% assayNames(x))
     stop("'subsetName' must differ from the names of existing assays; '",
          subsetName, "' is already an assay name.")
-  
+
   testForRows <- is.null(rows) || is.numeric(rows) || is.character(rows)
-  if(!testForRows)
+  if (!testForRows)
     stop("'rows' must be NULL, to include all rows, or a numeric or ",
          "character vector of the rows to include.")
-  
+
   testForCols <- is.null(cols) || is.numeric(cols) || is.character(cols)
-  if(!testForCols)
+  if (!testForCols)
     stop("'cols' must be NULL, to include all columns, or a numeric or ",
          "character vector of the columns to include.")
-  
+
   testForParentAssay <- is.null(parentAssay) ||
     (is.character(parentAssay) && length(parentAssay) == 1 &&
        !is.na(parentAssay))
-  if(!testForParentAssay)
+  if (!testForParentAssay)
     stop("'parentAssay' must be NULL, to use the default assay, or a single ",
          "character string naming the assay or subset to make the subset ",
          "from.")
-  
+
 }
 
-.rows <- function(x, rows, assayName){
+.rows <- function(x, rows, assayName) {
   parent <- assay(x, withDimnames = TRUE, assayName)
   dimR <- nrow(parent)
   if (dimR == 0)
@@ -3078,20 +3068,18 @@ NULL
       stop("'rows' are given as names, but the parent assay has no row ",
            "names.")
     tempRows <- match(rows, rownames(parent))
-  }
-  else if (is.null(rows)) {
+  } else if (is.null(rows)) {
     tempRows <- seq_len(dimR)
-  }
-  else{
+  } else {
     tempRows <- rows
   }
-  
+
   testRows <- any(tempRows > dimR)
-  if(is.na(testRows))
+  if (is.na(testRows))
     stop("Selected rows not available in the specified assay.")
-  if(testRows)
+  if (testRows)
     stop("Selected rows not available in the specified assay.")
-  if(length(tempRows) > dimR)
+  if (length(tempRows) > dimR)
     stop("Selected rows not available in the specified assay.")
   if (length(tempRows) == 0)
     stop("'rows' must select at least one row.")
@@ -3099,11 +3087,11 @@ NULL
     stop("'rows' must be positive whole numbers or row names.")
   if (anyDuplicated(tempRows))
     stop("'rows' must not contain duplicates.")
-  
+
   return(tempRows)
 }
 
-.cols <- function(x, cols, assayName){
+.cols <- function(x, cols, assayName) {
   parent <- assay(x, withDimnames = TRUE, assayName)
   dimC <- ncol(parent)
   if (dimC == 0)
@@ -3114,20 +3102,18 @@ NULL
       stop("'cols' are given as names, but the parent assay has no column ",
            "names.")
     tempCols <- match(cols, colnames(parent))
-  }
-  else if (is.null(cols)) {
+  } else if (is.null(cols)) {
     tempCols <- seq_len(dimC)
-  }
-  else{
+  } else {
     tempCols <- cols
   }
-  
+
   testCols <- any(tempCols > dimC)
-  if(is.na(testCols))
+  if (is.na(testCols))
     stop("Selected columns not available in the specified assay.")
-  if(testCols)
+  if (testCols)
     stop("Selected columns not available in the specified assay.")
-  if(length(tempCols) > dimC)
+  if (length(tempCols) > dimC)
     stop("Selected columns not available in the specified assay.")
   if (length(tempCols) == 0)
     stop("'cols' must select at least one column.")
@@ -3135,6 +3121,6 @@ NULL
     stop("'cols' must be positive whole numbers or column names.")
   if (anyDuplicated(tempCols))
     stop("'cols' must not contain duplicates.")
-  
+
   return(tempCols)
 }

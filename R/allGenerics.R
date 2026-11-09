@@ -33,12 +33,15 @@
 #' es
 setGeneric(
   name = "createSubset",
+  # no braces, so createSubset stays a standardGeneric
+  # nolint start: brace_linter.
   def = function(x,
                  subsetName,
                  rows = NULL,
                  cols = NULL,
                  parentAssay = NULL)
     standardGeneric("createSubset"),
+  # nolint end
   signature = "x"
 )
 
@@ -69,14 +72,13 @@ setGeneric(
 #' subsetAssayNames(es, subsetName = "subset1")
 setGeneric(
   name = "subsetAssayNames",
-  def = function(x, subsetName = NULL)
-  {
+  def = function(x, subsetName = NULL) {
     standardGeneric("subsetAssayNames")
   }
 )
 
 #' @title Get names of only the subsets in ExperimentSubset objects
-#' @description Retrieves the names of the available subsets (not the subset 
+#' @description Retrieves the names of the available subsets (not the subset
 #'   assays) in an \code{ExperimentSubset} object.
 #' @param x \code{ExperimentSubset} Specify the input ES object.
 #' @return A \code{vector} of subset names.
@@ -93,13 +95,12 @@ setGeneric(
 #' subsetNames(es)
 setGeneric(
   name = "subsetNames",
-  def = function(x)
-  {
+  def = function(x) {
     standardGeneric("subsetNames")
   }
 )
 
-#' @title Method for storing new assays inside subsets in ExperimentSubset 
+#' @title Method for storing new assays inside subsets in ExperimentSubset
 #'   objects
 #' @description Store a new subset \code{assay} inside a specified subset in the
 #'   input \code{ExperimentSubset} object.
@@ -142,8 +143,7 @@ setGeneric(
                  subsetName,
                  inputMatrix,
                  subsetAssayName,
-                 unlink = FALSE)
-  {
+                 unlink = FALSE) {
     standardGeneric("setSubsetAssay")
   },
   signature = "x"
@@ -172,8 +172,7 @@ setGeneric(
 #' subsetParent(es, "subset1/subset1pAssay")
 setGeneric(
   name = "subsetParent",
-  def = function(x, subsetName)
-  {
+  def = function(x, subsetName) {
     standardGeneric("subsetParent")
   }
 )
@@ -206,8 +205,7 @@ setGeneric(
 #' subsetSummary(es)
 setGeneric(
   name = "subsetSummary",
-  def = function(x)
-  {
+  def = function(x) {
     standardGeneric("subsetSummary")
   }
 )
@@ -233,24 +231,29 @@ setGeneric(
 #' subsetDim(es, "subset1")
 setGeneric(
   name = "subsetDim",
-  def = function(x, subsetName)
-  {
+  def = function(x, subsetName) {
     standardGeneric("subsetDim")
   },
   signature = "x"
 )
 
 #' @title reducedDimNames
-#' @description A wrapper to the \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} method.
+#' @description A wrapper to the \code{reducedDimNames} from
+#'   \link[SingleCellExperiment]{reducedDims} method with additional support for
+#'   subsets.
+#' @param x Input \code{ExperimentSubset} object or any object supported by
+#'   \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims}
+#'   method.
 #' @param ... Only \code{subsetName}, the name of the subset whose
 #'   \code{reducedDimNames} to get, given by name. Leave it out for the main
 #'   object's. A subset name by position, or any other argument, is an
 #'   error.
-#' @return The \code{reducedDimNames} from the specified subset or same as \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when \code{subsetName} is \code{missing}.
+#' @return The \code{reducedDimNames} from the specified subset or same as
+#'   \code{reducedDimNames} from \link[SingleCellExperiment]{reducedDims} when
+#'   \code{subsetName} is \code{missing}.
 #' @rdname reducedDimNames
 #' @export
-#' @examples 
+#' @examples
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es <- createSubset(es, "subset1",
@@ -264,8 +267,7 @@ setGeneric(
 #' reducedDimNames(es, subsetName = "subset1")
 setGeneric(
   name = "reducedDimNames",
-  def = function(x, ...)
-  {
+  def = function(x, ...) {
     standardGeneric("reducedDimNames")
   }
 )
@@ -288,8 +290,7 @@ setGeneric(
 #' subsetCount(es)
 setGeneric(
   name = "subsetCount",
-  def = function(x)
-  {
+  def = function(x) {
     standardGeneric("subsetCount")
   }
 )
@@ -315,8 +316,7 @@ setGeneric(
 #' subsetAssayCount(es)
 setGeneric(
   name = "subsetAssayCount",
-  def = function(x)
-  {
+  def = function(x) {
     standardGeneric("subsetAssayCount")
   }
 )
@@ -334,7 +334,7 @@ setGeneric(
 #' @rdname subsetRowData
 #' @importMethodsFrom SingleCellExperiment rowData
 #' @export
-#' @examples 
+#' @examples
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es <- createSubset(es,
@@ -345,8 +345,7 @@ setGeneric(
 #' subsetRowData(es, "subset1")
 setGeneric(
   name = "subsetRowData",
-  def = function(x, subsetName, parentRowData)
-  {
+  def = function(x, subsetName, parentRowData) {
     standardGeneric("subsetRowData")
   },
   signature = "x"
@@ -365,7 +364,7 @@ setGeneric(
 #' @rdname subsetColData
 #' @importMethodsFrom SingleCellExperiment colData
 #' @export
-#' @examples 
+#' @examples
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es <- createSubset(es,
@@ -376,8 +375,7 @@ setGeneric(
 #' subsetColData(es, "subset1")
 setGeneric(
   name = "subsetColData",
-  def = function(x, subsetName, parentColData)
-  {
+  def = function(x, subsetName, parentColData) {
     standardGeneric("subsetColData")
   },
   signature = "x"
@@ -399,8 +397,7 @@ setGeneric(
 #' @export
 setGeneric(
   name = "subsetColData<-",
-  def = function(x, subsetName, value)
-  {
+  def = function(x, subsetName, value) {
     standardGeneric("subsetColData<-")
   },
   signature = "x"
@@ -424,21 +421,21 @@ setGeneric(
 #' @export
 setGeneric(
   name = "subsetRowData<-",
-  def = function(x, subsetName, value)
-  {
+  def = function(x, subsetName, value) {
     standardGeneric("subsetRowData<-")
   },
   signature = "x"
 )
 
 #' @title subsetColnames
-#' @description Get \code{colnames} from a subset in the \code{ExperimentSubset} object.
-#' @param x Input \code{ExperimentSubset} object 
+#' @description Get \code{colnames} from a subset in the \code{ExperimentSubset}
+#'   object.
+#' @param x Input \code{ExperimentSubset} object
 #' @param subsetName Name of the subset to get \code{colnames} from.
 #' @return A \code{vector} of \code{colnames}.
 #' @rdname subsetColnames
 #' @export
-#' @examples 
+#' @examples
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es <- createSubset(es,
@@ -449,15 +446,15 @@ setGeneric(
 #' subsetColnames(es, "subset1")
 setGeneric(
   name = "subsetColnames",
-  def = function(x, subsetName)
-  {
+  def = function(x, subsetName) {
     standardGeneric("subsetColnames")
   },
   signature = "x"
 )
 
 #' @title subsetColnames
-#' @description Set \code{colnames} to a subset in the \code{ExperimentSubset} object.
+#' @description Set \code{colnames} to a subset in the \code{ExperimentSubset}
+#'   object.
 #' @param x Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to set \code{colnames} to.
 #' @param value Specify the colname values to replace.
@@ -466,22 +463,22 @@ setGeneric(
 #' @export
 setGeneric(
   name = "subsetColnames<-",
-  def = function(x, subsetName, value)
-  {
+  def = function(x, subsetName, value) {
     standardGeneric("subsetColnames<-")
   },
   signature = "x"
 )
 
 #' @title subsetRownames
-#' @description Get \code{rownames} from a subset in the \code{ExperimentSubset} object.
+#' @description Get \code{rownames} from a subset in the \code{ExperimentSubset}
+#'   object.
 #' @param x Input \code{ExperimentSubset} object.
 #' @param subsetName Name of the subset to get \code{rownames} from or set
 #'   them to.
 #' @return A \code{vector} of \code{rownames}.
 #' @rdname subsetRownames
 #' @export
-#' @examples 
+#' @examples
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es <- createSubset(es,
@@ -492,8 +489,7 @@ setGeneric(
 #' subsetRownames(es, "subset1")
 setGeneric(
   name = "subsetRownames",
-  def = function(x, subsetName)
-  {
+  def = function(x, subsetName) {
     standardGeneric("subsetRownames")
   },
   signature = "x"
@@ -511,8 +507,7 @@ setGeneric(
 #' @export
 setGeneric(
   name = "subsetRownames<-",
-  def = function(x, subsetName, value)
-  {
+  def = function(x, subsetName, value) {
     standardGeneric("subsetRownames<-")
   },
   signature = "x"
@@ -547,8 +542,7 @@ setGeneric(
   name = "getSubsetAssay",
   def = function(x,
                  subsetName,
-                 subsetAssayName = NULL)
-  {
+                 subsetAssayName = NULL) {
     standardGeneric("getSubsetAssay")
   },
   signature = "x"
@@ -588,8 +582,7 @@ setGeneric(
 #' subset1
 setGeneric(
   name = "getSubsetExperiment",
-  def = function(x, subsetName, parentData = TRUE)
-  {
+  def = function(x, subsetName, parentData = TRUE) {
     standardGeneric("getSubsetExperiment")
   },
   signature = "x"
@@ -645,22 +638,29 @@ setGeneric(
 #' reducedDimNames(es, subsetName = "subset1")
 setGeneric(
   name = "setSubsetExperiment",
-  def = function(x, subsetName, value, unlink = FALSE)
-  {
+  def = function(x, subsetName, value, unlink = FALSE) {
     standardGeneric("setSubsetExperiment")
   },
   signature = "x"
 )
 
 #' @title reducedDimNames<-
-#' @description A wrapper to the \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method with additional support for subsets.
-#' @param x Input \code{ExperimentSubset} object or any object supported by \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method.
-#' @param subsetName Specify the name of the subset to which the \code{reducedDimNames<-} should be set to. If \code{missing}, \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method is called on the main object.
-#' @param value Input value same as \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims} method.
+#' @description A wrapper to the \code{reducedDimNames<-} from
+#'   \link[SingleCellExperiment]{reducedDims} method with additional support for
+#'   subsets.
+#' @param x Input \code{ExperimentSubset} object or any object supported by
+#'   \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims}
+#'   method.
+#' @param subsetName Specify the name of the subset to which the
+#'   \code{reducedDimNames<-} should be set to. If \code{missing},
+#'   \code{reducedDimNames<-} from \link[SingleCellExperiment]{reducedDims}
+#'   method is called on the main object.
+#' @param value Input value same as \code{reducedDimNames<-} from
+#'   \link[SingleCellExperiment]{reducedDims} method.
 #' @return Input object with \code{reducedDimNames<-} set.
 #' @rdname reducedDimNames-set
 #' @export
-#' @examples 
+#' @examples
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
 #' es <- createSubset(es, "subset1",
@@ -674,8 +674,7 @@ setGeneric(
 #' reducedDimNames(es, subsetName = "subset1") <- c("rDim1", "rDim2")
 setGeneric(
   name = "reducedDimNames<-",
-  def = function(x, subsetName, value)
-  {
+  def = function(x, subsetName, value) {
     standardGeneric("reducedDimNames<-")
   }
 )
@@ -710,8 +709,7 @@ setGeneric(
 #' subsetRowLinks(es, subsetName = "subset1")
 setGeneric(
   name = "subsetRowLinks",
-  def = function(x, subsetName, parentRowLinkData = TRUE)
-  {
+  def = function(x, subsetName, parentRowLinkData = TRUE) {
     standardGeneric("subsetRowLinks")
   },
   signature = "x"
@@ -747,8 +745,7 @@ setGeneric(
 #' subsetColLinks(es, subsetName = "subset1")
 setGeneric(
   name = "subsetColLinks",
-  def = function(x, subsetName, parentColLinkData = TRUE)
-  {
+  def = function(x, subsetName, parentColLinkData = TRUE) {
     standardGeneric("subsetColLinks")
   },
   signature = "x"
@@ -805,8 +802,7 @@ setGeneric(
 #' rowLinks(es)[1:5, ]
 setGeneric(
   name = "subsetRowTree",
-  def = function(x, subsetName, whichTree = 1)
-  {
+  def = function(x, subsetName, whichTree = 1) {
     standardGeneric("subsetRowTree")
   },
   signature = "x"
@@ -816,8 +812,7 @@ setGeneric(
 #' @export
 setGeneric(
   name = "subsetRowTree<-",
-  def = function(x, subsetName, value)
-  {
+  def = function(x, subsetName, value) {
     standardGeneric("subsetRowTree<-")
   },
   signature = "x"
@@ -871,8 +866,7 @@ setGeneric(
 #' subsetColLinks(es, subsetName = "subset1")
 setGeneric(
   name = "subsetColTree",
-  def = function(x, subsetName, whichTree = 1)
-  {
+  def = function(x, subsetName, whichTree = 1) {
     standardGeneric("subsetColTree")
   },
   signature = "x"
@@ -882,8 +876,7 @@ setGeneric(
 #' @export
 setGeneric(
   name = "subsetColTree<-",
-  def = function(x, subsetName, value)
-  {
+  def = function(x, subsetName, value) {
     standardGeneric("subsetColTree<-")
   },
   signature = "x"
@@ -922,8 +915,7 @@ setGeneric(
 #' spatialCoords(es, subsetName = "subset1")
 setGeneric(
   name = "subsetSpatialCoords",
-  def = function(x, subsetName)
-  {
+  def = function(x, subsetName) {
     standardGeneric("subsetSpatialCoords")
   },
   signature = "x"
@@ -964,8 +956,7 @@ setGeneric(
 #' spatialCoords(es)
 setGeneric(
   name = "subsetSpatialCoords<-",
-  def = function(x, subsetName, value)
-  {
+  def = function(x, subsetName, value) {
     standardGeneric("subsetSpatialCoords<-")
   },
   signature = "x"
@@ -1003,8 +994,7 @@ setGeneric(
 #' subsetImgData(es, subsetName = "sampleB")
 setGeneric(
   name = "subsetImgData",
-  def = function(x, subsetName)
-  {
+  def = function(x, subsetName) {
     standardGeneric("subsetImgData")
   },
   signature = "x"
@@ -1039,8 +1029,7 @@ setGeneric(
 #' @export
 setGeneric(
   name = "subsetSpatialData",
-  def = function(x, subsetName, parentSpatialData)
-  {
+  def = function(x, subsetName, parentSpatialData) {
     standardGeneric("subsetSpatialData")
   },
   signature = "x"
@@ -1056,8 +1045,7 @@ setGeneric(
 #' @export
 setGeneric(
   name = "subsetSpatialData<-",
-  def = function(x, subsetName, value)
-  {
+  def = function(x, subsetName, value) {
     standardGeneric("subsetSpatialData<-")
   }
 )

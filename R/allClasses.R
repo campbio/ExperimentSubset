@@ -38,8 +38,8 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
   contains = "SummarizedExperiment"
 )
 
-#' An S4 class for \code{RangedSummarizedExperiment} objects with added support for
-#'   subsets.
+#' An S4 class for \code{RangedSummarizedExperiment} objects with added support
+#' for subsets.
 #' @slot subsets A list of \code{AssaySubset} objects.
 #' @exportClass SubsetRangedSummarizedExperiment
 #' @import methods
@@ -64,8 +64,8 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
   contains = "SingleCellExperiment"
 )
 
-#' An S4 class for \code{TreeSummarizedExperiment} objects with added support for
-#'   subsets.
+#' An S4 class for \code{TreeSummarizedExperiment} objects with added support
+#' for subsets.
 #' @slot subsets A list of \code{AssaySubset} objects.
 #' @exportClass SubsetTreeSummarizedExperiment
 #' @import methods
