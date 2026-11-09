@@ -54,7 +54,9 @@ with the droplets that Cell Ranger called as cells.
 [`library`](https://rdrr.io/r/base/library.html)`(``DropletTestFiles``)`\
 \
 `# download both matrices (cached after the first time)`\
-`rawFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(``"tenx-2.1.0-pbmc4k/1.0.0/raw.tar.gz"``)`\
+`rawFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(``"tenx-2.1.0-pbmc4k/1.0.0/raw.tar.gz"``)`
+
+\
 `filteredFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(``"tenx-2.1.0-pbmc4k/1.0.0/filtered.tar.gz"``)`\
 \
 `# unpack them into a temporary folder`\
@@ -720,7 +722,7 @@ it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
     ##  [7] singleCellTK_2.23.6             DelayedArray_0.39.8            
     ##  [9] SparseArray_1.13.4              S4Arrays_1.13.2                
     ## [11] abind_1.4-8                     Matrix_1.7-6                   
-    ## [13] ExperimentSubset_1.23.47        TreeSummarizedExperiment_2.21.0
+    ## [13] ExperimentSubset_1.23.48        TreeSummarizedExperiment_2.21.0
     ## [15] Biostrings_2.81.9               XVector_0.53.0                 
     ## [17] SpatialExperiment_1.23.0        scuttle_1.23.2                 
     ## [19] DropletUtils_1.33.2             SingleCellExperiment_1.35.2    

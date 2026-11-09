@@ -99,7 +99,7 @@ the `subset` parameter.
 \
 `#set a seed so the random counts below are reproducible`\
 [`set.seed`](https://rdrr.io/r/base/Random.html)`(``1``)`\
-`counts`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(`[`rpois`](https://rdrr.io/r/stats/Poisson.html)`(``100``, lambda ``=`` ``10``)``, ncol``=``10``, nrow``=``10``)`\
+`counts`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(`[`rpois`](https://rdrr.io/r/stats/Poisson.html)`(``100``, lambda ``=`` ``10``)``, ncol ``=`` ``10``, nrow ``=`` ``10``)`\
 `sce`` ``<-`` `[`SingleCellExperiment`](https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html)`(`[`list`](https://rdrr.io/r/base/list.html)`(``counts ``=`` ``counts``)``)`\
 `es`` ``<-`` `[`ExperimentSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)`(``sce``)`\
 `es`
@@ -123,7 +123,7 @@ from generally loaded data such as counts matrices, which can be passed
 to the constructor function in a list.
 
 \
-`counts`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(`[`rpois`](https://rdrr.io/r/stats/Poisson.html)`(``100``, lambda ``=`` ``10``)``, ncol``=``10``, nrow``=``10``)`\
+`counts`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(`[`rpois`](https://rdrr.io/r/stats/Poisson.html)`(``100``, lambda ``=`` ``10``)``, ncol ``=`` ``10``, nrow ``=`` ``10``)`\
 [`ExperimentSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)`(`[`list`](https://rdrr.io/r/base/list.html)`(``counts ``=`` ``counts``)``)`
 
     ## class: SubsetSingleCellExperiment 
@@ -155,7 +155,7 @@ is linked as the parent of this subset. The `parentAssay` can be an
 written as `"subset/assay"`.
 
 \
-`es`` ``<-`` `[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)`(``es``, `\
+`es`` ``<-`` `[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)`(``es``,`\
 `                   subsetName ``=`` ``"subset1"``,`\
 `                   rows ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``1``:``2``)``,`\
 `                   cols ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``1``:``5``)``,`\
@@ -189,11 +189,11 @@ parent object.
 
 \
 `subset1Assay`` ``<-`` `[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"subset1"``)`\
-`subset1Assay``[``,``]`` ``<-`` ``subset1Assay``[``,``]`` ``+`` ``1`\
-`es`` ``<-`` `[`setSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)`(``es``, `\
-`                  subsetName ``=`` ``"subset1"``, `\
-`                  inputMatrix ``=`` ``subset1Assay``, `\
-`                  subsetAssayName ``=`` ``"subset1Assay"``)`\
+`subset1Assay``[``, ``]`` ``<-`` ``subset1Assay``[``, ``]`` ``+`` ``1`\
+`es`` ``<-`` `[`setSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)`(``es``,`\
+`                     subsetName ``=`` ``"subset1"``,`\
+`                     inputMatrix ``=`` ``subset1Assay``,`\
+`                     subsetAssayName ``=`` ``"subset1Assay"``)`\
 `es`
 
     ## class: SubsetSingleCellExperiment 
@@ -479,7 +479,7 @@ parameter.
 
 \
 `#creating a dummy ES object`\
-`counts`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(`[`rpois`](https://rdrr.io/r/stats/Poisson.html)`(``100``, lambda ``=`` ``10``)``, ncol``=``10``, nrow``=``10``)`\
+`counts`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(`[`rpois`](https://rdrr.io/r/stats/Poisson.html)`(``100``, lambda ``=`` ``10``)``, ncol ``=`` ``10``, nrow ``=`` ``10``)`\
 `sce`` ``<-`` `[`SingleCellExperiment`](https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html)`(`[`list`](https://rdrr.io/r/base/list.html)`(``counts ``=`` ``counts``)``)`\
 `es`` ``<-`` `[`ExperimentSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)`(``sce``)`\
 \
@@ -493,10 +493,10 @@ parameter.
 `#should be stored and an additional 'subsetAssayName' parameter which defines`\
 `#the name of the new assay`\
 [`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(`\
-`  x ``=`` ``es``, `\
-`  i ``=`` ``"subset1"``, `\
-`  subsetAssayName ``=`` ``"subset1InternalAssay"``)`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(`[`rpois`](https://rdrr.io/r/stats/Poisson.html)`(``8``, lambda ``=`` ``10``)``, `\
-`                                                      ncol``=``4``, nrow``=``2``)`
+`  x ``=`` ``es``,`\
+`  i ``=`` ``"subset1"``,`\
+`  subsetAssayName ``=`` ``"subset1InternalAssay"`\
+`)`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(`[`rpois`](https://rdrr.io/r/stats/Poisson.html)`(``8``, lambda ``=`` ``10``)``, ncol ``=`` ``4``, nrow ``=`` ``2``)`
 
 Using `assay` getter method is simple, as no additional parameter is
 required unlike in the setter method.
@@ -553,7 +553,7 @@ Creating the `ExperimentSubset` object is as simple as passing an
 experiment object to the `ExperimentSubset` constructor:
 
 \
-`counts`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(`[`rpois`](https://rdrr.io/r/stats/Poisson.html)`(``100``, lambda ``=`` ``10``)``, ncol``=``10``, nrow``=``10``)`\
+`counts`` ``<-`` `[`matrix`](https://rdrr.io/r/base/matrix.html)`(`[`rpois`](https://rdrr.io/r/stats/Poisson.html)`(``100``, lambda ``=`` ``10``)``, ncol ``=`` ``10``, nrow ``=`` ``10``)`\
 `sce`` ``<-`` `[`SingleCellExperiment`](https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html)`(`[`list`](https://rdrr.io/r/base/list.html)`(``counts ``=`` ``counts``)``)`\
 `es`` ``<-`` `[`ExperimentSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)`(``sce``)`\
 [`subsetSummary`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSummary.md)`(``es``)`
@@ -567,7 +567,7 @@ experiment object to the `ExperimentSubset` constructor:
 Create a subset that includes the first 5 rows and columns only:
 
 \
-`es`` ``<-`` `[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)`(``es``, `\
+`es`` ``<-`` `[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)`(``es``,`\
 `                   subsetName ``=`` ``"subset1"``,`\
 `                   rows ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``1``:``5``)``,`\
 `                   cols ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``1``:``5``)``,`\
@@ -584,7 +584,7 @@ Create a subset that includes the first 5 rows and columns only:
 Create another subset from `subset1` by only keeping the first two rows:
 
 \
-`es`` ``<-`` `[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)`(``es``, `\
+`es`` ``<-`` `[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)`(``es``,`\
 `                   subsetName ``=`` ``"subset2"``,`\
 `                   rows ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``1``:``2``)``,`\
 `                   cols ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``1``:``5``)``,`\
@@ -603,17 +603,17 @@ Get `assay` from `subset2` and update values:
 
 \
 `subset2Assay`` ``<-`` `[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"subset2"``)`\
-`subset2Assay``[``,``]`` ``<-`` ``subset2Assay``[``,``]`` ``+`` ``1`
+`subset2Assay``[``, ``]`` ``<-`` ``subset2Assay``[``, ``]`` ``+`` ``1`
 
 Store the updated `assay` back to `subset2` using one of the two
 approaches:
 
 \
 `#approach 1`\
-`es`` ``<-`` `[`setSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)`(``es``, `\
-`                  subsetName ``=`` ``"subset2"``, `\
-`                  inputMatrix ``=`` ``subset2Assay``, `\
-`                  subsetAssayName ``=`` ``"subset2Assay_a1"``)`\
+`es`` ``<-`` `[`setSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)`(``es``,`\
+`                     subsetName ``=`` ``"subset2"``,`\
+`                     inputMatrix ``=`` ``subset2Assay``,`\
+`                     subsetAssayName ``=`` ``"subset2Assay_a1"``)`\
 \
 `#approach 2`\
 [`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"subset2"``, subsetAssayName ``=`` ``"subset2Assay_a2"``)`` ``<-`` ``subset2Assay`\
@@ -636,11 +636,11 @@ an `altExp` needs `unlink`, with the assay named as
 Store an experiment object of its own in the `altExp` slot of `subset2`:
 
 \
-[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``x ``=`` ``es``,`\
-`       e ``=`` ``"subset2_alt1"``,`\
-`       subsetName ``=`` ``"subset2"``)`` ``<-`` `[`SingleCellExperiment`](https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html)`(``assays ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(`\
-`         counts ``=`` `[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"subset2"``)`\
-`       ``)``)`
+`# an experiment object holding the counts of subset2`\
+`subset2Counts`` ``<-`` `[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"subset2"``)`\
+`subset2Alt`` ``<-`` `[`SingleCellExperiment`](https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html)`(``assays ``=`` `[`list`](https://rdrr.io/r/base/list.html)`(``counts ``=`` ``subset2Counts``)``)`\
+`# store it as an altExp of subset2`\
+[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``x ``=`` ``es``, e ``=`` ``"subset2_alt1"``, subsetName ``=`` ``"subset2"``)`` ``<-`` ``subset2Alt`
 
 Show the current condition of `ExperimentSubset` object:
 
@@ -912,7 +912,7 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.47        TreeSummarizedExperiment_2.21.0
+    ##  [1] ExperimentSubset_1.23.48        TreeSummarizedExperiment_2.21.0
     ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
     ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
     ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 

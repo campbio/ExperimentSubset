@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.47</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.48</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -185,7 +185,7 @@ providing input a named list to the <code>subset</code> parameter.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#set a seed so the random counts below are reproducible</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">10</span>, nrow<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
+<span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">10</span>, nrow <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ExperimentSubset.html">ExperimentSubset</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span><span class="va">es</span></span></code></pre></div>
@@ -206,7 +206,7 @@ providing input a named list to the <code>subset</code> parameter.</p>
 created directly from generally loaded data such as counts matrices,
 which can be passed to the constructor function in a list.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">10</span>, nrow<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">10</span>, nrow <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/ExperimentSubset.html">ExperimentSubset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## class: SubsetSingleCellExperiment </span></span>
 <span><span class="co">## dim: 10 10 </span></span>
@@ -243,7 +243,7 @@ from the parent object is linked as the parent of this subset. The
 object, a subset, or an <code>assay</code> seen in a subset, written as
 <code>"subset/assay"</code>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, </span>
+<code class="sourceCode R"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>,</span>
 <span>                   subsetName <span class="op">=</span> <span class="st">"subset1"</span>,</span>
 <span>                   rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>,</span>
 <span>                   cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,</span>
@@ -278,11 +278,11 @@ however, is used to store an <code>assay</code> in this
 experiment object of the same class as the parent object.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subset1Assay</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset1"</span><span class="op">)</span></span>
-<span><span class="va">subset1Assay</span><span class="op">[</span>,<span class="op">]</span> <span class="op">&lt;-</span> <span class="va">subset1Assay</span><span class="op">[</span>,<span class="op">]</span> <span class="op">+</span> <span class="fl">1</span></span>
-<span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/setSubsetAssay.html">setSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>, </span>
-<span>                  subsetName <span class="op">=</span> <span class="st">"subset1"</span>, </span>
-<span>                  inputMatrix <span class="op">=</span> <span class="va">subset1Assay</span>, </span>
-<span>                  subsetAssayName <span class="op">=</span> <span class="st">"subset1Assay"</span><span class="op">)</span></span>
+<span><span class="va">subset1Assay</span><span class="op">[</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">subset1Assay</span><span class="op">[</span>, <span class="op">]</span> <span class="op">+</span> <span class="fl">1</span></span>
+<span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/setSubsetAssay.html">setSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>,</span>
+<span>                     subsetName <span class="op">=</span> <span class="st">"subset1"</span>,</span>
+<span>                     inputMatrix <span class="op">=</span> <span class="va">subset1Assay</span>,</span>
+<span>                     subsetAssayName <span class="op">=</span> <span class="st">"subset1Assay"</span><span class="op">)</span></span>
 <span><span class="va">es</span></span></code></pre></div>
 <pre><code><span><span class="co">## class: SubsetSingleCellExperiment </span></span>
 <span><span class="co">## dim: 10 10 </span></span>
@@ -575,7 +575,7 @@ the subset name inside which the assay should be stored as
 the additional <code>subsetAssayName</code> parameter.</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#creating a dummy ES object</span></span>
-<span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">10</span>, nrow<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
+<span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">10</span>, nrow <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ExperimentSubset.html">ExperimentSubset</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span></span>
@@ -589,10 +589,10 @@ the additional <code>subsetAssayName</code> parameter.</p>
 <span><span class="co">#should be stored and an additional 'subsetAssayName' parameter which defines</span></span>
 <span><span class="co">#the name of the new assay</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span></span>
-<span>  x <span class="op">=</span> <span class="va">es</span>, </span>
-<span>  i <span class="op">=</span> <span class="st">"subset1"</span>, </span>
-<span>  subsetAssayName <span class="op">=</span> <span class="st">"subset1InternalAssay"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">8</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, </span>
-<span>                                                      ncol<span class="op">=</span><span class="fl">4</span>, nrow<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<span>  x <span class="op">=</span> <span class="va">es</span>,</span>
+<span>  i <span class="op">=</span> <span class="st">"subset1"</span>,</span>
+<span>  subsetAssayName <span class="op">=</span> <span class="st">"subset1InternalAssay"</span></span>
+<span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">8</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">4</span>, nrow <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <p>Using <code>assay</code> getter method is simple, as no additional
 parameter is required unlike in the setter method.</p>
 <div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
@@ -645,7 +645,7 @@ parameter is required unlike in the setter method.</p>
 passing an experiment object to the <code>ExperimentSubset</code>
 constructor:</p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">10</span>, nrow<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">100</span>, lambda <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">10</span>, nrow <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/ExperimentSubset.html">ExperimentSubset</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/subsetSummary.html">subsetSummary</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span></span></code></pre></div>
@@ -656,7 +656,7 @@ constructor:</p>
 <span><span class="co">## NULL</span></span></code></pre>
 <p>Create a subset that includes the first 5 rows and columns only:</p>
 <div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, </span>
+<code class="sourceCode R"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>,</span>
 <span>                   subsetName <span class="op">=</span> <span class="st">"subset1"</span>,</span>
 <span>                   rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,</span>
 <span>                   cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,</span>
@@ -671,7 +671,7 @@ constructor:</p>
 <p>Create another subset from <code>subset1</code> by only keeping the
 first two rows:</p>
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, </span>
+<code class="sourceCode R"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>,</span>
 <span>                   subsetName <span class="op">=</span> <span class="st">"subset2"</span>,</span>
 <span>                   rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">)</span>,</span>
 <span>                   cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span>,</span>
@@ -688,15 +688,15 @@ first two rows:</p>
 values:</p>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">subset2Assay</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset2"</span><span class="op">)</span></span>
-<span><span class="va">subset2Assay</span><span class="op">[</span>,<span class="op">]</span> <span class="op">&lt;-</span> <span class="va">subset2Assay</span><span class="op">[</span>,<span class="op">]</span> <span class="op">+</span> <span class="fl">1</span></span></code></pre></div>
+<span><span class="va">subset2Assay</span><span class="op">[</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">subset2Assay</span><span class="op">[</span>, <span class="op">]</span> <span class="op">+</span> <span class="fl">1</span></span></code></pre></div>
 <p>Store the updated <code>assay</code> back to <code>subset2</code>
 using one of the two approaches:</p>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#approach 1</span></span>
-<span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/setSubsetAssay.html">setSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>, </span>
-<span>                  subsetName <span class="op">=</span> <span class="st">"subset2"</span>, </span>
-<span>                  inputMatrix <span class="op">=</span> <span class="va">subset2Assay</span>, </span>
-<span>                  subsetAssayName <span class="op">=</span> <span class="st">"subset2Assay_a1"</span><span class="op">)</span></span>
+<span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/setSubsetAssay.html">setSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>,</span>
+<span>                     subsetName <span class="op">=</span> <span class="st">"subset2"</span>,</span>
+<span>                     inputMatrix <span class="op">=</span> <span class="va">subset2Assay</span>,</span>
+<span>                     subsetAssayName <span class="op">=</span> <span class="st">"subset2Assay_a1"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co">#approach 2</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset2"</span>, subsetAssayName <span class="op">=</span> <span class="st">"subset2Assay_a2"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">subset2Assay</span></span>
@@ -716,11 +716,11 @@ assay named as <code>"altExpName/assayName"</code>. See
 <code><a href="../reference/ExperimentSubset-altExp.html">?"ExperimentSubset-altExp"</a></code>. Store an experiment object of
 its own in the <code>altExp</code> slot of <code>subset2</code>:</p>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html" class="external-link">altExp</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">es</span>,</span>
-<span>       e <span class="op">=</span> <span class="st">"subset2_alt1"</span>,</span>
-<span>       subsetName <span class="op">=</span> <span class="st">"subset2"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span>         counts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset2"</span><span class="op">)</span></span>
-<span>       <span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># an experiment object holding the counts of subset2</span></span>
+<span><span class="va">subset2Counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"subset2"</span><span class="op">)</span></span>
+<span><span class="va">subset2Alt</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span>assays <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">subset2Counts</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># store it as an altExp of subset2</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html" class="external-link">altExp</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">es</span>, e <span class="op">=</span> <span class="st">"subset2_alt1"</span>, subsetName <span class="op">=</span> <span class="st">"subset2"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">subset2Alt</span></span></code></pre></div>
 <p>Show the current condition of <code>ExperimentSubset</code>
 object:</p>
 <div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
@@ -1011,7 +1011,7 @@ keeping all subsets in one object.</li>
 <span><span class="co">## [8] base     </span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## other attached packages:</span></span>
-<span><span class="co">##  [1] ExperimentSubset_1.23.47        TreeSummarizedExperiment_2.21.0</span></span>
+<span><span class="co">##  [1] ExperimentSubset_1.23.48        TreeSummarizedExperiment_2.21.0</span></span>
 <span><span class="co">##  [3] Biostrings_2.81.9               XVector_0.53.0                 </span></span>
 <span><span class="co">##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    </span></span>
 <span><span class="co">##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 </span></span>

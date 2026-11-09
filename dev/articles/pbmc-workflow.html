@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.47</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.48</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -118,14 +118,15 @@ cells.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">DropletTestFiles</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># download both matrices (cached after the first time)</span></span>
-<span><span class="va">rawFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html" class="external-link">getTestFile</a></span><span class="op">(</span><span class="st">"tenx-2.1.0-pbmc4k/1.0.0/raw.tar.gz"</span><span class="op">)</span></span>
-<span><span class="va">filteredFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html" class="external-link">getTestFile</a></span><span class="op">(</span><span class="st">"tenx-2.1.0-pbmc4k/1.0.0/filtered.tar.gz"</span><span class="op">)</span></span>
+<span><span class="va">rawFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html" class="external-link">getTestFile</a></span><span class="op">(</span><span class="st">"tenx-2.1.0-pbmc4k/1.0.0/raw.tar.gz"</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">filteredFile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html" class="external-link">getTestFile</a></span><span class="op">(</span><span class="st">"tenx-2.1.0-pbmc4k/1.0.0/filtered.tar.gz"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># unpack them into a temporary folder</span></span>
 <span><span class="va">dataFolder</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"pbmc4k"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/untar.html" class="external-link">untar</a></span><span class="op">(</span><span class="va">rawFile</span>, exdir <span class="op">=</span> <span class="va">dataFolder</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/untar.html" class="external-link">untar</a></span><span class="op">(</span><span class="va">filteredFile</span>, exdir <span class="op">=</span> <span class="va">dataFolder</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">DropletUtils</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># read each matrix, naming the columns by barcode</span></span>
@@ -135,13 +136,13 @@ cells.</p>
 <span><span class="va">filtered</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DropletUtils/man/read10xCounts.html" class="external-link">read10xCounts</a></span><span class="op">(</span><span class="va">filteredFolder</span>, col.names <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">raw</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1]  33694 737280</span></span></code></pre>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">filtered</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 33694  4340</span></span></code></pre>
 <p>The rows are named by Ensembl ID. Gene symbols are easier to read, so
 we use them instead, keeping the Ensembl ID where a symbol is
 repeated.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/LTLA/scuttle" class="external-link">scuttle</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># use gene symbols as row names</span></span>
@@ -157,7 +158,7 @@ repeated.</p>
 <code>SingleCellExperiment</code>. Its main assay, <code>counts</code>,
 holds every droplet. The cells Cell Ranger found become the first
 subset, <code>filtered</code>, chosen by barcode.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://campbio.github.io/ExperimentSubset/">ExperimentSubset</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># all droplets in the main object</span></span>
@@ -197,7 +198,7 @@ which finds the knee in the curve of total counts. We leave out its
 third method, per-droplet QC metrics, which is slow on 737,280 droplets;
 we compute QC metrics for the cells below. emptyDrops uses random
 sampling, so we set a seed first.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.camplab.net/sctk/" class="external-link">singleCellTK</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># test every droplet; set a seed, since emptyDrops samples at random</span></span>
@@ -205,7 +206,7 @@ sampling, so we set a seed first.</p>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/runDropletQC.html" class="external-link">runDropletQC</a></span><span class="op">(</span><span class="va">es</span>, algorithms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"emptyDrops"</span>, <span class="st">"barcodeRanks"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Each method gives its own set of cells: emptyDrops’ calls at a false
 discovery rate of 1%, and the droplets above barcodeRanks’ knee.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># droplets that emptyDrops calls as cells</span></span>
 <span><span class="va">dropletFdr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span><span class="op">$</span><span class="va">dropletUtils_emptyDrops_fdr</span></span>
 <span><span class="va">emptyDropsCell</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">dropletFdr</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">dropletFdr</span> <span class="op">&lt;=</span> <span class="fl">0.01</span></span>
@@ -223,11 +224,11 @@ discovery rate of 1%, and the droplets above barcodeRanks’ knee.</p>
 <p>We keep each set of calls as a subset next to Cell Ranger’s
 <code>filtered</code>. A subset stores only the positions of its
 droplets, so the object barely grows.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># size of the object before</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">object.size</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"MB"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "329.8 Mb"</span></span></code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># emptyDrops' and barcodeRanks' cells as two more subsets</span></span>
 <span><span class="va">emptyDropsPositions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">emptyDropsCell</span><span class="op">)</span></span>
 <span><span class="va">kneePositions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">kneeCell</span><span class="op">)</span></span>
@@ -237,14 +238,14 @@ droplets, so the object barely grows.</p>
 <span><span class="co"># size of the object after</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">object.size</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"MB"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "335.4 Mb"</span></span></code></pre>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the number of genes and cells in each set of calls</span></span>
 <span><span class="fu"><a href="../reference/subsetDim.html">subsetDim</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"filtered"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 33694  4340</span></span></code></pre>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/subsetDim.html">subsetDim</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"emptydrops"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 33694  4412</span></span></code></pre>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/subsetDim.html">subsetDim</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"barcoderanks"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] 33694  3519</span></span></code></pre>
 <p>The three mostly agree. We continue with Cell Ranger’s calls, the
@@ -258,7 +259,7 @@ comparison.</p>
 the <code>filtered</code> subset as an ordinary
 <code>SingleCellExperiment</code>, with the main object’s colData
 columns (the droplet QC above) included.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the filtered cells as a SingleCellExperiment</span></span>
 <span><span class="va">filteredCells</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getSubsetExperiment.html">getSubsetExperiment</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"filtered"</span><span class="op">)</span></span>
 <span><span class="va">filteredCells</span></span></code></pre></div>
@@ -281,7 +282,7 @@ doublets with scDblFinder. Our row names are gene symbols, so we say so.
 scDblFinder samples at random; <code><a href="https://rdrr.io/pkg/singleCellTK/man/runCellQC.html" class="external-link">runCellQC()</a></code> sets its own
 seed (<code>seed = 12345</code> by default), so the results are the same
 on every run.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># QC metrics and doublet calls for each cell</span></span>
 <span><span class="va">filteredCells</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/singleCellTK/man/runCellQC.html" class="external-link">runCellQC</a></span><span class="op">(</span><span class="va">filteredCells</span>,</span>
 <span>                           algorithms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"QCMetrics"</span>, <span class="st">"scDblFinder"</span><span class="op">)</span>,</span>
@@ -290,7 +291,7 @@ on every run.</p>
 <code><a href="https://rdrr.io/pkg/singleCellTK/man/runCellQC.html" class="external-link">runCellQC()</a></code> added in the <code>filtered</code> subset. The
 counts are unchanged, so they are not copied, and neither are the main
 object’s colData columns.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># store the QC results in the subset</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/setSubsetExperiment.html">setSubsetExperiment</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"filtered"</span>, value <span class="op">=</span> <span class="va">filteredCells</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"filtered"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -311,7 +312,7 @@ much of each cell’s counts comes from ambient RNA, the free-floating RNA
 in every droplet, and removes it. It estimates the ambient profile from
 the cells themselves. Like <code><a href="https://rdrr.io/pkg/singleCellTK/man/runCellQC.html" class="external-link">runCellQC()</a></code>,
 <code><a href="https://rdrr.io/pkg/celda/man/decontX.html" class="external-link">decontX()</a></code> sets its own seed by default.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/campbio/celda" class="external-link">celda</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># counts of the cells</span></span>
@@ -322,7 +323,7 @@ the cells themselves. Like <code><a href="https://rdrr.io/pkg/singleCellTK/man/r
 <p>The decontaminated counts become an assay of the
 <code>filtered</code> subset, and the estimated contamination becomes a
 colData column.</p>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># store the decontaminated counts in the subset</span></span>
 <span><span class="va">decontaminatedCounts</span> <span class="op">&lt;-</span> <span class="va">decontamination</span><span class="op">$</span><span class="va">decontXcounts</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/setSubsetAssay.html">setSubsetAssay</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"filtered"</span>,</span>
@@ -339,7 +340,7 @@ colData column.</p>
 <p>We keep cells that have at least 300 detected genes, at most 10% of
 counts from mitochondrial genes, at most 30% contamination, and that
 scDblFinder calls singlets.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the QC columns of the filtered cells</span></span>
 <span><span class="va">filteredData</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"filtered"</span><span class="op">)</span></span>
 <span></span>
@@ -360,7 +361,7 @@ counts: its <code>parentAssay</code> is
 <code>"filtered/decontaminated"</code>, the assay
 <code>decontaminated</code> stored in the subset
 <code>filtered</code>.</p>
-<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the high-quality cells, from the decontaminated counts</span></span>
 <span><span class="va">cellsToKeep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">keepCells</span><span class="op">)</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"clean"</span>, cols <span class="op">=</span> <span class="va">cellsToKeep</span>,</span>
@@ -377,7 +378,7 @@ or in its subset of variable genes.</p>
 <p><strong>Normalisation.</strong> Counts are divided by each cell’s
 size factor and log-transformed. <code>delayed = FALSE</code> computes
 the values now, rather than each time they are read.</p>
-<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/libscran/scrapper" class="external-link">scrapper</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># decontaminated counts of the clean cells</span></span>
@@ -394,7 +395,7 @@ the values now, rather than each time they are read.</p>
 expression varies most across the clean cells, and keep them as a subset
 of rows, <code>clean.variable</code>, made from the log-normalised
 values.</p>
-<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># variance of each gene, and the 2,000 most variable</span></span>
 <span><span class="va">geneVariances</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/modelGeneVariances.html" class="external-link">modelGeneVariances</a></span><span class="op">(</span><span class="va">lognormalized</span><span class="op">)</span></span>
 <span><span class="va">geneResiduals</span> <span class="op">&lt;-</span> <span class="va">geneVariances</span><span class="op">$</span><span class="va">statistics</span><span class="op">$</span><span class="va">residuals</span></span>
@@ -412,7 +413,7 @@ deviation 1. Only the variable genes are scaled: only they go into the
 PCA, and z-scores, which are rarely zero, take far more memory than the
 sparse log-normalised values. The z-scores are stored in the
 <code>clean.variable</code> subset.</p>
-<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># z-scores of each variable gene; scale() works on columns, so we</span></span>
 <span><span class="co"># transpose to one column per gene and back</span></span>
 <span><span class="va">variableDense</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">variableLognormalized</span><span class="op">)</span></span>
@@ -430,12 +431,12 @@ column per cell, the layout the other scrapper functions take; reduced
 dimensions are stored with one row per cell, so we transpose them for
 storing. scrapper’s PCA, clustering and UMAP use fixed seeds by default,
 so they give the same results on every run.</p>
-<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># principal components of the z-scores of the variable genes</span></span>
 <span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/runPca.html" class="external-link">runPca</a></span><span class="op">(</span><span class="va">scaled</span><span class="op">)</span></span>
 <span><span class="va">cellPcs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">components</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"reduction.pca"</span>, subsetName <span class="op">=</span> <span class="st">"clean"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">cellPcs</span></span></code></pre></div>
-<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># a nearest-neighbour graph of the cells, and its clusters</span></span>
 <span><span class="va">neighbourGraph</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/buildSnnGraph.html" class="external-link">buildSnnGraph</a></span><span class="op">(</span><span class="va">pca</span><span class="op">$</span><span class="va">components</span><span class="op">)</span></span>
 <span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/clusterGraph.html" class="external-link">clusterGraph</a></span><span class="op">(</span><span class="va">neighbourGraph</span><span class="op">)</span></span>
@@ -450,7 +451,7 @@ so they give the same results on every run.</p>
 <p><em>Direct style.</em> SingleR labels each cell with the most similar
 cell type in a reference, here the Monaco immune reference from
 celldex.</p>
-<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/SingleR-inc/SingleR" class="external-link">SingleR</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/LTLA/celldex" class="external-link">celldex</a></span><span class="op">)</span></span>
 <span></span>
@@ -461,7 +462,7 @@ celldex.</p>
 <span>                       labels <span class="op">=</span> <span class="va">monaco</span><span class="op">$</span><span class="va">label.main</span><span class="op">)</span></span></code></pre></div>
 <p>The clusters and labels go into the <code>clean</code> subset’s
 colData, and a few known marker genes are flagged in its rowData.</p>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># clusters and labels in the subset's colData</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"clean"</span><span class="op">)</span><span class="op">$</span><span class="va">cluster</span> <span class="op">&lt;-</span> <span class="va">clusters</span><span class="op">$</span><span class="va">membership</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">colData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"clean"</span><span class="op">)</span><span class="op">$</span><span class="va">label</span> <span class="op">&lt;-</span> <span class="va">predictions</span><span class="op">$</span><span class="va">labels</span></span>
@@ -471,14 +472,14 @@ colData, and a few known marker genes are flagged in its rowData.</p>
 <span><span class="co">##             587             916             444             136             947 </span></span>
 <span><span class="co">##        NK cells     Progenitors         T cells </span></span>
 <span><span class="co">##             179               3             782</span></span></code></pre>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># marker genes flagged in the subset's rowData</span></span>
 <span><span class="va">markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD3E"</span>, <span class="st">"CD4"</span>, <span class="st">"CD8A"</span>, <span class="st">"MS4A1"</span>, <span class="st">"CD14"</span>, <span class="st">"FCGR3A"</span>, <span class="st">"NKG7"</span>,</span>
 <span>             <span class="st">"LYZ"</span>, <span class="st">"PPBP"</span><span class="op">)</span></span>
 <span><span class="va">cleanGenes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/subsetRownames.html">subsetRownames</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"clean"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">rowData</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"clean"</span><span class="op">)</span><span class="op">$</span><span class="va">marker</span> <span class="op">&lt;-</span> <span class="va">cleanGenes</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">markers</span></span></code></pre></div>
 <p>We take the subset out again to plot it with scater.</p>
-<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://bioconductor.org/packages/scater/" class="external-link">scater</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># the clean cells, coloured by cell type</span></span>
@@ -492,7 +493,7 @@ colData, and a few known marker genes are flagged in its rowData.</p>
 <p><em>Experiment style.</em> T cells are the largest group. We make
 them a subset of <code>clean</code>, then repeat the analysis on them
 alone.</p>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the clean cells labelled as T cells</span></span>
 <span><span class="va">tcellLabels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD4+ T cells"</span>, <span class="st">"CD8+ T cells"</span>, <span class="st">"T cells"</span><span class="op">)</span></span>
 <span><span class="va">isTcell</span> <span class="op">&lt;-</span> <span class="va">predictions</span><span class="op">$</span><span class="va">labels</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">tcellLabels</span></span>
@@ -503,7 +504,7 @@ alone.</p>
 <pre><code><span><span class="co">## [1] 33694  2142</span></span></code></pre>
 <p>The new subset already sees the assays of <code>clean</code>, and
 those <code>clean</code> sees in turn, linked rather than copied:</p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/subsetAssayNames.html">subsetAssayNames</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"tcells"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "counts"         "decontaminated" "lognormalized"</span></span></code></pre>
 <p>A cell’s log-normalised values depend on its own counts and size
@@ -511,25 +512,25 @@ factor, so the T cells reuse <code>lognormalized</code> from
 <code>clean</code>, as subclustering usually does. The variable genes
 and their z-scores depend on which cells are included, so we compute
 them again on the T cells.</p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the T cells as a SingleCellExperiment, with the linked assays</span></span>
 <span><span class="va">tcells</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getSubsetExperiment.html">getSubsetExperiment</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"tcells"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assayNames</a></span><span class="op">(</span><span class="va">tcells</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "decontaminated" "counts"         "lognormalized"</span></span></code></pre>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the 2,000 genes that vary most among T cells</span></span>
 <span><span class="va">tcellLognormalized</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">tcells</span>, <span class="st">"lognormalized"</span><span class="op">)</span></span>
 <span><span class="va">tcellVariances</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/modelGeneVariances.html" class="external-link">modelGeneVariances</a></span><span class="op">(</span><span class="va">tcellLognormalized</span><span class="op">)</span></span>
 <span><span class="va">tcellResiduals</span> <span class="op">&lt;-</span> <span class="va">tcellVariances</span><span class="op">$</span><span class="va">statistics</span><span class="op">$</span><span class="va">residuals</span></span>
 <span><span class="va">tcellVariableGenes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/chooseHighlyVariableGenes.html" class="external-link">chooseHighlyVariableGenes</a></span><span class="op">(</span><span class="va">tcellResiduals</span>, top <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># z-scores of the T cells' variable genes, across the T cells only</span></span>
 <span><span class="va">tcellVariableLognormalized</span> <span class="op">&lt;-</span> <span class="va">tcellLognormalized</span><span class="op">[</span><span class="va">tcellVariableGenes</span>, <span class="op">]</span></span>
 <span><span class="va">tcellDense</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">tcellVariableLognormalized</span><span class="op">)</span></span>
 <span><span class="va">tcellGenesByColumn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">tcellDense</span><span class="op">)</span></span>
 <span><span class="va">tcellScaledByColumn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/BiocGenerics/man/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">tcellGenesByColumn</span><span class="op">)</span></span>
 <span><span class="va">tcellScaled</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">tcellScaledByColumn</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># principal components, stored with one row per cell</span></span>
 <span><span class="va">tcellPca</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/runPca.html" class="external-link">runPca</a></span><span class="op">(</span><span class="va">tcellScaled</span><span class="op">)</span></span>
 <span><span class="va">tcellPcs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">tcellPca</span><span class="op">$</span><span class="va">components</span><span class="op">)</span></span>
@@ -543,7 +544,7 @@ them again on the T cells.</p>
 <span><span class="co"># a UMAP embedding of the T cells</span></span>
 <span><span class="va">tcellUmap</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scrapper/man/runUmap.html" class="external-link">runUmap</a></span><span class="op">(</span><span class="va">tcellPca</span><span class="op">$</span><span class="va">components</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">tcells</span>, <span class="st">"embedding.umap"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">tcellUmap</span></span></code></pre></div>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the T-cell part of the reference, so every cell gets a T-cell subtype</span></span>
 <span><span class="va">isTcellReference</span> <span class="op">&lt;-</span> <span class="va">monaco</span><span class="op">$</span><span class="va">label.main</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">tcellLabels</span></span>
 <span><span class="va">tcellReference</span> <span class="op">&lt;-</span> <span class="va">monaco</span><span class="op">[</span>, <span class="va">isTcellReference</span><span class="op">]</span></span>
@@ -573,12 +574,12 @@ them again on the T cells.</p>
 <p><code><a href="../reference/setSubsetExperiment.html">setSubsetExperiment()</a></code> stores the reduced dimensions and
 colData columns we added in the <code>tcells</code> subset. The assays
 are unchanged, so they stay linked and nothing is copied.</p>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># store the T-cell results</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/setSubsetExperiment.html">setSubsetExperiment</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"tcells"</span>, value <span class="op">=</span> <span class="va">tcells</span><span class="op">)</span></span></code></pre></div>
 <p>As for the clean cells, the T cells’ variable genes become a subset
 of rows, <code>tcells.variable</code>, which stores their z-scores.</p>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the T cells' variable genes, and their z-scores</span></span>
 <span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSubset.html">createSubset</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"tcells.variable"</span>,</span>
 <span>                   rows <span class="op">=</span> <span class="va">tcellVariableGenes</span>,</span>
@@ -594,7 +595,7 @@ replacing, say, the T cells’ <code>lognormalized</code> with values
 computed on the T cells alone would need <code>unlink = TRUE</code>,
 after which <code>tcells</code> and the subsets made from it use their
 own version.</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the T cells, coloured by subtype</span></span>
 <span><span class="va">tcellCells</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/getSubsetExperiment.html">getSubsetExperiment</a></span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"tcells"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/scater/man/plotReducedDim.html" class="external-link">plotReducedDim</a></span><span class="op">(</span><span class="va">tcellCells</span>, dimred <span class="op">=</span> <span class="st">"embedding.umap"</span>, colour_by <span class="op">=</span> <span class="st">"subtype"</span><span class="op">)</span></span></code></pre></div>
@@ -605,7 +606,7 @@ own version.</p>
 </h2>
 <p><code><a href="../reference/subsetSummary.html">subsetSummary()</a></code> lists every subset, what it was made
 from, and what it stores.</p>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/subsetSummary.html">subsetSummary</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Main assay(s):</span></span>
 <span><span class="co">##  counts </span></span>
@@ -642,11 +643,11 @@ positions, and only what was computed for them:
 the two variable-gene subsets, and the colData, rowData and reduced
 dimensions added along the way. A linked assay, such as the T cells’
 <code>lognormalized</code>, is only built when it is read.</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the whole object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">object.size</a></span><span class="op">(</span><span class="va">es</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"MB"</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## [1] "567.5 Mb"</span></span></code></pre>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># the counts of all 737,280 droplets, stored once</span></span>
 <span><span class="va">allCounts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html" class="external-link">assay</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"counts"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/object.size.html" class="external-link">object.size</a></span><span class="op">(</span><span class="va">allCounts</span><span class="op">)</span>, units <span class="op">=</span> <span class="st">"MB"</span><span class="op">)</span></span></code></pre></div>
@@ -732,7 +733,7 @@ e.g. <code>"filtered/decontaminated"</code>
 <div class="section level2">
 <h2 id="session-information">Session information<a class="anchor" aria-label="anchor" href="#session-information"></a>
 </h2>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">## Platform: x86_64-pc-linux-gnu</span></span>
@@ -764,7 +765,7 @@ e.g. <code>"filtered/decontaminated"</code>
 <span><span class="co">##  [7] singleCellTK_2.23.6             DelayedArray_0.39.8            </span></span>
 <span><span class="co">##  [9] SparseArray_1.13.4              S4Arrays_1.13.2                </span></span>
 <span><span class="co">## [11] abind_1.4-8                     Matrix_1.7-6                   </span></span>
-<span><span class="co">## [13] ExperimentSubset_1.23.47        TreeSummarizedExperiment_2.21.0</span></span>
+<span><span class="co">## [13] ExperimentSubset_1.23.48        TreeSummarizedExperiment_2.21.0</span></span>
 <span><span class="co">## [15] Biostrings_2.81.9               XVector_0.53.0                 </span></span>
 <span><span class="co">## [17] SpatialExperiment_1.23.0        scuttle_1.23.2                 </span></span>
 <span><span class="co">## [19] DropletUtils_1.33.2             SingleCellExperiment_1.35.2    </span></span>

@@ -1,5 +1,20 @@
 # Changelog
 
+## ExperimentSubset 1.23.48 (2026-11-08)
+
+- The package code, tests and vignette now pass `make lint` with no
+  findings: spacing, braces, quotes, assignment, indentation and line
+  length follow the package’s lint settings, which now also accept the
+  names of the exported constructors, the class generators and the
+  `use.names` and `deparse.level` arguments that methods take from their
+  generics.
+  [`subsetSummary()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSummary.md)
+  loops with [`seq_along()`](https://rdrr.io/r/base/seq.html) and
+  [`createSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)
+  drops an internal variable that always equalled `parentAssay`. No
+  change in behavior
+  ([\#37](https://github.com/campbio/ExperimentSubset/issues/37))
+
 ## ExperimentSubset 1.23.47 (2026-11-08)
 
 - New `subsetRowTree(x, subsetName)` and `subsetColTree(x, subsetName)`
