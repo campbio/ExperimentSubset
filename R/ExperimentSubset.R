@@ -771,54 +771,54 @@ NULL
       "\n\n")
   cat("Subset(s):\n")
   if (!is.null(subsetNames(x))) {
-    Name <- list()
-    Dimensions <- list()
-    Parent <- list()
-    Assays <- list()
-    ReducedDims <- list()
-    AltExperiments <- list()
+    nameCol <- list()
+    dimCol <- list()
+    parentCol <- list()
+    assaysCol <- list()
+    reducedDimsCol <- list()
+    altExpsCol <- list()
 
     for (i in seq_along(subsetNames(x))) {
       parent <- subsetParent(x, subsetNames(x)[i])
-      Name[[i]] <- subsetNames(x)[i]
-      Parent[[i]] <-
+      nameCol[[i]] <- subsetNames(x)[i]
+      parentCol[[i]] <-
         paste(unlist(parent), collapse = " -> ")
       if (is.null(assayNames(.internalAssay(.subsets(x)[[i]])))) {
-        Assays[[i]] <- ""
+        assaysCol[[i]] <- ""
       } else {
-        Assays[[i]] <-
+        assaysCol[[i]] <-
           paste(unlist(assayNames(.internalAssay(.subsets(x)[[i]]))),
                 collapse = ", ")
       }
-      Dimensions[[i]] <-
+      dimCol[[i]] <-
         paste(unlist(subsetDim(x, subsetNames(x)[i])), collapse = ", ")
       if (inherits(x, "SingleCellExperiment")) {
-        ReducedDims[[i]] <-
+        reducedDimsCol[[i]] <-
           paste(unlist(reducedDimNames(x, subsetName = subsetNames(x)[i])),
                 collapse = ", ")
-        AltExperiments[[i]] <-
+        altExpsCol[[i]] <-
           paste(unlist(altExpNames(x, subsetName = subsetNames(x)[i])),
                 collapse = ", ")
       }
     }
 
     df <- data.frame(
-      Name = as.character(Name),
-      Dim = as.character(Dimensions),
-      Parent = as.character(Parent)
+      Name = as.character(nameCol),
+      Dim = as.character(dimCol),
+      Parent = as.character(parentCol)
     )
 
-    if (length(which(as.character(Assays) == "")) != subsetCount(x)) {
-      df <- cbind(df, Assays = as.character(Assays))
+    if (length(which(as.character(assaysCol) == "")) != subsetCount(x)) {
+      df <- cbind(df, Assays = as.character(assaysCol))
     }
 
     if (inherits(x, "SingleCellExperiment")) {
-      if (length(which(as.character(AltExperiments) == "")) != subsetCount(x)) {
-        df <- cbind(df, AltExperiments = as.character(AltExperiments))
+      if (length(which(as.character(altExpsCol) == "")) != subsetCount(x)) {
+        df <- cbind(df, AltExperiments = as.character(altExpsCol))
       }
 
-      if (length(which(as.character(ReducedDims) == "")) != subsetCount(x)) {
-        df <- cbind(df, ReducedDims = as.character(ReducedDims))
+      if (length(which(as.character(reducedDimsCol) == "")) != subsetCount(x)) {
+        df <- cbind(df, ReducedDims = as.character(reducedDimsCol))
       }
     }
 
