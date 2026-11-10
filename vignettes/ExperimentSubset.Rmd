@@ -34,10 +34,11 @@ if (!requireNamespace("BiocManager", quietly=TRUE)){
 BiocManager::install("ExperimentSubset")
 ```
 
-To install the latest version from GitHub, use the following code:
+To install the development version from the `devel` branch on GitHub,
+which may need the Bioconductor devel versions of its dependencies:
 
 ```{r install-github, eval = FALSE}
-BiocManager::install("campbio/ExperimentSubset")
+BiocManager::install("campbio/ExperimentSubset@devel")
 ```
 
 Loading the package:
