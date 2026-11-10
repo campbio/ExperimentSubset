@@ -1,6 +1,6 @@
 # RNA and ADT workflows in the PBMC article (#93)
 
-- **Status:** Draft, for review
+- **Status:** Approved
 - **Date:** 2026-11-09
 - **Branch:** `feature/cite-seq-article`, from `devel`
 - **Lands:** one PR to `devel` (1.23.49); devel only, no release port
@@ -33,8 +33,10 @@ Decided in chat (2026-11-09):
      without a copy);
   2. decontPro and CLR on `clean`;
   3. the RNA-labelled T cells checked with protein;
-  4. decontPro again on the T cells alone, with
-     `unlink = "ADT/decontPro"`.
+  4. decontPro again on the T cells alone, with CLR recomputed from it,
+     stored with `unlink = c("ADT/decontPro", "ADT/clr")` (decided
+     2026-11-09, during implementation: unlinking only `decontPro` would
+     leave the T cells a `clr` computed from `clean`'s decontPro).
 - **Left out:** renaming the main ADT and dropping its isotype controls
   (carry along). They come back once subsets can be made from an altExp
   (#92); the idea is recorded on #92.
@@ -72,9 +74,9 @@ Sections, with what changes:
 3. **One object; finding cells; QC; ambient RNA; high-quality cells.**
    As now (`filtered`, `emptydrops`, `barcoderanks`, `runCellQC()`,
    decontamination, `clean`), on the new data, with the thresholds
-   re-checked against it (the script used 15% mitochondrial counts,
-   the article 10%; keep 10% unless the new data's distribution clearly
-   needs more, and say so). One short new point: `filtered` and `clean`
+   re-checked against it. Mitochondrial counts: median 9%, 75th
+   percentile 13%, 90th 36%, so 10% would drop 40% of the cells; the
+   article uses 15%, as the script did, and says why. One short new point: `filtered` and `clean`
    see the ADT of their cells and store none of it.
    `decontX()` comes from the decontX package instead of celda, after
    checking its arguments and results match.
@@ -94,17 +96,20 @@ Sections, with what changes:
    SingleCellExperiment carries ADT with `counts`, `decontPro` and
    `clr`, all linked.
 8. **New: decontPro on the T cells alone.** decontPro fitted to the
-   T cells only, with their own clusters as cell types. Storing it
-   without `unlink` is an error naming the linked assay (shown in a chunk
-   with `error = TRUE`); `unlink = "ADT/decontPro"` stores it, and
-   `counts` and `clr` stay linked. This replaces the prose-only
-   paragraph about `unlink = TRUE`.
+   T cells only, with their own clusters as cell types, and CLR
+   recomputed from it. Storing both without `unlink` is an error naming
+   the linked assays (shown in a chunk with `error = TRUE`);
+   `unlink = c("ADT/decontPro", "ADT/clr")` stores them, and `counts`
+   stays linked. This replaces the prose-only paragraph about
+   `unlink = TRUE`.
 9. **The whole analysis in one object.** `subsetSummary()`, and the size
    of the whole object next to that of the counts, with a sentence that
    the 6.8 million barcode names account for most of the difference.
-10. **How this maps to MAMS.** The table gains a row: the `ADT` altExp is
-    a MAMS feature-observation matrix (FOM) with `modality` "protein";
-    `decontPro` and `clr` are `processing` values.
+10. **How this maps to MAMS.** The table gains two rows: the `ADT`
+    altExp is a MAMS matrix with `analyte` "protein" (MAMS defines
+    `analyte` values; `modality` has none), and its assays `decontPro`
+    and `clr` are `processing` "decontaminated" and "lognormalized"
+    (CLR is a log after dividing by each cell's geometric mean).
 11. **Session information.** As now.
 
 ## Other files
