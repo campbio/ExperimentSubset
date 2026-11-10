@@ -1,24 +1,28 @@
-# A single-cell workflow with every subset in one object
+# RNA and protein in one object: a single-cell workflow with subsets
 
 A single-cell analysis makes many versions of the same data: all
 droplets, the droplets that hold cells, the cells that pass quality
 control, the genes that vary most, a cell type re-analysed on its own.
 Usually each becomes a separate object, and each copy has to be kept in
-step with the others.
+step with the others. With CITE-seq, which measures proteins with
+antibodies next to the RNA, each version also has a protein side.
 
-This article runs a complete analysis of 4,000 peripheral blood
-mononuclear cells (PBMCs) from 10x Genomics and keeps every one of those
-versions as a **subset** of one `ExperimentSubset` object. A subset
-stores which rows and columns of its parent it uses, plus anything
-computed for it. It sees its parent’s assays without copying them.
+This article runs a complete analysis of 5,000 peripheral blood
+mononuclear cells (PBMCs) from 10x Genomics, measured with RNA and 32
+antibodies, and keeps every one of those versions as a **subset** of one
+`ExperimentSubset` object. A subset stores which rows and columns of its
+parent it uses, plus anything computed for it. It sees its parent’s
+assays without copying them. The antibody counts live in an alternative
+experiment of the main object, `altExp("ADT")`, and every subset sees
+them too, cut to its own cells.
 
 The purpose of this article is to show how a whole analysis fits in one
 object, not to give a complete or definitive annotation of PBMCs. The
-quality-control thresholds and the cell-type labels are simple, common
-choices; a careful annotation would need more work, such as checking
-marker genes for each cluster.
+quality-control thresholds, the cell-type labels and the protein checks
+are simple, common choices; a careful annotation would need more work,
+such as checking marker genes and proteins for each cluster.
 
-The analysis takes about 15 minutes and downloads about 200 MB the first
+The analysis takes about 20 minutes and downloads about 125 MB the first
 time it runs.
 
 We store results in two ways, and each step says which it uses:
@@ -34,9 +38,10 @@ We store results in two ways, and each step says which it uses:
   subset with
   [`setSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md),
   [`colData()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html),
-  [`rowData()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)
-  or
+  [`rowData()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html),
   [`reducedDim()`](https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html)
+  or
+  [`altExp()`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)
   with `subsetName =`.
 
 The names of the subsets, assays and reduced dimensions follow the
@@ -45,22 +50,27 @@ section shows how they map.
 
 ## The data
 
-We use the PBMC 4k data set, processed with Cell Ranger 2.1.0, from the
-DropletTestFiles package. It has two matrices: the *raw* matrix, with
-every droplet barcode, most of them empty, and the *filtered* matrix,
-with the droplets that Cell Ranger called as cells.
+We use the 5k PBMC data set with a panel of TotalSeq-B antibodies,
+processed with Cell Ranger 3.1.0, from the DropletTestFiles package. It
+has two matrices: the *raw* matrix, with every barcode of the 10x
+whitelist, most of them empty, and the *filtered* matrix, with the
+droplets that Cell Ranger called as cells. Each has a row for every gene
+and for every antibody.
 
 \
 [`library`](https://rdrr.io/r/base/library.html)`(``DropletTestFiles``)`\
 \
 `# download both matrices (cached after the first time)`\
-`rawFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(``"tenx-2.1.0-pbmc4k/1.0.0/raw.tar.gz"``)`
+`rawFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(``"tenx-3.1.0-5k_pbmc_protein_v3/1.0.0/raw.tar.gz"``)`
 
 \
-`filteredFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(``"tenx-2.1.0-pbmc4k/1.0.0/filtered.tar.gz"``)`\
+`filteredFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(`\
+`  ``"tenx-3.1.0-5k_pbmc_protein_v3/1.0.0/filtered.tar.gz"`\
+`)`
+
 \
 `# unpack them into a temporary folder`\
-`dataFolder`` ``<-`` `[`file.path`](https://rdrr.io/r/base/file.path.html)`(`[`tempdir`](https://rdrr.io/r/base/tempfile.html)`(``)``, ``"pbmc4k"``)`\
+`dataFolder`` ``<-`` `[`file.path`](https://rdrr.io/r/base/file.path.html)`(`[`tempdir`](https://rdrr.io/r/base/tempfile.html)`(``)``, ``"pbmc5k"``)`\
 [`untar`](https://rdrr.io/r/utils/untar.html)`(``rawFile``, exdir ``=`` ``dataFolder``)`\
 [`untar`](https://rdrr.io/r/utils/untar.html)`(``filteredFile``, exdir ``=`` ``dataFolder``)`
 
@@ -68,36 +78,83 @@ with the droplets that Cell Ranger called as cells.
 [`library`](https://rdrr.io/r/base/library.html)`(``DropletUtils``)`\
 \
 `# read each matrix, naming the columns by barcode`\
-`rawFolder`` ``<-`` `[`file.path`](https://rdrr.io/r/base/file.path.html)`(``dataFolder``, ``"raw_gene_bc_matrices"``, ``"GRCh38"``)`\
-`filteredFolder`` ``<-`` `[`file.path`](https://rdrr.io/r/base/file.path.html)`(``dataFolder``, ``"filtered_gene_bc_matrices"``, ``"GRCh38"``)`\
+`rawFolder`` ``<-`` `[`file.path`](https://rdrr.io/r/base/file.path.html)`(``dataFolder``, ``"raw_feature_bc_matrix"``)`\
+`filteredFolder`` ``<-`` `[`file.path`](https://rdrr.io/r/base/file.path.html)`(``dataFolder``, ``"filtered_feature_bc_matrix"``)`\
 `raw`` ``<-`` `[`read10xCounts`](https://rdrr.io/pkg/DropletUtils/man/read10xCounts.html)`(``rawFolder``, col.names ``=`` ``TRUE``)`\
 `filtered`` ``<-`` `[`read10xCounts`](https://rdrr.io/pkg/DropletUtils/man/read10xCounts.html)`(``filteredFolder``, col.names ``=`` ``TRUE``)`\
 [`dim`](https://rdrr.io/r/base/dim.html)`(``raw``)`
 
-    ## [1]  33694 737280
+    ## [1]   33570 6794880
 
 \
 [`dim`](https://rdrr.io/r/base/dim.html)`(``filtered``)`
 
-    ## [1] 33694  4340
+    ## [1] 33570  5247
 
-The rows are named by Ensembl ID. Gene symbols are easier to read, so we
-use them instead, keeping the Ensembl ID where a symbol is repeated.
+We keep the raw matrix as it is, all 6,794,880 barcodes. Most were never
+seen in sequencing and have no counts at all: they are entries of the
+whitelist, not empty droplets. The matrix is sparse, so such a barcode
+costs almost nothing to store, and keeping everything is what
+`ExperimentSubset` is for.
+
+The rows are named by Ensembl ID for genes and by antibody name for
+proteins. Gene symbols are easier to read, so we use them instead,
+keeping the ID where a symbol is repeated.
 
 \
 [`library`](https://rdrr.io/r/base/library.html)`(`[`scuttle`](https://github.com/LTLA/scuttle)`)`\
 \
 `# use gene symbols as row names`\
-`geneIds`` ``<-`` `[`rowData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``raw``)``$``ID`\
-`geneSymbols`` ``<-`` `[`rowData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``raw``)``$``Symbol`\
-`geneNames`` ``<-`` `[`uniquifyFeatureNames`](https://rdrr.io/pkg/scuttle/man/uniquifyFeatureNames.html)`(``geneIds``, ``geneSymbols``)`\
-[`rownames`](https://rdrr.io/r/base/colnames.html)`(``raw``)`` ``<-`` ``geneNames`
+`featureIds`` ``<-`` `[`rowData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``raw``)``$``ID`\
+`featureSymbols`` ``<-`` `[`rowData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``raw``)``$``Symbol`\
+`featureNames`` ``<-`` `[`uniquifyFeatureNames`](https://rdrr.io/pkg/scuttle/man/uniquifyFeatureNames.html)`(``featureIds``, ``featureSymbols``)`\
+[`rownames`](https://rdrr.io/r/base/colnames.html)`(``raw``)`` ``<-`` ``featureNames`
+
+The `Type` column of the rowData says whether each row is a gene or an
+antibody.
+[`splitAltExps()`](https://rdrr.io/pkg/SingleCellExperiment/man/splitAltExps.html)
+keeps the genes in the main object and moves the antibodies to an
+alternative experiment, which we name `ADT` (antibody-derived tags). The
+antibody names end in `_TotalSeqB`, which we drop.
+
+\
+`# the type of each row: gene or antibody`\
+`featureTypes`` ``<-`` `[`rowData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``raw``)``$``Type`\
+[`table`](https://rdrr.io/r/base/table.html)`(``featureTypes``)`
+
+    ## featureTypes
+    ## Antibody Capture  Gene Expression 
+    ##               32            33538
+
+\
+`# genes in the main object, antibodies in the altExp "ADT"`\
+`raw`` ``<-`` `[`splitAltExps`](https://rdrr.io/pkg/SingleCellExperiment/man/splitAltExps.html)`(``raw``, ``featureTypes``, ref ``=`` ``"Gene Expression"``)`\
+[`altExpNames`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``raw``)`` ``<-`` ``"ADT"`\
+\
+`# shorter antibody names`\
+`adt`` ``<-`` `[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``raw``, ``"ADT"``)`\
+[`rownames`](https://rdrr.io/r/base/colnames.html)`(``adt``)`` ``<-`` `[`sub`](https://rdrr.io/r/base/grep.html)`(``"_TotalSeqB$"``, ``""``, `[`rownames`](https://rdrr.io/r/base/colnames.html)`(``adt``)``)`\
+[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``raw``, ``"ADT"``)`` ``<-`` ``adt`\
+[`rownames`](https://rdrr.io/r/base/colnames.html)`(``adt``)`
+
+    ##  [1] "CD3"           "CD4"           "CD8a"          "CD11b"        
+    ##  [5] "CD14"          "CD15"          "CD16"          "CD19"         
+    ##  [9] "CD20"          "CD25"          "CD27"          "CD28"         
+    ## [13] "CD34"          "CD45RA"        "CD45RO"        "CD56"         
+    ## [17] "CD62L"         "CD69"          "CD80"          "CD86"         
+    ## [21] "CD127"         "CD137"         "CD197"         "CD274"        
+    ## [25] "CD278"         "CD335"         "PD-1"          "HLA-DR"       
+    ## [29] "TIGIT"         "IgG1_control"  "IgG2a_control" "IgG2b_control"
+
+The last three antibodies are isotype controls, which bind nothing in
+particular; they measure the background.
 
 ## One object for all droplets
 
 [`ExperimentSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset.md)
 wraps the raw `SingleCellExperiment`. Its main assay, `counts`, holds
-every droplet. The cells Cell Ranger found become the first subset,
+every droplet, and its altExp `ADT` the antibody counts of every
+droplet. The cells Cell Ranger found become the first subset,
 `filtered`, chosen by barcode.
 
 \
@@ -112,23 +169,47 @@ every droplet. The cells Cell Ranger found become the first subset,
 `es`
 
     ## class: SubsetSingleCellExperiment 
-    ## dim: 33694 737280 
+    ## dim: 33538 6794880 
     ## metadata(1): Samples
     ## assays(1): counts
-    ## rownames(33694): RP11-34P13.3 FAM138A ... AC213203.1 FAM231B
-    ## rowData names(2): ID Symbol
-    ## colnames(737280): AAACCTGAGAAACCAT-1 AAACCTGAGAAACCGC-1 ...
-    ##   TTTGTCATCTTTAGTC-1 TTTGTCATCTTTCCTC-1
+    ## rownames(33538): MIR1302-2HG FAM138A ... AC213203.1 FAM231C
+    ## rowData names(3): ID Symbol Type
+    ## colnames(6794880): AAACCCAAGAAACACT-1 AAACCCAAGAAACCAT-1 ...
+    ##   TTTGTTGTCTTTGGCT-1 TTTGTTGTCTTTGTCG-1
     ## colData names(2): Sample Barcode
     ## reducedDimNames(0):
-    ## mainExpName: NULL
-    ## altExpNames(0):
+    ## mainExpName: Gene Expression
+    ## altExpNames(1): ADT
     ## subsets(1): filtered
     ## subsetAssays(1): filtered
 
 `assay(es, "filtered")` returns the counts of the filtered cells. They
 are not copied: the subset stores the column positions and reads the
-main object’s counts when asked.
+main object’s counts when asked. The same goes for the antibodies: the
+subset sees the main object’s `ADT`, cut to its cells.
+
+\
+`# the antibody counts of the filtered cells, read from the main object`\
+[`altExpNames`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``es``, subsetName ``=`` ``"filtered"``)`
+
+    ## [1] "ADT"
+
+\
+`filteredAdt`` ``<-`` `[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``es``, ``"ADT"``, subsetName ``=`` ``"filtered"``)`\
+`filteredAdt`
+
+    ## class: SingleCellExperiment 
+    ## dim: 32 5247 
+    ## metadata(1): Samples
+    ## assays(1): counts
+    ## rownames(32): CD3 CD4 ... IgG2a_control IgG2b_control
+    ## rowData names(3): ID Symbol Type
+    ## colnames(5247): AAACCCAAGAGACAAG-1 AAACCCAAGGCCTAGA-1 ...
+    ##   TTTGTTGCATTGCCGG-1 TTTGTTGGTCCGGCAT-1
+    ## colData names(0):
+    ## reducedDimNames(0):
+    ## mainExpName: NULL
+    ## altExpNames(0):
 
 ## Finding cells among the droplets
 
@@ -138,8 +219,8 @@ can run on it directly. singleCellTK’s
 runs two other methods from DropletUtils on every droplet: `emptyDrops`,
 which tests each droplet against the ambient RNA profile, and
 `barcodeRanks`, which finds the knee in the curve of total counts. We
-leave out its third method, per-droplet QC metrics, which is slow on
-737,280 droplets; we compute QC metrics for the cells below. emptyDrops
+leave out its third method, per-droplet QC metrics, which is slow on 6.8
+million barcodes; we compute QC metrics for the cells below. emptyDrops
 uses random sampling, so we set a seed first.
 
 \
@@ -165,9 +246,17 @@ discovery rate of 1%, and the droplets above barcodeRanks’ knee.
 [`table`](https://rdrr.io/pkg/BiocGenerics/man/table.html)`(``emptyDrops ``=`` ``emptyDropsCell``, cellRanger ``=`` ``cellRangerCell``)`
 
     ##           cellRanger
-    ## emptyDrops  FALSE   TRUE
-    ##      FALSE 732550    318
-    ##      TRUE     390   4022
+    ## emptyDrops   FALSE    TRUE
+    ##      FALSE 6789425     164
+    ##      TRUE      208    5083
+
+\
+[`table`](https://rdrr.io/pkg/BiocGenerics/man/table.html)`(``knee ``=`` ``kneeCell``, cellRanger ``=`` ``cellRangerCell``)`
+
+    ##        cellRanger
+    ## knee      FALSE    TRUE
+    ##   FALSE 6789633    2199
+    ##   TRUE        0    3048
 
 We keep each set of calls as a subset next to Cell Ranger’s `filtered`.
 A subset stores only the positions of its droplets, so the object barely
@@ -177,7 +266,7 @@ grows.
 `# size of the object before`\
 [`format`](https://rdrr.io/r/base/format.html)`(`[`object.size`](https://rdrr.io/r/utils/object.size.html)`(``es``)``, units ``=`` ``"MB"``)`
 
-    ## [1] "329.8 Mb"
+    ## [1] "3412.1 Mb"
 
 \
 `# emptyDrops' and barcodeRanks' cells as two more subsets`\
@@ -189,33 +278,35 @@ grows.
 `# size of the object after`\
 [`format`](https://rdrr.io/r/base/format.html)`(`[`object.size`](https://rdrr.io/r/utils/object.size.html)`(``es``)``, units ``=`` ``"MB"``)`
 
-    ## [1] "335.4 Mb"
+    ## [1] "3417.7 Mb"
 
 \
 `# the number of genes and cells in each set of calls`\
 [`subsetDim`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.md)`(``es``, subsetName ``=`` ``"filtered"``)`
 
-    ## [1] 33694  4340
+    ## [1] 33538  5247
 
 \
 [`subsetDim`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.md)`(``es``, subsetName ``=`` ``"emptydrops"``)`
 
-    ## [1] 33694  4412
+    ## [1] 33538  5291
 
 \
 [`subsetDim`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.md)`(``es``, subsetName ``=`` ``"barcoderanks"``)`
 
-    ## [1] 33694  3519
+    ## [1] 33538  3048
 
-The three mostly agree. We continue with Cell Ranger’s calls, the
-`filtered` subset; the others stay in the object for comparison.
+emptyDrops and Cell Ranger mostly agree; the knee is stricter and keeps
+fewer cells. We continue with Cell Ranger’s calls, the `filtered`
+subset; the others stay in the object for comparison.
 
 ## Quality control of the cells
 
 *Experiment style.*
 [`getSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md)
 returns the `filtered` subset as an ordinary `SingleCellExperiment`,
-with the main object’s colData columns (the droplet QC above) included.
+with the main object’s colData columns (the droplet QC above) and its
+`ADT`, both cut to the subset’s cells, included.
 
 \
 `# the filtered cells as a SingleCellExperiment`\
@@ -223,18 +314,18 @@ with the main object’s colData columns (the droplet QC above) included.
 `filteredCells`
 
     ## class: SingleCellExperiment 
-    ## dim: 33694 4340 
+    ## dim: 33538 5247 
     ## metadata(0):
     ## assays(1): counts
-    ## rownames(33694): RP11-34P13.3 FAM138A ... AC213203.1 FAM231B
-    ## rowData names(2): ID Symbol
-    ## colnames(4340): AAACCTGAGAAGGCCT-1 AAACCTGAGACAGACC-1 ...
-    ##   TTTGTCAGTTAAGACA-1 TTTGTCATCCCAAGAT-1
+    ## rownames(33538): MIR1302-2HG FAM138A ... AC213203.1 FAM231C
+    ## rowData names(3): ID Symbol Type
+    ## colnames(5247): AAACCCAAGAGACAAG-1 AAACCCAAGGCCTAGA-1 ...
+    ##   TTTGTTGCATTGCCGG-1 TTTGTTGGTCCGGCAT-1
     ## colData names(9): Sample Barcode ... dropletUtils_BarcodeRank_Knee
     ##   dropletUtils_BarcodeRank_Inflection
     ## reducedDimNames(0):
-    ## mainExpName: NULL
-    ## altExpNames(0):
+    ## mainExpName: Gene Expression
+    ## altExpNames(1): ADT
 
 singleCellTK’s
 [`runCellQC()`](https://rdrr.io/pkg/singleCellTK/man/runCellQC.html)
@@ -254,8 +345,9 @@ same on every run.
 [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md)
 stores what
 [`runCellQC()`](https://rdrr.io/pkg/singleCellTK/man/runCellQC.html)
-added in the `filtered` subset. The counts are unchanged, so they are
-not copied, and neither are the main object’s colData columns.
+added in the `filtered` subset. The counts and the antibody counts are
+unchanged, so they are not copied, and neither are the main object’s
+colData columns.
 
 \
 `# store the QC results in the subset`\
@@ -273,23 +365,23 @@ not copied, and neither are the main object’s colData columns.
 
 ## Removing ambient RNA
 
-*Direct style.* celda’s
-[`decontX()`](https://rdrr.io/pkg/celda/man/decontX.html) estimates how
-much of each cell’s counts comes from ambient RNA, the free-floating RNA
-in every droplet, and removes it. It estimates the ambient profile from
-the cells themselves. Like
+*Direct style.* decontX’s
+[`decontX()`](https://rdrr.io/pkg/decontX/man/decontX.html) estimates
+how much of each cell’s counts comes from ambient RNA, the free-floating
+RNA in every droplet, and removes it. It estimates the ambient profile
+from the cells themselves. Like
 [`runCellQC()`](https://rdrr.io/pkg/singleCellTK/man/runCellQC.html),
-[`decontX()`](https://rdrr.io/pkg/celda/man/decontX.html) sets its own
+[`decontX()`](https://rdrr.io/pkg/decontX/man/decontX.html) sets its own
 seed by default.
 
 \
-[`library`](https://rdrr.io/r/base/library.html)`(`[`celda`](https://github.com/campbio/celda)`)`\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`decontX`](https://github.com/campbio/decontX)`)`\
 \
 `# counts of the cells`\
 `cellCounts`` ``<-`` `[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"filtered"``)`\
 \
 `# estimate and remove the ambient RNA`\
-`decontamination`` ``<-`` `[`decontX`](https://rdrr.io/pkg/celda/man/decontX.html)`(``cellCounts``)`
+`decontamination`` ``<-`` `[`decontX`](https://rdrr.io/pkg/decontX/man/decontX.html)`(``cellCounts``)`
 
 The decontaminated counts become an assay of the `filtered` subset, and
 the estimated contamination becomes a colData column.
@@ -307,17 +399,25 @@ the estimated contamination becomes a colData column.
 
 ## Keeping high-quality cells
 
-We keep cells that have at least 300 detected genes, at most 10% of
-counts from mitochondrial genes, at most 30% contamination, and that
+These cells have more mitochondrial counts than many PBMC data sets:
+half of them have more than 9% (the median below). Most cells have up to
+about 15%, and a smaller group, probably damaged cells, has far more. We
+keep cells that have at least 300 detected genes, at most 15% of counts
+from mitochondrial genes, at most 30% contamination, and that
 scDblFinder calls singlets.
 
 \
 `# the QC columns of the filtered cells`\
 `filteredData`` ``<-`` `[`colData`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, subsetName ``=`` ``"filtered"``)`\
+[`summary`](https://rdrr.io/r/base/summary.html)`(``filteredData``$``mito_percent``)`
+
+    ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    ##   0.000   7.230   8.995  14.786  13.335  93.907
+
 \
 `# each QC rule`\
 `enoughGenes`` ``<-`` ``filteredData``$``detected`` ``>=`` ``300`\
-`lowMito`` ``<-`` ``filteredData``$``mito_percent`` ``<=`` ``10`\
+`lowMito`` ``<-`` ``filteredData``$``mito_percent`` ``<=`` ``15`\
 `lowContamination`` ``<-`` ``filteredData``$``contamination`` ``<=`` ``0.3`\
 `singlet`` ``<-`` ``filteredData``$``scDblFinder_doublet_call`` ``==`` ``"Singlet"`\
 \
@@ -327,11 +427,12 @@ scDblFinder calls singlets.
 
     ## keepCells
     ## FALSE  TRUE 
-    ##   346  3994
+    ##  1582  3665
 
 The new subset, `clean`, is made from the decontaminated counts: its
 `parentAssay` is `"filtered/decontaminated"`, the assay `decontaminated`
-stored in the subset `filtered`.
+stored in the subset `filtered`. It sees the antibody counts of its
+cells as well, still from the main object.
 
 \
 `# the high-quality cells, from the decontaminated counts`\
@@ -340,7 +441,7 @@ stored in the subset `filtered`.
 `                   parentAssay ``=`` ``"filtered/decontaminated"``)`\
 [`subsetDim`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.md)`(``es``, subsetName ``=`` ``"clean"``)`
 
-    ## [1] 33694  3994
+    ## [1] 33538  3665
 
 ## Clustering
 
@@ -359,7 +460,7 @@ each time they are read.
 `cleanCounts`` ``<-`` `[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"clean"``)`\
 \
 `# size factors from each cell's total, then log-normalised values`\
-`cellTotals`` ``<-`` `[`colSums`](https://rdrr.io/pkg/Matrix/man/colSums-methods.html)`(``cleanCounts``)`\
+`cellTotals`` ``<-`` ``colSums``(``cleanCounts``)`\
 `sizeFactors`` ``<-`` `[`centerSizeFactors`](https://rdrr.io/pkg/scrapper/man/centerSizeFactors.html)`(``cellTotals``)`\
 `lognormalized`` ``<-`` `[`normalizeCounts`](https://rdrr.io/pkg/scrapper/man/normalizeCounts.html)`(``cleanCounts``, ``sizeFactors``, delayed ``=`` ``FALSE``)`\
 `es`` ``<-`` `[`setSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)`(``es``, subsetName ``=`` ``"clean"``,`\
@@ -382,7 +483,7 @@ most across the clean cells, and keep them as a subset of rows,
 `variableLognormalized`` ``<-`` `[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"clean.variable"``)`\
 [`dim`](https://rdrr.io/r/base/dim.html)`(``variableLognormalized``)`
 
-    ## [1] 2000 3994
+    ## [1] 2000 3665
 
 **Scaling.** Each variable gene’s log-normalised values are turned into
 z-scores across the clean cells: mean 0 and standard deviation 1. Only
@@ -452,9 +553,9 @@ known marker genes are flagged in its rowData.
 
     ## 
     ##         B cells    CD4+ T cells    CD8+ T cells Dendritic cells       Monocytes 
-    ##             587             916             444             136             947 
-    ##        NK cells     Progenitors         T cells 
-    ##             179               3             782
+    ##             278            1065             173             116            1203 
+    ##        NK cells         T cells 
+    ##             315             515
 
 \
 `# marker genes flagged in the subset's rowData`\
@@ -475,6 +576,160 @@ We take the subset out again to plot it with scater.
 ![UMAP of the clean cells, coloured by cell
 type](pbmc-workflow_files/figure-html/plot-clean-1.png)
 
+## Removing ambient protein
+
+*Direct style.* Antibody counts have a background too: antibodies that
+float free in the droplet or bind where they shouldn’t. decontX’s
+[`decontPro()`](https://rdrr.io/pkg/decontX/man/decontPro.html)
+estimates the background of each antibody in each cell and removes it.
+It needs a cell type for each cell, for which we use the RNA clusters,
+numbered from 1 as
+[`decontPro()`](https://rdrr.io/pkg/decontX/man/decontPro.html) expects.
+
+\
+`# the antibody counts of the clean cells, still read from the main object`\
+`cleanAdt`` ``<-`` `[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``es``, ``"ADT"``, subsetName ``=`` ``"clean"``)`\
+`cleanAdtCounts`` ``<-`` `[`counts`](https://rdrr.io/pkg/BiocGenerics/man/dge.html)`(``cleanAdt``)`\
+\
+`# the RNA clusters as cell types, numbered from 1`\
+`clusterFactor`` ``<-`` `[`factor`](https://rdrr.io/r/base/factor.html)`(``clusters``$``membership``)`\
+`cellTypes`` ``<-`` `[`as.integer`](https://rdrr.io/r/base/integer.html)`(``clusterFactor``)`
+
+[`decontPro()`](https://rdrr.io/pkg/decontX/man/decontPro.html) can also
+learn the background from droplets that hold no cell: it uses each
+antibody’s share of their counts. The main object has every droplet, so
+they are at hand: we use the droplets that neither Cell Ranger nor
+emptyDrops called as cells but that have some antibody counts. Droplets
+that only one of them calls may hold a cell, whose antibodies aren’t
+background.
+
+\
+`# the antibody counts of every droplet, and each droplet's total`\
+`allAdt`` ``<-`` `[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``es``, ``"ADT"``)`\
+`allAdtCounts`` ``<-`` `[`counts`](https://rdrr.io/pkg/BiocGenerics/man/dge.html)`(``allAdt``)`\
+`adtTotals`` ``<-`` ``colSums``(``allAdtCounts``)`\
+\
+`# droplets that aren't cells but have antibody counts`\
+`notCell`` ``<-`` ``!``cellRangerCell`` ``&`` ``!``emptyDropsCell`\
+`isAmbient`` ``<-`` ``notCell`` ``&`` ``adtTotals`` ``>`` ``0`\
+[`sum`](https://rdrr.io/r/base/sum.html)`(``isAmbient``)`
+
+    ## [1] 317164
+
+\
+`ambientCounts`` ``<-`` ``allAdtCounts``[``, ``isAmbient``]`
+
+[`decontPro()`](https://rdrr.io/pkg/decontX/man/decontPro.html) fits a
+model to the counts of the clean cells, which takes a few minutes and
+prints its progress, hidden here. It sets its own seed, so the results
+are the same on every run.
+
+\
+`# estimate and remove the background of each antibody in each cell`\
+`proteinDecontamination`` ``<-`` `[`decontPro`](https://rdrr.io/pkg/decontX/man/decontPro.html)`(``cleanAdtCounts``, ``cellTypes``,`\
+`                                    ambient_counts ``=`` ``ambientCounts``)`\
+\
+`# the decontaminated counts, with the antibody and cell names`\
+`decontaminatedAdt`` ``<-`` ``proteinDecontamination``$``decontaminated_counts`\
+[`dimnames`](https://rdrr.io/r/base/dimnames.html)`(``decontaminatedAdt``)`` ``<-`` `[`dimnames`](https://rdrr.io/r/base/dimnames.html)`(``cleanAdtCounts``)`
+
+The decontaminated antibody counts become an assay, `decontPro`, of the
+`clean` subset’s `ADT`. We add it to the object
+[`altExp()`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)
+returned and store that back with
+`altExp(es, "ADT", subsetName = "clean") <-`. The subset stores only
+what is new: `counts` is unchanged, so it stays linked to the main
+object’s, and the object grows by about the size of the new matrix.
+
+\
+`# size of the object before`\
+[`format`](https://rdrr.io/r/base/format.html)`(`[`object.size`](https://rdrr.io/r/utils/object.size.html)`(``es``)``, units ``=`` ``"MB"``)`
+
+    ## [1] "3675.1 Mb"
+
+\
+`# add the decontaminated counts to the clean cells' ADT and store it`\
+[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``cleanAdt``, ``"decontPro"``)`` ``<-`` ``decontaminatedAdt`\
+[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``es``, ``"ADT"``, subsetName ``=`` ``"clean"``)`` ``<-`` ``cleanAdt`\
+\
+`# size of the object after, and of the new matrix`\
+[`format`](https://rdrr.io/r/base/format.html)`(`[`object.size`](https://rdrr.io/r/utils/object.size.html)`(``es``)``, units ``=`` ``"MB"``)`
+
+    ## [1] "3676.6 Mb"
+
+\
+[`format`](https://rdrr.io/r/base/format.html)`(`[`object.size`](https://rdrr.io/r/utils/object.size.html)`(``decontaminatedAdt``)``, units ``=`` ``"MB"``)`
+
+    ## [1] "1.2 Mb"
+
+**Normalisation.** Antibody counts are commonly normalised with the
+centred log ratio (CLR): log-transform each count, then subtract the
+mean of the cell’s log counts, which takes out differences in each
+cell’s total. We store it as a second assay, `clr`, of the same `ADT`.
+
+\
+`# log counts, minus each cell's mean log count`\
+`logAdt`` ``<-`` `[`log1p`](https://rdrr.io/r/base/Log.html)`(``decontaminatedAdt``)`\
+`cellMeans`` ``<-`` ``colMeans``(``logAdt``)`\
+`clrAdt`` ``<-`` `[`sweep`](https://rdrr.io/pkg/DelayedArray/man/DelayedArray-utils.html)`(``logAdt``, MARGIN ``=`` ``2``, ``cellMeans``)`\
+\
+`# store it next to decontPro`\
+[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``cleanAdt``, ``"clr"``)`` ``<-`` ``clrAdt`\
+[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``es``, ``"ADT"``, subsetName ``=`` ``"clean"``)`` ``<-`` ``cleanAdt`\
+\
+`# the clean cells' ADT now has three assays`\
+`storedAdt`` ``<-`` `[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``es``, ``"ADT"``, subsetName ``=`` ``"clean"``)`\
+[`assayNames`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``storedAdt``)`
+
+    ## [1] "counts"    "decontPro" "clr"
+
+## Checking the cell labels with protein
+
+The cell types came from RNA alone. The antibodies give an independent
+check: T cells should carry CD3, CD4+ T cells CD4 and CD8+ T cells CD8a.
+[`getSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md)
+returns the clean cells with their `ADT`, including the two new assays.
+
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`ggplot2`](https://ggplot2.tidyverse.org)`)`\
+\
+`# the clean cells, with their ADT`\
+`cleanCells`` ``<-`` `[`getSubsetExperiment`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md)`(``es``, subsetName ``=`` ``"clean"``)`\
+`cleanProtein`` ``<-`` `[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``cleanCells``, ``"ADT"``)`\
+\
+`# each cell's RNA label, next to its protein values`\
+`cleanProtein``$``label`` ``<-`` ``cleanCells``$``label`\
+\
+`# CLR values by cell type, with the labels turned to fit`\
+`proteinPlot`` ``<-`` `[`plotExpression`](https://rdrr.io/pkg/scater/man/plotExpression.html)`(``cleanProtein``,`\
+`                              features ``=`` `[`c`](https://rdrr.io/r/base/c.html)`(``"CD3"``, ``"CD4"``, ``"CD8a"``)``,`\
+`                              x ``=`` ``"label"``, assay.type ``=`` ``"clr"``,`\
+`                              colour_by ``=`` ``"label"``)`\
+`slantedText`` ``<-`` `[`element_text`](https://ggplot2.tidyverse.org/reference/element.html)`(``angle ``=`` ``45``, hjust ``=`` ``1``)`\
+`slantedLabels`` ``<-`` `[`theme`](https://ggplot2.tidyverse.org/reference/theme.html)`(``axis.text.x ``=`` ``slantedText``)`\
+`proteinPlot`` ``+`` ``slantedLabels`
+
+![CLR of CD3, CD4 and CD8a by cell
+type](pbmc-workflow_files/figure-html/plot-protein-1.png)
+
+\
+`# median CD3 protein in each cell type`\
+`cd3`` ``<-`` `[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``cleanProtein``, ``"clr"``)``[``"CD3"``, ``]`\
+[`tapply`](https://rdrr.io/r/base/tapply.html)`(``cd3``, ``cleanProtein``$``label``, ``median``)`
+
+    ##         B cells    CD4+ T cells    CD8+ T cells Dendritic cells       Monocytes 
+    ##     -0.21100149      5.80974283      5.52746881      1.43082349     -0.09437538 
+    ##        NK cells         T cells 
+    ##      0.10469913      5.27590801
+
+CD3 is high in all three T-cell labels and near zero in B cells and
+monocytes, and CD4+ T cells carry CD4 but not CD8a. The cells labelled
+just T cells split into those that carry CD4 and those that carry CD8a.
+The protein also shows what RNA missed: part of the cells labelled CD8+
+T cells carry CD4 and not CD8a. Monocytes and dendritic cells carry some
+CD4 too, as they do in blood. A careful annotation would use both, for
+example by clustering on RNA and protein together.
+
 ## Re-analysing the T cells
 
 *Experiment style.* T cells are the largest group. We make them a subset
@@ -489,7 +744,7 @@ of `clean`, then repeat the analysis on them alone.
 `                   parentAssay ``=`` ``"clean"``)`\
 [`subsetDim`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetDim.md)`(``es``, subsetName ``=`` ``"tcells"``)`
 
-    ## [1] 33694  2142
+    ## [1] 33538  1753
 
 The new subset already sees the assays of `clean`, and those `clean`
 sees in turn, linked rather than copied:
@@ -510,6 +765,13 @@ cells are included, so we compute them again on the T cells.
 [`assayNames`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``tcells``)`
 
     ## [1] "decontaminated" "counts"         "lognormalized"
+
+\
+`# their ADT, with the counts, decontPro and clr of clean`\
+`tcellAdtSeen`` ``<-`` `[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``tcells``, ``"ADT"``)`\
+[`assayNames`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``tcellAdtSeen``)`
+
+    ## [1] "counts"    "decontPro" "clr"
 
 \
 `# the 2,000 genes that vary most among T cells`\
@@ -554,26 +816,26 @@ cells are included, so we compute them again on the T cells.
 
     ## 
     ##    Central memory CD8 T cells   Effector memory CD8 T cells 
-    ##                           103                             9 
+    ##                            15                            17 
     ##     Follicular helper T cells                    MAIT cells 
-    ##                            18                            93 
+    ##                            21                            73 
     ##             Naive CD4 T cells             Naive CD8 T cells 
-    ##                           659                           265 
+    ##                           726                            79 
     ##            Non-Vd2 gd T cells            T regulatory cells 
-    ##                            66                           120 
+    ##                            80                           103 
     ## Terminal effector CD4 T cells Terminal effector CD8 T cells 
-    ##                             5                            35 
+    ##                            29                            25 
     ##                     Th1 cells                Th1/Th17 cells 
-    ##                           176                           103 
+    ##                            35                           192 
     ##                    Th17 cells                     Th2 cells 
-    ##                            53                            92 
+    ##                            76                            94 
     ##                Vd2 gd T cells 
-    ##                           345
+    ##                           188
 
 [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md)
 stores the reduced dimensions and colData columns we added in the
-`tcells` subset. The assays are unchanged, so they stay linked and
-nothing is copied.
+`tcells` subset. The assays and the `ADT` are unchanged, so they stay
+linked and nothing is copied.
 
 \
 `# store the T-cell results`\
@@ -593,11 +855,7 @@ rows, `tcells.variable`, which stores their z-scores.
 
 `clean.variable` and `tcells.variable` each store their own `scaled`: an
 assay stored in one subset doesn’t clash with one of the same name in
-another. A subset can’t store an assay under a name it already sees
-linked from its parent, though; replacing, say, the T cells’
-`lognormalized` with values computed on the T cells alone would need
-`unlink = TRUE`, after which `tcells` and the subsets made from it use
-their own version.
+another.
 
 \
 `# the T cells, coloured by subtype`\
@@ -607,10 +865,67 @@ their own version.
 ![UMAP of the T cells, coloured by T-cell
 subtype](pbmc-workflow_files/figure-html/plot-tcells-1.png)
 
+## Removing ambient protein in the T cells alone
+
+[`decontPro()`](https://rdrr.io/pkg/decontX/man/decontPro.html) fits
+each antibody’s background and its true signal to the cell types it is
+given. The T cells now have clusters of their own, finer than the clean
+cells’ clusters, so we run it again on the T cells alone, with those
+clusters and the same ambient droplets.
+
+\
+`# the T cells' antibody counts, and their clusters numbered from 1`\
+`tcellAdt`` ``<-`` `[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``es``, ``"ADT"``, subsetName ``=`` ``"tcells"``)`\
+`tcellAdtCounts`` ``<-`` `[`counts`](https://rdrr.io/pkg/BiocGenerics/man/dge.html)`(``tcellAdt``)`\
+`tcellClusterFactor`` ``<-`` `[`factor`](https://rdrr.io/r/base/factor.html)`(``tcells``$``cluster``)`\
+`tcellTypes`` ``<-`` `[`as.integer`](https://rdrr.io/r/base/integer.html)`(``tcellClusterFactor``)`\
+\
+`# estimate and remove the background, on the T cells only`\
+`tcellProteinDecontamination`` ``<-`` `[`decontPro`](https://rdrr.io/pkg/decontX/man/decontPro.html)`(``tcellAdtCounts``, ``tcellTypes``,`\
+`                                         ambient_counts ``=`` ``ambientCounts``)`\
+`tcellDecontaminatedAdt`` ``<-`\
+`  ``tcellProteinDecontamination``$``decontaminated_counts`\
+[`dimnames`](https://rdrr.io/r/base/dimnames.html)`(``tcellDecontaminatedAdt``)`` ``<-`` `[`dimnames`](https://rdrr.io/r/base/dimnames.html)`(``tcellAdtCounts``)`\
+\
+`# CLR of the new values`\
+`tcellLogAdt`` ``<-`` `[`log1p`](https://rdrr.io/r/base/Log.html)`(``tcellDecontaminatedAdt``)`\
+`tcellCellMeans`` ``<-`` ``colMeans``(``tcellLogAdt``)`\
+`tcellClrAdt`` ``<-`` `[`sweep`](https://rdrr.io/pkg/DelayedArray/man/DelayedArray-utils.html)`(``tcellLogAdt``, MARGIN ``=`` ``2``, ``tcellCellMeans``)`\
+\
+`# both replace the ones the T cells see from clean`\
+[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``tcellAdt``, ``"decontPro"``)`` ``<-`` ``tcellDecontaminatedAdt`\
+[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``tcellAdt``, ``"clr"``)`` ``<-`` ``tcellClrAdt`
+
+The T cells see `decontPro` and `clr` linked from `clean`. Storing
+values of their own under the same names would break that link without
+saying so, so it is an error, which names the linked assays:
+
+\
+`# store the T cells' own decontPro and clr`\
+[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``es``, ``"ADT"``, subsetName ``=`` ``"tcells"``)`` ``<-`` ``tcellAdt`
+
+    ## Error in `.checkUnlinked()`:
+    ## ! 'ADT/decontPro' in subset 'tcells' is linked to altExp 'ADT' of subset 'clean' and 'ADT/clr' to altExp 'ADT' of subset 'clean'. Set unlink = TRUE or unlink = c("ADT/decontPro", "ADT/clr") to store separate 'ADT/decontPro' and 'ADT/clr' computed on the cells of 'tcells'.
+
+`unlink` names the altExp assays to unlink, as `"ADT/decontPro"`. The T
+cells then store their own `decontPro` and `clr`, with a message for
+each, such as “Subset ‘tcells’ now stores its own ‘ADT/decontPro’,
+unlinked from altExp ‘ADT’ of subset ‘clean’.” Subsets made from the T
+cells will use these; `clean`’s are unchanged, and `counts` stays linked
+to the main object.
+
+\
+`# store them, unlinked from clean's`\
+`tcellUnlink`` ``<-`` `[`c`](https://rdrr.io/r/base/c.html)`(``"ADT/decontPro"``, ``"ADT/clr"``)`\
+[`altExp`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)`(``es``, ``"ADT"``, subsetName ``=`` ``"tcells"``, unlink ``=`` ``tcellUnlink``)`` ``<-`` ``tcellAdt`
+
 ## The whole analysis in one object
 
 [`subsetSummary()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSummary.md)
-lists every subset, what it was made from, and what it stores.
+lists every subset, what it was made from, the assays and reduced
+dimensions it stores, and the altExps it sees. `AltExperiments` doesn’t
+say whether a subset stores any assays of an altExp: `clean` and
+`tcells` store their own `decontPro` and `clr`, the others none.
 
 \
 [`subsetSummary`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetSummary.md)`(``es``)`
@@ -621,13 +936,13 @@ lists every subset, what it was made from, and what it stores.
     ## Subset(s):
 
     ##              Name         Dim
-    ## 1        filtered 33694, 4340
-    ## 2      emptydrops 33694, 4412
-    ## 3    barcoderanks 33694, 3519
-    ## 4           clean 33694, 3994
-    ## 5  clean.variable  2000, 3994
-    ## 6          tcells 33694, 2142
-    ## 7 tcells.variable  2000, 2142
+    ## 1        filtered 33538, 5247
+    ## 2      emptydrops 33538, 5291
+    ## 3    barcoderanks 33538, 3048
+    ## 4           clean 33538, 3665
+    ## 5  clean.variable  2000, 3665
+    ## 6          tcells 33538, 1753
+    ## 7 tcells.variable  2000, 1753
     ##                                                                                     Parent
     ## 1                                                                                   counts
     ## 2                                                                                   counts
@@ -636,53 +951,78 @@ lists every subset, what it was made from, and what it stores.
     ## 5            clean/lognormalized -> clean -> filtered/decontaminated -> filtered -> counts
     ## 6                                   clean -> filtered/decontaminated -> filtered -> counts
     ## 7 tcells/lognormalized -> tcells -> clean -> filtered/decontaminated -> filtered -> counts
-    ##           Assays                   ReducedDims
-    ## 1 decontaminated                              
-    ## 2                                             
-    ## 3                                             
-    ## 4  lognormalized reduction.pca, embedding.umap
-    ## 5         scaled                              
-    ## 6                reduction.pca, embedding.umap
-    ## 7         scaled
+    ##           Assays AltExperiments                   ReducedDims
+    ## 1 decontaminated            ADT                              
+    ## 2                           ADT                              
+    ## 3                           ADT                              
+    ## 4  lognormalized            ADT reduction.pca, embedding.umap
+    ## 5         scaled            ADT                              
+    ## 6                           ADT reduction.pca, embedding.umap
+    ## 7         scaled            ADT
 
 All of this lives in one object. The subsets store row and column
 positions, and only what was computed for them: `decontaminated` in
-`filtered`, `lognormalized` in `clean`, `scaled` in the two
-variable-gene subsets, and the colData, rowData and reduced dimensions
+`filtered`; `lognormalized`, and `decontPro` and `clr` of `ADT`, in
+`clean`; `scaled` in the two variable-gene subsets; the T cells’ own
+`decontPro` and `clr`; and the colData, rowData and reduced dimensions
 added along the way. A linked assay, such as the T cells’
-`lognormalized`, is only built when it is read.
+`lognormalized` or their antibody `counts`, is only built when it is
+read.
 
 \
 `# the whole object`\
 [`format`](https://rdrr.io/r/base/format.html)`(`[`object.size`](https://rdrr.io/r/utils/object.size.html)`(``es``)``, units ``=`` ``"MB"``)`
 
-    ## [1] "567.5 Mb"
+    ## [1] "3710.1 Mb"
 
 \
-`# the counts of all 737,280 droplets, stored once`\
+`# the RNA counts of all barcodes, stored once`\
 `allCounts`` ``<-`` `[`assay`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html)`(``es``, ``"counts"``)`\
 [`format`](https://rdrr.io/r/base/format.html)`(`[`object.size`](https://rdrr.io/r/utils/object.size.html)`(``allCounts``)``, units ``=`` ``"MB"``)`
 
-    ## [1] "164.4 Mb"
+    ## [1] "761.9 Mb"
+
+\
+`# the same counts without the barcode names`\
+`unnamedCounts`` ``<-`` ``allCounts`\
+[`dimnames`](https://rdrr.io/r/base/dimnames.html)`(``unnamedCounts``)`` ``<-`` ``NULL`\
+[`format`](https://rdrr.io/r/base/format.html)`(`[`object.size`](https://rdrr.io/r/utils/object.size.html)`(``unnamedCounts``)``, units ``=`` ``"MB"``)`
+
+    ## [1] "189.5 Mb"
+
+The counts themselves are small: a barcode with no counts takes 4 bytes.
+Most of the object’s size is the 6.8 million barcode names, in the
+column names of the counts and of `ADT` and in the colData, followed by
+the droplet QC columns that
+[`runDropletQC()`](https://rdrr.io/pkg/singleCellTK/man/runDropletQC.html)
+added for every barcode.
+[`object.size()`](https://rdrr.io/r/utils/object.size.html) counts each
+name again in every vector that holds it, so it overstates the memory
+the object uses.
 
 Kept as separate objects instead, the three sets of cell calls, the
-clean cells and the T cells would each carry their own copy of the
-counts, and the T cells another copy of the log-normalised values.
+clean cells and the T cells would each carry their own copy of the RNA
+and antibody counts, and the T cells another copy of the log-normalised
+values.
 
 ## How this maps to MAMS
 
 [MAMS](https://github.com/single-cell-mams/mams) (Matrix and Analysis
 Metadata Standards) describes the matrices and annotations a single-cell
 analysis produces. The names used here follow its suggested values where
-it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
-`scaled`, `reduction`, `embedding`); `emptydrops`, `barcoderanks` and
-`tcells` are our own names for subsets.
+it has them (`filtered`, `clean`, `variable`, `counts`,
+`decontaminated`, `lognormalized`, `scaled`, `reduction`, `embedding`);
+`emptydrops`, `barcoderanks` and `tcells` are our own names for subsets,
+`ADT` is the usual name for antibody counts, and `decontPro` and `clr`
+are named after the methods.
 
 | In this article | ExperimentSubset | MAMS |
 |----|----|----|
 | `filtered`, `emptydrops`, `barcoderanks`, `clean`, `tcells` | subsets of columns | `obs_subset` |
 | `clean.variable`, `tcells.variable` | subsets of rows | `feature_subset` (`variable`) |
 | `counts`, `decontaminated`, `lognormalized`, `scaled` | assays | `processing` |
+| `ADT` | an altExp, seen by every subset | a matrix with `analyte` `protein` |
+| `decontPro`, `clr` of `ADT` | assays of the altExp | `processing` (`decontaminated`, `lognormalized`) |
 | `reduction.pca`, `embedding.umap` | reducedDims | `processing` (`reduction`, `embedding`) |
 | `parentAssay`, e.g. `"filtered/decontaminated"` | the assay or subset a subset was made from | `parent_id` |
 | a subset made from its parent’s rows or columns | [`createSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md) | `parent_relationship` (`subset`) |
@@ -718,11 +1058,11 @@ it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
     ## other attached packages:
     ##  [1] scater_1.41.3                   ggplot2_4.0.3                  
     ##  [3] celldex_1.23.0                  SingleR_2.15.4                 
-    ##  [5] scrapper_1.7.11                 celda_1.29.3                   
+    ##  [5] scrapper_1.7.11                 decontX_1.11.2                 
     ##  [7] singleCellTK_2.23.6             DelayedArray_0.39.8            
     ##  [9] SparseArray_1.13.4              S4Arrays_1.13.2                
     ## [11] abind_1.4-8                     Matrix_1.7-6                   
-    ## [13] ExperimentSubset_1.23.48        TreeSummarizedExperiment_2.21.0
+    ## [13] ExperimentSubset_1.23.49        TreeSummarizedExperiment_2.21.0
     ## [15] Biostrings_2.81.9               XVector_0.53.0                 
     ## [17] SpatialExperiment_1.23.0        scuttle_1.23.2                 
     ## [19] DropletUtils_1.33.2             SingleCellExperiment_1.35.2    
@@ -739,90 +1079,86 @@ it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
     ##   [5] doParallel_1.0.17         alabaster.base_1.13.5    
     ##   [7] tools_4.6.1               R6_2.6.1                 
     ##   [9] HDF5Array_1.41.3          lazyeval_0.2.3           
-    ##  [11] uwot_0.2.5                rhdf5filters_1.25.5      
-    ##  [13] GetoptLong_1.1.1          sp_2.2-4                 
-    ##  [15] withr_3.0.3               gridExtra_2.3.1          
-    ##  [17] progressr_1.1.0           cli_3.6.6                
-    ##  [19] textshaping_1.0.5         enrichR_3.4              
-    ##  [21] labeling_0.4.3            alabaster.se_1.13.1      
-    ##  [23] eds_1.15.0                sass_0.4.10              
-    ##  [25] S7_0.2.2                  QuickJSR_1.11.0          
-    ##  [27] pkgdown_2.2.1             StanHeaders_2.39.1       
-    ##  [29] Rsamtools_2.29.0          systemfonts_1.3.2        
-    ##  [31] yulab.utils_0.2.5         dbscan_1.2.7             
-    ##  [33] R.utils_2.13.0            parallelly_1.48.0        
-    ##  [35] WriteXLS_6.8.0            limma_3.99.4             
-    ##  [37] RSQLite_3.53.3            shape_1.4.6.1            
-    ##  [39] BiocIO_1.23.3             combinat_0.0-9           
-    ##  [41] dplyr_1.2.1               dendextend_1.19.1        
-    ##  [43] inline_0.3.21             loo_2.10.1               
-    ##  [45] ggbeeswarm_0.7.3          R.methodsS3_1.8.2        
-    ##  [47] lifecycle_1.0.5           yaml_2.3.12              
-    ##  [49] edgeR_4.99.12             rhdf5_2.57.20            
-    ##  [51] BiocFileCache_3.3.2       Rtsne_0.17               
-    ##  [53] grid_4.6.1                blob_1.3.0               
-    ##  [55] dqrng_0.4.1               ExperimentHub_3.3.2      
-    ##  [57] crayon_1.5.3              lattice_0.23-1           
-    ##  [59] cowplot_1.2.0             beachmat_2.29.3          
-    ##  [61] cigarillo_1.3.1           annotate_1.91.0          
-    ##  [63] KEGGREST_1.53.6           magick_2.9.1             
-    ##  [65] pillar_1.11.1             knitr_1.52               
-    ##  [67] ComplexHeatmap_2.29.0     rjson_0.2.23             
-    ##  [69] xgboost_3.2.1.1           future.apply_1.21.0      
-    ##  [71] codetools_0.2-20          glue_1.8.1               
-    ##  [73] V8_8.2.1                  data.table_1.18.6.1      
-    ##  [75] gypsum_1.9.0              spam_2.11-4              
-    ##  [77] vctrs_0.7.3               png_0.1-9                
-    ##  [79] treeio_1.37.1             gtable_0.3.6             
-    ##  [81] cachem_1.1.0              xfun_0.62                
-    ##  [83] RcppEigen_0.3.4.0.2       GSVAdata_1.49.2          
-    ##  [85] iterators_1.0.14          statmod_1.5.2            
-    ##  [87] bluster_1.23.1            nlme_3.1-171             
-    ##  [89] bit64_4.8.6               alabaster.ranges_1.13.1  
-    ##  [91] filelock_1.0.3            rstan_2.32.7             
-    ##  [93] GenomeInfoDb_1.49.1       bslib_0.12.0             
-    ##  [95] irlba_2.4.1               vipor_0.4.7              
-    ##  [97] otel_0.2.0                colorspace_2.1-4         
-    ##  [99] DBI_1.3.0                 tidyselect_1.2.1         
-    ## [101] bit_4.6.0                 compiler_4.6.1           
-    ## [103] curl_8.1.0                httr2_1.3.0              
-    ## [105] graph_1.91.0              BiocNeighbors_2.7.3      
-    ## [107] h5mread_1.5.3             desc_1.4.3               
-    ## [109] ggdendro_0.2.0            rtracklayer_1.73.0       
-    ## [111] scales_1.4.0              rappdirs_0.3.4           
-    ## [113] stringr_1.6.0             digest_0.6.39            
-    ## [115] alabaster.matrix_1.13.4   rmarkdown_2.32           
-    ## [117] htmltools_0.5.9           pkgconfig_2.0.3          
-    ## [119] sparseMatrixStats_1.25.0  dbplyr_2.6.0             
-    ## [121] fastmap_1.2.0             rlang_1.3.0              
-    ## [123] GlobalOptions_0.1.4       htmlwidgets_1.6.4        
-    ## [125] UCSC.utils_1.9.0          DelayedMatrixStats_1.35.0
-    ## [127] farver_2.1.2              jquerylib_0.1.4          
-    ## [129] jsonlite_2.0.0            BiocParallel_1.47.0      
-    ## [131] R.oo_1.27.1               BiocSingular_1.29.2      
-    ## [133] RCurl_1.98-1.20           magrittr_2.0.5           
-    ## [135] dotCall64_1.2             Rhdf5lib_2.1.0           
-    ## [137] Rcpp_1.1.2                ape_5.8-1                
-    ## [139] viridis_0.6.5             reticulate_1.47.0        
-    ## [141] alabaster.schemas_1.13.0  stringi_1.8.9            
-    ## [143] pROC_1.19.1               MCMCprecision_0.4.2      
-    ## [145] MASS_7.3-66               pkgbuild_1.4.8           
-    ## [147] AnnotationHub_4.3.3       plyr_1.8.9               
-    ## [149] listenv_1.1.0             parallel_4.6.1           
-    ## [151] ggrepel_0.9.8             scDblFinder_1.27.12      
-    ## [153] circlize_0.4.18           igraph_2.3.4             
-    ## [155] reshape2_1.4.5            ScaledMatrix_1.21.0      
-    ## [157] rstantools_2.7.1          BiocVersion_3.24.0       
-    ## [159] XML_3.99-0.25             evaluate_1.0.5           
-    ## [161] SeuratObject_5.4.0        RcppParallel_6.2.1       
-    ## [163] BiocManager_1.30.27       foreach_1.5.2            
-    ## [165] tidyr_1.3.2               purrr_1.2.2              
-    ## [167] future_1.80.0             clue_0.3-68              
-    ## [169] BiocBaseUtils_1.15.1      rsvd_1.0.6               
-    ## [171] xtable_1.8-8              restfulr_0.0.17          
-    ## [173] tidytree_0.4.8            viridisLite_0.4.3        
-    ## [175] ragg_1.5.2                tibble_3.3.1             
-    ## [177] memoise_2.0.1             beeswarm_0.4.0           
-    ## [179] AnnotationDbi_1.75.2      GenomicAlignments_1.49.2 
-    ## [181] cluster_2.1.8.3           globals_0.20.0           
-    ## [183] decontX_1.11.2            GSEABase_1.75.0
+    ##  [11] rhdf5filters_1.25.5       GetoptLong_1.1.1         
+    ##  [13] sp_2.2-4                  withr_3.0.3              
+    ##  [15] gridExtra_2.3.1           progressr_1.1.0          
+    ##  [17] cli_3.6.6                 textshaping_1.0.5        
+    ##  [19] labeling_0.4.3            alabaster.se_1.13.1      
+    ##  [21] eds_1.15.0                sass_0.4.10              
+    ##  [23] S7_0.2.2                  QuickJSR_1.11.0          
+    ##  [25] pkgdown_2.2.1             Rsamtools_2.29.0         
+    ##  [27] systemfonts_1.3.2         yulab.utils_0.2.5        
+    ##  [29] StanHeaders_2.39.1        dbscan_1.2.7             
+    ##  [31] R.utils_2.13.0            parallelly_1.48.0        
+    ##  [33] limma_3.99.4              RSQLite_3.53.3           
+    ##  [35] shape_1.4.6.1             BiocIO_1.23.3            
+    ##  [37] combinat_0.0-9            dplyr_1.2.1              
+    ##  [39] inline_0.3.21             loo_2.10.1               
+    ##  [41] ggbeeswarm_0.7.3          R.methodsS3_1.8.2        
+    ##  [43] lifecycle_1.0.5           yaml_2.3.12              
+    ##  [45] edgeR_4.99.12             rhdf5_2.57.20            
+    ##  [47] BiocFileCache_3.3.2       grid_4.6.1               
+    ##  [49] blob_1.3.0                dqrng_0.4.1              
+    ##  [51] ExperimentHub_3.3.2       crayon_1.5.3             
+    ##  [53] lattice_0.23-1            cowplot_1.2.0            
+    ##  [55] beachmat_2.29.3           cigarillo_1.3.1          
+    ##  [57] annotate_1.91.0           KEGGREST_1.53.6          
+    ##  [59] magick_2.9.1              pillar_1.11.1            
+    ##  [61] knitr_1.52                ComplexHeatmap_2.29.0    
+    ##  [63] rjson_0.2.23              xgboost_3.2.1.1          
+    ##  [65] future.apply_1.21.0       codetools_0.2-20         
+    ##  [67] glue_1.8.1                V8_8.2.1                 
+    ##  [69] data.table_1.18.6.1       gypsum_1.9.0             
+    ##  [71] spam_2.11-4               vctrs_0.7.3              
+    ##  [73] png_0.1-9                 treeio_1.37.1            
+    ##  [75] gtable_0.3.6              cachem_1.1.0             
+    ##  [77] xfun_0.62                 GSVAdata_1.49.2          
+    ##  [79] iterators_1.0.14          statmod_1.5.2            
+    ##  [81] bluster_1.23.1            nlme_3.1-171             
+    ##  [83] bit64_4.8.6               alabaster.ranges_1.13.1  
+    ##  [85] filelock_1.0.3            rstan_2.32.7             
+    ##  [87] GenomeInfoDb_1.49.1       bslib_0.12.0             
+    ##  [89] irlba_2.4.1               vipor_0.4.7              
+    ##  [91] otel_0.2.0                colorspace_2.1-4         
+    ##  [93] DBI_1.3.0                 tidyselect_1.2.1         
+    ##  [95] bit_4.6.0                 compiler_4.6.1           
+    ##  [97] curl_8.1.0                httr2_1.3.0              
+    ##  [99] graph_1.91.0              BiocNeighbors_2.7.3      
+    ## [101] h5mread_1.5.3             desc_1.4.3               
+    ## [103] rtracklayer_1.73.0        scales_1.4.0             
+    ## [105] rappdirs_0.3.4            stringr_1.6.0            
+    ## [107] digest_0.6.39             alabaster.matrix_1.13.4  
+    ## [109] rmarkdown_2.32            htmltools_0.5.9          
+    ## [111] pkgconfig_2.0.3           sparseMatrixStats_1.25.0 
+    ## [113] dbplyr_2.6.0              fastmap_1.2.0            
+    ## [115] rlang_1.3.0               GlobalOptions_0.1.4      
+    ## [117] htmlwidgets_1.6.4         UCSC.utils_1.9.0         
+    ## [119] DelayedMatrixStats_1.35.0 farver_2.1.2             
+    ## [121] jquerylib_0.1.4           jsonlite_2.0.0           
+    ## [123] BiocParallel_1.47.0       R.oo_1.27.1              
+    ## [125] BiocSingular_1.29.2       RCurl_1.98-1.20          
+    ## [127] magrittr_2.0.5            dotCall64_1.2            
+    ## [129] Rhdf5lib_2.1.0            Rcpp_1.1.2               
+    ## [131] ape_5.8-1                 viridis_0.6.5            
+    ## [133] reticulate_1.47.0         alabaster.schemas_1.13.0 
+    ## [135] stringi_1.8.9             MCMCprecision_0.4.2      
+    ## [137] MASS_7.3-66               AnnotationHub_4.3.3      
+    ## [139] plyr_1.8.9                pkgbuild_1.4.8           
+    ## [141] parallel_4.6.1            listenv_1.1.0            
+    ## [143] ggrepel_0.9.8             scDblFinder_1.27.12      
+    ## [145] circlize_0.4.18           igraph_2.3.4             
+    ## [147] reshape2_1.4.5            ScaledMatrix_1.21.0      
+    ## [149] rstantools_2.7.1          BiocVersion_3.24.0       
+    ## [151] XML_3.99-0.25             evaluate_1.0.5           
+    ## [153] SeuratObject_5.4.0        RcppParallel_6.2.1       
+    ## [155] BiocManager_1.30.27       foreach_1.5.2            
+    ## [157] tidyr_1.3.2               purrr_1.2.2              
+    ## [159] future_1.80.0             clue_0.3-68              
+    ## [161] BiocBaseUtils_1.15.1      rsvd_1.0.6               
+    ## [163] xtable_1.8-8              restfulr_0.0.17          
+    ## [165] tidytree_0.4.8            viridisLite_0.4.3        
+    ## [167] ragg_1.5.2                tibble_3.3.1             
+    ## [169] memoise_2.0.1             beeswarm_0.4.0           
+    ## [171] AnnotationDbi_1.75.2      GenomicAlignments_1.49.2 
+    ## [173] cluster_2.1.8.3           globals_0.20.0           
+    ## [175] GSEABase_1.75.0

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.48</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.49</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -21,7 +21,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Workflows</h6></li>
-    <li><a class="dropdown-item" href="../articles/pbmc-workflow.html">A single-cell workflow with every subset in one object</a></li>
+    <li><a class="dropdown-item" href="../articles/pbmc-workflow.html">RNA and protein in one object: a single-cell workflow with subsets</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -39,6 +39,10 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.49" id="experimentsubset-12349-2026-11-09">ExperimentSubset 1.23.49 (2026-11-09)<a class="anchor" aria-label="anchor" href="#experimentsubset-12349-2026-11-09"></a></h2>
+<ul><li>The workflow article on the website now uses the 10x 5k PBMC CITE-seq data set (RNA and 32 antibodies) instead of PBMC 4k, and keeps Cell Ranger’s raw matrix whole: all 6,794,880 barcodes, with the antibodies in <code>altExp("ADT")</code>. Next to the RNA workflow, the same object now holds an antibody workflow: decontPro and CLR on the high-quality cells, stored in the subset’s <code>ADT</code> while its <code>counts</code> stay linked to the main object; the RNA cell-type labels checked against CD3, CD4 and CD8a protein; and decontPro and CLR again on the T cells alone, stored with <code>unlink = c("ADT/decontPro", "ADT/clr")</code>. RNA decontamination now uses the decontX package rather than celda, and the article keeps cells with up to 15% mitochondrial counts rather than 10%, since this data set has more. No change to the package (<a href="https://github.com/campbio/ExperimentSubset/issues/93" class="external-link">#93</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.48" id="experimentsubset-12348-2026-11-08">ExperimentSubset 1.23.48 (2026-11-08)<a class="anchor" aria-label="anchor" href="#experimentsubset-12348-2026-11-08"></a></h2>
 <ul><li>The package code, tests and vignette now pass <code>make lint</code> with no findings: spacing, braces, quotes, assignment, indentation and line length follow the package’s lint settings, which now also accept the names of the exported constructors, the class generators and the <code>use.names</code> and <code>deparse.level</code> arguments that methods take from their generics. <code><a href="../reference/subsetSummary.html">subsetSummary()</a></code> loops with <code><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_along()</a></code> and <code><a href="../reference/createSubset.html">createSubset()</a></code> drops an internal variable that always equalled <code>parentAssay</code>. No change in behavior (<a href="https://github.com/campbio/ExperimentSubset/issues/37" class="external-link">#37</a>)</li>
