@@ -3,8 +3,8 @@ title: "RNA and protein in one object: a single-cell workflow with subsets"
 description: >
   From raw droplets to T-cell subtypes in 5,000 PBMCs measured with RNA
   and 32 antibodies (CITE-seq), keeping three sets of cell calls,
-  high-quality cells, variable genes, T cells and the protein results as
-  subsets of one ExperimentSubset object.
+  high-quality cells, variable genes and T cells as subsets of one
+  ExperimentSubset object, with the protein results stored in them.
 ---
 
 ```{r setup, include = FALSE}
@@ -298,10 +298,11 @@ colData(es, subsetName = "filtered")$contamination <-
 # Keeping high-quality cells
 
 These cells have more mitochondrial counts than many PBMC data sets: half
-of them have more than 9% (the median below). Most cells have up to about 15%, and a smaller
-group, probably damaged cells, has far more. We keep cells that have at
-least 300 detected genes, at most 15% of counts from mitochondrial genes,
-at most 30% contamination, and that scDblFinder calls singlets.
+of them have more than 9% (the median below). Most cells have up to
+about 15%, and a smaller group, probably damaged cells, has far more. We
+keep cells that have at least 300 detected genes, at most 15% of counts
+from mitochondrial genes, at most 30% contamination, and that scDblFinder
+calls singlets.
 
 ```{r filter}
 # the QC columns of the filtered cells
@@ -485,7 +486,8 @@ didn't call as cells but that have some antibody counts.
 
 ```{r ambient-adt}
 # the antibody counts of every droplet, and each droplet's total
-allAdtCounts <- counts(altExp(es, "ADT"))
+allAdt <- altExp(es, "ADT")
+allAdtCounts <- counts(allAdt)
 adtTotals <- colSums(allAdtCounts)
 
 # droplets that aren't cells but have antibody counts
@@ -537,12 +539,15 @@ total. We store it as a second assay, `clr`, of the same `ADT`.
 # log counts, minus each cell's mean log count
 logAdt <- log1p(decontaminatedAdt)
 cellMeans <- colMeans(logAdt)
-clrAdt <- sweep(logAdt, 2, cellMeans)
+clrAdt <- sweep(logAdt, MARGIN = 2, cellMeans)
 
 # store it next to decontPro
 assay(cleanAdt, "clr") <- clrAdt
 altExp(es, "ADT", subsetName = "clean") <- cleanAdt
-assayNames(altExp(es, "ADT", subsetName = "clean"))
+
+# the clean cells' ADT now has three assays
+storedAdt <- altExp(es, "ADT", subsetName = "clean")
+assayNames(storedAdt)
 ```
 
 # Checking the cell labels with protein
@@ -552,7 +557,9 @@ check: T cells should carry CD3, CD4+ T cells CD4 and CD8+ T cells CD8a.
 `getSubsetExperiment()` returns the clean cells with their `ADT`,
 including the two new assays.
 
-```{r plot-protein, fig.alt = "CLR values of CD3, CD4 and CD8a protein in each cell type of the clean cells", fig.height = 6}
+```{r plot-protein, fig.height = 6, fig.alt = "CLR of CD3, CD4 and CD8a by cell type"}
+library(ggplot2)
+
 # the clean cells, with their ADT
 cleanCells <- getSubsetExperiment(es, subsetName = "clean")
 cleanProtein <- altExp(cleanCells, "ADT")
@@ -565,7 +572,8 @@ proteinPlot <- plotExpression(cleanProtein,
                               features = c("CD3", "CD4", "CD8a"),
                               x = "label", assay.type = "clr",
                               colour_by = "label")
-slantedLabels <- theme(axis.text.x = element_text(angle = 45, hjust = 1))
+slantedText <- element_text(angle = 45, hjust = 1)
+slantedLabels <- theme(axis.text.x = slantedText)
 proteinPlot + slantedLabels
 ```
 
@@ -579,10 +587,9 @@ CD3 is high in all three T-cell labels and near zero in B cells and
 monocytes, and CD4+ T cells carry CD4 but not CD8a. The cells labelled
 just T cells split into those that carry CD4 and those that carry CD8a.
 The protein also shows what RNA missed: part of the cells labelled CD8+
-T cells carry CD4 and not CD8a. Monocytes and
-dendritic cells carry some CD4 too, as they do in blood. A careful
-annotation would use both, for example by clustering on RNA and protein
-together.
+T cells carry CD4 and not CD8a. Monocytes and dendritic cells carry some
+CD4 too, as they do in blood. A careful annotation would use both, for
+example by clustering on RNA and protein together.
 
 # Re-analysing the T cells
 
@@ -617,7 +624,8 @@ tcells <- getSubsetExperiment(es, subsetName = "tcells")
 assayNames(tcells)
 
 # their ADT, with the counts, decontPro and clr of clean
-assayNames(altExp(tcells, "ADT"))
+tcellAdtSeen <- altExp(tcells, "ADT")
+assayNames(tcellAdtSeen)
 ```
 
 ```{r tcell-variable}
@@ -721,7 +729,7 @@ dimnames(tcellDecontaminatedAdt) <- dimnames(tcellAdtCounts)
 # CLR of the new values
 tcellLogAdt <- log1p(tcellDecontaminatedAdt)
 tcellCellMeans <- colMeans(tcellLogAdt)
-tcellClrAdt <- sweep(tcellLogAdt, 2, tcellCellMeans)
+tcellClrAdt <- sweep(tcellLogAdt, MARGIN = 2, tcellCellMeans)
 
 # both replace the ones the T cells see from clean
 assay(tcellAdt, "decontPro") <- tcellDecontaminatedAdt
@@ -752,9 +760,11 @@ altExp(es, "ADT", subsetName = "tcells", unlink = tcellUnlink) <- tcellAdt
 
 # The whole analysis in one object
 
-`subsetSummary()` lists every subset, what it was made from, and what it
-stores; `AltExperiments` lists the altExps each subset sees, whether it
-stores any of their assays or not.
+`subsetSummary()` lists every subset, what it was made from, the assays
+and reduced dimensions it stores, and the altExps it sees.
+`AltExperiments` doesn't say whether a subset stores any assays of an
+altExp: `clean` and `tcells` store their own `decontPro` and `clr`, the
+others none.
 
 ```{r summary}
 subsetSummary(es)
@@ -784,8 +794,10 @@ format(object.size(unnamedCounts), units = "MB")
 
 The counts themselves are small: a barcode with no counts takes 4 bytes.
 Most of the object's size is the 6.8 million barcode names, in the
-column names and the colData. `object.size()` counts each name again in
-every vector that holds it, so it overstates the memory the object uses.
+column names of the counts and of `ADT` and in the colData, followed by
+the droplet QC columns that `runDropletQC()` added for every barcode.
+`object.size()` counts each name again in every vector that holds it, so
+it overstates the memory the object uses.
 
 Kept as separate objects instead, the three sets of cell calls, the clean
 cells and the T cells would each carry their own copy of the RNA and
@@ -799,8 +811,9 @@ Metadata Standards) describes the matrices and annotations a single-cell
 analysis produces. The names used here follow its suggested values where
 it has them (`filtered`, `clean`, `variable`, `counts`, `decontaminated`,
 `lognormalized`, `scaled`, `reduction`, `embedding`); `emptydrops`,
-`barcoderanks` and `tcells` are our own names for subsets, and
-`decontPro` and `clr` are named after the methods.
+`barcoderanks` and `tcells` are our own names for subsets, `ADT` is the
+usual name for antibody counts, and `decontPro` and `clr` are named after
+the methods.
 
 | In this article | ExperimentSubset | MAMS |
 |---|---|---|

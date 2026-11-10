@@ -87,14 +87,15 @@ Sections, with what changes:
    ADT counts) as the ambient profile. (Changed during implementation
    from 20,000 sampled droplets: decontPro uses them only through each
    antibody's total, takes sparse counts and sets its own seed, so no
-   sample, `set.seed()` or dense copy is needed.) CLR as
-   a short visible function. Both stored as assays of `clean`'s ADT with
+   sample, `set.seed()` or dense copy is needed.) CLR written out step
+   by step, without a helper function. Both stored as assays of
+   `clean`'s ADT with
    `altExp(es, "ADT", subsetName = "clean") <- adt`; `counts` stays
    linked. The object size before and after shows growth of about one
    matrix.
 6. **New: checking the cell labels with protein.** A plot of CD3, CD4 and
    CD8a CLR values by SingleR label (with `fig.alt`), and the median CD3
-   CLR of T cells against other cells.
+   CLR of each label.
 7. **Re-analysing the T cells.** As now. The T cells'
    SingleCellExperiment carries ADT with `counts`, `decontPro` and
    `clr`, all linked.
@@ -117,7 +118,8 @@ Sections, with what changes:
 
 ## Other files
 
-- `DESCRIPTION`: `Config/Needs/website` replaces celda with decontX;
+- `DESCRIPTION`: `Config/Needs/website` replaces celda with decontX, and
+  lists scrapper and scater, which the article already used;
   `Version: 1.23.49`. Imports and Suggests unchanged.
 - `.github/workflows/pkgdown.yaml`: the devel job's cache key
   `article-data-devel-v1` becomes `article-data-devel-v2`, since a cache
