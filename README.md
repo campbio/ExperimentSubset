@@ -1,10 +1,12 @@
 # ExperimentSubset
+<!-- badges: start -->
 [![Bioc release build](https://bioconductor.org/shields/build/release/bioc/ExperimentSubset.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/ExperimentSubset/)
 [![Bioc devel build](https://bioconductor.org/shields/build/devel/bioc/ExperimentSubset.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/ExperimentSubset/)
 [![Years in Bioconductor](https://bioconductor.org/shields/years-in-bioc/ExperimentSubset.svg)](https://bioconductor.org/packages/ExperimentSubset)
 [![Bioconductor downloads](https://bioconductor.org/shields/downloads/release/ExperimentSubset.svg)](https://bioconductor.org/packages/stats/bioc/ExperimentSubset/)
 [![R-CMD-check](https://github.com/campbio/ExperimentSubset/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel)](https://github.com/campbio/ExperimentSubset/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/campbio/ExperimentSubset/actions/workflows/pkgdown.yaml/badge.svg?branch=devel)](https://github.com/campbio/ExperimentSubset/actions/workflows/pkgdown.yaml)
+<!-- badges: end -->
 
 ## Introduction
 `ExperimentSubset` package enables users to perform flexible subsetting of Single-Cell data that comes from the same experiment as well as the consequent storage of these subsets back into the same object. It offers the same interface to the users as other `Experiment` classes but with additional subset support.
