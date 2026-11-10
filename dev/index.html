@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.49</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.50</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,11 +59,13 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="experimentsubset">ExperimentSubset<a class="anchor" aria-label="anchor" href="#experimentsubset"></a>
 </h1></div>
-<p><a href="https://github.com/campbio/ExperimentSubset/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/campbio/ExperimentSubset/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel" alt="R-CMD-check"></a></p>
+<!-- badges: start -->
+
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p><code>ExperimentSubset</code> package enables users to perform flexible subsetting of Single-Cell data that comes from the same experiment as well as the consequent storage of these subsets back into the same object. It offers the same interface to the users as other <code>Experiment</code> classes but with additional subset support. More details about the package are available in the package vignette.</p>
+<p><code>ExperimentSubset</code> package enables users to perform flexible subsetting of Single-Cell data that comes from the same experiment as well as the consequent storage of these subsets back into the same object. It offers the same interface to the users as other <code>Experiment</code> classes but with additional subset support.</p>
+<p>Documentation, examples and articles are on the <a href="https://campbio.github.io/ExperimentSubset/">ExperimentSubset website</a>, including a <a href="https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html">workflow article</a> that keeps a whole RNA and protein (CITE-seq) analysis of 5,000 PBMCs, from raw droplets to T-cell subtypes, in one object.</p>
 </div>
 <div class="section level2">
 <h2 id="supported-experiment-classes">Supported Experiment Classes<a class="anchor" aria-label="anchor" href="#supported-experiment-classes"></a>
@@ -84,9 +86,9 @@
 <code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span></span>
 <span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"ExperimentSubset"</span><span class="op">)</span></span></code></pre></div>
-<p>To install the latest development version from GitHub:</p>
+<p>To install the development version from the <code>devel</code> branch on GitHub (it may need the Bioconductor devel versions of its dependencies):</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"campbio/ExperimentSubset"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"campbio/ExperimentSubset@devel"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
@@ -128,7 +130,17 @@
 </ul>
 </div>
 
-
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://bioconductor.org/checkResults/release/bioc-LATEST/ExperimentSubset/" class="external-link"><img src="https://bioconductor.org/shields/build/release/bioc/ExperimentSubset.svg" alt="Bioc release build"></a></li>
+<li><a href="https://bioconductor.org/checkResults/devel/bioc-LATEST/ExperimentSubset/" class="external-link"><img src="https://bioconductor.org/shields/build/devel/bioc/ExperimentSubset.svg" alt="Bioc devel build"></a></li>
+<li><a href="https://bioconductor.org/packages/ExperimentSubset" class="external-link"><img src="https://bioconductor.org/shields/years-in-bioc/ExperimentSubset.svg" alt="Years in Bioconductor"></a></li>
+<li><a href="https://bioconductor.org/packages/stats/bioc/ExperimentSubset/" class="external-link"><img src="https://bioconductor.org/shields/downloads/release/ExperimentSubset.svg" alt="Bioconductor downloads"></a></li>
+<li><a href="https://github.com/campbio/ExperimentSubset/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/campbio/ExperimentSubset/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/campbio/ExperimentSubset/actions/workflows/pkgdown.yaml" class="external-link"><img src="https://github.com/campbio/ExperimentSubset/actions/workflows/pkgdown.yaml/badge.svg?branch=devel" alt="pkgdown"></a></li>
+</ul>
+</div>
 
   </aside>
 </div>

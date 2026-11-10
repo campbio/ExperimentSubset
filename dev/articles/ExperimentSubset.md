@@ -14,10 +14,11 @@ T-cell subtypes, in one object.
 `    `[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``"BiocManager"``)``}`\
 `BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``"ExperimentSubset"``)`
 
-To install the latest version from GitHub, use the following code:
+To install the development version from the `devel` branch on GitHub,
+which may need the Bioconductor devel versions of its dependencies:
 
 \
-`BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``"campbio/ExperimentSubset"``)`
+`BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``"campbio/ExperimentSubset@devel"``)`
 
 Loading the package:
 
@@ -912,7 +913,7 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.49        TreeSummarizedExperiment_2.21.0
+    ##  [1] ExperimentSubset_1.23.50        TreeSummarizedExperiment_2.21.0
     ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
     ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
     ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 

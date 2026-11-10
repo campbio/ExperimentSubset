@@ -1,15 +1,19 @@
 # ExperimentSubset
 
-[![R-CMD-check](https://github.com/campbio/ExperimentSubset/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel)](https://github.com/campbio/ExperimentSubset/actions/workflows/R-CMD-check.yaml)
-
 ## Introduction
 
 `ExperimentSubset` package enables users to perform flexible subsetting
 of Single-Cell data that comes from the same experiment as well as the
 consequent storage of these subsets back into the same object. It offers
 the same interface to the users as other `Experiment` classes but with
-additional subset support. More details about the package are available
-in the package vignette.
+additional subset support.
+
+Documentation, examples and articles are on the [ExperimentSubset
+website](https://campbio.github.io/ExperimentSubset/), including a
+[workflow
+article](https://campbio.github.io/ExperimentSubset/dev/articles/pbmc-workflow.html)
+that keeps a whole RNA and protein (CITE-seq) analysis of 5,000 PBMCs,
+from raw droplets to T-cell subtypes, in one object.
 
 ## Supported Experiment Classes
 
@@ -29,10 +33,11 @@ To install the release version from
 `    `[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``"BiocManager"``)`\
 `BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``"ExperimentSubset"``)`
 
-To install the latest development version from GitHub:
+To install the development version from the `devel` branch on GitHub (it
+may need the Bioconductor devel versions of its dependencies):
 
 \
-`BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``"campbio/ExperimentSubset"``)`
+`BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``"campbio/ExperimentSubset@devel"``)`
 
 ## Citation
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## ExperimentSubset 1.23.50 (2026-11-10)
+
+- The README and the vignette now install the development version with
+  `BiocManager::install("campbio/ExperimentSubset@devel")`. Before,
+  `BiocManager::install("campbio/ExperimentSubset")` installed the
+  default branch, which holds the release version. The README also links
+  to the website and the workflow article, and shows Bioconductor build,
+  years, downloads and pkgdown badges next to R-CMD-check. No change to
+  the package
+
 ## ExperimentSubset 1.23.49 (2026-11-09)
 
 - The workflow article on the website now uses the 10x 5k PBMC CITE-seq
