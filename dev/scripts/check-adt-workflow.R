@@ -15,7 +15,9 @@
 #
 # Needs DropletTestFiles, DropletUtils, scuttle, scDblFinder, celda,
 # decontX, scrapper, SingleR and celldex. On 2026-11-05 (1.23.37) all 33
-# checks passed. To be turned into a vignette or article (#93).
+# checks passed. The workflow article (vignettes/articles/pbmc-workflow.Rmd)
+# now shows these steps (#93), except the last section's carry-along
+# checks, which wait for subsets made from an altExp (#92).
 
 args <- commandArgs(trailingOnly = TRUE)
 repo <- if (length(args) > 0) args[1] else "."
