@@ -1,9 +1,10 @@
 ---
-title: "A single-cell workflow with every subset in one object"
+title: "RNA and protein in one object: a single-cell workflow with subsets"
 description: >
-  From raw droplets to T-cell subtypes in 4,000 PBMCs, keeping three sets
-  of cell calls, high-quality cells, variable genes and T cells as subsets
-  of one ExperimentSubset object.
+  From raw droplets to T-cell subtypes in 5,000 PBMCs measured with RNA
+  and 32 antibodies (CITE-seq), keeping three sets of cell calls,
+  high-quality cells, variable genes, T cells and the protein results as
+  subsets of one ExperimentSubset object.
 ---
 
 ```{r setup, include = FALSE}
@@ -15,21 +16,25 @@ A single-cell analysis makes many versions of the same data: all droplets,
 the droplets that hold cells, the cells that pass quality control, the
 genes that vary most, a cell type re-analysed on its own. Usually each
 becomes a separate object, and each copy has to be kept in step with the
-others.
+others. With CITE-seq, which measures proteins with antibodies next to the
+RNA, each version also has a protein side.
 
-This article runs a complete analysis of 4,000 peripheral blood
-mononuclear cells (PBMCs) from 10x Genomics and keeps every one of those
-versions as a **subset** of one `ExperimentSubset` object. A subset stores
-which rows and columns of its parent it uses, plus anything computed for
-it. It sees its parent's assays without copying them.
+This article runs a complete analysis of 5,000 peripheral blood
+mononuclear cells (PBMCs) from 10x Genomics, measured with RNA and 32
+antibodies, and keeps every one of those versions as a **subset** of one
+`ExperimentSubset` object. A subset stores which rows and columns of its
+parent it uses, plus anything computed for it. It sees its parent's
+assays without copying them. The antibody counts live in an alternative
+experiment of the main object, `altExp("ADT")`, and every subset sees
+them too, cut to its own cells.
 
 The purpose of this article is to show how a whole analysis fits in one
 object, not to give a complete or definitive annotation of PBMCs. The
-quality-control thresholds and the cell-type labels are simple, common
-choices; a careful annotation would need more work, such as checking
-marker genes for each cluster.
+quality-control thresholds, the cell-type labels and the protein checks
+are simple, common choices; a careful annotation would need more work,
+such as checking marker genes and proteins for each cluster.
 
-The analysis takes about 15 minutes and downloads about 200 MB the first
+The analysis takes about 25 minutes and downloads about 125 MB the first
 time it runs.
 
 We store results in two ways, and each step says which it uses:
@@ -40,8 +45,8 @@ We store results in two ways, and each step says which it uses:
   assays, colData, rowData, reducedDims and metadata replace the
   subset's own.
 - **Direct style.** We compute a result ourselves and store it in the
-  subset with `setSubsetAssay()`, `colData()`, `rowData()` or
-  `reducedDim()` with `subsetName =`.
+  subset with `setSubsetAssay()`, `colData()`, `rowData()`,
+  `reducedDim()` or `altExp()` with `subsetName =`.
 
 The names of the subsets, assays and reduced dimensions follow the
 [MAMS](https://github.com/single-cell-mams/mams) conventions; the last
@@ -49,20 +54,24 @@ section shows how they map.
 
 # The data
 
-We use the PBMC 4k data set, processed with Cell Ranger 2.1.0, from the
-DropletTestFiles package. It has two matrices: the *raw* matrix, with
-every droplet barcode, most of them empty, and the *filtered* matrix,
-with the droplets that Cell Ranger called as cells.
+We use the 5k PBMC data set with a panel of TotalSeq-B antibodies,
+processed with Cell Ranger 3.1.0, from the DropletTestFiles package. It
+has two matrices: the *raw* matrix, with every barcode of the 10x
+whitelist, most of them empty, and the *filtered* matrix, with the
+droplets that Cell Ranger called as cells. Each has a row for every gene
+and for every antibody.
 
 ```{r download}
 library(DropletTestFiles)
 
 # download both matrices (cached after the first time)
-rawFile <- getTestFile("tenx-2.1.0-pbmc4k/1.0.0/raw.tar.gz")
-filteredFile <- getTestFile("tenx-2.1.0-pbmc4k/1.0.0/filtered.tar.gz")
+rawFile <- getTestFile("tenx-3.1.0-5k_pbmc_protein_v3/1.0.0/raw.tar.gz")
+filteredFile <- getTestFile(
+  "tenx-3.1.0-5k_pbmc_protein_v3/1.0.0/filtered.tar.gz"
+)
 
 # unpack them into a temporary folder
-dataFolder <- file.path(tempdir(), "pbmc4k")
+dataFolder <- file.path(tempdir(), "pbmc5k")
 untar(rawFile, exdir = dataFolder)
 untar(filteredFile, exdir = dataFolder)
 ```
@@ -71,32 +80,65 @@ untar(filteredFile, exdir = dataFolder)
 library(DropletUtils)
 
 # read each matrix, naming the columns by barcode
-rawFolder <- file.path(dataFolder, "raw_gene_bc_matrices", "GRCh38")
-filteredFolder <- file.path(dataFolder, "filtered_gene_bc_matrices", "GRCh38")
+rawFolder <- file.path(dataFolder, "raw_feature_bc_matrix")
+filteredFolder <- file.path(dataFolder, "filtered_feature_bc_matrix")
 raw <- read10xCounts(rawFolder, col.names = TRUE)
 filtered <- read10xCounts(filteredFolder, col.names = TRUE)
 dim(raw)
 dim(filtered)
 ```
 
-The rows are named by Ensembl ID. Gene symbols are easier to read, so we
-use them instead, keeping the Ensembl ID where a symbol is repeated.
+We keep the raw matrix as it is, all `r format(ncol(raw), big.mark = ",")`
+barcodes. Most were never seen in sequencing and have no counts at all:
+they are entries of the whitelist, not empty droplets. The matrix is
+sparse, so such a barcode costs almost nothing to store, and keeping
+everything is what `ExperimentSubset` is for.
+
+The rows are named by Ensembl ID for genes and by antibody name for
+proteins. Gene symbols are easier to read, so we use them instead,
+keeping the ID where a symbol is repeated.
 
 ```{r symbols}
 library(scuttle)
 
 # use gene symbols as row names
-geneIds <- rowData(raw)$ID
-geneSymbols <- rowData(raw)$Symbol
-geneNames <- uniquifyFeatureNames(geneIds, geneSymbols)
-rownames(raw) <- geneNames
+featureIds <- rowData(raw)$ID
+featureSymbols <- rowData(raw)$Symbol
+featureNames <- uniquifyFeatureNames(featureIds, featureSymbols)
+rownames(raw) <- featureNames
 ```
+
+The `Type` column of the rowData says whether each row is a gene or an
+antibody. `splitAltExps()` keeps the genes in the main object and moves
+the antibodies to an alternative experiment, which we name `ADT`
+(antibody-derived tags). The antibody names end in `_TotalSeqB`, which we
+drop.
+
+```{r split}
+# the type of each row: gene or antibody
+featureTypes <- rowData(raw)$Type
+table(featureTypes)
+
+# genes in the main object, antibodies in the altExp "ADT"
+raw <- splitAltExps(raw, featureTypes, ref = "Gene Expression")
+altExpNames(raw) <- "ADT"
+
+# shorter antibody names
+adt <- altExp(raw, "ADT")
+rownames(adt) <- sub("_TotalSeqB$", "", rownames(adt))
+altExp(raw, "ADT") <- adt
+rownames(adt)
+```
+
+The last three antibodies are isotype controls, which bind nothing in
+particular; they measure the background.
 
 # One object for all droplets
 
 `ExperimentSubset()` wraps the raw `SingleCellExperiment`. Its main assay,
-`counts`, holds every droplet. The cells Cell Ranger found become the
-first subset, `filtered`, chosen by barcode.
+`counts`, holds every droplet, and its altExp `ADT` the antibody counts of
+every droplet. The cells Cell Ranger found become the first subset,
+`filtered`, chosen by barcode.
 
 ```{r object}
 library(ExperimentSubset)
@@ -112,7 +154,15 @@ es
 
 `assay(es, "filtered")` returns the counts of the filtered cells. They are
 not copied: the subset stores the column positions and reads the main
-object's counts when asked.
+object's counts when asked. The same goes for the antibodies: the subset
+sees the main object's `ADT`, cut to its cells.
+
+```{r filtered-adt}
+# the antibody counts of the filtered cells, read from the main object
+altExpNames(es, subsetName = "filtered")
+filteredAdt <- altExp(es, "ADT", subsetName = "filtered")
+filteredAdt
+```
 
 # Finding cells among the droplets
 
@@ -121,9 +171,9 @@ can run on it directly. singleCellTK's `runDropletQC()` runs two other
 methods from DropletUtils on every droplet: `emptyDrops`, which tests each
 droplet against the ambient RNA profile, and `barcodeRanks`, which finds
 the knee in the curve of total counts. We leave out its third method,
-per-droplet QC metrics, which is slow on 737,280 droplets; we compute QC
-metrics for the cells below. emptyDrops uses random sampling, so we set a
-seed first.
+per-droplet QC metrics, which is slow on 6.8 million barcodes; we compute
+QC metrics for the cells below. emptyDrops uses random sampling, so we set
+a seed first.
 
 ```{r droplet-qc}
 library(singleCellTK)
@@ -147,6 +197,7 @@ kneeCell <- colData(es)$dropletUtils_BarcodeRank_Knee == 1
 # droplets that Cell Ranger called as cells
 cellRangerCell <- colnames(es) %in% cellBarcodes
 table(emptyDrops = emptyDropsCell, cellRanger = cellRangerCell)
+table(knee = kneeCell, cellRanger = cellRangerCell)
 ```
 
 We keep each set of calls as a subset next to Cell Ranger's `filtered`. A
@@ -172,14 +223,16 @@ subsetDim(es, subsetName = "emptydrops")
 subsetDim(es, subsetName = "barcoderanks")
 ```
 
-The three mostly agree. We continue with Cell Ranger's calls, the
-`filtered` subset; the others stay in the object for comparison.
+emptyDrops and Cell Ranger mostly agree; the knee is stricter and keeps
+fewer cells. We continue with Cell Ranger's calls, the `filtered` subset;
+the others stay in the object for comparison.
 
 # Quality control of the cells
 
 *Experiment style.* `getSubsetExperiment()` returns the `filtered` subset
 as an ordinary `SingleCellExperiment`, with the main object's colData
-columns (the droplet QC above) included.
+columns (the droplet QC above) and its `ADT`, both cut to the subset's
+cells, included.
 
 ```{r get-filtered}
 # the filtered cells as a SingleCellExperiment
@@ -201,8 +254,8 @@ filteredCells <- runCellQC(filteredCells,
 ```
 
 `setSubsetExperiment()` stores what `runCellQC()` added in the `filtered`
-subset. The counts are unchanged, so they are not copied, and neither are
-the main object's colData columns.
+subset. The counts and the antibody counts are unchanged, so they are not
+copied, and neither are the main object's colData columns.
 
 ```{r set-filtered}
 # store the QC results in the subset
@@ -212,13 +265,13 @@ colnames(colData(es, subsetName = "filtered"))
 
 # Removing ambient RNA
 
-*Direct style.* celda's `decontX()` estimates how much of each cell's
+*Direct style.* decontX's `decontX()` estimates how much of each cell's
 counts comes from ambient RNA, the free-floating RNA in every droplet, and
 removes it. It estimates the ambient profile from the cells themselves.
 Like `runCellQC()`, `decontX()` sets its own seed by default.
 
 ```{r decontx}
-library(celda)
+library(decontX)
 
 # counts of the cells
 cellCounts <- assay(es, "filtered")
@@ -244,17 +297,20 @@ colData(es, subsetName = "filtered")$contamination <-
 
 # Keeping high-quality cells
 
-We keep cells that have at least 300 detected genes, at most 10% of
-counts from mitochondrial genes, at most 30% contamination, and that
-scDblFinder calls singlets.
+These cells have more mitochondrial counts than many PBMC data sets: half
+of them have more than 9%. Most cells have up to about 15%, and a smaller
+group, probably damaged cells, has far more. We keep cells that have at
+least 300 detected genes, at most 15% of counts from mitochondrial genes,
+at most 30% contamination, and that scDblFinder calls singlets.
 
 ```{r filter}
 # the QC columns of the filtered cells
 filteredData <- colData(es, subsetName = "filtered")
+summary(filteredData$mito_percent)
 
 # each QC rule
 enoughGenes <- filteredData$detected >= 300
-lowMito <- filteredData$mito_percent <= 10
+lowMito <- filteredData$mito_percent <= 15
 lowContamination <- filteredData$contamination <= 0.3
 singlet <- filteredData$scDblFinder_doublet_call == "Singlet"
 
@@ -265,7 +321,8 @@ table(keepCells)
 
 The new subset, `clean`, is made from the decontaminated counts: its
 `parentAssay` is `"filtered/decontaminated"`, the assay `decontaminated`
-stored in the subset `filtered`.
+stored in the subset `filtered`. It sees the antibody counts of its cells
+as well, still from the main object.
 
 ```{r clean}
 # the high-quality cells, from the decontaminated counts
@@ -403,6 +460,127 @@ cleanCells <- getSubsetExperiment(es, subsetName = "clean")
 plotReducedDim(cleanCells, dimred = "embedding.umap", colour_by = "label")
 ```
 
+# Removing ambient protein
+
+*Direct style.* Antibody counts have a background too: antibodies that
+float free in the droplet or bind where they shouldn't. decontX's
+`decontPro()` estimates the background of each antibody in each cell and
+removes it. It needs a cell type for each cell, for which we use the RNA
+clusters, numbered from 1 as `decontPro()` expects.
+
+```{r clean-adt}
+# the antibody counts of the clean cells, still read from the main object
+cleanAdt <- altExp(es, "ADT", subsetName = "clean")
+cleanAdtCounts <- counts(cleanAdt)
+
+# the RNA clusters as cell types, numbered from 1
+clusterFactor <- factor(clusters$membership)
+cellTypes <- as.integer(clusterFactor)
+```
+
+`decontPro()` can also learn the background from droplets that hold no
+cell. The main object has every droplet, so they are at hand: we take
+20,000 of the droplets that Cell Ranger didn't call as cells but that
+have some antibody counts.
+
+```{r ambient-adt}
+# the antibody counts of every droplet, and each droplet's total
+allAdtCounts <- counts(altExp(es, "ADT"))
+adtTotals <- colSums(allAdtCounts)
+
+# droplets that aren't cells but have antibody counts
+isAmbient <- !cellRangerCell & adtTotals > 0
+ambientPositions <- which(isAmbient)
+length(ambientPositions)
+
+# 20,000 of them, chosen at random
+set.seed(100)
+ambientSample <- sample(ambientPositions, 20000)
+ambientCounts <- as.matrix(allAdtCounts[, ambientSample])
+```
+
+`decontPro()` fits a model to the counts of the clean cells, which takes
+a few minutes.
+
+```{r decontpro}
+# estimate and remove the background of each antibody in each cell
+set.seed(100)
+cleanAdtDense <- as.matrix(cleanAdtCounts)
+proteinDecontamination <- decontPro(cleanAdtDense, cellTypes,
+                                    ambient_counts = ambientCounts)
+
+# the decontaminated counts, with the antibody and cell names
+decontaminatedAdt <- proteinDecontamination$decontaminated_counts
+dimnames(decontaminatedAdt) <- dimnames(cleanAdtCounts)
+```
+
+The decontaminated antibody counts become an assay, `decontPro`, of the
+`clean` subset's `ADT`. We add it to the object `altExp()` returned and
+store that back with `altExp(es, "ADT", subsetName = "clean") <-`. The
+subset stores only what is new: `counts` is unchanged, so it stays linked
+to the main object's, and the object grows by about the size of the new
+matrix.
+
+```{r store-decontpro}
+# size of the object before
+format(object.size(es), units = "MB")
+
+# add the decontaminated counts to the clean cells' ADT and store it
+assay(cleanAdt, "decontPro") <- decontaminatedAdt
+altExp(es, "ADT", subsetName = "clean") <- cleanAdt
+
+# size of the object after, and of the new matrix
+format(object.size(es), units = "MB")
+format(object.size(decontaminatedAdt), units = "MB")
+```
+
+**Normalisation.** Antibody counts are commonly normalised with the
+centred log ratio (CLR): log-transform each count, then subtract the mean
+of the cell's log counts, which takes out differences in each cell's
+total. We store it as a second assay, `clr`, of the same `ADT`.
+
+```{r clr}
+# log counts, minus each cell's mean log count
+logAdt <- log1p(decontaminatedAdt)
+cellMeans <- colMeans(logAdt)
+clrAdt <- sweep(logAdt, 2, cellMeans)
+
+# store it next to decontPro
+assay(cleanAdt, "clr") <- clrAdt
+altExp(es, "ADT", subsetName = "clean") <- cleanAdt
+assayNames(altExp(es, "ADT", subsetName = "clean"))
+```
+
+# Checking the cell labels with protein
+
+The cell types came from RNA alone. The antibodies give an independent
+check: T cells should carry CD3, CD4+ T cells CD4 and CD8+ T cells CD8a.
+`getSubsetExperiment()` returns the clean cells with their `ADT`,
+including the two new assays.
+
+```{r plot-protein, fig.alt = "CLR values of CD3, CD4 and CD8a protein in each cell type of the clean cells", fig.height = 6}
+# the clean cells, with their ADT
+cleanCells <- getSubsetExperiment(es, subsetName = "clean")
+cleanProtein <- altExp(cleanCells, "ADT")
+
+# each cell's RNA label, next to its protein values
+cleanProtein$label <- cleanCells$label
+
+# CLR values by cell type, with the labels turned to fit
+proteinPlot <- plotExpression(cleanProtein,
+                              features = c("CD3", "CD4", "CD8a"),
+                              x = "label", assay.type = "clr",
+                              colour_by = "label")
+slantedLabels <- theme(axis.text.x = element_text(angle = 45, hjust = 1))
+proteinPlot + slantedLabels
+```
+
+```{r cd3-by-label}
+# median CD3 protein in each cell type
+cd3 <- assay(cleanProtein, "clr")["CD3", ]
+tapply(cd3, cleanProtein$label, median)
+```
+
 # Re-analysing the T cells
 
 *Experiment style.* T cells are the largest group. We make them a subset
@@ -434,6 +612,9 @@ are included, so we compute them again on the T cells.
 # the T cells as a SingleCellExperiment, with the linked assays
 tcells <- getSubsetExperiment(es, subsetName = "tcells")
 assayNames(tcells)
+
+# their ADT, with the counts, decontPro and clr of clean
+assayNames(altExp(tcells, "ADT"))
 ```
 
 ```{r tcell-variable}
@@ -482,8 +663,8 @@ table(tcells$subtype)
 ```
 
 `setSubsetExperiment()` stores the reduced dimensions and colData columns
-we added in the `tcells` subset. The assays are unchanged, so they stay
-linked and nothing is copied.
+we added in the `tcells` subset. The assays and the `ADT` are unchanged,
+so they stay linked and nothing is copied.
 
 ```{r set-tcells}
 # store the T-cell results
@@ -505,16 +686,65 @@ es <- setSubsetAssay(es, subsetName = "tcells.variable",
 
 `clean.variable` and `tcells.variable` each store their own `scaled`: an
 assay stored in one subset doesn't clash with one of the same name in
-another. A subset can't store an assay under a name it already sees
-linked from its parent, though; replacing, say, the T cells'
-`lognormalized` with values computed on the T cells alone would need
-`unlink = TRUE`, after which `tcells` and the subsets made from it use
-their own version.
+another.
 
 ```{r plot-tcells, fig.alt = "UMAP of the T cells, coloured by T-cell subtype"}
 # the T cells, coloured by subtype
 tcellCells <- getSubsetExperiment(es, subsetName = "tcells")
 plotReducedDim(tcellCells, dimred = "embedding.umap", colour_by = "subtype")
+```
+
+# Removing ambient protein in the T cells alone
+
+`decontPro()` fits each antibody's background and its true signal to the
+cell types it is given. The T cells now have clusters of their own, finer
+than the clean cells' clusters, so we run it again on the T cells alone,
+with those clusters and the same ambient droplets.
+
+```{r tcell-decontpro}
+# the T cells' antibody counts, and their clusters numbered from 1
+tcellAdt <- altExp(es, "ADT", subsetName = "tcells")
+tcellAdtCounts <- counts(tcellAdt)
+tcellClusterFactor <- factor(tcells$cluster)
+tcellTypes <- as.integer(tcellClusterFactor)
+
+# estimate and remove the background, on the T cells only
+set.seed(100)
+tcellAdtDense <- as.matrix(tcellAdtCounts)
+tcellProteinDecontamination <- decontPro(tcellAdtDense, tcellTypes,
+                                         ambient_counts = ambientCounts)
+tcellDecontaminatedAdt <-
+  tcellProteinDecontamination$decontaminated_counts
+dimnames(tcellDecontaminatedAdt) <- dimnames(tcellAdtCounts)
+
+# CLR of the new values
+tcellLogAdt <- log1p(tcellDecontaminatedAdt)
+tcellCellMeans <- colMeans(tcellLogAdt)
+tcellClrAdt <- sweep(tcellLogAdt, 2, tcellCellMeans)
+
+# both replace the ones the T cells see from clean
+assay(tcellAdt, "decontPro") <- tcellDecontaminatedAdt
+assay(tcellAdt, "clr") <- tcellClrAdt
+```
+
+The T cells see `decontPro` and `clr` linked from `clean`. Storing values
+of their own under the same names would break that link without saying
+so, so it is an error, which names the linked assays:
+
+```{r tcell-decontpro-linked, error = TRUE}
+# store the T cells' own decontPro and clr
+altExp(es, "ADT", subsetName = "tcells") <- tcellAdt
+```
+
+`unlink` names the altExp assays to unlink, as `"ADT/decontPro"`. The
+T cells then store their own `decontPro` and `clr`, and the subsets made
+from them will use these; `clean`'s are unchanged, and `counts` stays
+linked to the main object.
+
+```{r tcell-decontpro-unlink, message = TRUE}
+# store them, unlinked from clean's
+tcellUnlink <- c("ADT/decontPro", "ADT/clr")
+altExp(es, "ADT", subsetName = "tcells", unlink = tcellUnlink) <- tcellAdt
 ```
 
 # The whole analysis in one object
@@ -528,38 +758,49 @@ subsetSummary(es)
 
 All of this lives in one object. The subsets store row and column
 positions, and only what was computed for them: `decontaminated` in
-`filtered`, `lognormalized` in `clean`, `scaled` in the two variable-gene
-subsets, and the colData, rowData and reduced dimensions added along the
-way. A linked assay, such as the T cells' `lognormalized`, is only built
-when it is read.
+`filtered`; `lognormalized`, and `decontPro` and `clr` of `ADT`, in
+`clean`; `scaled` in the two variable-gene subsets; the T cells' own
+`decontPro` and `clr`; and the colData, rowData and reduced dimensions
+added along the way. A linked assay, such as the T cells' `lognormalized`
+or their antibody `counts`, is only built when it is read.
 
 ```{r size}
 # the whole object
 format(object.size(es), units = "MB")
 
-# the counts of all 737,280 droplets, stored once
+# the RNA and antibody counts of all barcodes, stored once
 allCounts <- assay(es, "counts")
 format(object.size(allCounts), units = "MB")
+format(object.size(allAdtCounts), units = "MB")
 ```
 
+Most of the object's size is not counts but the 6.8 million barcode
+names, in the column names and the colData. `object.size()` counts each
+name again in every vector that holds it, so it overstates the memory the
+object uses.
+
 Kept as separate objects instead, the three sets of cell calls, the clean
-cells and the T cells would each carry their own copy of the counts, and
-the T cells another copy of the log-normalised values.
+cells and the T cells would each carry their own copy of the RNA and
+antibody counts, and the T cells another copy of the log-normalised
+values.
 
 # How this maps to MAMS
 
 [MAMS](https://github.com/single-cell-mams/mams) (Matrix and Analysis
 Metadata Standards) describes the matrices and annotations a single-cell
 analysis produces. The names used here follow its suggested values where
-it has them (`filtered`, `clean`, `variable`, `counts`, `lognormalized`,
-`scaled`, `reduction`, `embedding`); `emptydrops`, `barcoderanks` and
-`tcells` are our own names for subsets.
+it has them (`filtered`, `clean`, `variable`, `counts`, `decontaminated`,
+`lognormalized`, `scaled`, `reduction`, `embedding`); `emptydrops`,
+`barcoderanks` and `tcells` are our own names for subsets, and
+`decontPro` and `clr` are named after the methods.
 
 | In this article | ExperimentSubset | MAMS |
 |---|---|---|
 | `filtered`, `emptydrops`, `barcoderanks`, `clean`, `tcells` | subsets of columns | `obs_subset` |
 | `clean.variable`, `tcells.variable` | subsets of rows | `feature_subset` (`variable`) |
 | `counts`, `decontaminated`, `lognormalized`, `scaled` | assays | `processing` |
+| `ADT` | an altExp, seen by every subset | a matrix with `analyte` `protein` |
+| `decontPro`, `clr` of `ADT` | assays of the altExp | `processing` (`decontaminated`, `lognormalized`) |
 | `reduction.pca`, `embedding.umap` | reducedDims | `processing` (`reduction`, `embedding`) |
 | `parentAssay`, e.g. `"filtered/decontaminated"` | the assay or subset a subset was made from | `parent_id` |
 | a subset made from its parent's rows or columns | `createSubset()` | `parent_relationship` (`subset`) |
