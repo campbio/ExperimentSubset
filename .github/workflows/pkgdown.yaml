@@ -98,7 +98,7 @@ jobs:
           path: |
             ~/.cache/R/ExperimentHub
             ~/.cache/R/gypsum
-          key: article-data-devel-v1
+          key: article-data-devel-v2
 
       - name: Build the devel site into site/dev
         env:
