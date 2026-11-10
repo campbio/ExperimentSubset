@@ -83,8 +83,11 @@ Sections, with what changes:
 4. **Clustering, annotation (SingleR), UMAP.** As now.
 5. **New: removing ambient protein and normalising it** (direct style).
    decontPro on `clean`'s ADT counts, with the RNA clusters as cell
-   types and the ADT of 20,000 droplets that aren't cells (and have any
-   ADT counts) as the ambient profile, sampled after `set.seed()`. CLR as
+   types and the ADT of all droplets that aren't cells (and have any
+   ADT counts) as the ambient profile. (Changed during implementation
+   from 20,000 sampled droplets: decontPro uses them only through each
+   antibody's total, takes sparse counts and sets its own seed, so no
+   sample, `set.seed()` or dense copy is needed.) CLR as
    a short visible function. Both stored as assays of `clean`'s ADT with
    `altExp(es, "ADT", subsetName = "clean") <- adt`; `counts` stays
    linked. The object size before and after shows growth of about one

@@ -34,7 +34,7 @@ quality-control thresholds, the cell-type labels and the protein checks
 are simple, common choices; a careful annotation would need more work,
 such as checking marker genes and proteins for each cluster.
 
-The analysis takes about 25 minutes and downloads about 125 MB the first
+The analysis takes about 20 minutes and downloads about 125 MB the first
 time it runs.
 
 We store results in two ways, and each step says which it uses:
@@ -298,7 +298,7 @@ colData(es, subsetName = "filtered")$contamination <-
 # Keeping high-quality cells
 
 These cells have more mitochondrial counts than many PBMC data sets: half
-of them have more than 9%. Most cells have up to about 15%, and a smaller
+of them have more than 9% (the median below). Most cells have up to about 15%, and a smaller
 group, probably damaged cells, has far more. We keep cells that have at
 least 300 detected genes, at most 15% of counts from mitochondrial genes,
 at most 30% contamination, and that scDblFinder calls singlets.
@@ -479,9 +479,9 @@ cellTypes <- as.integer(clusterFactor)
 ```
 
 `decontPro()` can also learn the background from droplets that hold no
-cell. The main object has every droplet, so they are at hand: we take
-20,000 of the droplets that Cell Ranger didn't call as cells but that
-have some antibody counts.
+cell: it uses each antibody's share of their counts. The main object has
+every droplet, so they are at hand: we use the droplets that Cell Ranger
+didn't call as cells but that have some antibody counts.
 
 ```{r ambient-adt}
 # the antibody counts of every droplet, and each droplet's total
@@ -490,23 +490,17 @@ adtTotals <- colSums(allAdtCounts)
 
 # droplets that aren't cells but have antibody counts
 isAmbient <- !cellRangerCell & adtTotals > 0
-ambientPositions <- which(isAmbient)
-length(ambientPositions)
-
-# 20,000 of them, chosen at random
-set.seed(100)
-ambientSample <- sample(ambientPositions, 20000)
-ambientCounts <- as.matrix(allAdtCounts[, ambientSample])
+sum(isAmbient)
+ambientCounts <- allAdtCounts[, isAmbient]
 ```
 
 `decontPro()` fits a model to the counts of the clean cells, which takes
-a few minutes.
+a few minutes and prints its progress, hidden here. It sets its own seed,
+so the results are the same on every run.
 
-```{r decontpro}
+```{r decontpro, results = "hide"}
 # estimate and remove the background of each antibody in each cell
-set.seed(100)
-cleanAdtDense <- as.matrix(cleanAdtCounts)
-proteinDecontamination <- decontPro(cleanAdtDense, cellTypes,
+proteinDecontamination <- decontPro(cleanAdtCounts, cellTypes,
                                     ambient_counts = ambientCounts)
 
 # the decontaminated counts, with the antibody and cell names
@@ -580,6 +574,15 @@ proteinPlot + slantedLabels
 cd3 <- assay(cleanProtein, "clr")["CD3", ]
 tapply(cd3, cleanProtein$label, median)
 ```
+
+CD3 is high in all three T-cell labels and near zero in B cells and
+monocytes, and CD4+ T cells carry CD4 but not CD8a. The cells labelled
+just T cells split into those that carry CD4 and those that carry CD8a.
+The protein also shows what RNA missed: part of the cells labelled CD8+
+T cells carry CD4 and not CD8a. Monocytes and
+dendritic cells carry some CD4 too, as they do in blood. A careful
+annotation would use both, for example by clustering on RNA and protein
+together.
 
 # Re-analysing the T cells
 
@@ -701,7 +704,7 @@ cell types it is given. The T cells now have clusters of their own, finer
 than the clean cells' clusters, so we run it again on the T cells alone,
 with those clusters and the same ambient droplets.
 
-```{r tcell-decontpro}
+```{r tcell-decontpro, results = "hide"}
 # the T cells' antibody counts, and their clusters numbered from 1
 tcellAdt <- altExp(es, "ADT", subsetName = "tcells")
 tcellAdtCounts <- counts(tcellAdt)
@@ -709,9 +712,7 @@ tcellClusterFactor <- factor(tcells$cluster)
 tcellTypes <- as.integer(tcellClusterFactor)
 
 # estimate and remove the background, on the T cells only
-set.seed(100)
-tcellAdtDense <- as.matrix(tcellAdtCounts)
-tcellProteinDecontamination <- decontPro(tcellAdtDense, tcellTypes,
+tcellProteinDecontamination <- decontPro(tcellAdtCounts, tcellTypes,
                                          ambient_counts = ambientCounts)
 tcellDecontaminatedAdt <-
   tcellProteinDecontamination$decontaminated_counts
@@ -737,11 +738,13 @@ altExp(es, "ADT", subsetName = "tcells") <- tcellAdt
 ```
 
 `unlink` names the altExp assays to unlink, as `"ADT/decontPro"`. The
-T cells then store their own `decontPro` and `clr`, and the subsets made
-from them will use these; `clean`'s are unchanged, and `counts` stays
+T cells then store their own `decontPro` and `clr`, with a message for
+each, such as "Subset 'tcells' now stores its own 'ADT/decontPro',
+unlinked from altExp 'ADT' of subset 'clean'." Subsets made from the
+T cells will use these; `clean`'s are unchanged, and `counts` stays
 linked to the main object.
 
-```{r tcell-decontpro-unlink, message = TRUE}
+```{r tcell-decontpro-unlink}
 # store them, unlinked from clean's
 tcellUnlink <- c("ADT/decontPro", "ADT/clr")
 altExp(es, "ADT", subsetName = "tcells", unlink = tcellUnlink) <- tcellAdt
@@ -750,7 +753,8 @@ altExp(es, "ADT", subsetName = "tcells", unlink = tcellUnlink) <- tcellAdt
 # The whole analysis in one object
 
 `subsetSummary()` lists every subset, what it was made from, and what it
-stores.
+stores; `AltExperiments` lists the altExps each subset sees, whether it
+stores any of their assays or not.
 
 ```{r summary}
 subsetSummary(es)
@@ -768,16 +772,20 @@ or their antibody `counts`, is only built when it is read.
 # the whole object
 format(object.size(es), units = "MB")
 
-# the RNA and antibody counts of all barcodes, stored once
+# the RNA counts of all barcodes, stored once
 allCounts <- assay(es, "counts")
 format(object.size(allCounts), units = "MB")
-format(object.size(allAdtCounts), units = "MB")
+
+# the same counts without the barcode names
+unnamedCounts <- allCounts
+dimnames(unnamedCounts) <- NULL
+format(object.size(unnamedCounts), units = "MB")
 ```
 
-Most of the object's size is not counts but the 6.8 million barcode
-names, in the column names and the colData. `object.size()` counts each
-name again in every vector that holds it, so it overstates the memory the
-object uses.
+The counts themselves are small: a barcode with no counts takes 4 bytes.
+Most of the object's size is the 6.8 million barcode names, in the
+column names and the colData. `object.size()` counts each name again in
+every vector that holds it, so it overstates the memory the object uses.
 
 Kept as separate objects instead, the three sets of cell calls, the clean
 cells and the T cells would each carry their own copy of the RNA and
