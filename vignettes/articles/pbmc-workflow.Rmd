@@ -481,8 +481,10 @@ cellTypes <- as.integer(clusterFactor)
 
 `decontPro()` can also learn the background from droplets that hold no
 cell: it uses each antibody's share of their counts. The main object has
-every droplet, so they are at hand: we use the droplets that Cell Ranger
-didn't call as cells but that have some antibody counts.
+every droplet, so they are at hand: we use the droplets that neither
+Cell Ranger nor emptyDrops called as cells but that have some antibody
+counts. Droplets that only one of them calls may hold a cell, whose
+antibodies aren't background.
 
 ```{r ambient-adt}
 # the antibody counts of every droplet, and each droplet's total
@@ -491,7 +493,8 @@ allAdtCounts <- counts(allAdt)
 adtTotals <- colSums(allAdtCounts)
 
 # droplets that aren't cells but have antibody counts
-isAmbient <- !cellRangerCell & adtTotals > 0
+notCell <- !cellRangerCell & !emptyDropsCell
+isAmbient <- notCell & adtTotals > 0
 sum(isAmbient)
 ambientCounts <- allAdtCounts[, isAmbient]
 ```

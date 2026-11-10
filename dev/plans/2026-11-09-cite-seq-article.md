@@ -83,8 +83,9 @@ Sections, with what changes:
 4. **Clustering, annotation (SingleR), UMAP.** As now.
 5. **New: removing ambient protein and normalising it** (direct style).
    decontPro on `clean`'s ADT counts, with the RNA clusters as cell
-   types and the ADT of all droplets that aren't cells (and have any
-   ADT counts) as the ambient profile. (Changed during implementation
+   types and the ADT of all droplets that neither Cell Ranger nor
+   emptyDrops calls as cells (and have any ADT counts) as the ambient
+   profile. (Changed during implementation
    from 20,000 sampled droplets: decontPro uses them only through each
    antibody's total, takes sparse counts and sets its own seed, so no
    sample, `set.seed()` or dense copy is needed.) CLR written out step
@@ -119,7 +120,7 @@ Sections, with what changes:
 ## Other files
 
 - `DESCRIPTION`: `Config/Needs/website` replaces celda with decontX, and
-  lists scrapper and scater, which the article already used;
+  lists scrapper, scater and ggplot2, which the article uses;
   `Version: 1.23.49`. Imports and Suggests unchanged.
 - `.github/workflows/pkgdown.yaml`: the devel job's cache key
   `article-data-devel-v1` becomes `article-data-devel-v2`, since a cache
