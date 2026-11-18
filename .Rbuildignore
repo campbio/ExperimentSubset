@@ -3,7 +3,6 @@
 ^doc$
 ^Meta$
 ^codecov\.yml$
-^\.travis\.yml$
 ^\.github$
 ^dev$
 ^\.claude$
