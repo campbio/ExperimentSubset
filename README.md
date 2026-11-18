@@ -6,6 +6,7 @@
 [![Bioconductor downloads](https://bioconductor.org/shields/downloads/release/ExperimentSubset.svg)](https://bioconductor.org/packages/stats/bioc/ExperimentSubset/)
 [![R-CMD-check](https://github.com/campbio/ExperimentSubset/actions/workflows/R-CMD-check.yaml/badge.svg?branch=devel)](https://github.com/campbio/ExperimentSubset/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/campbio/ExperimentSubset/actions/workflows/pkgdown.yaml/badge.svg?branch=devel)](https://github.com/campbio/ExperimentSubset/actions/workflows/pkgdown.yaml)
+[![Codecov test coverage](https://codecov.io/gh/campbio/ExperimentSubset/branch/devel/graph/badge.svg)](https://app.codecov.io/gh/campbio/ExperimentSubset?branch=devel)
 <!-- badges: end -->
 
 ## Introduction
