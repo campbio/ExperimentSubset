@@ -795,6 +795,21 @@ test_that("Every Subset* class is an ExperimentSubset (#5)", {
   }
 })
 
+test_that("The package defines the same S4 methods (#36)", {
+  # one line per method, "<generic>,<signature>", as in the help aliases.
+  # A change to how methods are defined, such as looping over the classes,
+  # must not add, drop or retype any of them
+  ns <- asNamespace("ExperimentSubset")
+  methodNames <- character(0)
+  for (generic in as.character(getGenerics(where = ns))) {
+    signatures <- names(findMethods(generic, where = ns))
+    methodNames <- c(methodNames,
+                     paste0(generic, ",", gsub("#", ",", signatures)))
+  }
+  # radix sorts in the C locale, so the order is the same on every machine
+  expect_snapshot(writeLines(sort(methodNames, method = "radix")))
+})
+
 # Runs the methods every Subset*Experiment class shares on es, whose main
 # assay "counts" has row and column names and at least 5 rows and 6
 # columns. Returns es with a subset "s1" and a stored assay "doubled".
