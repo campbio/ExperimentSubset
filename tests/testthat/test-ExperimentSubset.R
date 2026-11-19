@@ -810,6 +810,71 @@ test_that("The package defines the same S4 methods (#36)", {
   expect_snapshot(writeLines(sort(methodNames, method = "radix")))
 })
 
+test_that("The method loops cover every Subset* class (#36)", {
+  esClasses <- ExperimentSubset:::.esClasses
+  esSCEClasses <- ExperimentSubset:::.esSCEClasses
+  # a new Subset* class must be added to .esClasses as well as the union
+  unionMembers <- Filter(function(cls) extends(cls, "ExperimentSubset"),
+                         getClasses(asNamespace("ExperimentSubset")))
+  unionMembers <- setdiff(unionMembers, "ExperimentSubset")
+  expect_setequal(esClasses, unionMembers)
+  expect_true(all(esSCEClasses %in% esClasses))
+  isSCE <- vapply(esClasses, extends, logical(1), "SingleCellExperiment")
+  expect_setequal(esSCEClasses, esClasses[isSCE])
+})
+
+test_that(".rdMethods() documents looped methods as roxygen would (#36)", {
+  rdMethods <- ExperimentSubset:::.rdMethods
+  tags <- rdMethods("subsetDim", "SubsetSummarizedExperiment")
+  expect_equal(tags, c(
+    "@aliases subsetDim,SubsetSummarizedExperiment-method",
+    "@usage \\S4method{subsetDim}{SubsetSummarizedExperiment}(x, subsetName)"
+  ))
+
+  # replacement methods, with the value class in the signature
+  tags <- rdMethods("colData<-", "SubsetSingleCellExperiment")
+  expect_match(tags[1],
+               "colData<-,SubsetSingleCellExperiment,DataFrame-method",
+               fixed = TRUE)
+  expect_match(
+    tags[2],
+    paste0("\\S4method{colData}{SubsetSingleCellExperiment,DataFrame}",
+           "(x, ...) <- value"),
+    fixed = TRUE
+  )
+
+  # defaults are written out, and only the classes with the method appear
+  tags <- rdMethods("reducedDim<-")
+  usage <- strsplit(sub("^@usage ", "", tags[2]), "\n\n")[[1]]
+  expect_length(usage, 9)
+  expect_true(all(grepl("withDimnames = TRUE", usage, fixed = TRUE)))
+  expect_false(any(grepl("SubsetSummarizedExperiment", usage, fixed = TRUE)))
+  expect_equal(
+    usage[1],
+    paste0("\\S4method{reducedDim}{SubsetSingleCellExperiment,character}",
+           "(x, type, withDimnames = TRUE, ...) <- value")
+  )
+
+  # arguments the generic lacks, which S4 wraps in .local()
+  tags <- rdMethods("combineCols", "SubsetSummarizedExperiment")
+  expect_equal(
+    tags[2],
+    paste0("@usage \\S4method{combineCols}{SubsetSummarizedExperiment}",
+           "(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)")
+  )
+
+  # several generics on one page, by class and then in the given order
+  tags <- rdMethods(c("metadata", "metadata<-"),
+                    c("SubsetSummarizedExperiment", "SubsetSpatialExperiment"))
+  expect_equal(
+    strsplit(sub("^@aliases ", "", tags[1]), " ")[[1]],
+    c("metadata,SubsetSummarizedExperiment-method",
+      "metadata<-,SubsetSummarizedExperiment-method",
+      "metadata,SubsetSpatialExperiment-method",
+      "metadata<-,SubsetSpatialExperiment-method")
+  )
+})
+
 # Runs the methods every Subset*Experiment class shares on es, whose main
 # assay "counts" has row and column names and at least 5 rows and 6
 # columns. Returns es with a subset "s1" and a stored assay "doubled".

@@ -142,3 +142,19 @@ setClassUnion(
     "SubsetSpatialExperiment"
   )
 )
+
+# The classes that R/SubsetMethods.R defines the shared methods for: all
+# five, and the three that extend SingleCellExperiment for the altExp and
+# reducedDim methods. A new Subset* class goes here as well as in the union
+.esClasses <- c(
+  "SubsetSummarizedExperiment",
+  "SubsetRangedSummarizedExperiment",
+  "SubsetSingleCellExperiment",
+  "SubsetTreeSummarizedExperiment",
+  "SubsetSpatialExperiment"
+)
+.esSCEClasses <- c(
+  "SubsetSingleCellExperiment",
+  "SubsetTreeSummarizedExperiment",
+  "SubsetSpatialExperiment"
+)
