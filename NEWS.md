@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.51 (2026-11-18)
+* A new GitHub Actions workflow, `test-coverage.yaml`, runs the tests under covr on every push and pull request to devel and uploads the coverage to Codecov with the `CODECOV_TOKEN` secret. Before, no workflow uploaded coverage: `codecov.yml` still held the Travis CI settings that ran `covr::codecov()`, and those settings are now gone, as is `.travis.yml` from `.Rbuildignore`. The README shows a Codecov badge for devel. No change to the package
+
 # ExperimentSubset 1.23.50 (2026-11-10)
 * The README and the vignette now install the development version with `BiocManager::install("campbio/ExperimentSubset@devel")`. Before, `BiocManager::install("campbio/ExperimentSubset")` installed the default branch, which holds the release version. The README also links to the website and the workflow article, and shows Bioconductor build, years, downloads and pkgdown badges next to R-CMD-check. No change to the package
 
