@@ -1,6 +1,6 @@
 # 0006. Define the Subset* methods once, in loops over the classes
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-19
 - **Deciders:** Joshua D. Campbell
 

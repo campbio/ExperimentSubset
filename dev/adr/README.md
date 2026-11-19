@@ -41,4 +41,4 @@ why, is the point.
 | [0003](0003-drop-stats-from-suggests.md) | Drop stats from Suggests | Accepted | 2026-10-31 |
 | [0004](0004-require-r-4-6.md) | Require R 4.6.0 | Accepted | 2026-11-01 |
 | [0005](0005-experimentsubset-class-union.md) | Add an ExperimentSubset class union over the Subset* classes | Accepted | 2026-11-04 |
-| [0006](0006-define-subset-methods-in-loops.md) | Define the Subset* methods once, in loops over the classes | Proposed | 2026-11-19 |
+| [0006](0006-define-subset-methods-in-loops.md) | Define the Subset* methods once, in loops over the classes | Accepted | 2026-11-19 |

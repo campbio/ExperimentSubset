@@ -1,6 +1,6 @@
 # Define the Subset* methods once, in loops over the classes (#36, part 1)
 
-- **Status:** Proposed
+- **Status:** Approved
 - **Date:** 2026-11-19
 - **Branch:** `fix/dedup-subset-methods`, from `devel`
 - **Lands:** one PR to `devel` (1.23.53); devel only, no release port
