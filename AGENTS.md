@@ -45,10 +45,13 @@ or deploy the site locally. Add new exports to `_pkgdown.yml` and run
 - `R/SubsetMethods.R`: the thin `setMethod()` wrappers that forward to
   the shared internals, each defined once in a loop over `.esClasses`
   (all five classes) or `.esSCEClasses` (the three that extend
-  SingleCellExperiment), ADR 0006. roxygen can't see methods defined in
-  a loop, so a new method there needs its generic named in the
-  `@eval .rdMethods(...)` block of its help page; that helper writes the
-  methods' aliases and usage. `R/SubsetSpatialExperiment.R` and
+  SingleCellExperiment), ADR 0006. A new method for every class goes in
+  the first loop; one for the SingleCellExperiment-based classes only
+  (like altExp and reducedDim) goes in the second. roxygen can't see
+  methods defined in a loop, so a new method there needs its generic
+  named in the `@eval .rdMethods(...)` block of its help page; that
+  helper writes the methods' aliases and usage, and stops if a named
+  generic has no methods. `R/SubsetSpatialExperiment.R` and
   `R/SubsetTreeSummarizedExperiment.R` hold the methods of one class
   only, documented as usual.
 - `Collate:` in DESCRIPTION fixes the load order (classes, then

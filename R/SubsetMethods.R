@@ -719,12 +719,25 @@ rm(cls)
 # order of `generics`
 .rdMethods <- function(generics, classes = .esClasses) {
   ns <- asNamespace("ExperimentSubset")
+  methodLists <- list()
+  for (generic in generics) {
+    methodList <- list()
+    if (methods::isGeneric(generic, where = ns)) {
+      methodList <- methods::findMethods(generic, where = ns)
+    }
+    # names are the signatures, such as "SubsetSingleCellExperiment#ANY"
+    if (!any(sub("#.*", "", names(methodList)) %in% classes)) {
+      # a misspelled generic would otherwise drop its methods' docs
+      stop("'generics' includes '", generic, "', which has no methods ",
+           "for the classes in 'classes'.")
+    }
+    methodLists[[generic]] <- methodList
+  }
   aliases <- character(0)
   usages <- character(0)
   for (cls in classes) {
     for (generic in generics) {
-      methodList <- methods::findMethods(generic, where = ns)
-      # names are the signatures, such as "SubsetSingleCellExperiment#ANY"
+      methodList <- methodLists[[generic]]
       keys <- names(methodList)
       keys <- keys[sub("#.*", "", keys) == cls]
       for (key in keys) {

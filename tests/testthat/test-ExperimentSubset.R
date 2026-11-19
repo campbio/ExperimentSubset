@@ -863,6 +863,14 @@ test_that(".rdMethods() documents looped methods as roxygen would (#36)", {
            "(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)")
   )
 
+  # a generic without methods for the classes is an error, not empty docs
+  expect_error(rdMethods("subsetDims"),
+               regexp = "'generics' includes 'subsetDims', which has no",
+               fixed = TRUE)
+  expect_error(rdMethods("altExp", "SubsetSummarizedExperiment"),
+               regexp = "includes 'altExp', which has no methods",
+               fixed = TRUE)
+
   # several generics on one page, by class and then in the given order
   tags <- rdMethods(c("metadata", "metadata<-"),
                     c("SubsetSummarizedExperiment", "SubsetSpatialExperiment"))

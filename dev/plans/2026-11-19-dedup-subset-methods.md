@@ -204,3 +204,20 @@ undocumented-methods checks confirm the generated docs.
 
 The PR says "Part of #36"; the issue stays open for the other two
 pieces.
+
+## Found during implementation
+
+- `R/SubsetTreeSummarizedExperiment.R` had `@usage NULL` on its
+  `subsetColData<-` and `subsetRowData<-` methods (#8), added when
+  their three-class signatures gave usage lines too wide for the PDF
+  manual. Their signatures are now `x` only, so `.rdMethods()` writes
+  their usage lines like the other classes': 257 `\S4method` entries
+  instead of 255, with all 312 aliases unchanged. `make check-full`
+  reports no usage-width NOTE.
+- S4 stores a method with arguments its generic lacks (`combineCols()`
+  and `combineRows()`: `delayed`, `fill`) wrapped in `.local()`, so
+  `.rdUsage()` reads the formals through `methods::unRematchDefinition()`,
+  as roxygen does.
+- `.rdMethods()` stops when a named generic has no methods for the
+  classes, so a misspelled generic can't silently drop docs (from the
+  spec review).
