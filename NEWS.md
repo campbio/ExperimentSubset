@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.53 (2026-11-19)
+* The methods the `Subset*` classes share are now each defined once, in a loop over the classes in the new `R/SubsetMethods.R`, rather than copied into one file per class, so a fix to a method reaches every class. `SubsetSummarizedExperiment.R`, `SubsetRangedSummarizedExperiment.R` and `SubsetSingleCellExperiment.R` are gone; `SubsetSpatialExperiment.R` and `SubsetTreeSummarizedExperiment.R` keep only the methods of their own class. The help pages keep the same aliases, and the `subsetColData<-` and `subsetRowData<-` pages now also show the usage line for `SubsetTreeSummarizedExperiment`, as they do for the other classes. No change in behavior (#36)
+
 # ExperimentSubset 1.23.52 (2026-11-19)
 * `codecov.yml` sets devel as the default branch on Codecov, so its repo page shows the coverage of devel instead of an old report for master. No change to the package
 

@@ -42,9 +42,15 @@ or deploy the site locally. Add new exports to `_pkgdown.yml` and run
   create a first subset through `subset =`, plus the shared internal
   implementations (`.createSubset()`, `.setSubsetAssay()`,
   `.subsetParent()`, ...) and the internal slot accessors.
-- `R/Subset<Class>.R`, one per supported class: thin `setMethod()`
-  wrappers that forward to the shared internals. A change to a method
-  usually needs the same change in all five files.
+- `R/SubsetMethods.R`: the thin `setMethod()` wrappers that forward to
+  the shared internals, each defined once in a loop over `.esClasses`
+  (all five classes) or `.esSCEClasses` (the three that extend
+  SingleCellExperiment), ADR 0006. roxygen can't see methods defined in
+  a loop, so a new method there needs its generic named in the
+  `@eval .rdMethods(...)` block of its help page; that helper writes the
+  methods' aliases and usage. `R/SubsetSpatialExperiment.R` and
+  `R/SubsetTreeSummarizedExperiment.R` hold the methods of one class
+  only, documented as usual.
 - `Collate:` in DESCRIPTION fixes the load order (classes, then
   generics, then the rest). Add new R files there too.
 - `vignettes/ExperimentSubset.Rmd`, with the figure `es_structure.png`:
@@ -67,7 +73,10 @@ or deploy the site locally. Add new exports to `_pkgdown.yml` and run
 - `SubsetSummarizedExperiment`, `SubsetRangedSummarizedExperiment`,
   `SubsetSingleCellExperiment`, `SubsetTreeSummarizedExperiment` and
   `SubsetSpatialExperiment`: each extends its Bioconductor class with one
-  slot, `subsets`, a SimpleList of `AssaySubset`.
+  slot, `subsets`, a SimpleList of `AssaySubset`. A new `Subset*` class
+  goes into the `ExperimentSubset` union and `.esClasses` (and
+  `.esSCEClasses` if it extends SingleCellExperiment), all in
+  `R/allClasses.R`.
 - `R/allClasses.R` exports each of these classes with
   `@exportClass <Name>`, not `@export`. Since roxygen2 7.2.1, `@export`
   on `.Foo <- setClass("Foo")` also exports the generator, which would
