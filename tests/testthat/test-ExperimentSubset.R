@@ -796,15 +796,30 @@ test_that("Every Subset* class is an ExperimentSubset (#5)", {
 })
 
 test_that("The package defines the same S4 methods (#36)", {
-  # one line per method, "<generic>,<signature>", as in the help aliases.
-  # A change to how methods are defined, such as looping over the classes,
-  # must not add, drop or retype any of them
+  # one line per method, "<generic>,<signature>(<arguments>)", with the
+  # signature as in the help aliases. A change to how methods are defined,
+  # such as looping over the classes, must not add, drop or retype any of
+  # them, or change their arguments or defaults
   ns <- asNamespace("ExperimentSubset")
+  argumentText <- function(method) {
+    # a method with arguments its generic lacks is wrapped in .local()
+    arguments <- formals(unRematchDefinition(method))
+    defaults <- vapply(arguments, function(argument) {
+      if (identical(argument, quote(expr = ))) {
+        return("")
+      }
+      paste0(" = ", paste(deparse(argument), collapse = ""))
+    }, character(1))
+    paste0(names(arguments), defaults, collapse = ", ")
+  }
   methodNames <- character(0)
   for (generic in as.character(getGenerics(where = ns))) {
-    signatures <- names(findMethods(generic, where = ns))
-    methodNames <- c(methodNames,
-                     paste0(generic, ",", gsub("#", ",", signatures)))
+    methodList <- findMethods(generic, where = ns)
+    methodNames <- c(
+      methodNames,
+      paste0(generic, ",", gsub("#", ",", names(methodList)), "(",
+             vapply(methodList, argumentText, character(1)), ")")
+    )
   }
   # radix sorts in the C locale, so the order is the same on every machine
   expect_snapshot(writeLines(sort(methodNames, method = "radix")))
@@ -843,12 +858,11 @@ test_that(".rdMethods() documents looped methods as roxygen would (#36)", {
     fixed = TRUE
   )
 
-  # defaults are written out, and only the classes with the method appear
-  tags <- rdMethods("reducedDim<-")
+  # defaults are written out, for each method of each class
+  tags <- rdMethods("reducedDim<-", ExperimentSubset:::.esSCEClasses)
   usage <- strsplit(sub("^@usage ", "", tags[2]), "\n\n")[[1]]
   expect_length(usage, 9)
   expect_true(all(grepl("withDimnames = TRUE", usage, fixed = TRUE)))
-  expect_false(any(grepl("SubsetSummarizedExperiment", usage, fixed = TRUE)))
   expect_equal(
     usage[1],
     paste0("\\S4method{reducedDim}{SubsetSingleCellExperiment,character}",
@@ -870,6 +884,24 @@ test_that(".rdMethods() documents looped methods as roxygen would (#36)", {
   expect_error(rdMethods("altExp", "SubsetSummarizedExperiment"),
                regexp = "includes 'altExp', which has no methods",
                fixed = TRUE)
+  # so is one missing for some of the classes, which would drop their docs
+  expect_error(
+    rdMethods("altExp"),
+    regexp = paste("no methods for SubsetSummarizedExperiment,",
+                   "SubsetRangedSummarizedExperiment."),
+    fixed = TRUE
+  )
+
+  # defaults with Rd special characters are escaped
+  usage <- ExperimentSubset:::.rdUsage(
+    "subsetDim", "SubsetSummarizedExperiment",
+    function(x, sep = "%s", brace = "{") NULL
+  )
+  expect_equal(
+    usage,
+    paste0("\\S4method{subsetDim}{SubsetSummarizedExperiment}",
+           "(x, sep = \"\\%s\", brace = \"\\{\")")
+  )
 
   # several generics on one page, by class and then in the given order
   tags <- rdMethods(c("metadata", "metadata<-"),

@@ -8,6 +8,10 @@
 # documents them has a block below that generates their aliases and usage
 # with @eval .rdMethods(). A new method in a loop needs its generic named
 # in the block for its help page.
+#
+# Method bodies must not use the loop variable cls: the methods don't
+# capture it, and it is removed after the loops. A method that needs its
+# class can call class(x).
 
 # Methods for all five classes ---------------------------------------------
 
@@ -726,10 +730,12 @@ rm(cls)
       methodList <- methods::findMethods(generic, where = ns)
     }
     # names are the signatures, such as "SubsetSingleCellExperiment#ANY"
-    if (!any(sub("#.*", "", names(methodList)) %in% classes)) {
-      # a misspelled generic would otherwise drop its methods' docs
+    missing <- setdiff(classes, sub("#.*", "", names(methodList)))
+    if (length(missing) > 0) {
+      # a misspelled generic, or a page listing classes its methods aren't
+      # defined for, would otherwise drop docs without a message
       stop("'generics' includes '", generic, "', which has no methods ",
-           "for the classes in 'classes'.")
+           "for ", paste(missing, collapse = ", "), ".")
     }
     methodLists[[generic]] <- methodList
   }
@@ -767,7 +773,9 @@ rm(cls)
     if (identical(args[[i]], quote(expr = ))) {
       return(names(args)[i])
     }
-    paste(names(args)[i], "=", paste(deparse(args[[i]]), collapse = ""))
+    default <- paste(deparse(args[[i]]), collapse = "")
+    # \, %, { and } are special in Rd, as in a default such as "%s"
+    paste(names(args)[i], "=", gsub("([\\\\%{}])", "\\\\\\1", default))
   }, character(1))
   usage <- sprintf("\\S4method{%s}{%s}(%s)", sub("<-$", "", generic),
                    signature, paste(argText, collapse = ", "))
