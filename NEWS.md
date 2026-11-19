@@ -1,3 +1,6 @@
+# ExperimentSubset 1.23.52 (2026-11-19)
+* `codecov.yml` sets devel as the default branch on Codecov, so its repo page shows the coverage of devel instead of an old report for master. No change to the package
+
 # ExperimentSubset 1.23.51 (2026-11-18)
 * A new GitHub Actions workflow, `test-coverage.yaml`, runs the tests under covr on every push and pull request to devel and uploads the coverage to Codecov with the `CODECOV_TOKEN` secret. Before, no workflow uploaded coverage: `codecov.yml` still held the Travis CI settings that ran `covr::codecov()`, and those settings are now gone, as is `.travis.yml` from `.Rbuildignore`. The README shows a Codecov badge for devel. No change to the package
 
