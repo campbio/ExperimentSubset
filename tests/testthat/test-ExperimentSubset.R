@@ -795,6 +795,126 @@ test_that("Every Subset* class is an ExperimentSubset (#5)", {
   }
 })
 
+test_that("The package defines the same S4 methods (#36)", {
+  # one line per method, "<generic>,<signature>(<arguments>)", with the
+  # signature as in the help aliases. A change to how methods are defined,
+  # such as looping over the classes, must not add, drop or retype any of
+  # them, or change their arguments or defaults
+  ns <- asNamespace("ExperimentSubset")
+  argumentText <- function(method) {
+    # a method with arguments its generic lacks is wrapped in .local()
+    arguments <- formals(unRematchDefinition(method))
+    defaults <- vapply(arguments, function(argument) {
+      if (identical(argument, quote(expr = ))) {
+        return("")
+      }
+      paste0(" = ", paste(deparse(argument), collapse = ""))
+    }, character(1))
+    paste0(names(arguments), defaults, collapse = ", ")
+  }
+  methodNames <- character(0)
+  for (generic in as.character(getGenerics(where = ns))) {
+    methodList <- findMethods(generic, where = ns)
+    methodNames <- c(
+      methodNames,
+      paste0(generic, ",", gsub("#", ",", names(methodList)), "(",
+             vapply(methodList, argumentText, character(1)), ")")
+    )
+  }
+  # radix sorts in the C locale, so the order is the same on every machine
+  expect_snapshot(writeLines(sort(methodNames, method = "radix")))
+})
+
+test_that("The method loops cover every Subset* class (#36)", {
+  esClasses <- ExperimentSubset:::.esClasses
+  esSCEClasses <- ExperimentSubset:::.esSCEClasses
+  # a new Subset* class must be added to .esClasses as well as the union
+  unionMembers <- Filter(function(cls) extends(cls, "ExperimentSubset"),
+                         getClasses(asNamespace("ExperimentSubset")))
+  unionMembers <- setdiff(unionMembers, "ExperimentSubset")
+  expect_setequal(esClasses, unionMembers)
+  expect_true(all(esSCEClasses %in% esClasses))
+  isSCE <- vapply(esClasses, extends, logical(1), "SingleCellExperiment")
+  expect_setequal(esSCEClasses, esClasses[isSCE])
+})
+
+test_that(".rdMethods() documents looped methods as roxygen would (#36)", {
+  rdMethods <- ExperimentSubset:::.rdMethods
+  tags <- rdMethods("subsetDim", "SubsetSummarizedExperiment")
+  expect_equal(tags, c(
+    "@aliases subsetDim,SubsetSummarizedExperiment-method",
+    "@usage \\S4method{subsetDim}{SubsetSummarizedExperiment}(x, subsetName)"
+  ))
+
+  # replacement methods, with the value class in the signature
+  tags <- rdMethods("colData<-", "SubsetSingleCellExperiment")
+  expect_match(tags[1],
+               "colData<-,SubsetSingleCellExperiment,DataFrame-method",
+               fixed = TRUE)
+  expect_match(
+    tags[2],
+    paste0("\\S4method{colData}{SubsetSingleCellExperiment,DataFrame}",
+           "(x, ...) <- value"),
+    fixed = TRUE
+  )
+
+  # defaults are written out, for each method of each class
+  tags <- rdMethods("reducedDim<-", ExperimentSubset:::.esSCEClasses)
+  usage <- strsplit(sub("^@usage ", "", tags[2]), "\n\n")[[1]]
+  expect_length(usage, 9)
+  expect_true(all(grepl("withDimnames = TRUE", usage, fixed = TRUE)))
+  expect_equal(
+    usage[1],
+    paste0("\\S4method{reducedDim}{SubsetSingleCellExperiment,character}",
+           "(x, type, withDimnames = TRUE, ...) <- value")
+  )
+
+  # arguments the generic lacks, which S4 wraps in .local()
+  tags <- rdMethods("combineCols", "SubsetSummarizedExperiment")
+  expect_equal(
+    tags[2],
+    paste0("@usage \\S4method{combineCols}{SubsetSummarizedExperiment}",
+           "(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)")
+  )
+
+  # a generic without methods for the classes is an error, not empty docs
+  expect_error(rdMethods("subsetDims"),
+               regexp = "'generics' includes 'subsetDims', which has no",
+               fixed = TRUE)
+  expect_error(rdMethods("altExp", "SubsetSummarizedExperiment"),
+               regexp = "includes 'altExp', which has no methods",
+               fixed = TRUE)
+  # so is one missing for some of the classes, which would drop their docs
+  expect_error(
+    rdMethods("altExp"),
+    regexp = paste("no methods for SubsetSummarizedExperiment,",
+                   "SubsetRangedSummarizedExperiment."),
+    fixed = TRUE
+  )
+
+  # defaults with Rd special characters are escaped
+  usage <- ExperimentSubset:::.rdUsage(
+    "subsetDim", "SubsetSummarizedExperiment",
+    function(x, sep = "%s", brace = "{") NULL
+  )
+  expect_equal(
+    usage,
+    paste0("\\S4method{subsetDim}{SubsetSummarizedExperiment}",
+           "(x, sep = \"\\%s\", brace = \"\\{\")")
+  )
+
+  # several generics on one page, by class and then in the given order
+  tags <- rdMethods(c("metadata", "metadata<-"),
+                    c("SubsetSummarizedExperiment", "SubsetSpatialExperiment"))
+  expect_equal(
+    strsplit(sub("^@aliases ", "", tags[1]), " ")[[1]],
+    c("metadata,SubsetSummarizedExperiment-method",
+      "metadata<-,SubsetSummarizedExperiment-method",
+      "metadata,SubsetSpatialExperiment-method",
+      "metadata<-,SubsetSpatialExperiment-method")
+  )
+})
+
 # Runs the methods every Subset*Experiment class shares on es, whose main
 # assay "counts" has row and column names and at least 5 rows and 6
 # columns. Returns es with a subset "s1" and a stored assay "doubled".
