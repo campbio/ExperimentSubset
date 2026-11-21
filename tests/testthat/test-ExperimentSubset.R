@@ -4584,3 +4584,105 @@ test_that("TreeSE and SpatialExperiment subsets see altExps (#58)", {
     expect_equal(altExpNames(sub), "ADT", info = class)
   }
 })
+
+test_that("createSubset() doesn't build the parent assay (#36)", {
+  es <- bracketExample()$es
+  # by name and by position, from a main assay, a subset, an assay stored
+  # in a subset, and a subset of a subset
+  cases <- list(
+    fromMain = list(rows = c("g2", "g4"), cols = 3:5,
+                    parentAssay = "counts"),
+    fromSubset = list(rows = 2:3, cols = c("c2", "c5"), parentAssay = "s1"),
+    fromStored = list(rows = c("g1", "g3"), cols = 1:2,
+                      parentAssay = "s1/doubled"),
+    fromChained = list(rows = 1:2, cols = c("c4", "c6"),
+                       parentAssay = "s1a")
+  )
+  makeAll <- function(es) {
+    for (name in names(cases))
+      es <- do.call(createSubset, c(list(es, name), cases[[name]]))
+    es
+  }
+  expected <- makeAll(es)
+  local_mocked_bindings(
+    .assay = function(...) stop("createSubset() built the parent assay.")
+  )
+  actual <- makeAll(es)
+  subsets <- ExperimentSubset:::.subsets
+  expect_identical(subsets(actual), subsets(expected))
+})
+
+test_that("createSubset() matches row names stored only on the assay (#36)", {
+  counts <- matrix(as.numeric(seq_len(200)), nrow = 10,
+                   dimnames = list(paste0("g", 1:10), paste0("c", 1:20)))
+  es <- ExperimentSubset(SingleCellExperiment(list(counts = counts)))
+  # the object loses its row names, but the stored assay keeps them
+  rownames(es) <- NULL
+  es <- createSubset(es, "s1", rows = 2:6)
+  expect_null(subsetRownames(es, "s1"))
+  byName <- createSubset(es, "child", rows = c("g3", "g5"),
+                         parentAssay = "s1")
+  byPosition <- createSubset(es, "child", rows = c(2L, 4L),
+                             parentAssay = "s1")
+  subsets <- ExperimentSubset:::.subsets
+  expect_identical(subsets(byName), subsets(byPosition))
+})
+
+test_that("createSubset() needs a named first assay or parentAssay (#36)", {
+  counts <- matrix(as.numeric(1:20), nrow = 4)
+  es <- ExperimentSubset(SingleCellExperiment(list(counts = counts)))
+  noName <- paste("'parentAssay' is needed: 'x' has no named first assay",
+                  "to make the subset from.")
+  # no assays, unnamed assays, and an unnamed first assay
+  for (value in list(list(), list(counts), list(counts, counts = counts))) {
+    assays(es, withDimnames = FALSE) <- value
+    expect_error(createSubset(es, "s1", rows = 1:2), noName, fixed = TRUE,
+                 info = paste(length(value), "assays"))
+  }
+})
+
+test_that("createSubset() stops when a parent subset lost its assay (#36)", {
+  es <- bracketExample()$es
+  # s1 was made from "counts", which is gone
+  assay(es, "counts") <- NULL
+  expect_error(createSubset(es, "child", rows = 1:2, parentAssay = "s1"),
+               "'counts' is not an assay of subset 's1'.", fixed = TRUE)
+
+  # a subset from before parents were recorded reads its own "counts";
+  # s2 stores none
+  es <- bracketExample()$es
+  subsets <- ExperimentSubset:::.subsets(es)
+  s2 <- subsets[["s2"]]
+  subsets[["s2"]] <- ExperimentSubset:::AssaySubset(
+    subsetName = "s2",
+    rowIndices = ExperimentSubset:::.rowIndices(s2),
+    colIndices = ExperimentSubset:::.colIndices(s2),
+    parentAssay = NULL,
+    internalAssay = ExperimentSubset:::.internalAssay(s2)
+  )
+  es <- ExperimentSubset:::`.subsets<-`(es, subsets)
+  expect_error(assay(es, "s2"))
+  expect_error(createSubset(es, "child", rows = 1:2, parentAssay = "s2"),
+               "'counts' is not an assay of subset 's2'.", fixed = TRUE)
+})
+
+test_that("A parent cycle stops instead of hanging (#36)", {
+  es <- bracketExample()$es
+  # s1a is made from s1; make s1 point back to s1a
+  subsets <- ExperimentSubset:::.subsets(es)
+  s1 <- subsets[["s1"]]
+  subsets[["s1"]] <- ExperimentSubset:::AssaySubset(
+    subsetName = "s1",
+    rowIndices = ExperimentSubset:::.rowIndices(s1),
+    colIndices = ExperimentSubset:::.colIndices(s1),
+    parentAssay = "s1a",
+    internalAssay = ExperimentSubset:::.internalAssay(s1)
+  )
+  es <- ExperimentSubset:::`.subsets<-`(es, subsets)
+  cycle <- "does not lead to a main assay"
+  expect_error(subsetParent(es, "s1a"), cycle)
+  expect_error(subsetParent(es, "s1/doubled"), cycle)
+  expect_error(assay(es, "s1a"), cycle)
+  expect_error(createSubset(es, "child", rows = 1, parentAssay = "s1a"),
+               cycle)
+})
