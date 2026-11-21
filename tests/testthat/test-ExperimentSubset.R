@@ -4647,6 +4647,23 @@ test_that("createSubset() stops when a parent subset lost its assay (#36)", {
   assay(es, "counts") <- NULL
   expect_error(createSubset(es, "child", rows = 1:2, parentAssay = "s1"),
                "'counts' is not an assay of subset 's1'.", fixed = TRUE)
+
+  # a subset from before parents were recorded reads its own "counts";
+  # s2 stores none
+  es <- bracketExample()$es
+  subsets <- ExperimentSubset:::.subsets(es)
+  s2 <- subsets[["s2"]]
+  subsets[["s2"]] <- ExperimentSubset:::AssaySubset(
+    subsetName = "s2",
+    rowIndices = ExperimentSubset:::.rowIndices(s2),
+    colIndices = ExperimentSubset:::.colIndices(s2),
+    parentAssay = NULL,
+    internalAssay = ExperimentSubset:::.internalAssay(s2)
+  )
+  es <- ExperimentSubset:::`.subsets<-`(es, subsets)
+  expect_error(assay(es, "s2"))
+  expect_error(createSubset(es, "child", rows = 1:2, parentAssay = "s2"),
+               "'counts' is not an assay of subset 's2'.", fixed = TRUE)
 })
 
 test_that("A parent cycle stops instead of hanging (#36)", {

@@ -107,8 +107,9 @@ The other functions are built on it:
 **Error wording:** one guard means one wording: "The parent chain of
 '<label>' does not lead to a main assay." `.toRootIndices()` said "of
 the subset"; `.liftIndices()` in `createSubset()` now names the
-`parentAssay`. For a `"S/assay"` input, `subsetParent()` now names `S`.
-Only an object whose subsets form a cycle reaches this error, and no
+`parentAssay`. For a `"S/assay"` input, `subsetParent()` names `S`, as
+on devel: `.resolveAssay()` walks the chain of `S` first, so the error
+comes from there (corrected during review). Only an object whose subsets form a cycle reaches this error, and no
 existing test checks its text.
 
 `.primaryAssayName()`, `.assayOwners()`, `.nearestOwner()`,
@@ -233,10 +234,24 @@ against the current code before it changes.
   through `.primaryAssayName()` and `.assayOwners()`, without copying.
   A new test covers it, and the spec review found this case too.
 
-  One case is not covered: an old subset with no `parentAssay` whose
-  internal object lacks "counts". `devel` failed there with
-  SummarizedExperiment's subscript error. Such objects come only from
-  versions before parents were recorded.
+  An old subset with no `parentAssay` reads its own "counts". When its
+  internal object has none, the check now stops with "'counts' is not
+  an assay of subset 's2'." `devel` stopped with SummarizedExperiment's
+  subscript error instead.
+
+  Without the check, the branch made the child, and `assay()` of the
+  child then quietly read the main object's counts. `/code-review`
+  found this.
+
+  `.checkSeesAssay()` holds the rule and its message for both
+  `createSubset()` and `assay()`.
+- **Review findings left as they are:**
+  - Repeated chain walks inside `createSubset()`: a few lookups on short
+    chains, small next to the copies removed.
+  - A no-names case in the mock test: that fallback builds the assay on
+    purpose, and test 2 checks its result.
+  - A clear error for a `container` not in the chain: no caller passes
+    one, and devel behaves the same.
 - **`force(label)` in `.containerChain()`.** The default
   `label = parentAssay` is evaluated lazily, so without `force()` the
   error would name the subset the loop had reached, not where the walk

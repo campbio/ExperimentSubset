@@ -335,12 +335,17 @@ NULL
            "\"subset/assay\"; '", parentAssay, "' is none of these.")
   }
   # a parent subset must still see the assay it was made from, as when
-  # assay(x, parentAssay) was built here
-  if (ref$kind == "subset" &&
-        !is.null(.parentAssay(.subsets(x)[[ref$subset]]))) {
-    primary <- .primaryAssayName(x, ref$subset)
-    if (!primary %in% names(.assayOwners(x, ref$subset)))
-      stop("'", primary, "' is not an assay of subset '", ref$subset, "'.")
+  # assay(x, parentAssay) was built here; one from before parents were
+  # recorded reads its own "counts"
+  if (ref$kind == "subset") {
+    parent <- .subsets(x)[[ref$subset]]
+    if (is.null(.parentAssay(parent))) {
+      .checkSeesAssay(ref$subset, "counts",
+                      assayNames(.internalAssay(parent)))
+    } else {
+      .checkSeesAssay(ref$subset, .primaryAssayName(x, ref$subset),
+                      names(.assayOwners(x, ref$subset)))
+    }
   }
 
   rows <- .selectIndices(x, rows, parentAssay, ref, "row")
@@ -1610,6 +1615,13 @@ NULL
   c(.containerChain(x, parentAssay, subsetName), subsetName)
 }
 
+# Stops unless subset subsetName sees assayName: seen is the names of the
+# assays it sees, its own and linked
+.checkSeesAssay <- function(subsetName, assayName, seen) {
+  if (!assayName %in% seen)
+    stop("'", assayName, "' is not an assay of subset '", subsetName, "'.")
+}
+
 # Assays visible in a subset: a named vector from assay name to where it is
 # stored, "" for the main object or a subset name. Each subset's own
 # assays hide those of the same name linked from further up the chain.
@@ -1648,8 +1660,7 @@ NULL
 # container up the chain that stores it, sliced to the subset
 .subsetAssayView <- function(x, subsetName, assayName, withDimnames = TRUE) {
   owners <- .assayOwners(x, subsetName)
-  if (!assayName %in% names(owners))
-    stop("'", assayName, "' is not an assay of subset '", subsetName, "'.")
+  .checkSeesAssay(subsetName, assayName, names(owners))
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   owner <- owners[[assayName]]
   if (owner == subsetName)
