@@ -320,9 +320,11 @@ NULL
                         parentAssay)
 
   if (is.null(parentAssay)) {
-    if (length(assayNames(x)) == 0)
-      stop("'x' has no named assays to make a subset from.")
     parentAssay <- assayNames(x)[1]
+    # NULL with no assays or no names, "" with an unnamed first assay
+    if (!.isOneString(parentAssay) || !nzchar(parentAssay))
+      stop("'parentAssay' is needed: 'x' has no named first assay to make ",
+           "the subset from.")
     ref <- .resolveAssay(x, parentAssay)
   } else {
     # .resolveAssay() itself stops for a bare name of an assay stored in a
@@ -331,6 +333,14 @@ NULL
     if (is.null(ref))
       stop("'parentAssay' must be NULL or name an assay, a subset or a ",
            "\"subset/assay\"; '", parentAssay, "' is none of these.")
+  }
+  # a parent subset must still see the assay it was made from, as when
+  # assay(x, parentAssay) was built here
+  if (ref$kind == "subset" &&
+        !is.null(.parentAssay(.subsets(x)[[ref$subset]]))) {
+    primary <- .primaryAssayName(x, ref$subset)
+    if (!primary %in% names(.assayOwners(x, ref$subset)))
+      stop("'", primary, "' is not an assay of subset '", ref$subset, "'.")
   }
 
   rows <- .selectIndices(x, rows, parentAssay, ref, "row")
@@ -1581,6 +1591,8 @@ NULL
 # up the parent chain: each step moves up one subset, so a longer walk
 # means a cycle. label names where the walk started, in the error.
 .containerChain <- function(x, parentAssay, label = parentAssay) {
+  # before the loop changes parentAssay
+  force(label)
   chain <- character(0)
   for (step in seq_len(subsetCount(x) + 1)) {
     container <- .parentSubsetName(x, parentAssay)

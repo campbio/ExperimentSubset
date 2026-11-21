@@ -4628,14 +4628,25 @@ test_that("createSubset() matches row names stored only on the assay (#36)", {
   expect_identical(subsets(byName), subsets(byPosition))
 })
 
-test_that("createSubset() needs a named assay without parentAssay (#36)", {
-  es <- ExperimentSubset(SingleCellExperiment(
-    list(counts = matrix(as.numeric(1:20), nrow = 4))
-  ))
-  assays(es) <- list()
-  expect_error(createSubset(es, "s1", rows = 1:2),
-               "'x' has no named assays to make a subset from",
-               fixed = TRUE)
+test_that("createSubset() needs a named first assay or parentAssay (#36)", {
+  counts <- matrix(as.numeric(1:20), nrow = 4)
+  es <- ExperimentSubset(SingleCellExperiment(list(counts = counts)))
+  noName <- paste("'parentAssay' is needed: 'x' has no named first assay",
+                  "to make the subset from.")
+  # no assays, unnamed assays, and an unnamed first assay
+  for (value in list(list(), list(counts), list(counts, counts = counts))) {
+    assays(es, withDimnames = FALSE) <- value
+    expect_error(createSubset(es, "s1", rows = 1:2), noName, fixed = TRUE,
+                 info = paste(length(value), "assays"))
+  }
+})
+
+test_that("createSubset() stops when a parent subset lost its assay (#36)", {
+  es <- bracketExample()$es
+  # s1 was made from "counts", which is gone
+  assay(es, "counts") <- NULL
+  expect_error(createSubset(es, "child", rows = 1:2, parentAssay = "s1"),
+               "'counts' is not an assay of subset 's1'.", fixed = TRUE)
 })
 
 test_that("A parent cycle stops instead of hanging (#36)", {

@@ -188,8 +188,8 @@ against the current code before it changes.
 ## Housekeeping
 
 - `NEWS.md`, 1.23.54: "`createSubset()` no longer builds the parent
-  assay to check `rows` and `cols`, and stops with a clear message on an
-  object with no assays. The parent-chain walks share one internal
+  assay to check `rows` and `cols`, and stops with a clear message when
+  there is no named first assay. The parent-chain walks share one internal
   function. No change in results (#36)."
 - `DESCRIPTION`: version 1.23.54. Keep `Config/roxygen2/version` at
   8.1.0.
@@ -211,10 +211,37 @@ against the current code before it changes.
   parentAssay)`, which `.createSubset()` already has, so the parent isn't
   resolved again. The size and names come from a small helper,
   `.parentExtent()`.
-- **No assays:** the error says "no named assays": "'x' has no named
-  assays to make a subset from." An object whose assays all lost their
-  names (`assays(x) <- list(m)`) also has no `assayNames(x)[1]`, so
-  "no assays" would be wrong for it.
+- **No assays, or an unnamed first assay.** The error is "'parentAssay'
+  is needed: 'x' has no named first assay to make the subset from." It
+  covers three cases:
+  - no assays;
+  - assays that all lost their names (`assays(x) <- list(m)`, where
+    `assayNames(x)[1]` is `NULL`);
+  - an unnamed first assay (`""`).
+
+  For `""`, devel failed in `assay()` with "invalid subscript". Without
+  this check, the branch would have made a subset with
+  `parentAssay = ""`. The spec review found that case. One test covers
+  all three.
+- **A parent subset that lost its assay.** Because `devel` built
+  `assay(x, parentAssay)`, it stopped with "'counts' is not an assay of
+  subset 's1'." when the assay a parent subset was made from had been
+  removed (`assay(es, "counts") <- NULL`). Without that call, the branch
+  made the subset and failed only later, at `assay()`.
+
+  `.createSubset()` now makes the same check with the same message,
+  through `.primaryAssayName()` and `.assayOwners()`, without copying.
+  A new test covers it, and the spec review found this case too.
+
+  One case is not covered: an old subset with no `parentAssay` whose
+  internal object lacks "counts". `devel` failed there with
+  SummarizedExperiment's subscript error. Such objects come only from
+  versions before parents were recorded.
+- **`force(label)` in `.containerChain()`.** The default
+  `label = parentAssay` is evaluated lazily, so without `force()` the
+  error would name the subset the loop had reached, not where the walk
+  started. No caller relies on the default today. The spec review found
+  this.
 - **Two more `.indicesIn()` calls.** `.subsetAltExpView()` calls it too,
   besides `.subsetAssayView()`. Both calls now use the new argument
   order.
