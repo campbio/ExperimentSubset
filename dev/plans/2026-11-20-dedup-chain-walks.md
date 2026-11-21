@@ -1,6 +1,6 @@
 # One parent-chain walk, and createSubset() without copying the parent (#36, part 2)
 
-- **Status:** Draft
+- **Status:** Approved
 - **Date:** 2026-11-20
 - **Branch:** `fix/dedup-chain-walks`, from `devel`
 - **Lands:** one PR to `devel` (1.23.54); devel only, no release port
@@ -204,3 +204,28 @@ against the current code before it changes.
 - **Review:** a spec review by a fresh subagent, then `/code-review`.
 - **After merge:** close #36 with a comment on the two pieces left as
   they are.
+
+## Found during implementation
+
+- **`.selectIndices()` takes `ref` too.** It is `.resolveAssay(x,
+  parentAssay)`, which `.createSubset()` already has, so the parent isn't
+  resolved again. The size and names come from a small helper,
+  `.parentExtent()`.
+- **No assays:** the error says "no named assays": "'x' has no named
+  assays to make a subset from." An object whose assays all lost their
+  names (`assays(x) <- list(m)`) also has no `assayNames(x)[1]`, so
+  "no assays" would be wrong for it.
+- **Two more `.indicesIn()` calls.** `.subsetAltExpView()` calls it too,
+  besides `.subsetAssayView()`. Both calls now use the new argument
+  order.
+- **Old and new code compared.** A scratch script compared the devel
+  versions of the changed functions with the new ones on 60 random
+  objects (chains of 3-7 subsets, parents that are subsets or
+  `"subset/assay"`, rows and columns by position or name, every fifth
+  object with its row names removed). It found the same results in 1,910
+  comparisons:
+  - the subset chain;
+  - indices up to the main object and to every container;
+  - `subsetParent()` for every subset and `"subset/assay"`;
+  - the stored subsets after `createSubset()`;
+  - the error for 7 kinds of bad `rows` or `cols`.

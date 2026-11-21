@@ -320,19 +320,24 @@ NULL
                         parentAssay)
 
   if (is.null(parentAssay)) {
+    if (length(assayNames(x)) == 0)
+      stop("'x' has no named assays to make a subset from.")
     parentAssay <- assayNames(x)[1]
-  } else if (is.null(.resolveAssay(x, parentAssay))) {
+    ref <- .resolveAssay(x, parentAssay)
+  } else {
     # .resolveAssay() itself stops for a bare name of an assay stored in a
     # subset
-    stop("'parentAssay' must be NULL or name an assay, a subset or a ",
-         "\"subset/assay\"; '", parentAssay, "' is none of these.")
+    ref <- .resolveAssay(x, parentAssay)
+    if (is.null(ref))
+      stop("'parentAssay' must be NULL or name an assay, a subset or a ",
+           "\"subset/assay\"; '", parentAssay, "' is none of these.")
   }
 
-  rows <- .rows(x, rows, parentAssay)
-  cols <- .cols(x, cols, parentAssay)
+  rows <- .selectIndices(x, rows, parentAssay, ref, "row")
+  cols <- .selectIndices(x, cols, parentAssay, ref, "col")
   # rows and cols are relative to the parent; names come from the main object
-  rootRows <- .toRootIndices(x, parentAssay, rows, .rowIndices)
-  rootCols <- .toRootIndices(x, parentAssay, cols, .colIndices)
+  rootRows <- .liftIndices(x, parentAssay, rows, .rowIndices)
+  rootCols <- .liftIndices(x, parentAssay, cols, .colIndices)
 
   a <- list(Matrix(
     nrow = length(rows),
@@ -531,8 +536,8 @@ NULL
     SingleCellExperiment::reducedDims(out) <- list()
     altExps(out) <- list()
   }
-  out <- out[.rootIndices(x, subsetName, .rowIndices),
-             .rootIndices(x, subsetName, .colIndices)]
+  out <- out[.indicesIn(x, subsetName, .rowIndices),
+             .indicesIn(x, subsetName, .colIndices)]
   rownames(out) <- rownames(internal)
   colnames(out) <- colnames(internal)
 
@@ -748,21 +753,21 @@ NULL
     parentList <- c(parentList, current)
   else if (is.null(.parentAssay(.subsets(x)[[current]])))
     return(NULL)
-  # each step moves up one subset, so a longer walk means a cycle
-  for (step in seq_len(subsetCount(x) + 1)) {
-    parent <- .parentAssay(.subsets(x)[[current]])
+  # up the chain from the subset: the parent each subset names, if it is
+  # a "P/assay", then the subset P it is in
+  chain <- .subsetChain(x, current)
+  for (i in rev(seq_along(chain))) {
+    parent <- .parentAssay(.subsets(x)[[chain[i]]])
     if (is.null(parent))
       return(parentList)
-    container <- .parentSubsetName(x, parent)
-    if (is.null(container))
+    # the outermost subset's parent is a main assay, or a name in an old
+    # object that resolves to nothing
+    if (i == 1)
       return(c(parentList, parent))
-    if (parent != container)
+    if (parent != chain[i - 1])
       parentList <- c(parentList, parent)
-    parentList <- c(parentList, container)
-    current <- container
+    parentList <- c(parentList, chain[i - 1])
   }
-  stop("The parent chain of '", subsetName, "' does not lead to a main ",
-       "assay.")
 }
 
 .subsetSummary <- function(x) {
@@ -1151,11 +1156,11 @@ NULL
   for (holder in holders) {
     if (holder == "") {
       part <- .storedAltExp(x, name)
-      part <- part[, .indicesIn(x, subsetName, NULL, .colIndices)]
+      part <- part[, .indicesIn(x, subsetName, .colIndices)]
     } else {
       part <- .storedAltExp(.internalAssay(.subsets(x)[[holder]]), name)
       if (holder != subsetName)
-        part <- part[, .indicesIn(x, subsetName, holder, .colIndices)]
+        part <- part[, .indicesIn(x, subsetName, .colIndices, holder)]
     }
     partOwners <- rep(holder, length(assayNames(part)))
     names(partOwners) <- assayNames(part)
@@ -1571,17 +1576,26 @@ NULL
   NULL
 }
 
+# The subsets that parentAssay is inside, from the outermost down to the
+# one it names or points into; character(0) for a main assay. The one walk
+# up the parent chain: each step moves up one subset, so a longer walk
+# means a cycle. label names where the walk started, in the error.
+.containerChain <- function(x, parentAssay, label = parentAssay) {
+  chain <- character(0)
+  for (step in seq_len(subsetCount(x) + 1)) {
+    container <- .parentSubsetName(x, parentAssay)
+    if (is.null(container))
+      return(chain)
+    chain <- c(container, chain)
+    parentAssay <- .parentAssay(.subsets(x)[[container]])
+  }
+  stop("The parent chain of '", label, "' does not lead to a main assay.")
+}
+
 # Subset names from the outermost container down to subsetName
 .subsetChain <- function(x, subsetName) {
-  chain <- subsetName
-  for (step in seq_len(subsetCount(x) + 1)) {
-    parent <- .parentSubsetName(x, .parentAssay(.subsets(x)[[chain[1]]]))
-    if (is.null(parent))
-      return(chain)
-    chain <- c(parent, chain)
-  }
-  stop("The parent chain of '", subsetName, "' does not lead to a main ",
-       "assay.")
+  parentAssay <- .parentAssay(.subsets(x)[[subsetName]])
+  c(.containerChain(x, parentAssay, subsetName), subsetName)
 }
 
 # Assays visible in a subset: a named vector from assay name to where it is
@@ -1597,17 +1611,25 @@ NULL
   owners
 }
 
-# Indices of a subset within the rows or columns of container (a subset
-# name, or NULL for the main object). getIndices is .rowIndices or
-# .colIndices.
-.indicesIn <- function(x, subsetName, container, getIndices) {
-  chain <- .subsetChain(x, subsetName)
-  start <- if (is.null(container)) 0L else match(container, chain)
-  below <- chain[seq_along(chain) > start]
-  indices <- getIndices(.subsets(x)[[subsetName]])
-  for (subset in rev(below)[-1])
+# Indices relative to parentAssay as positions in the rows or columns of
+# container, a subset up the chain, or of the main object when container
+# is NULL. getIndices is .rowIndices or .colIndices.
+.liftIndices <- function(x, parentAssay, indices, getIndices,
+                         container = NULL, label = parentAssay) {
+  chain <- .containerChain(x, parentAssay, label)
+  if (!is.null(container))
+    chain <- chain[seq_along(chain) > match(container, chain)]
+  for (subset in rev(chain))
     indices <- getIndices(.subsets(x)[[subset]])[indices]
   indices
+}
+
+# Indices of a subset within the rows or columns of container (a subset
+# up its chain), or of the main object when container is NULL
+.indicesIn <- function(x, subsetName, getIndices, container = NULL) {
+  subset <- .subsets(x)[[subsetName]]
+  .liftIndices(x, .parentAssay(subset), getIndices(subset), getIndices,
+               container, label = subsetName)
 }
 
 # An assay as seen in a subset: its own, or a view of the nearest
@@ -1628,8 +1650,8 @@ NULL
     ownerInternal <- .internalAssay(.subsets(x)[[owner]])
     source <- assay(ownerInternal, assayName, withDimnames = FALSE)
   }
-  rows <- .indicesIn(x, subsetName, container, .rowIndices)
-  cols <- .indicesIn(x, subsetName, container, .colIndices)
+  rows <- .indicesIn(x, subsetName, .rowIndices, container)
+  cols <- .indicesIn(x, subsetName, .colIndices, container)
   out <- source[rows, cols, drop = FALSE]
   if (withDimnames && !is.null(rownames(internal)))
     rownames(out) <- rownames(internal)
@@ -1679,27 +1701,6 @@ NULL
     )
   }
   x
-}
-
-# Converts indices relative to parentAssay into positions in the main
-# object by following the chain of parent subsets. getIndices is
-# .rowIndices or .colIndices.
-.toRootIndices <- function(x, parentAssay, indices, getIndices) {
-  for (step in seq_len(subsetCount(x) + 1)) {
-    parentName <- .parentSubsetName(x, parentAssay)
-    if (is.null(parentName))
-      return(indices)
-    parent <- .subsets(x)[[parentName]]
-    indices <- getIndices(parent)[indices]
-    parentAssay <- .parentAssay(parent)
-  }
-  stop("The parent chain of the subset does not lead to a main assay.")
-}
-
-# Row or column indices of a subset as positions in the main object
-.rootIndices <- function(x, subsetName, getIndices) {
-  subset <- .subsets(x)[[subsetName]]
-  .toRootIndices(x, .parentAssay(subset), getIndices(subset), getIndices)
 }
 
 #' @title Combine ExperimentSubset objects by columns or rows
@@ -1941,7 +1942,7 @@ NULL
       if (!identical(as.character(class(internal)), baseClass))
         internal <- methods::as(internal, baseClass)
       if (renamed) {
-        positions <- .rootIndices(object, name, getOtherIndices)
+        positions <- .indicesIn(object, name, getOtherIndices)
         stored <- getOtherNames(internal)
         followed <- .followNames(stored,
                                  getOtherNames(object)[positions],
@@ -1968,7 +1969,7 @@ NULL
   if (methods::is(out, "SpatialExperiment")) {
     subsets <- .subsets(out)
     for (name in names(subsets)) {
-      rootCols <- .rootIndices(out, name, .colIndices)
+      rootCols <- .indicesIn(out, name, .colIndices)
       internal <- .internalAssay(subsets[[name]])
       internal$sample_id <- out$sample_id[rootCols]
       .internalAssay(subsets[[name]]) <- internal
@@ -2093,7 +2094,7 @@ NULL
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   out <- rowData(internal)
   if (parentRowData) {
-    rootRows <- .rootIndices(x, subsetName, .rowIndices)
+    rootRows <- .indicesIn(x, subsetName, .rowIndices)
     parentRows <- rowData(x)[rootRows, , drop = FALSE]
     parentRows <- .hideParentColumns(parentRows, out, subsetName, "rowData")
     out <- .tagParentColumns(cbind(parentRows, out), ncol(parentRows))
@@ -2111,7 +2112,7 @@ NULL
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   out <- colData(internal)
   if (parentColData) {
-    rootCols <- .rootIndices(x, subsetName, .colIndices)
+    rootCols <- .indicesIn(x, subsetName, .colIndices)
     parentCols <- colData(x)[rootCols, , drop = FALSE]
     # a SpatialExperiment subset stores a copy of sample_id, made by
     # createSubset(); the main object's current one is used instead
@@ -2609,8 +2610,8 @@ NULL
 # Positions in owner, a subset in subsetName's chain, of subsetName's rows
 # or columns
 .ownerPositions <- function(x, subsetName, owner, getIndices) {
-  match(.rootIndices(x, subsetName, getIndices),
-        .rootIndices(x, owner, getIndices))
+  match(.indicesIn(x, subsetName, getIndices),
+        .indicesIn(x, owner, getIndices))
 }
 
 # The subset in subsetName's chain that stores the trees along dim that
@@ -2647,7 +2648,7 @@ NULL
     out <- out[.ownerPositions(x, subsetName, owner, d$indices), ,
                drop = FALSE]
   } else if (parentLinkData && !is.null(d$links(x))) {
-    out <- d$links(x)[.rootIndices(x, subsetName, d$indices), , drop = FALSE]
+    out <- d$links(x)[.indicesIn(x, subsetName, d$indices), , drop = FALSE]
   } else {
     return(NULL)
   }
@@ -2796,7 +2797,7 @@ NULL
 # object's
 .subsetSpatialCoords <- function(x, subsetName) {
   .isSubset(x, subsetName)
-  rootCols <- .rootIndices(x, subsetName, .colIndices)
+  rootCols <- .indicesIn(x, subsetName, .colIndices)
   owner <- .spatialCoordsOwner(x, subsetName)
   if (is.null(owner))
     return(spatialCoords(x)[rootCols, , drop = FALSE])
@@ -2854,7 +2855,7 @@ NULL
 # spots, looked up on each read (#72)
 .subsetImgData <- function(x, subsetName) {
   .isSubset(x, subsetName)
-  rootCols <- .rootIndices(x, subsetName, .colIndices)
+  rootCols <- .indicesIn(x, subsetName, .colIndices)
   images <- imgData(x)
   images[images$sample_id %in% x$sample_id[rootCols], , drop = FALSE]
 }
@@ -2890,7 +2891,7 @@ NULL
   nSpots <- subsetDim(x, subsetName)[2]
   out <- S4Vectors::DataFrame(row.names = as.character(seq_len(nSpots)))
   if (parentSpatialData) {
-    rootCols <- .rootIndices(x, subsetName, .colIndices)
+    rootCols <- .indicesIn(x, subsetName, .colIndices)
     # SpatialExperiment's note repeats the warning above
     out <- suppressMessages(spatialData(x))[rootCols, , drop = FALSE]
   }
@@ -3057,70 +3058,57 @@ NULL
 
 }
 
-.rows <- function(x, rows, assayName) {
-  parent <- assay(x, withDimnames = TRUE, assayName)
-  dimR <- nrow(parent)
-  if (dimR == 0)
-    stop("Parent '", assayName, "' has no rows, so a subset can't be made ",
-         "from it.")
-  if (is.character(rows)) {
-    if (is.null(rownames(parent)))
-      stop("'rows' are given as names, but the parent assay has no row ",
-           "names.")
-    tempRows <- match(rows, rownames(parent))
-  } else if (is.null(rows)) {
-    tempRows <- seq_len(dimR)
+# Positions in parentAssay's rows or columns that select picks: all of them
+# for NULL, or the numbers or names given, checked. dim is "row" or "col",
+# and ref is .resolveAssay(x, parentAssay).
+.selectIndices <- function(x, select, parentAssay, ref, dim) {
+  arg <- paste0("'", dim, "s'")
+  noun <- if (dim == "row") "row" else "column"
+  extent <- .parentExtent(x, parentAssay, ref, dim, is.character(select))
+  n <- extent$n
+  if (n == 0)
+    stop("Parent '", parentAssay, "' has no ", noun, "s, so a subset can't ",
+         "be made from it.")
+  if (is.character(select)) {
+    if (is.null(extent$names))
+      stop(arg, " are given as names, but the parent assay has no ", noun,
+           " names.")
+    indices <- match(select, extent$names)
+  } else if (is.null(select)) {
+    indices <- seq_len(n)
   } else {
-    tempRows <- rows
+    indices <- select
   }
 
-  testRows <- any(tempRows > dimR)
-  if (is.na(testRows))
-    stop("Selected rows not available in the specified assay.")
-  if (testRows)
-    stop("Selected rows not available in the specified assay.")
-  if (length(tempRows) > dimR)
-    stop("Selected rows not available in the specified assay.")
-  if (length(tempRows) == 0)
-    stop("'rows' must select at least one row.")
-  if (any(tempRows < 1) || any(tempRows != round(tempRows)))
-    stop("'rows' must be positive whole numbers or row names.")
-  if (anyDuplicated(tempRows))
-    stop("'rows' must not contain duplicates.")
-
-  return(tempRows)
+  outside <- any(indices > n)
+  if (is.na(outside) || outside || length(indices) > n)
+    stop("Selected ", noun, "s not available in the specified assay.")
+  if (length(indices) == 0)
+    stop(arg, " must select at least one ", noun, ".")
+  if (any(indices < 1) || any(indices != round(indices)))
+    stop(arg, " must be positive whole numbers or ", noun, " names.")
+  if (anyDuplicated(indices))
+    stop(arg, " must not contain duplicates.")
+  indices
 }
 
-.cols <- function(x, cols, assayName) {
-  parent <- assay(x, withDimnames = TRUE, assayName)
-  dimC <- ncol(parent)
-  if (dimC == 0)
-    stop("Parent '", assayName, "' has no columns, so a subset can't be ",
-         "made from it.")
-  if (is.character(cols)) {
-    if (is.null(colnames(parent)))
-      stop("'cols' are given as names, but the parent assay has no column ",
-           "names.")
-    tempCols <- match(cols, colnames(parent))
-  } else if (is.null(cols)) {
-    tempCols <- seq_len(dimC)
-  } else {
-    tempCols <- cols
+# The number of rows or columns of parentAssay, and their names if
+# needNames, without building the assay: a main assay has the main
+# object's, and a subset or "subset/assay" the subset's, from its internal
+# object. dim and ref as for .selectIndices().
+.parentExtent <- function(x, parentAssay, ref, dim, needNames) {
+  holder <- x
+  if (ref$kind != "main")
+    holder <- .internalAssay(.subsets(x)[[ref$subset]])
+  dimNames <- if (dim == "row") rownames else colnames
+  n <- if (dim == "row") nrow(holder) else ncol(holder)
+  names <- NULL
+  if (needNames) {
+    names <- dimNames(holder)
+    # the assays stored in x keep their names after rownames(x) <- NULL,
+    # and a subset without names of its own shows them
+    if (is.null(names) && ref$kind != "main")
+      names <- dimNames(assay(x, parentAssay))
   }
-
-  testCols <- any(tempCols > dimC)
-  if (is.na(testCols))
-    stop("Selected columns not available in the specified assay.")
-  if (testCols)
-    stop("Selected columns not available in the specified assay.")
-  if (length(tempCols) > dimC)
-    stop("Selected columns not available in the specified assay.")
-  if (length(tempCols) == 0)
-    stop("'cols' must select at least one column.")
-  if (any(tempCols < 1) || any(tempCols != round(tempCols)))
-    stop("'cols' must be positive whole numbers or column names.")
-  if (anyDuplicated(tempCols))
-    stop("'cols' must not contain duplicates.")
-
-  return(tempCols)
+  list(n = n, names = names)
 }
