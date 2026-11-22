@@ -9,7 +9,8 @@ AssaySubset(
   rowIndices = NULL,
   colIndices = NULL,
   parentAssay = "counts",
-  internalAssay = NULL
+  internalAssay = NULL,
+  altExpName = NULL
 )
 }
 \arguments{
@@ -25,6 +26,10 @@ in the subset.}
 
 \item{internalAssay}{An internal Experiment object to store additional
 subset data.}
+
+\item{altExpName}{\code{character(1)} or \code{NULL}. The altExp whose
+features the subset's rows index, for a subset made with
+\code{createSubset(altExp =)}.}
 }
 \value{
 A \code{AssaySubset} object.

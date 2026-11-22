@@ -4895,6 +4895,7 @@ test_that("A subset made from an altExp sees only altExps below it (#92)", {
   expect_equal(altExpNames(es, subsetName = "clean.antibodies"),
                character(0))
   extra <- SummarizedExperiment(list(counts = matrix(1, 2, 12)))
+  colnames(extra) <- subsetColnames(es, "clean.antibodies")
   altExp(es, "extra", subsetName = "clean.antibodies") <- extra
   es <- createSubset(es, "cd", rows = 1:2, parentAssay = "clean.antibodies")
   expect_equal(altExpNames(es, subsetName = "clean.antibodies"), "extra")
@@ -5023,7 +5024,11 @@ test_that("A new altExp class carries along to subsets made from it", {
   es <- makeAdtEs(cleanClr = FALSE)
   es <- createSubset(es, "adt", rows = 1:2, altExp = "ADT")
   es <- createSubset(es, "below", rows = 1, parentAssay = "adt")
-  altExp(es, "ADT") <- as(altExp(es, "ADT"), "SummarizedExperiment")
+  # as() to SummarizedExperiment drops a SingleCellExperiment's rownames
+  adt <- as(altExp(es, "ADT"), "SummarizedExperiment")
+  rownames(adt) <- rownames(altExp(es, "ADT"))
+  altExp(es, "ADT") <- adt
+  expect_equal(assay(es, "below"), assay(adt, "counts")[1, , drop = FALSE])
   for (name in c("adt", "below")) {
     out <- getSubsetExperiment(es, name)
     expect_false(is(out, "SingleCellExperiment"))
@@ -5062,7 +5067,9 @@ test_that("Combining objects keeps subsets made from an altExp (#92)", {
                assay(altExp(combined, "ADT"), "counts")[c("CD3", "CD8"),
                                                          paste0("cell", 2:5)])
   # combineRows() keeps no altExps
-  expect_warning(byRows <- combineRows(es, genes), "Dropped subsets 'adt'")
+  expect_warning(byRows <- combineRows(es, genes),
+                 paste0("Dropped subset 'adt': the altExp 'ADT' it was made ",
+                        "from was removed."), fixed = TRUE)
   expect_equal(subsetNames(byRows), "clean")
 })
 

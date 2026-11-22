@@ -9,17 +9,24 @@
 \alias{createSubset,SubsetSpatialExperiment-method}
 \title{Subset creation method for ExperimentSubset objects}
 \usage{
-createSubset(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+createSubset(
+  x,
+  subsetName,
+  rows = NULL,
+  cols = NULL,
+  parentAssay = NULL,
+  altExp = NULL
+)
 
-\S4method{createSubset}{SubsetSummarizedExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{SubsetSummarizedExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL, altExp = NULL)
 
-\S4method{createSubset}{SubsetRangedSummarizedExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{SubsetRangedSummarizedExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL, altExp = NULL)
 
-\S4method{createSubset}{SubsetSingleCellExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{SubsetSingleCellExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL, altExp = NULL)
 
-\S4method{createSubset}{SubsetTreeSummarizedExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{SubsetTreeSummarizedExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL, altExp = NULL)
 
-\S4method{createSubset}{SubsetSpatialExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL)
+\S4method{createSubset}{SubsetSpatialExperiment}(x, subsetName, rows = NULL, cols = NULL, parentAssay = NULL, altExp = NULL)
 }
 \arguments{
 \item{x}{\code{ExperimentSubset} Specify the object from which a subset
