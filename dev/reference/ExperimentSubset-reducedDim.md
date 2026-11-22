@@ -36,52 +36,52 @@ reducedDims(x, ...)
 # S4 method for class 'SubsetSingleCellExperiment'
 reducedDims(x, withDimnames = TRUE, ...) <- value
 
-# S4 method for class 'SubsetSpatialExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment,character'
 reducedDim(x, type, ...)
 
-# S4 method for class 'SubsetSpatialExperiment,missing'
+# S4 method for class 'SubsetTreeSummarizedExperiment,missing'
 reducedDim(x, type, ...)
 
-# S4 method for class 'SubsetSpatialExperiment,numeric'
+# S4 method for class 'SubsetTreeSummarizedExperiment,numeric'
 reducedDim(x, type, ...)
 
-# S4 method for class 'SubsetSpatialExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment,character'
 reducedDim(x, type, withDimnames = TRUE, ...) <- value
 
-# S4 method for class 'SubsetSpatialExperiment,missing'
+# S4 method for class 'SubsetTreeSummarizedExperiment,missing'
 reducedDim(x, type, withDimnames = TRUE, ...) <- value
 
-# S4 method for class 'SubsetSpatialExperiment,numeric'
+# S4 method for class 'SubsetTreeSummarizedExperiment,numeric'
 reducedDim(x, type, withDimnames = TRUE, ...) <- value
 
-# S4 method for class 'SubsetSpatialExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 reducedDims(x, ...)
 
-# S4 method for class 'SubsetSpatialExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 reducedDims(x, withDimnames = TRUE, ...) <- value
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
+# S4 method for class 'SubsetSpatialExperiment,character'
 reducedDim(x, type, ...)
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,missing'
+# S4 method for class 'SubsetSpatialExperiment,missing'
 reducedDim(x, type, ...)
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,numeric'
+# S4 method for class 'SubsetSpatialExperiment,numeric'
 reducedDim(x, type, ...)
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
+# S4 method for class 'SubsetSpatialExperiment,character'
 reducedDim(x, type, withDimnames = TRUE, ...) <- value
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,missing'
+# S4 method for class 'SubsetSpatialExperiment,missing'
 reducedDim(x, type, withDimnames = TRUE, ...) <- value
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,numeric'
+# S4 method for class 'SubsetSpatialExperiment,numeric'
 reducedDim(x, type, withDimnames = TRUE, ...) <- value
 
-# S4 method for class 'SubsetTreeSummarizedExperiment'
+# S4 method for class 'SubsetSpatialExperiment'
 reducedDims(x, ...)
 
-# S4 method for class 'SubsetTreeSummarizedExperiment'
+# S4 method for class 'SubsetSpatialExperiment'
 reducedDims(x, withDimnames = TRUE, ...) <- value
 ```
 
@@ -96,6 +96,11 @@ reducedDims(x, withDimnames = TRUE, ...) <- value
   `character(1)` or `integer(1)` The name or position of the reduced
   dimension. Leave it out for the first one.
 
+- withDimnames:
+
+  `logical(1)` Passed on to `reducedDim<-` or `reducedDims<-`. Default
+  `TRUE`.
+
 - ...:
 
   `subsetName`
@@ -107,11 +112,6 @@ reducedDims(x, withDimnames = TRUE, ...) <- value
 
   Other arguments are passed on to the `SingleCellExperiment` method,
   for the subset or the main object.
-
-- withDimnames:
-
-  `logical(1)` Passed on to `reducedDim<-` or `reducedDims<-`. Default
-  `TRUE`.
 
 - value:
 

@@ -11,6 +11,12 @@ subsetColData(x, subsetName, parentColData)
 
 subsetColData(x, subsetName) <- value
 
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetColData(x, subsetName, parentColData)
+
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetColData(x, subsetName) <- value
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetColData(x, subsetName, parentColData)
 
@@ -21,22 +27,19 @@ subsetColData(x, subsetName) <- value
 subsetColData(x, subsetName, parentColData)
 
 # S4 method for class 'SubsetSingleCellExperiment'
-subsetColData(x, subsetName) <- value
-
-# S4 method for class 'SubsetSummarizedExperiment'
-subsetColData(x, subsetName) <- value
-
-# S4 method for class 'SubsetSummarizedExperiment'
-subsetColData(x, subsetName, parentColData)
-
-# S4 method for class 'SubsetSpatialExperiment'
-subsetColData(x, subsetName, parentColData)
-
-# S4 method for class 'SubsetSpatialExperiment'
 subsetColData(x, subsetName) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetColData(x, subsetName, parentColData)
+
+# S4 method for class 'SubsetTreeSummarizedExperiment'
+subsetColData(x, subsetName) <- value
+
+# S4 method for class 'SubsetSpatialExperiment'
+subsetColData(x, subsetName, parentColData)
+
+# S4 method for class 'SubsetSpatialExperiment'
+subsetColData(x, subsetName) <- value
 ```
 
 ## Arguments

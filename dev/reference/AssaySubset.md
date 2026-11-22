@@ -11,7 +11,8 @@ AssaySubset(
   rowIndices = NULL,
   colIndices = NULL,
   parentAssay = "counts",
-  internalAssay = NULL
+  internalAssay = NULL,
+  altExpName = NULL
 )
 ```
 
@@ -36,6 +37,11 @@ AssaySubset(
 - internalAssay:
 
   An internal Experiment object to store additional subset data.
+
+- altExpName:
+
+  `character(1)` or `NULL`. The altExp whose features the subset's rows
+  index, for a subset made with `createSubset(altExp =)`.
 
 ## Value
 

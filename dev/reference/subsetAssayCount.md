@@ -8,19 +8,19 @@ inside these subsets in an `ExperimentSubset` object.
 ``` r
 subsetAssayCount(x)
 
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetAssayCount(x)
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetAssayCount(x)
 
 # S4 method for class 'SubsetSingleCellExperiment'
 subsetAssayCount(x)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetAssayCount(x)
 
 # S4 method for class 'SubsetSpatialExperiment'
-subsetAssayCount(x)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetAssayCount(x)
 ```
 

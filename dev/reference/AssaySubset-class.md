@@ -24,3 +24,9 @@ Used inside the `Subset*` classes; not for direct use.
 
   `SummarizedExperiment` An internal experiment object to store
   additional subset data.
+
+- `altExpName`:
+
+  `character(1)` or `NULL`. For a subset made with
+  `createSubset(altExp =)`, the name of the altExp whose features its
+  rows index; `NULL` for other subsets (ADR 0007).

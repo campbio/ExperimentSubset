@@ -24,10 +24,10 @@ altExps(x, ...)
 # S4 method for class 'SubsetSingleCellExperiment'
 altExpNames(x, ...)
 
-# S4 method for class 'SubsetSingleCellExperiment,character'
+# S4 method for class 'SubsetSingleCellExperiment,ANY'
 altExpNames(x, ...) <- value
 
-# S4 method for class 'SubsetSingleCellExperiment,ANY'
+# S4 method for class 'SubsetSingleCellExperiment,character'
 altExpNames(x, ...) <- value
 
 # S4 method for class 'SubsetSingleCellExperiment,character'
@@ -42,39 +42,6 @@ altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
 # S4 method for class 'SubsetSingleCellExperiment'
 altExps(x, withDimnames = TRUE, withColData = FALSE, ...) <- value
 
-# S4 method for class 'SubsetSpatialExperiment,character'
-altExp(x, e, ...)
-
-# S4 method for class 'SubsetSpatialExperiment,missing'
-altExp(x, e, ...)
-
-# S4 method for class 'SubsetSpatialExperiment,numeric'
-altExp(x, e, ...)
-
-# S4 method for class 'SubsetSpatialExperiment'
-altExps(x, ...)
-
-# S4 method for class 'SubsetSpatialExperiment'
-altExpNames(x, ...)
-
-# S4 method for class 'SubsetSpatialExperiment,character'
-altExpNames(x, ...) <- value
-
-# S4 method for class 'SubsetSpatialExperiment,ANY'
-altExpNames(x, ...) <- value
-
-# S4 method for class 'SubsetSpatialExperiment,character'
-altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
-
-# S4 method for class 'SubsetSpatialExperiment,missing'
-altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
-
-# S4 method for class 'SubsetSpatialExperiment,numeric'
-altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
-
-# S4 method for class 'SubsetSpatialExperiment'
-altExps(x, withDimnames = TRUE, withColData = FALSE, ...) <- value
-
 # S4 method for class 'SubsetTreeSummarizedExperiment,character'
 altExp(x, e, ...)
 
@@ -89,14 +56,14 @@ altExps(x, ...)
 
 # S4 method for class 'SubsetTreeSummarizedExperiment'
 altExpNames(x, ...)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
-altExpNames(x, ...) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment,ANY'
 altExpNames(x, ...) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment,character'
+altExpNames(x, ...) <- value
+
+# S4 method for class 'SubsetTreeSummarizedExperiment,character'
 altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment,missing'
@@ -106,6 +73,39 @@ altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
 altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment'
+altExps(x, withDimnames = TRUE, withColData = FALSE, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,character'
+altExp(x, e, ...)
+
+# S4 method for class 'SubsetSpatialExperiment,missing'
+altExp(x, e, ...)
+
+# S4 method for class 'SubsetSpatialExperiment,numeric'
+altExp(x, e, ...)
+
+# S4 method for class 'SubsetSpatialExperiment'
+altExps(x, ...)
+
+# S4 method for class 'SubsetSpatialExperiment'
+altExpNames(x, ...)
+
+# S4 method for class 'SubsetSpatialExperiment,ANY'
+altExpNames(x, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,character'
+altExpNames(x, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,character'
+altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,missing'
+altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,numeric'
+altExp(x, e, withDimnames = TRUE, withColData = FALSE, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment'
 altExps(x, withDimnames = TRUE, withColData = FALSE, ...) <- value
 ```
 
@@ -120,6 +120,14 @@ altExps(x, withDimnames = TRUE, withColData = FALSE, ...) <- value
   `character(1)` or `integer(1)` The name or position of the alternative
   experiment. Leave it out for the first one. With `subsetName`,
   positions follow `altExpNames()`.
+
+- withDimnames:
+
+  `logical(1)` Passed on to `altExp<-` or `altExps<-`. Default `TRUE`.
+
+- withColData:
+
+  `logical(1)` Passed on to `altExp<-` or `altExps<-`. Default `FALSE`.
 
 - ...:
 
@@ -149,14 +157,6 @@ altExps(x, withDimnames = TRUE, withColData = FALSE, ...) <- value
   For `altExpNames<-`, a `character` vector of new names, one for each
   name `altExpNames()` returns; with `subsetName`, they must all differ,
   and only the subset's own altExps can get new names.
-
-- withDimnames:
-
-  `logical(1)` Passed on to `altExp<-` or `altExps<-`. Default `TRUE`.
-
-- withColData:
-
-  `logical(1)` Passed on to `altExp<-` or `altExps<-`. Default `FALSE`.
 
 ## Value
 
@@ -212,6 +212,12 @@ from the main object or from the subset that stores it. Its new values
 show in them. Renaming it renames what they store of it. Removing it, or
 storing it with other rows or another class, drops what they added to
 it, with a warning; an altExp a subset stores whole is kept.
+
+A subset can also be made from an altExp, with its own features, by
+`createSubset(altExp =)`; see
+[`createSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md).
+Such a subset sees only the altExps it, or a subset it was made from,
+stores.
 
 ## See also
 

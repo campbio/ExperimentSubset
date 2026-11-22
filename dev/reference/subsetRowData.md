@@ -11,6 +11,12 @@ subsetRowData(x, subsetName, parentRowData)
 
 subsetRowData(x, subsetName) <- value
 
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetRowData(x, subsetName, parentRowData)
+
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetRowData(x, subsetName) <- value
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetRowData(x, subsetName, parentRowData)
 
@@ -21,22 +27,19 @@ subsetRowData(x, subsetName) <- value
 subsetRowData(x, subsetName, parentRowData)
 
 # S4 method for class 'SubsetSingleCellExperiment'
-subsetRowData(x, subsetName) <- value
-
-# S4 method for class 'SubsetSummarizedExperiment'
-subsetRowData(x, subsetName) <- value
-
-# S4 method for class 'SubsetSummarizedExperiment'
-subsetRowData(x, subsetName, parentRowData)
-
-# S4 method for class 'SubsetSpatialExperiment'
-subsetRowData(x, subsetName, parentRowData)
-
-# S4 method for class 'SubsetSpatialExperiment'
 subsetRowData(x, subsetName) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetRowData(x, subsetName, parentRowData)
+
+# S4 method for class 'SubsetTreeSummarizedExperiment'
+subsetRowData(x, subsetName) <- value
+
+# S4 method for class 'SubsetSpatialExperiment'
+subsetRowData(x, subsetName, parentRowData)
+
+# S4 method for class 'SubsetSpatialExperiment'
+subsetRowData(x, subsetName) <- value
 ```
 
 ## Arguments

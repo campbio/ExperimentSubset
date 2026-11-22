@@ -28,6 +28,12 @@ error. Any other name stores a main assay.
 ## Usage
 
 ``` r
+# S4 method for class 'SubsetSummarizedExperiment,character'
+assay(x, i, withDimnames = TRUE, ...)
+
+# S4 method for class 'SubsetSummarizedExperiment,character'
+assay(x, i, withDimnames = TRUE, ...) <- value
+
 # S4 method for class 'SubsetRangedSummarizedExperiment,character'
 assay(x, i, withDimnames = TRUE, ...)
 
@@ -40,22 +46,16 @@ assay(x, i, withDimnames = TRUE, ...)
 # S4 method for class 'SubsetSingleCellExperiment,character'
 assay(x, i, withDimnames = TRUE, ...) <- value
 
-# S4 method for class 'SubsetSummarizedExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment,character'
 assay(x, i, withDimnames = TRUE, ...)
 
-# S4 method for class 'SubsetSummarizedExperiment,character'
+# S4 method for class 'SubsetTreeSummarizedExperiment,character'
 assay(x, i, withDimnames = TRUE, ...) <- value
 
 # S4 method for class 'SubsetSpatialExperiment,character'
 assay(x, i, withDimnames = TRUE, ...)
 
 # S4 method for class 'SubsetSpatialExperiment,character'
-assay(x, i, withDimnames = TRUE, ...) <- value
-
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
-assay(x, i, withDimnames = TRUE, ...)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment,character'
 assay(x, i, withDimnames = TRUE, ...) <- value
 ```
 

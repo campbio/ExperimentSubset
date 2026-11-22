@@ -1,5 +1,108 @@
 # Changelog
 
+## ExperimentSubset 1.23.55 (2026-11-21)
+
+- New `altExp` argument of
+  [`createSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md):
+  a subset can now be made from an alternative experiment (altExp) of
+  the main object, with its own features and cells, such as the ADT
+  proteins without the isotype controls. With `altExp = "ADT"`, `rows`
+  pick ADT’s features and `parentAssay` names one of ADT’s assays:
+  `"counts"` (or `NULL`, its first assay) for the main object’s ADT,
+  with `cols` picking the main object’s cells, or `"clean/clr"` (or
+  `"clean"`) for ADT as subset `clean` sees it, with the assays `clean`
+  stores in it, and `cols` picking `clean`’s cells. The subset sees
+  every assay of that ADT, linked and cut to its rows and cells, and
+  stores its own with
+  [`setSubsetAssay()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md)
+  and the usual `unlink` rules, with messages such as “unlinked from
+  altExp ‘ADT’ of subset ‘clean’”. It has ADT’s class, so a subset of a
+  SingleCellExperiment altExp can hold reducedDims;
+  [`getSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/getSubsetExperiment.md)
+  returns an object of that class, and `rowData(parentRowData = TRUE)`
+  gives ADT’s rowData. Subsets made from it, without `altExp`, pick its
+  rows and cells.
+  [`subsetParent()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetParent.md)
+  writes where it was made from as `"ADT/counts"` or `"clean/ADT/clr"`.
+  Changes to ADT carry along: renaming it updates the subset; giving it
+  other rows, such as dropping the isotype controls, keeps the subset’s
+  features whose names remain, or is an error if the rows have no names
+  to match; giving it another class converts the subset; removing it, or
+  [`combineRows()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html),
+  which returns a class without altExps, drops the subset and those made
+  from it with the warning “Dropped subsets ‘a’ and ‘b’: the altExp
+  ‘ADT’ they were made from was removed.” If the assay it was made from
+  goes, it behaves as for a main assay: storing `clean`’s ADT without
+  `clr` is an error, “‘value’ has no assay ‘ADT/clr’, which subsets
+  ‘clean.antibodies’ were made from. Keep it in ‘value’.”, while giving
+  the main ADT other rows, which drops what `clean` stored in it, leaves
+  the subset without its parent assay. `x[i, ]` leaves its rows alone,
+  and
+  [`combineCols()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html)
+  matches ADT’s rows by name. For a TreeSummarizedExperiment, its row
+  tree is an error, since its rows aren’t the main object’s; column
+  trees and spatial coordinates are read at its cells, and stored only
+  if its class can hold them. An altExp stored only in a subset can’t be
+  used. A rename of the main object’s altExps no longer renames altExps
+  of the same name that these subsets store themselves, which don’t see
+  the main object’s. Subsets now record this in a new slot of the
+  internal `AssaySubset` class (ADR 0007). Objects saved before it work
+  as they are, and the new
+  [`updateObject()`](https://rdrr.io/pkg/BiocGenerics/man/updateObject.html)
+  methods add the slot. Other subsets don’t change
+  ([\#92](https://github.com/campbio/ExperimentSubset/issues/92))
+
+## ExperimentSubset 1.23.54 (2026-11-20)
+
+- [`createSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)
+  no longer builds the parent assay to check `rows` and `cols`: it reads
+  the parent’s size and row or column names from the main object, or
+  from the subset it is made from. Before, it built the whole parent
+  assay twice. It still builds it to match names in `rows` or `cols`
+  when the subset has no names of its own, which happens only after the
+  object’s names were removed with `rownames(x) <- NULL` or
+  `colnames(x) <- NULL`, as the stored assays keep theirs. Without
+  `parentAssay`, on an object whose first assay has no name, or that has
+  no assays, it now stops with “‘parentAssay’ is needed: ‘x’ has no
+  named first assay to make the subset from.” instead of an error from
+  [`assay()`](https://rdrr.io/pkg/SummarizedExperiment/man/SummarizedExperiment-class.html).
+  The internal walks up the chain of parent subsets now share one
+  function, with one cycle guard. No change in results
+  ([\#36](https://github.com/campbio/ExperimentSubset/issues/36))
+
+## ExperimentSubset 1.23.53 (2026-11-19)
+
+- The methods the `Subset*` classes share are now each defined once, in
+  a loop over the classes in the new `R/SubsetMethods.R`, rather than
+  copied into one file per class, so a fix to a method reaches every
+  class. `SubsetSummarizedExperiment.R`,
+  `SubsetRangedSummarizedExperiment.R` and
+  `SubsetSingleCellExperiment.R` are gone; `SubsetSpatialExperiment.R`
+  and `SubsetTreeSummarizedExperiment.R` keep only the methods of their
+  own class. The help pages keep the same aliases, and the
+  `subsetColData<-` and `subsetRowData<-` pages now also show the usage
+  line for `SubsetTreeSummarizedExperiment`, as they do for the other
+  classes. No change in behavior
+  ([\#36](https://github.com/campbio/ExperimentSubset/issues/36))
+
+## ExperimentSubset 1.23.52 (2026-11-19)
+
+- `codecov.yml` sets devel as the default branch on Codecov, so its repo
+  page shows the coverage of devel instead of an old report for master.
+  No change to the package
+
+## ExperimentSubset 1.23.51 (2026-11-18)
+
+- A new GitHub Actions workflow, `test-coverage.yaml`, runs the tests
+  under covr on every push and pull request to devel and uploads the
+  coverage to Codecov with the `CODECOV_TOKEN` secret. Before, no
+  workflow uploaded coverage: `codecov.yml` still held the Travis CI
+  settings that ran
+  [`covr::codecov()`](https://covr.r-lib.org/reference/codecov.html),
+  and those settings are now gone, as is `.travis.yml` from
+  `.Rbuildignore`. The README shows a Codecov badge for devel. No change
+  to the package
+
 ## ExperimentSubset 1.23.50 (2026-11-10)
 
 - The README and the vignette now install the development version with

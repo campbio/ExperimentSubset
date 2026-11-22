@@ -7,19 +7,19 @@ Retrieves the names of all the subsets as well as the subset assays.
 ``` r
 subsetAssayNames(x, subsetName = NULL)
 
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetAssayNames(x, subsetName = NULL)
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetAssayNames(x, subsetName = NULL)
 
 # S4 method for class 'SubsetSingleCellExperiment'
 subsetAssayNames(x, subsetName = NULL)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetAssayNames(x, subsetName = NULL)
 
 # S4 method for class 'SubsetSpatialExperiment'
-subsetAssayNames(x, subsetName = NULL)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetAssayNames(x, subsetName = NULL)
 ```
 

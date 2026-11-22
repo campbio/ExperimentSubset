@@ -17,6 +17,18 @@ result's, or by position with `use.names = FALSE`.
 ## Usage
 
 ``` r
+# S4 method for class 'SubsetSummarizedExperiment'
+cbind(..., deparse.level = 1)
+
+# S4 method for class 'SubsetSummarizedExperiment'
+rbind(..., deparse.level = 1)
+
+# S4 method for class 'SubsetSummarizedExperiment'
+combineCols(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
+
+# S4 method for class 'SubsetSummarizedExperiment'
+combineRows(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 cbind(..., deparse.level = 1)
 
@@ -41,16 +53,16 @@ combineCols(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
 # S4 method for class 'SubsetSingleCellExperiment'
 combineRows(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 cbind(..., deparse.level = 1)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 rbind(..., deparse.level = 1)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 combineCols(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 combineRows(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
 
 # S4 method for class 'SubsetSpatialExperiment'
@@ -63,18 +75,6 @@ rbind(..., deparse.level = 1)
 combineCols(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
 
 # S4 method for class 'SubsetSpatialExperiment'
-combineRows(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
-cbind(..., deparse.level = 1)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
-rbind(..., deparse.level = 1)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
-combineCols(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 combineRows(x, ..., delayed = TRUE, fill = NA, use.names = TRUE)
 ```
 

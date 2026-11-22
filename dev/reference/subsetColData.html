@@ -9,7 +9,7 @@ Set colData to a subset."><meta name="robots" content="noindex"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.50</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.55</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@ Set colData to a subset."><meta name="robots" content="noindex"></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Accessor method for colData from subsets in ExperimentSubset objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/allGenerics.R" class="external-link"><code>R/allGenerics.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetRangedSummarizedExperiment.R" class="external-link"><code>R/SubsetRangedSummarizedExperiment.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetSingleCellExperiment.R" class="external-link"><code>R/SubsetSingleCellExperiment.R</code></a>, and 3 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/allGenerics.R" class="external-link"><code>R/allGenerics.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetMethods.R" class="external-link"><code>R/SubsetMethods.R</code></a></small>
       <div class="d-none name"><code>subsetColData.Rd</code></div>
     </div>
 
@@ -53,6 +53,12 @@ Set colData to a subset."><meta name="robots" content="noindex"></head><body>
 <span></span>
 <span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
+<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
+<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentColData</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
+<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
 <span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment'</span></span>
 <span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentColData</span><span class="op">)</span></span>
 <span></span>
@@ -63,22 +69,19 @@ Set colData to a subset."><meta name="robots" content="noindex"></head><body>
 <span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentColData</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
-<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
-<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
-<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentColData</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
-<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentColData</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
 <span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
-<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentColData</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentColData</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
+<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, <span class="va">parentColData</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="fu">subsetColData</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span></code></pre></div>
     </div>
 
     <div class="section level2">

@@ -11,7 +11,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.50</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.55</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Subset creation method for ExperimentSubset objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/allGenerics.R" class="external-link"><code>R/allGenerics.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetRangedSummarizedExperiment.R" class="external-link"><code>R/SubsetRangedSummarizedExperiment.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetSingleCellExperiment.R" class="external-link"><code>R/SubsetSingleCellExperiment.R</code></a>, and 3 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/allGenerics.R" class="external-link"><code>R/allGenerics.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetMethods.R" class="external-link"><code>R/SubsetMethods.R</code></a></small>
       <div class="d-none name"><code>createSubset.Rd</code></div>
     </div>
 
@@ -52,22 +52,29 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment'</span></span>
-<span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
-<span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">createSubset</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">subsetName</span>,</span>
+<span>  rows <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cols <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  parentAssay <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  altExp <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
-<span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span>, altExp <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
-<span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment'</span></span>
+<span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span>, altExp <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
+<span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span>, altExp <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
-<span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span>, altExp <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="fu">createSubset</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span>, rows <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span>, parentAssay <span class="op">=</span> <span class="cn">NULL</span>, altExp <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -102,13 +109,55 @@ are included in the subset. Default <code>NULL</code>.</p></dd>
 subset: the name of a main <code>assay</code>, of a subset, or of an assay seen
 in a subset written as <code>"subset/assay"</code>. If <code>NULL</code>, the first
 available main <code>assay</code> will be marked as parent. Default
-<code>NULL</code>.</p></dd>
+<code>NULL</code>. With <code>altExp</code>, it names an assay of that altExp
+instead; see the section below.</p></dd>
+
+
+<dt id="arg-altexp">altExp<a class="anchor" aria-label="anchor" href="#arg-altexp"></a></dt>
+<dd><p><code>character(1)</code> or <code>NULL</code>. The name of an
+alternative experiment (altExp) of the main object, such as
+<code>"ADT"</code>, to make the subset from: <code>rows</code> then pick its
+features. Only for the classes that extend <code>SingleCellExperiment</code>.
+If <code>NULL</code>, the subset is made from the main object's features.
+Default <code>NULL</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An <code>ExperimentSubset</code> object that now contains the newly created
   subset.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="subsets-made-from-an-altexp">Subsets made from an altExp<a class="anchor" aria-label="anchor" href="#subsets-made-from-an-altexp"></a></h2>
+
+
+<p>With <code>altExp = "ADT"</code>, the subset's rows are features of the
+  altExp <code>"ADT"</code>, such as some of its proteins, and its columns are
+  cells, as for any subset. <code>parentAssay</code> names an assay of the
+  altExp, as the main object or a subset sees it:</p><ul><li><p><code>NULL</code> or <code>"counts"</code>: the first assay, or the assay
+      <code>counts</code>, of the main object's altExp. <code>cols</code> pick the
+      main object's cells.</p></li>
+<li><p><code>"clean"</code> or <code>"clean/clr"</code>: the first assay, or the
+      assay <code>clr</code>, of the altExp as subset <code>clean</code> sees it,
+      with the assays <code>clean</code> stores in it. <code>cols</code> pick
+      <code>clean</code>'s cells.</p></li>
+</ul><p><code>rows</code> pick the altExp's features, by position or name. The
+  subset sees every assay of the altExp as its parent does, linked and
+  cut to its rows and cells, and stores its own with
+  <code><a href="setSubsetAssay.html">setSubsetAssay()</a></code>, with the usual <code>unlink</code> rules. Its
+  rowData with <code>parentRowData = TRUE</code> is the altExp's, and
+  <code><a href="getSubsetExperiment.html">getSubsetExperiment()</a></code> returns an object of the altExp's class.
+  Subsets made from it, without <code>altExp</code>, pick its rows and cells.
+  It doesn't see the main object's altExps. A row tree doesn't apply to
+  it; column trees and spatial data are read at its cells.</p>
+<p>Changes to the altExp carry along: renaming it, on the main object or
+  in the subset it was made from, renames what the subset records; if it
+  gets other rows, the subset keeps the features whose names remain; if
+  it is removed, the subset and those made from it are dropped, with a
+  warning. If the assay the subset was made from goes, it behaves as for
+  a main assay: storing a subset's view of the altExp without that assay
+  is an error, and a change to the main object's altExp that drops it
+  leaves the subset without its parent assay.</p>
     </div>
 
     <div class="section level2">
@@ -135,6 +184,37 @@ available main <code>assay</code> will be marked as parent. Default
 <span class="r-out co"><span class="r-pr">#&gt;</span> altExpNames(0):</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> subsets(1): subset1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> subsetAssays(1): subset1</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># an object with 10 genes and 20 cells</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">200</span>, lambda <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"gene"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"cell"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu"><a href="ExperimentSubset.html">ExperimentSubset</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">counts</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># counts of 4 proteins in the same cells, as the altExp "ADT"</span></span></span>
+<span class="r-in"><span><span class="va">adtCounts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Poisson.html" class="external-link">rpois</a></span><span class="op">(</span><span class="fl">80</span>, lambda <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">adtCounts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD3"</span>, <span class="st">"CD4"</span>, <span class="st">"CD8"</span>, <span class="st">"Isotype"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">altExp</span><span class="op">(</span><span class="va">es</span>, <span class="st">"ADT"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu">SingleCellExperiment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">adtCounts</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'colnames(value)' are not the same as 'colnames(x)' for 'altExp&lt;-'.</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> This will be an error in the next release of Bioconductor.</span>
+<span class="r-in"><span><span class="co"># a subset of the first 12 cells</span></span></span>
+<span class="r-in"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu">createSubset</span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"clean"</span>, cols <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">12</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># a subset of clean's cells without the isotype control</span></span></span>
+<span class="r-in"><span><span class="va">es</span> <span class="op">&lt;-</span> <span class="fu">createSubset</span><span class="op">(</span><span class="va">es</span>, subsetName <span class="op">=</span> <span class="st">"clean.antibodies"</span>,</span></span>
+<span class="r-in"><span>                   rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CD3"</span>, <span class="st">"CD4"</span>, <span class="st">"CD8"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                   parentAssay <span class="op">=</span> <span class="st">"clean"</span>, altExp <span class="op">=</span> <span class="st">"ADT"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu">assay</span><span class="op">(</span><span class="va">es</span>, <span class="st">"clean.antibodies"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  3 12</span>
+<span class="r-in"><span><span class="fu"><a href="subsetParent.html">subsetParent</a></span><span class="op">(</span><span class="va">es</span>, <span class="st">"clean.antibodies"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clean/ADT/counts"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clean"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "counts"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

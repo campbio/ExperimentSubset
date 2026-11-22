@@ -8,19 +8,19 @@ an `ExperimentSubset` object.
 ``` r
 subsetNames(x)
 
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetNames(x)
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetNames(x)
 
 # S4 method for class 'SubsetSingleCellExperiment'
 subsetNames(x)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetNames(x)
 
 # S4 method for class 'SubsetSpatialExperiment'
-subsetNames(x)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetNames(x)
 ```
 

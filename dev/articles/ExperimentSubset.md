@@ -913,19 +913,19 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.50        TreeSummarizedExperiment_2.21.0
+    ##  [1] ExperimentSubset_1.23.55        TreeSummarizedExperiment_2.21.0
     ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
     ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
     ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 
     ##  [9] GenomicRanges_1.65.4            Seqinfo_1.3.2                  
     ## [11] IRanges_2.47.5                  S4Vectors_0.51.10              
-    ## [13] BiocGenerics_0.59.12            generics_0.1.4                 
+    ## [13] BiocGenerics_0.59.13            generics_0.1.4                 
     ## [15] MatrixGenerics_1.25.0           matrixStats_1.5.0              
     ## [17] BiocStyle_2.41.0               
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] rjson_0.2.23        xfun_0.62           bslib_0.12.0       
-    ##  [4] htmlwidgets_1.6.4   lattice_0.23-1      yulab.utils_0.2.5  
+    ##  [4] htmlwidgets_1.6.4   lattice_0.23-1      yulab.utils_0.2.6  
     ##  [7] vctrs_0.7.3         tools_4.6.1         parallel_4.6.1     
     ## [10] tibble_3.3.1        pkgconfig_2.0.3     Matrix_1.7-6       
     ## [13] desc_1.4.3          lifecycle_1.0.5     compiler_4.6.1     
@@ -937,10 +937,10 @@ and `metadata`.
     ## [31] magick_2.9.1        abind_1.4-8         nlme_3.1-171       
     ## [34] tidyselect_1.2.1    digest_0.6.39       purrr_1.2.2        
     ## [37] dplyr_1.2.1         bookdown_0.48       fastmap_1.2.0      
-    ## [40] grid_4.6.1          cli_3.6.6           SparseArray_1.13.4 
-    ## [43] magrittr_2.0.5      S4Arrays_1.13.2     ape_5.8-1          
+    ## [40] grid_4.6.1          cli_3.6.6           SparseArray_1.13.5 
+    ## [43] magrittr_2.0.5      S4Arrays_1.13.3     ape_5.8-1          
     ## [46] rappdirs_0.3.4      rmarkdown_2.32      otel_0.2.0         
     ## [49] ragg_1.5.2          evaluate_1.0.5      knitr_1.52         
-    ## [52] rlang_1.3.0         Rcpp_1.1.2          tidytree_0.4.8     
+    ## [52] rlang_1.3.0         Rcpp_1.1.2          tidytree_0.4.9     
     ## [55] glue_1.8.1          BiocManager_1.30.27 jsonlite_2.0.0     
     ## [58] R6_2.6.1            systemfonts_1.3.2   fs_2.1.0

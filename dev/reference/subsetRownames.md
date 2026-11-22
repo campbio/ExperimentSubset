@@ -11,6 +11,12 @@ subsetRownames(x, subsetName)
 
 subsetRownames(x, subsetName) <- value
 
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetRownames(x, subsetName)
+
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetRownames(x, subsetName) <- value
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetRownames(x, subsetName)
 
@@ -23,22 +29,16 @@ subsetRownames(x, subsetName)
 # S4 method for class 'SubsetSingleCellExperiment'
 subsetRownames(x, subsetName) <- value
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetRownames(x, subsetName)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetRownames(x, subsetName) <- value
 
 # S4 method for class 'SubsetSpatialExperiment'
 subsetRownames(x, subsetName)
 
 # S4 method for class 'SubsetSpatialExperiment'
-subsetRownames(x, subsetName) <- value
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
-subsetRownames(x, subsetName)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetRownames(x, subsetName) <- value
 ```
 

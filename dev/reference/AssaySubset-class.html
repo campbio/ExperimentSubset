@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.50</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.55</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,6 +70,12 @@ in the subset.</p></dd>
 <dt><code>internalAssay</code></dt>
 <dd><p><code>SummarizedExperiment</code> An internal experiment object
 to store additional subset data.</p></dd>
+
+
+<dt><code>altExpName</code></dt>
+<dd><p><code>character(1)</code> or <code>NULL</code>. For a subset made
+with <code>createSubset(altExp =)</code>, the name of the altExp whose
+features its rows index; <code>NULL</code> for other subsets (ADR 0007).</p></dd>
 
 
 </dl></div>

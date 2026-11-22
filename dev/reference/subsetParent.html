@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.50</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.55</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Subset parent hierarchy retrieval method for ExperimentSubset objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/allGenerics.R" class="external-link"><code>R/allGenerics.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetRangedSummarizedExperiment.R" class="external-link"><code>R/SubsetRangedSummarizedExperiment.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetSingleCellExperiment.R" class="external-link"><code>R/SubsetSingleCellExperiment.R</code></a>, and 3 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/allGenerics.R" class="external-link"><code>R/allGenerics.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetMethods.R" class="external-link"><code>R/SubsetMethods.R</code></a></small>
       <div class="d-none name"><code>subsetParent.Rd</code></div>
     </div>
 
@@ -51,19 +51,19 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">subsetParent</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
+<span><span class="fu">subsetParent</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span></span>
+<span></span>
 <span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment'</span></span>
 <span><span class="fu">subsetParent</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
 <span><span class="fu">subsetParent</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
 <span><span class="fu">subsetParent</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
-<span><span class="fu">subsetParent</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
 <span><span class="fu">subsetParent</span><span class="op">(</span><span class="va">x</span>, <span class="va">subsetName</span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -83,7 +83,12 @@ assay stored in a subset as <code>"subset/assay"</code>, against which the
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A <code>list</code> containing the 'subset to parent' link.</p>
+    <p>A <code>list</code> containing the 'subset to parent' link. For a
+  subset made with <code>createSubset(altExp =)</code>, the altExp's assay it
+  was made from is written as <code>"altExp/assay"</code>, such as
+  <code>"ADT/counts"</code>, or as <code>"subset/altExp/assay"</code> when it was
+  made from a subset's view of the altExp; the list then goes on through
+  the subsets its cells come from.</p>
     </div>
 
     <div class="section level2">

@@ -9,7 +9,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.50</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.55</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,8 @@
 <span>  rowIndices <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  colIndices <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  parentAssay <span class="op">=</span> <span class="st">"counts"</span>,</span>
-<span>  internalAssay <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  internalAssay <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  altExpName <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -83,6 +84,12 @@ in the subset.</p></dd>
 <dt id="arg-internalassay">internalAssay<a class="anchor" aria-label="anchor" href="#arg-internalassay"></a></dt>
 <dd><p>An internal Experiment object to store additional
 subset data.</p></dd>
+
+
+<dt id="arg-altexpname">altExpName<a class="anchor" aria-label="anchor" href="#arg-altexpname"></a></dt>
+<dd><p><code>character(1)</code> or <code>NULL</code>. The altExp whose
+features the subset's rows index, for a subset made with
+<code>createSubset(altExp =)</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

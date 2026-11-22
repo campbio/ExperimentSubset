@@ -16,48 +16,6 @@ column, use `colData(x, subsetName = "name")$column <- values`.
 ## Usage
 
 ``` r
-# S4 method for class 'SubsetRangedSummarizedExperiment'
-rowData(x, use.names = TRUE, ...)
-
-# S4 method for class 'SubsetRangedSummarizedExperiment'
-colData(x, ...)
-
-# S4 method for class 'SubsetRangedSummarizedExperiment'
-rowData(x, ...) <- value
-
-# S4 method for class 'SubsetRangedSummarizedExperiment,DataFrame'
-colData(x, ...) <- value
-
-# S4 method for class 'SubsetRangedSummarizedExperiment,NULL'
-colData(x, ...) <- value
-
-# S4 method for class 'SubsetRangedSummarizedExperiment,data.frame'
-colData(x, ...) <- value
-
-# S4 method for class 'SubsetRangedSummarizedExperiment,ANY'
-colData(x, ...) <- value
-
-# S4 method for class 'SubsetSingleCellExperiment'
-rowData(x, use.names = TRUE, ...)
-
-# S4 method for class 'SubsetSingleCellExperiment'
-colData(x, ...)
-
-# S4 method for class 'SubsetSingleCellExperiment'
-rowData(x, ...) <- value
-
-# S4 method for class 'SubsetSingleCellExperiment,DataFrame'
-colData(x, ...) <- value
-
-# S4 method for class 'SubsetSingleCellExperiment,NULL'
-colData(x, ...) <- value
-
-# S4 method for class 'SubsetSingleCellExperiment,data.frame'
-colData(x, ...) <- value
-
-# S4 method for class 'SubsetSingleCellExperiment,ANY'
-colData(x, ...) <- value
-
 # S4 method for class 'SubsetSummarizedExperiment'
 rowData(x, use.names = TRUE, ...)
 
@@ -66,6 +24,9 @@ colData(x, ...)
 
 # S4 method for class 'SubsetSummarizedExperiment'
 rowData(x, ...) <- value
+
+# S4 method for class 'SubsetSummarizedExperiment,ANY'
+colData(x, ...) <- value
 
 # S4 method for class 'SubsetSummarizedExperiment,DataFrame'
 colData(x, ...) <- value
@@ -76,28 +37,46 @@ colData(x, ...) <- value
 # S4 method for class 'SubsetSummarizedExperiment,data.frame'
 colData(x, ...) <- value
 
-# S4 method for class 'SubsetSummarizedExperiment,ANY'
-colData(x, ...) <- value
-
-# S4 method for class 'SubsetSpatialExperiment'
+# S4 method for class 'SubsetRangedSummarizedExperiment'
 rowData(x, use.names = TRUE, ...)
 
-# S4 method for class 'SubsetSpatialExperiment'
+# S4 method for class 'SubsetRangedSummarizedExperiment'
 colData(x, ...)
 
-# S4 method for class 'SubsetSpatialExperiment'
+# S4 method for class 'SubsetRangedSummarizedExperiment'
 rowData(x, ...) <- value
 
-# S4 method for class 'SubsetSpatialExperiment,DataFrame'
+# S4 method for class 'SubsetRangedSummarizedExperiment,ANY'
 colData(x, ...) <- value
 
-# S4 method for class 'SubsetSpatialExperiment,NULL'
+# S4 method for class 'SubsetRangedSummarizedExperiment,DataFrame'
 colData(x, ...) <- value
 
-# S4 method for class 'SubsetSpatialExperiment,data.frame'
+# S4 method for class 'SubsetRangedSummarizedExperiment,NULL'
 colData(x, ...) <- value
 
-# S4 method for class 'SubsetSpatialExperiment,ANY'
+# S4 method for class 'SubsetRangedSummarizedExperiment,data.frame'
+colData(x, ...) <- value
+
+# S4 method for class 'SubsetSingleCellExperiment'
+rowData(x, use.names = TRUE, ...)
+
+# S4 method for class 'SubsetSingleCellExperiment'
+colData(x, ...)
+
+# S4 method for class 'SubsetSingleCellExperiment'
+rowData(x, ...) <- value
+
+# S4 method for class 'SubsetSingleCellExperiment,ANY'
+colData(x, ...) <- value
+
+# S4 method for class 'SubsetSingleCellExperiment,DataFrame'
+colData(x, ...) <- value
+
+# S4 method for class 'SubsetSingleCellExperiment,NULL'
+colData(x, ...) <- value
+
+# S4 method for class 'SubsetSingleCellExperiment,data.frame'
 colData(x, ...) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment'
@@ -108,6 +87,9 @@ colData(x, ...)
 
 # S4 method for class 'SubsetTreeSummarizedExperiment'
 rowData(x, ...) <- value
+
+# S4 method for class 'SubsetTreeSummarizedExperiment,ANY'
+colData(x, ...) <- value
 
 # S4 method for class 'SubsetTreeSummarizedExperiment,DataFrame'
 colData(x, ...) <- value
@@ -118,7 +100,25 @@ colData(x, ...) <- value
 # S4 method for class 'SubsetTreeSummarizedExperiment,data.frame'
 colData(x, ...) <- value
 
-# S4 method for class 'SubsetTreeSummarizedExperiment,ANY'
+# S4 method for class 'SubsetSpatialExperiment'
+rowData(x, use.names = TRUE, ...)
+
+# S4 method for class 'SubsetSpatialExperiment'
+colData(x, ...)
+
+# S4 method for class 'SubsetSpatialExperiment'
+rowData(x, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,ANY'
+colData(x, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,DataFrame'
+colData(x, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,NULL'
+colData(x, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,data.frame'
 colData(x, ...) <- value
 ```
 

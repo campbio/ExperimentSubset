@@ -49,7 +49,7 @@ assay(x, i) &amp;lt;- value stores value in a subset when
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.50</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.55</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,7 +78,7 @@ assay(x, i) &amp;lt;- value stores value in a subset when
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Assays of subsets in ExperimentSubset objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/ExperimentSubset.R" class="external-link"><code>R/ExperimentSubset.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetRangedSummarizedExperiment.R" class="external-link"><code>R/SubsetRangedSummarizedExperiment.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetSingleCellExperiment.R" class="external-link"><code>R/SubsetSingleCellExperiment.R</code></a>, and 3 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/ExperimentSubset.R" class="external-link"><code>R/ExperimentSubset.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetMethods.R" class="external-link"><code>R/SubsetMethods.R</code></a></small>
       <div class="d-none name"><code>ExperimentSubset-assay.Rd</code></div>
     </div>
 
@@ -108,7 +108,13 @@ assay(x, i) &amp;lt;- value stores value in a subset when
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment,character'</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S4 method for class 'SubsetSummarizedExperiment,character'</span></span>
+<span><span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment,character'</span></span>
+<span><span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment,character'</span></span>
 <span><span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetRangedSummarizedExperiment,character'</span></span>
@@ -120,22 +126,16 @@ assay(x, i) &amp;lt;- value stores value in a subset when
 <span><span class="co"># S4 method for class 'SubsetSingleCellExperiment,character'</span></span>
 <span><span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
 <span><span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSummarizedExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
 <span><span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
 <span><span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
-<span><span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
-<span><span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
 <span><span class="fu">assay</span><span class="op">(</span><span class="va">x</span>, <span class="va">i</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span></code></pre></div>
     </div>
 

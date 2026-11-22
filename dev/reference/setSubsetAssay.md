@@ -8,19 +8,19 @@ Store a new subset `assay` inside a specified subset in the input
 ``` r
 setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
+# S4 method for class 'SubsetSummarizedExperiment'
+setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
 # S4 method for class 'SubsetSingleCellExperiment'
 setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 
 # S4 method for class 'SubsetSpatialExperiment'
-setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 setSubsetAssay(x, subsetName, inputMatrix, subsetAssayName, unlink = FALSE)
 ```
 

@@ -12,19 +12,19 @@ supplementary data inside the subsets such as `reducedDims` and
 ``` r
 subsetSummary(x)
 
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetSummary(x)
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetSummary(x)
 
 # S4 method for class 'SubsetSingleCellExperiment'
 subsetSummary(x)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetSummary(x)
 
 # S4 method for class 'SubsetSpatialExperiment'
-subsetSummary(x)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetSummary(x)
 ```
 

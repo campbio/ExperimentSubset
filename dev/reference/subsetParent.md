@@ -7,19 +7,19 @@ Retrieves a complete 'subset to parent' link from a specified subset.
 ``` r
 subsetParent(x, subsetName)
 
+# S4 method for class 'SubsetSummarizedExperiment'
+subsetParent(x, subsetName)
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 subsetParent(x, subsetName)
 
 # S4 method for class 'SubsetSingleCellExperiment'
 subsetParent(x, subsetName)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetParent(x, subsetName)
 
 # S4 method for class 'SubsetSpatialExperiment'
-subsetParent(x, subsetName)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 subsetParent(x, subsetName)
 ```
 
@@ -37,7 +37,11 @@ subsetParent(x, subsetName)
 
 ## Value
 
-A `list` containing the 'subset to parent' link.
+A `list` containing the 'subset to parent' link. For a subset made with
+`createSubset(altExp =)`, the altExp's assay it was made from is written
+as `"altExp/assay"`, such as `"ADT/counts"`, or as
+`"subset/altExp/assay"` when it was made from a subset's view of the
+altExp; the list then goes on through the subsets its cells come from.
 
 ## Examples
 

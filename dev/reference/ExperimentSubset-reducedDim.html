@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.50</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.55</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,7 +50,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Reduced dimensions of subsets in ExperimentSubset objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/ExperimentSubset.R" class="external-link"><code>R/ExperimentSubset.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetSingleCellExperiment.R" class="external-link"><code>R/SubsetSingleCellExperiment.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetSpatialExperiment.R" class="external-link"><code>R/SubsetSpatialExperiment.R</code></a>, and 1 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/ExperimentSubset.R" class="external-link"><code>R/ExperimentSubset.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetMethods.R" class="external-link"><code>R/SubsetMethods.R</code></a></small>
       <div class="d-none name"><code>ExperimentSubset-reducedDim.Rd</code></div>
     </div>
 
@@ -91,52 +91,52 @@
 <span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
 <span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,missing'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,missing'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,numeric'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,numeric'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,missing'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,missing'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,numeric'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,numeric'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
 <span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
 <span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,missing'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,missing'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,numeric'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,numeric'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,missing'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,missing'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,numeric'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,numeric'</span></span>
 <span><span class="fu">reducedDim</span><span class="op">(</span><span class="va">x</span>, <span class="va">type</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
 <span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
 <span><span class="fu">reducedDims</span><span class="op">(</span><span class="va">x</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span></code></pre></div>
     </div>
 
@@ -153,6 +153,12 @@
 position of the reduced dimension. Leave it out for the first one.</p></dd>
 
 
+<dt id="arg-withdimnames">withDimnames<a class="anchor" aria-label="anchor" href="#arg-withdimnames"></a></dt>
+<dd><p><code>logical(1)</code> Passed on to
+<code>reducedDim&lt;-</code> or
+<code>reducedDims&lt;-</code>. Default <code>TRUE</code>.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><dl><dt><code>subsetName</code></dt>
 <dd><p><code>character(1)</code> Name of the subset whose
@@ -163,12 +169,6 @@ position of the reduced dimension. Leave it out for the first one.</p></dd>
 
 </dl><p>Other arguments are passed on to the <code>SingleCellExperiment</code>
 method, for the subset or the main object.</p></dd>
-
-
-<dt id="arg-withdimnames">withDimnames<a class="anchor" aria-label="anchor" href="#arg-withdimnames"></a></dt>
-<dd><p><code>logical(1)</code> Passed on to
-<code>reducedDim&lt;-</code> or
-<code>reducedDims&lt;-</code>. Default <code>TRUE</code>.</p></dd>
 
 
 <dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>

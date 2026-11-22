@@ -66,7 +66,8 @@ and for every antibody.
 \
 `filteredFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(`\
 `  ``"tenx-3.1.0-5k_pbmc_protein_v3/1.0.0/filtered.tar.gz"`\
-`)`\
+`)`
+
 \
 `# unpack them into a temporary folder`\
 `dataFolder`` ``<-`` `[`file.path`](https://rdrr.io/r/base/file.path.html)`(`[`tempdir`](https://rdrr.io/r/base/tempfile.html)`(``)``, ``"pbmc5k"``)`\
@@ -1055,20 +1056,20 @@ are named after the methods.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] scater_1.41.3                   ggplot2_4.0.3                  
+    ##  [1] scater_1.41.3                   ggplot2_4.0.4                  
     ##  [3] celldex_1.23.0                  SingleR_2.15.4                 
-    ##  [5] scrapper_1.7.11                 decontX_1.11.2                 
+    ##  [5] scrapper_1.7.11                 decontX_1.11.34                
     ##  [7] singleCellTK_2.23.6             DelayedArray_0.39.8            
-    ##  [9] SparseArray_1.13.4              S4Arrays_1.13.2                
+    ##  [9] SparseArray_1.13.5              S4Arrays_1.13.3                
     ## [11] abind_1.4-8                     Matrix_1.7-6                   
-    ## [13] ExperimentSubset_1.23.50        TreeSummarizedExperiment_2.21.0
+    ## [13] ExperimentSubset_1.23.55        TreeSummarizedExperiment_2.21.0
     ## [15] Biostrings_2.81.9               XVector_0.53.0                 
     ## [17] SpatialExperiment_1.23.0        scuttle_1.23.2                 
     ## [19] DropletUtils_1.33.2             SingleCellExperiment_1.35.2    
     ## [21] SummarizedExperiment_1.43.0     Biobase_2.73.2                 
     ## [23] GenomicRanges_1.65.4            Seqinfo_1.3.2                  
     ## [25] IRanges_2.47.5                  S4Vectors_0.51.10              
-    ## [27] BiocGenerics_0.59.12            generics_0.1.4                 
+    ## [27] BiocGenerics_0.59.13            generics_0.1.4                 
     ## [29] MatrixGenerics_1.25.0           matrixStats_1.5.0              
     ## [31] DropletTestFiles_1.23.0        
     ## 
@@ -1077,36 +1078,36 @@ are named after the methods.
     ##   [3] httr_1.4.9                RColorBrewer_1.1-3       
     ##   [5] doParallel_1.0.17         alabaster.base_1.13.5    
     ##   [7] tools_4.6.1               R6_2.6.1                 
-    ##   [9] HDF5Array_1.41.3          lazyeval_0.2.3           
+    ##   [9] HDF5Array_1.41.6          lazyeval_0.2.3           
     ##  [11] rhdf5filters_1.25.5       GetoptLong_1.1.1         
     ##  [13] sp_2.2-4                  withr_3.0.3              
     ##  [15] gridExtra_2.3.1           progressr_1.1.0          
     ##  [17] cli_3.6.6                 textshaping_1.0.5        
     ##  [19] labeling_0.4.3            alabaster.se_1.13.1      
     ##  [21] eds_1.15.0                sass_0.4.10              
-    ##  [23] S7_0.2.2                  QuickJSR_1.11.0          
+    ##  [23] S7_1.0.0                  QuickJSR_1.11.0          
     ##  [25] pkgdown_2.2.1             Rsamtools_2.29.0         
-    ##  [27] systemfonts_1.3.2         yulab.utils_0.2.5        
-    ##  [29] StanHeaders_2.39.1        dbscan_1.2.7             
-    ##  [31] R.utils_2.13.0            parallelly_1.48.0        
-    ##  [33] limma_3.99.4              RSQLite_3.53.3           
+    ##  [27] systemfonts_1.3.2         yulab.utils_0.2.6        
+    ##  [29] StanHeaders_2.39.1.1      dbscan_1.3.0             
+    ##  [31] R.utils_2.13.0            parallelly_1.50.0        
+    ##  [33] limma_3.99.5              RSQLite_3.53.3           
     ##  [35] shape_1.4.6.1             BiocIO_1.23.3            
     ##  [37] combinat_0.0-9            dplyr_1.2.1              
     ##  [39] inline_0.3.21             loo_2.10.1               
     ##  [41] ggbeeswarm_0.7.3          R.methodsS3_1.8.2        
     ##  [43] lifecycle_1.0.5           yaml_2.3.12              
-    ##  [45] edgeR_4.99.12             rhdf5_2.57.20            
-    ##  [47] BiocFileCache_3.3.2       grid_4.6.1               
+    ##  [45] edgeR_4.99.15             rhdf5_2.57.20            
+    ##  [47] BiocFileCache_3.3.3       grid_4.6.1               
     ##  [49] blob_1.3.0                dqrng_0.4.1              
     ##  [51] ExperimentHub_3.3.2       crayon_1.5.3             
     ##  [53] lattice_0.23-1            cowplot_1.2.0            
     ##  [55] beachmat_2.29.3           cigarillo_1.3.1          
-    ##  [57] annotate_1.91.0           KEGGREST_1.53.6          
+    ##  [57] annotate_1.91.1           KEGGREST_1.53.6          
     ##  [59] magick_2.9.1              pillar_1.11.1            
     ##  [61] knitr_1.52                ComplexHeatmap_2.29.0    
     ##  [63] rjson_0.2.23              xgboost_3.2.1.1          
     ##  [65] future.apply_1.21.0       codetools_0.2-20         
-    ##  [67] glue_1.8.1                V8_8.2.1                 
+    ##  [67] glue_1.8.1                V8_8.3.0                 
     ##  [69] data.table_1.18.6.1       gypsum_1.9.0             
     ##  [71] spam_2.11-4               vctrs_0.7.3              
     ##  [73] png_0.1-9                 treeio_1.37.1            
@@ -1116,14 +1117,14 @@ are named after the methods.
     ##  [81] bluster_1.23.1            nlme_3.1-171             
     ##  [83] bit64_4.8.6               alabaster.ranges_1.13.1  
     ##  [85] filelock_1.0.3            rstan_2.32.7             
-    ##  [87] GenomeInfoDb_1.49.1       bslib_0.12.0             
+    ##  [87] GenomeInfoDb_1.49.3       bslib_0.12.0             
     ##  [89] irlba_2.4.1               vipor_0.4.7              
     ##  [91] otel_0.2.0                colorspace_2.1-4         
     ##  [93] DBI_1.3.0                 tidyselect_1.2.1         
     ##  [95] bit_4.6.0                 compiler_4.6.1           
     ##  [97] curl_8.1.0                httr2_1.3.0              
     ##  [99] graph_1.91.0              BiocNeighbors_2.7.3      
-    ## [101] h5mread_1.5.3             desc_1.4.3               
+    ## [101] h5mread_1.5.7             desc_1.4.3               
     ## [103] rtracklayer_1.73.0        scales_1.4.0             
     ## [105] rappdirs_0.3.4            stringr_1.6.0            
     ## [107] digest_0.6.39             alabaster.matrix_1.13.4  
@@ -1131,20 +1132,20 @@ are named after the methods.
     ## [111] pkgconfig_2.0.3           sparseMatrixStats_1.25.0 
     ## [113] dbplyr_2.6.0              fastmap_1.2.0            
     ## [115] rlang_1.3.0               GlobalOptions_0.1.4      
-    ## [117] htmlwidgets_1.6.4         UCSC.utils_1.9.0         
+    ## [117] htmlwidgets_1.6.4         UCSC.utils_1.9.1         
     ## [119] DelayedMatrixStats_1.35.0 farver_2.1.2             
     ## [121] jquerylib_0.1.4           jsonlite_2.0.0           
     ## [123] BiocParallel_1.47.0       R.oo_1.27.1              
-    ## [125] BiocSingular_1.29.2       RCurl_1.98-1.20          
+    ## [125] BiocSingular_1.29.3       RCurl_1.98-1.20          
     ## [127] magrittr_2.0.5            dotCall64_1.2            
-    ## [129] Rhdf5lib_2.1.0            Rcpp_1.1.2               
+    ## [129] Rhdf5lib_2.1.1            Rcpp_1.1.2               
     ## [131] ape_5.8-1                 viridis_0.6.5            
     ## [133] reticulate_1.47.0         alabaster.schemas_1.13.0 
     ## [135] stringi_1.8.9             MCMCprecision_0.4.2      
     ## [137] MASS_7.3-66               AnnotationHub_4.3.3      
     ## [139] plyr_1.8.9                pkgbuild_1.4.8           
     ## [141] parallel_4.6.1            listenv_1.1.0            
-    ## [143] ggrepel_0.9.8             scDblFinder_1.27.12      
+    ## [143] ggrepel_0.9.8             scDblFinder_1.27.13      
     ## [145] circlize_0.4.18           igraph_2.3.4             
     ## [147] reshape2_1.4.5            ScaledMatrix_1.21.0      
     ## [149] rstantools_2.7.1          BiocVersion_3.24.0       
@@ -1152,10 +1153,10 @@ are named after the methods.
     ## [153] SeuratObject_5.4.0        RcppParallel_6.2.1       
     ## [155] BiocManager_1.30.27       foreach_1.5.2            
     ## [157] tidyr_1.3.2               purrr_1.2.2              
-    ## [159] future_1.80.0             clue_0.3-68              
-    ## [161] BiocBaseUtils_1.15.1      rsvd_1.0.6               
+    ## [159] future_1.82.0             clue_0.3-68              
+    ## [161] BiocBaseUtils_1.15.1      rsvd_2.0.0               
     ## [163] xtable_1.8-8              restfulr_0.0.17          
-    ## [165] tidytree_0.4.8            viridisLite_0.4.3        
+    ## [165] tidytree_0.4.9            viridisLite_0.4.3        
     ## [167] ragg_1.5.2                tibble_3.3.1             
     ## [169] memoise_2.0.1             beeswarm_0.4.0           
     ## [171] AnnotationDbi_1.75.2      GenomicAlignments_1.49.2 

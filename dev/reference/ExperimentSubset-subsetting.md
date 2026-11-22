@@ -10,19 +10,19 @@ or `j` repeats a row or column, subsets keep one copy of it.
 ## Usage
 
 ``` r
+# S4 method for class 'SubsetSummarizedExperiment,ANY,ANY,ANY'
+x[i, j, ..., drop = TRUE]
+
 # S4 method for class 'SubsetRangedSummarizedExperiment,ANY,ANY,ANY'
 x[i, j, ..., drop = TRUE]
 
 # S4 method for class 'SubsetSingleCellExperiment,ANY,ANY,ANY'
 x[i, j, ..., drop = TRUE]
 
-# S4 method for class 'SubsetSummarizedExperiment,ANY,ANY,ANY'
+# S4 method for class 'SubsetTreeSummarizedExperiment,ANY,ANY,ANY'
 x[i, j, ..., drop = TRUE]
 
 # S4 method for class 'SubsetSpatialExperiment,ANY,ANY,ANY'
-x[i, j, ..., drop = TRUE]
-
-# S4 method for class 'SubsetTreeSummarizedExperiment,ANY,ANY,ANY'
 x[i, j, ..., drop = TRUE]
 ```
 

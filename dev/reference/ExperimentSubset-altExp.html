@@ -17,7 +17,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.50</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.55</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Alternative experiments of subsets in ExperimentSubset objects</h1>
-      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/ExperimentSubset.R" class="external-link"><code>R/ExperimentSubset.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetSingleCellExperiment.R" class="external-link"><code>R/SubsetSingleCellExperiment.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetSpatialExperiment.R" class="external-link"><code>R/SubsetSpatialExperiment.R</code></a>, and 1 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/ExperimentSubset.R" class="external-link"><code>R/ExperimentSubset.R</code></a>, <a href="https://github.com/campbio/ExperimentSubset/blob/devel/R/SubsetMethods.R" class="external-link"><code>R/SubsetMethods.R</code></a></small>
       <div class="d-none name"><code>ExperimentSubset-altExp.Rd</code></div>
     </div>
 
@@ -76,10 +76,10 @@
 <span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
 <span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment,character'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment,ANY'</span></span>
 <span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment,ANY'</span></span>
+<span><span class="co"># S4 method for class 'SubsetSingleCellExperiment,character'</span></span>
 <span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetSingleCellExperiment,character'</span></span>
@@ -94,39 +94,6 @@
 <span><span class="co"># S4 method for class 'SubsetSingleCellExperiment'</span></span>
 <span><span class="fu">altExps</span><span class="op">(</span><span class="va">x</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
-<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,missing'</span></span>
-<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,numeric'</span></span>
-<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
-<span><span class="fu">altExps</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
-<span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
-<span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,ANY'</span></span>
-<span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
-<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,missing'</span></span>
-<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,numeric'</span></span>
-<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
-<span><span class="fu">altExps</span><span class="op">(</span><span class="va">x</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
-<span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
 <span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
@@ -141,14 +108,14 @@
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
 <span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
-<span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,ANY'</span></span>
 <span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
+<span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,character'</span></span>
 <span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment,missing'</span></span>
@@ -158,6 +125,39 @@
 <span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
 <span></span>
 <span><span class="co"># S4 method for class 'SubsetTreeSummarizedExperiment'</span></span>
+<span><span class="fu">altExps</span><span class="op">(</span><span class="va">x</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
+<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,missing'</span></span>
+<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,numeric'</span></span>
+<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="fu">altExps</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
+<span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,ANY'</span></span>
+<span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
+<span><span class="fu">altExpNames</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,character'</span></span>
+<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,missing'</span></span>
+<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment,numeric'</span></span>
+<span><span class="fu">altExp</span><span class="op">(</span><span class="va">x</span>, <span class="va">e</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span>
+<span></span>
+<span><span class="co"># S4 method for class 'SubsetSpatialExperiment'</span></span>
 <span><span class="fu">altExps</span><span class="op">(</span><span class="va">x</span>, withDimnames <span class="op">=</span> <span class="cn">TRUE</span>, withColData <span class="op">=</span> <span class="cn">FALSE</span>, <span class="va">...</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">value</span></span></code></pre></div>
     </div>
 
@@ -173,6 +173,18 @@
 <dd><p><code>character(1)</code> or <code>integer(1)</code> The name or position
 of the alternative experiment. Leave it out for the first one. With
 <code>subsetName</code>, positions follow <code>altExpNames()</code>.</p></dd>
+
+
+<dt id="arg-withdimnames">withDimnames<a class="anchor" aria-label="anchor" href="#arg-withdimnames"></a></dt>
+<dd><p><code>logical(1)</code> Passed on to
+<code>altExp&lt;-</code> or <code>altExps&lt;-</code>.
+Default <code>TRUE</code>.</p></dd>
+
+
+<dt id="arg-withcoldata">withColData<a class="anchor" aria-label="anchor" href="#arg-withcoldata"></a></dt>
+<dd><p><code>logical(1)</code> Passed on to
+<code>altExp&lt;-</code> or <code>altExps&lt;-</code>.
+Default <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -205,18 +217,6 @@ column per column of the subset (or of the main object). For
 <code>character</code> vector of new names, one for each name
 <code>altExpNames()</code> returns; with <code>subsetName</code>, they must all
 differ, and only the subset's own altExps can get new names.</p></dd>
-
-
-<dt id="arg-withdimnames">withDimnames<a class="anchor" aria-label="anchor" href="#arg-withdimnames"></a></dt>
-<dd><p><code>logical(1)</code> Passed on to
-<code>altExp&lt;-</code> or <code>altExps&lt;-</code>.
-Default <code>TRUE</code>.</p></dd>
-
-
-<dt id="arg-withcoldata">withColData<a class="anchor" aria-label="anchor" href="#arg-withcoldata"></a></dt>
-<dd><p><code>logical(1)</code> Passed on to
-<code>altExp&lt;-</code> or <code>altExps&lt;-</code>.
-Default <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -266,6 +266,9 @@ Default <code>FALSE</code>.</p></dd>
   show in them. Renaming it renames what they store of it. Removing it,
   or storing it with other rows or another class, drops what they added
   to it, with a warning; an altExp a subset stores whole is kept.</p>
+<p>A subset can also be made from an altExp, with its own features, by
+  <code>createSubset(altExp =)</code>; see <code><a href="createSubset.html">createSubset</a></code>. Such a
+  subset sees only the altExps it, or a subset it was made from, stores.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

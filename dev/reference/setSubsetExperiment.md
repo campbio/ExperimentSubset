@@ -9,19 +9,19 @@ metadata.
 ``` r
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
+# S4 method for class 'SubsetSummarizedExperiment'
+setSubsetExperiment(x, subsetName, value, unlink = FALSE)
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
 # S4 method for class 'SubsetSingleCellExperiment'
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 
 # S4 method for class 'SubsetSpatialExperiment'
-setSubsetExperiment(x, subsetName, value, unlink = FALSE)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 setSubsetExperiment(x, subsetName, value, unlink = FALSE)
 ```
 

@@ -7,6 +7,12 @@ the main object, as for the class `x` extends.
 ## Usage
 
 ``` r
+# S4 method for class 'SubsetSummarizedExperiment'
+metadata(x, ...)
+
+# S4 method for class 'SubsetSummarizedExperiment'
+metadata(x, ...) <- value
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 metadata(x, ...)
 
@@ -19,22 +25,16 @@ metadata(x, ...)
 # S4 method for class 'SubsetSingleCellExperiment'
 metadata(x, ...) <- value
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 metadata(x, ...)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 metadata(x, ...) <- value
 
 # S4 method for class 'SubsetSpatialExperiment'
 metadata(x, ...)
 
 # S4 method for class 'SubsetSpatialExperiment'
-metadata(x, ...) <- value
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
-metadata(x, ...)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 metadata(x, ...) <- value
 ```
 

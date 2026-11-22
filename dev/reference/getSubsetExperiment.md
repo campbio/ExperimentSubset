@@ -9,19 +9,19 @@ run on the subset. Store what the tool added with `setSubsetExperiment`.
 ``` r
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 
+# S4 method for class 'SubsetSummarizedExperiment'
+getSubsetExperiment(x, subsetName, parentData = TRUE)
+
 # S4 method for class 'SubsetRangedSummarizedExperiment'
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 
 # S4 method for class 'SubsetSingleCellExperiment'
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 
-# S4 method for class 'SubsetSummarizedExperiment'
+# S4 method for class 'SubsetTreeSummarizedExperiment'
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 
 # S4 method for class 'SubsetSpatialExperiment'
-getSubsetExperiment(x, subsetName, parentData = TRUE)
-
-# S4 method for class 'SubsetTreeSummarizedExperiment'
 getSubsetExperiment(x, subsetName, parentData = TRUE)
 ```
 
