@@ -1518,11 +1518,11 @@ NULL
     return(character(0))
   }
   changed <- character(0)
-  for (name in assayNames(new)) {
-    if (!name %in% assayNames(old)
-        || !.sameAssay(assay(new, name, withDimnames = FALSE),
-                       assay(old, name, withDimnames = FALSE)))
-      changed <- c(changed, name)
+  for (assayName in assayNames(new)) {
+    if (!assayName %in% assayNames(old)
+        || !.sameAssay(assay(new, assayName, withDimnames = FALSE),
+                       assay(old, assayName, withDimnames = FALSE)))
+      changed <- c(changed, assayName)
   }
   changed
 }
