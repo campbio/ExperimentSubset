@@ -17,7 +17,43 @@
 #'   subset: the name of a main \code{assay}, of a subset, or of an assay seen
 #'   in a subset written as \code{"subset/assay"}. If \code{NULL}, the first
 #'   available main \code{assay} will be marked as parent. Default
-#'   \code{NULL}.
+#'   \code{NULL}. With \code{altExp}, it names an assay of that altExp
+#'   instead; see the section below.
+#' @param altExp \code{character(1)} or \code{NULL}. The name of an
+#'   alternative experiment (altExp) of the main object, such as
+#'   \code{"ADT"}, to make the subset from: \code{rows} then pick its
+#'   features. Only for the classes that extend \code{SingleCellExperiment}.
+#'   If \code{NULL}, the subset is made from the main object's features.
+#'   Default \code{NULL}.
+#' @section Subsets made from an altExp:
+#'   With \code{altExp = "ADT"}, the subset's rows are features of the
+#'   altExp \code{"ADT"}, such as some of its proteins, and its columns are
+#'   cells, as for any subset. \code{parentAssay} names an assay of the
+#'   altExp, as the main object or a subset sees it:
+#'   \itemize{
+#'     \item \code{NULL} or \code{"counts"}: the first assay, or the assay
+#'       \code{counts}, of the main object's altExp. \code{cols} pick the
+#'       main object's cells.
+#'     \item \code{"clean"} or \code{"clean/clr"}: the first assay, or the
+#'       assay \code{clr}, of the altExp as subset \code{clean} sees it,
+#'       with the assays \code{clean} stores in it. \code{cols} pick
+#'       \code{clean}'s cells.
+#'   }
+#'   \code{rows} pick the altExp's features, by position or name. The
+#'   subset sees every assay of the altExp as its parent does, linked and
+#'   cut to its rows and cells, and stores its own with
+#'   \code{setSubsetAssay()}, with the usual \code{unlink} rules. Its
+#'   rowData with \code{parentRowData = TRUE} is the altExp's, and
+#'   \code{getSubsetExperiment()} returns an object of the altExp's class.
+#'   Subsets made from it, without \code{altExp}, pick its rows and cells.
+#'   It doesn't see the main object's altExps. A row tree doesn't apply to
+#'   it; column trees and spatial data are read at its cells.
+#'
+#'   Changes to the altExp carry along: renaming it, on the main object or
+#'   in the subset it was made from, renames what the subset records; if it
+#'   gets other rows, the subset keeps the features whose names remain; if
+#'   it is removed, the subset and those made from it are dropped, with a
+#'   warning.
 #' @return An \code{ExperimentSubset} object that now contains the newly created
 #'   subset.
 #' @rdname createSubset
@@ -31,6 +67,25 @@
 #' cols = c(20,21,40,45,90,99,100,123,166,299),
 #' parentAssay = "counts")
 #' es
+#'
+#' # an object with 10 genes and 20 cells
+#' set.seed(1)
+#' counts <- matrix(rpois(200, lambda = 5), nrow = 10)
+#' rownames(counts) <- paste0("gene", 1:10)
+#' colnames(counts) <- paste0("cell", 1:20)
+#' es <- ExperimentSubset(list(counts = counts))
+#' # counts of 4 proteins in the same cells, as the altExp "ADT"
+#' adtCounts <- matrix(rpois(80, lambda = 20), nrow = 4)
+#' rownames(adtCounts) <- c("CD3", "CD4", "CD8", "Isotype")
+#' altExp(es, "ADT") <- SingleCellExperiment(list(counts = adtCounts))
+#' # a subset of the first 12 cells
+#' es <- createSubset(es, subsetName = "clean", cols = 1:12)
+#' # a subset of clean's cells without the isotype control
+#' es <- createSubset(es, subsetName = "clean.antibodies",
+#'                    rows = c("CD3", "CD4", "CD8"),
+#'                    parentAssay = "clean", altExp = "ADT")
+#' dim(assay(es, "clean.antibodies"))
+#' subsetParent(es, "clean.antibodies")
 setGeneric(
   name = "createSubset",
   # no braces, so createSubset stays a standardGeneric
@@ -157,7 +212,12 @@ setGeneric(
 #' @param subsetName \code{character(1)} Specify the name of the subset, or an
 #'   assay stored in a subset as \code{"subset/assay"}, against which the
 #'   'subset to parent link' should be retrieved.
-#' @return A \code{list} containing the 'subset to parent' link.
+#' @return A \code{list} containing the 'subset to parent' link. For a
+#'   subset made with \code{createSubset(altExp =)}, the altExp's assay it
+#'   was made from is written as \code{"altExp/assay"}, such as
+#'   \code{"ADT/counts"}, or as \code{"subset/altExp/assay"} when it was
+#'   made from a subset's view of the altExp; the list then goes on through
+#'   the subsets its cells come from.
 #' @rdname subsetParent
 #' @importMethodsFrom SummarizedExperiment assayNames
 #' @export

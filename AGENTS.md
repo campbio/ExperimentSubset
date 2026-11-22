@@ -70,9 +70,19 @@ or deploy the site locally. Add new exports to `_pkgdown.yml` and run
 
 - `AssaySubset` (internal): one subset. Slots `subsetName`, `rowIndices`
   and `colIndices` (indices into the parent), `parentAssay` (the name of
-  the assay or subset it was made from, so subsets can chain), and
+  the assay or subset it was made from, so subsets can chain),
   `internalAssay` (a SummarizedExperiment-like object holding the
-  subset's own assays and metadata).
+  subset's own assays and metadata), and `altExpName` (ADR 0007).
+- `altExpName` is set only on a subset made with
+  `createSubset(altExp =)`: its rows, and those of subsets made from it,
+  index that altExp's features, not the main object's, while columns
+  always lead to the main object's cells. `.rowRoot()` finds where a
+  subset's rows come from and `.rootObject()` the object they index, so
+  code that pairs row indices with `rownames(x)`, `rowData(x)` or
+  `nrow(x)` must use `.rootObject()` instead. `.rootAltExp()` reads the
+  slot, and returns `NULL` for objects saved before it existed. Rebuild
+  a subset with `.copySubset()`, which keeps every slot, not
+  `AssaySubset()` field by field.
 - `SubsetSummarizedExperiment`, `SubsetRangedSummarizedExperiment`,
   `SubsetSingleCellExperiment`, `SubsetTreeSummarizedExperiment` and
   `SubsetSpatialExperiment`: each extends its Bioconductor class with one
@@ -88,8 +98,8 @@ or deploy the site locally. Add new exports to `_pkgdown.yml` and run
 - Never use `@`. Inside the package, use the internal accessors in
   `R/ExperimentSubset.R` (`.subsets()`, `.subsets<-`, `.subsetName()`,
   `.rowIndices()`, `.colIndices()`, `.parentAssay()`, `.internalAssay()`,
-  `.internalAssay<-`). Users see the exported API (`createSubset()`,
-  `setSubsetAssay()`, `getSubsetAssay()`, `subsetNames()`,
+  `.internalAssay<-`, `.rootAltExp()`). Users see the exported API
+  (`createSubset()`, `setSubsetAssay()`, `getSubsetAssay()`, `subsetNames()`,
   `subsetRowData()`, `subsetColData()`, ...) and the base methods
   (`assay()`, `reducedDims()`, `metadata()`, `altExps()`) called with
   `subsetName =`.

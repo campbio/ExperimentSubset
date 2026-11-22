@@ -457,3 +457,49 @@ The fixture, built with a helper in the test file:
 - **Review:** a spec review by a fresh subagent, then `/code-review`.
 - **Follow-up PR:** the article section, and the last two steps of
   `dev/scripts/check-adt-workflow.R`.
+
+## Found during implementation
+
+- **The accessor is `.rootAltExp()`, not `.altExpName()`.** An internal
+  `.altExpName(e, visible)` already resolves an altExp name or position,
+  so the slot's accessor has another name. The slot is still
+  `altExpName`.
+- **Small helpers the design implied:**
+  - `.altExpView(x, container, name)`: an altExp as the main object or a
+    subset sees it, or `NULL`; `.rootObject()` and the carry step use it;
+  - `.rootChain()`: the part of a chain whose data a subset sees, from
+    the subset that starts the root down;
+  - `.altExpStart()` and `.createAltExpSubset()`: the checks and the
+    building for `createSubset(altExp =)`;
+  - `.emptyCut()`: an altExp, or a parent's internal object, cut and
+    emptied;
+  - `.carryAltExps()`: runs `.carryAltExpParts()` then
+    `.carryRowRoots()`, in every place that called the first;
+  - `.checkTreeDim()`, `.checkCanStore()` and `.treeDims()` for trees and
+    spatial data.
+- **A subset of an altExp-rooted subset** gets its internal object, and
+  so its row and column names, from its parent's internal object, cut
+  and emptied. That keeps the class, as the spec says. Main-rooted
+  subsets still take their names from the main object.
+- **Link messages name each assay's own source.** `.linkedSources()` now
+  takes `x`. For a subset made from `clean`'s view of ADT, `counts` is
+  "linked to the main altExp 'ADT'" and `clr` "to altExp 'ADT' of subset
+  'clean'", from the view's owners, not one wording for the whole root.
+- **`updateObject()`** comes from S4Vectors, which re-exports it, so
+  there's no new dependency. The `AssaySubset` method also runs
+  `updateObject()` on the subset's stored object.
+- **Combining:** `cbind()` and `rbind()` match altExp rows by position
+  (their altExps must match), as `combineCols(use.names = FALSE)` does.
+  The SpatialExperiment step that copies `sample_id` into each subset
+  skips subsets made from an altExp, which store no copy.
+- **`subsetSpatialData<-` is already defunct**, so it needs no class
+  check.
+- **`as(<SingleCellExperiment>, "SummarizedExperiment")` drops the
+  rownames** (in SingleCellExperiment, not this package). Replacing ADT
+  with such an object is then "other rows without names", an error. The
+  class-change test sets the rownames again.
+- **roxygen2 8.1.1 is installed.** `make docs` rewrote only the changed
+  Rd files and bumped `Config/roxygen2/version`, which is set back to
+  8.1.0, as AGENTS.md asks.
+- **The full suite takes over 10 minutes** here, so it ran in the
+  background.

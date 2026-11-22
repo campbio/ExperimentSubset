@@ -5066,6 +5066,19 @@ test_that("Combining objects keeps subsets made from an altExp (#92)", {
   expect_equal(assay(combined, "adt"),
                assay(altExp(combined, "ADT"), "counts")[c("CD3", "CD8"),
                                                          paste0("cell", 2:5)])
+  # by position: the proteins keep their positions
+  renamed <- makeAdtEs(cleanClr = FALSE)
+  colnames(renamed) <- paste0("other", 1:20)
+  renamed <- ExperimentSubset(as(renamed, "SingleCellExperiment"))
+  adt <- altExp(renamed, "ADT")
+  rownames(adt) <- paste0("P", 1:4)
+  altExp(renamed, "ADT") <- adt
+  # combineCols() warns that the proteins' names differ
+  expect_warning(byPosition <- combineCols(renamed, es, use.names = FALSE),
+                 "'rowRanges' are not identical", fixed = TRUE)
+  expect_equal(unname(assay(byPosition, "adt")),
+               unname(assay(altExp(byPosition, "ADT"), "counts")[c(1, 3),
+                                                                 22:25]))
   # combineRows() keeps no altExps
   expect_warning(byRows <- combineRows(es, genes),
                  paste0("Dropped subset 'adt': the altExp 'ADT' it was made ",
