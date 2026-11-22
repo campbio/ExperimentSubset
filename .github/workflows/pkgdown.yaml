@@ -63,6 +63,18 @@ jobs:
         run: rm -f AGENTS.md CLAUDE.md
         shell: bash
 
+      # Temporary (as in campbio/celda#451): the image pins CRAN to a
+      # 2026-10-28 snapshot, older than what ggtree (devel, needed through
+      # singleCellTK in Config/Needs/website) requires: treelayout, and
+      # tidytree >= 0.4.9. Use current CRAN, as the Bioconductor devel
+      # builders do. Remove this step once the bioconductor_docker:devel
+      # image's snapshot is newer.
+      - name: Use current CRAN instead of the container's snapshot
+        run: |
+          echo 'options(repos = c(getOption("repos")[names(getOption("repos")) != "CRAN"], CRAN = "https://p3m.dev/cran/__linux__/noble/latest"))' >> ~/.Rprofile
+          Rscript -e 'getOption("repos")'
+        shell: bash
+
       - name: Install the package and the site's dependencies
         # Config/Needs/website lists pkgdown and the articles' packages
         run: |
