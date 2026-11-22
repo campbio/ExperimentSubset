@@ -5343,3 +5343,79 @@ test_that("Spec review fixes for altExp subsets (#92)", {
                  "'rowRanges' are not identical", fixed = TRUE)
   expect_equal(subsetRownames(combined, "adt"), c("P1", "P3"))
 })
+
+test_that("Code review fixes for altExp subsets (#92)", {
+  # a SummarizedExperiment ADT: reads give nothing, writes say why
+  seEs <- makeAdtEs(cleanClr = FALSE, adt = "se")
+  seEs <- createSubset(seEs, "adt", rows = 1:2, altExp = "ADT")
+  expect_equal(reducedDimNames(seEs, subsetName = "adt"), character(0))
+  expect_length(reducedDims(seEs, subsetName = "adt"), 0)
+  expect_equal(altExpNames(seEs, subsetName = "adt"), character(0))
+  expect_length(altExps(seEs, subsetName = "adt"), 0)
+  expect_output(subsetSummary(seEs), "adt")
+  cantStore <- "Subset 'adt' is a SummarizedExperiment, which can't store"
+  expect_error(reducedDim(seEs, "PCA", subsetName = "adt"),
+               paste(cantStore, "reducedDims."), fixed = TRUE)
+  expect_error(altExp(seEs, "x", subsetName = "adt") <-
+                 SummarizedExperiment(list(counts = matrix(1, 1, 20))),
+               paste(cantStore, "altExps."), fixed = TRUE)
+  expect_error(altExpNames(seEs, subsetName = "adt") <- character(0),
+               paste(cantStore, "altExps."), fixed = TRUE)
+
+  # a subset made from an altExp subset is protected too
+  es <- makeAdtEs()
+  es <- createSubset(es, "S", rows = 1:3, parentAssay = "clean/counts",
+                     altExp = "ADT")
+  es <- createSubset(es, "C", rows = 1:2, parentAssay = "S/clr")
+  cleanAdt <- altExp(es, "ADT", subsetName = "clean")
+  assay(cleanAdt, "clr") <- NULL
+  expect_error(altExp(es, "ADT", subsetName = "clean") <- cleanAdt,
+               paste0("'value' has no assay 'ADT/clr', which subsets 'C' ",
+                      "were made from."), fixed = TRUE)
+
+  # a changed class says what the subsets lose
+  es <- makeAdtEs(cleanClr = FALSE)
+  es <- createSubset(es, "adt", rows = 1:2, altExp = "ADT")
+  reducedDim(es, "PCA", subsetName = "adt") <- matrix(1, 20, 2)
+  adt <- as(altExp(es, "ADT"), "SummarizedExperiment")
+  rownames(adt) <- rownames(altExp(es, "ADT"))
+  expect_warning(altExp(es, "ADT") <- adt,
+                 paste0("Dropped the reducedDims and altExps of subset ",
+                        "'adt': altExp 'ADT' is now a SummarizedExperiment"),
+                 fixed = TRUE)
+
+  # a TreeSummarizedExperiment ADT keeps the main object's column tree
+  tse <- makeTreeTse()
+  adtCounts <- matrix(as.numeric(1:18), nrow = 3,
+                      dimnames = list(c("CD3", "CD4", "CD8"), colnames(tse)))
+  altExp(tse, "ADT") <- TreeSummarizedExperiment(list(counts = adtCounts))
+  tse <- ExperimentSubset(tse)
+  tse <- createSubset(tse, "adt", rows = 1:2, cols = 2:5, altExp = "ADT")
+  out <- getSubsetExperiment(tse, "adt")
+  expect_equal(colLinks(out)$nodeLab, colLinks(tse)$nodeLab[2:5])
+  expect_silent(setSubsetExperiment(tse, "adt", out))
+  # and in a main object without trees, it stores back unchanged
+  sce <- makeAdtEs(cleanClr = FALSE)
+  altExp(sce, "ADT") <- TreeSummarizedExperiment(
+    list(counts = assay(altExp(sce, "ADT")))
+  )
+  sce <- createSubset(sce, "adt", rows = 1:2, altExp = "ADT")
+  out <- getSubsetExperiment(sce, "adt")
+  expect_s4_class(out, "TreeSummarizedExperiment")
+  expect_silent(setSubsetExperiment(sce, "adt", out))
+
+  # the stored object of a SpatialExperiment ADT keeps no images
+  spe <- makeImageSpe()
+  speAdt <- SpatialExperiment(
+    assays = list(counts = matrix(as.numeric(1:18), nrow = 3,
+                                  dimnames = list(NULL, colnames(spe)))),
+    sample_id = spe$sample_id, imgData = imgData(spe)
+  )
+  altExp(spe, "ADT") <- speAdt
+  spe <- ExperimentSubset(spe)
+  spe <- createSubset(spe, "adt", rows = 1:2, altExp = "ADT")
+  stored <- ExperimentSubset:::.internalAssay(
+    ExperimentSubset:::.subsets(spe)[["adt"]]
+  )
+  expect_equal(nrow(imgData(stored)), 0)
+})

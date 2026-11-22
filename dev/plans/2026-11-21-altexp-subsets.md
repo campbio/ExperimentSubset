@@ -553,3 +553,36 @@ The fixture, built with a helper in the test file:
     'value'.", as `.checkNotParents()` does (`.checkAltExpParents()`).
   - Dropping subsets in both cases, for main assays too, would change
     existing behavior and is left to its own issue.
+- **`/code-review` findings, fixed:**
+  - with a plain SummarizedExperiment altExp, `reducedDimNames()`,
+    `reducedDims()`, `altExpNames()` and `altExps()` with `subsetName`
+    failed, and so did `subsetSummary()` for the whole object. They now
+    return nothing for such a subset, and the getters of one reducedDim or
+    altExp, and every setter, stop with "Subset 'adt' is a
+    SummarizedExperiment, which can't store reducedDims." (or "altExps");
+  - `.checkAltExpParents()` checked only the subset made with `altExp`.
+    It now checks every subset below such a root that no longer sees its
+    primary assay, and only assays this change removed, as
+    `.checkNotParents()` does. Both share `.stopUsedParents()`;
+  - `getSubsetExperiment()` of a TreeSummarizedExperiment altExp's subset
+    lost the main object's column tree. With a main object without trees,
+    `.subsetTree()` and `.subsetLinks()` called `colTree()`/`colLinks()` on
+    it;
+  - a class change dropped a subset's reducedDims and altExps without a
+    warning; now "Dropped the reducedDims and altExps of subset 'adt':
+    altExp 'ADT' is now a SummarizedExperiment, which can't hold them.";
+  - `.assayOwners()`, `.rootSources()` and `.subsetAssayView()` built the
+    whole altExp view, cutting every assay to the container's columns,
+    for each lookup. In the article the main ADT has 6.8 million barcodes.
+    They now read the stored parts uncut (`.rootAssayHolders()`), and
+    `.subsetAssayView()` cuts only the one assay, once. The carry step
+    and the parent check read only the altExp's shape (`.rootShape()`);
+  - `.emptyCut()` kept `imgData`, `rowPairs` and `colPairs`, and cut the
+    assays before emptying them.
+- **`/code-review` findings left as they are:**
+  - a stale `sample_id` after `cbind()` of two SpatialExperiment objects
+    with SpatialExperiment altExps and repeated sample IDs. Not reproduced,
+    and it needs that rare setup;
+  - the class checks being spread over the readers: converting every
+    altExp subset to SingleCellExperiment would undo the agreed class
+    rule. The fixes above cover the readers that failed.
