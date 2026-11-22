@@ -37,6 +37,10 @@ Decided in chat (2026-11-21):
 - **When that altExp disappears:** the subset and those made from it are
   dropped, with a warning.
 - **The article's new section:** a follow-up PR.
+- **Trees and spatial data:** row-tree accessors stop; column-side
+  readers (coordinates, images, column trees) work through the column
+  chain, since its cells are the main object's; column-side setters
+  work only when the subset's class can hold the data.
 
 **Success:**
 - the article's case works on a small simulated object:
@@ -123,16 +127,28 @@ main object:
   exactly, subclasses included. A subset of a plain SummarizedExperiment
   altExp can't hold reducedDims, as for a subset of a
   `SubsetSummarizedExperiment` today.
-- **Tree and spatial accessors** stop for these subsets and those below
-  them, with "Subset 'x' is made from altExp 'ADT'; it has no trees or
-  spatial data.":
-  - `subsetRowTree()`, `subsetColTree()` and their setters;
-  - `subsetRowLinks()`, `subsetColLinks()`;
-  - `subsetSpatialCoords()` and its setter, `subsetImgData()`;
-  - `subsetSpatialData()` and its setter;
-  - `spatialCoords()`/`spatialData()` with `subsetName`.
-
-  Without this, they'd read the main object's at the wrong rows.
+- **Tree and spatial accessors**, for these subsets and those below them,
+  on a SpatialExperiment or TreeSummarizedExperiment main object:
+  - **Row side: stop.** `subsetRowTree()`, `subsetRowTree<-` and
+    `subsetRowLinks()` stop with "Subset 'x' is made from altExp 'ADT';
+    its rows aren't the main object's, so the row tree doesn't apply."
+    The main object's row tree links genes, and reading it at ADT
+    positions would give the wrong features without an error.
+  - **Column side: read as for any subset.** `subsetColTree()`,
+    `subsetColLinks()`, `subsetSpatialCoords()`, `spatialCoords()` with
+    `subsetName`, `subsetImgData()`, and the deprecated
+    `subsetSpatialData()`/`spatialData()` with `subsetName` all work from
+    `.indicesIn(x, s, .colIndices)`. The column chain ends at the main
+    object's cells, so they return the main object's data at the subset's
+    cells, or what the nearest subset up the column chain stores (such as
+    coordinates or a column tree on `clean`).
+  - **Column-side setters: only when the class can hold it.**
+    `subsetSpatialCoords<-`, `subsetColTree<-`, `subsetSpatialData<-`, and
+    `setSubsetExperiment()` storing changed coordinates or trees, work
+    when the subset's internal object can hold them (ADT is itself a
+    SpatialExperiment or TreeSummarizedExperiment). Otherwise they stop
+    with "Subset 'x' is a SingleCellExperiment, which can't store
+    spatialCoords." (or "a colTree"), not with an S4 dispatch error.
 
 **Other functions with `subsetName =`:**
 - **`rowData(parentRowData = TRUE)`:** the altExp's rowData, as the root
@@ -143,7 +159,8 @@ main object:
   `x`. It's cut to the subset's rows and its columns relative to the
   root's container. Then it gets the assays the subset sees (its primary
   assay first), rowData, colData, and its own reducedDims, altExps and
-  metadata. The class is the altExp's. No spatial or tree steps.
+  metadata. The class is the altExp's. The spatial and column-tree steps
+  run only when that class can hold them; the row-tree step never runs.
   `setSubsetExperiment()` works through the same pieces.
 - **`subsetParent()`:** names the altExp root as `"altExp/assay"`, the
   form `unlink` already uses, prefixed with the container when there is
@@ -245,6 +262,25 @@ main object:
   `.altExpSource()`.
 - **`.altExpHolders()`** walks the chain only from the subset that starts
   the root.
+
+### Trees and spatial data
+
+- **Owner lookups:** `.nearestOwner()`'s checks (in `.treeOwner()` and
+  `.spatialCoordsOwner()`) skip internal objects whose class can't hold
+  a tree or coordinates, so a SingleCellExperiment internal object is
+  passed over and the walk goes on up the column chain. The spatial
+  check already wraps its test in `isTRUE()`. The tree check
+  (`length(tree(internal, NULL)) > 0`) gets a class test first.
+- **Row trees:** `.subsetTree()`/`.subsetLinks()` with `dim = "row"`
+  and `subsetRowTree<-` stop for a subset with an altExp root, before any
+  lookup.
+- **Positions:** the column-side readers already use only column
+  indices, so they don't change.
+- **Setters:** `.subsetSpatialCoords<-`, `.subsetColTree<-` (through
+  `.replaceTree()`), `.storeChangedSpatialCoords()` and
+  `.storeChangedTrees()` check that the internal object is a
+  SpatialExperiment or TreeSummarizedExperiment, and stop with the
+  message in Interface otherwise.
 
 ### Building the subset
 
@@ -356,8 +392,19 @@ The fixture, built with a helper in the test file:
 7. **altExps:** `altExpNames()` of the subset doesn't list the main
    object's altExps, and an altExp the subset stores is seen below it.
 8. **Summary:** `subsetSummary()` prints the Parent chain.
-9. **Tree and spatial:** each accessor stops, on a SpatialExperiment
-   and a TreeSummarizedExperiment object with an altExp.
+9. **Tree and spatial,** on a SpatialExperiment and a
+   TreeSummarizedExperiment main object, each with an ADT
+   SingleCellExperiment altExp and a subset made from it:
+   - `subsetRowTree()`, `subsetRowTree<-` and `subsetRowLinks()` stop;
+   - `subsetColTree()`, `subsetColLinks()`, `subsetSpatialCoords()`,
+     `spatialCoords(subsetName =)` and `subsetImgData()` equal the main
+     object's at the subset's cells;
+   - with coordinates or a column tree stored on the container (`clean`),
+     the ADT subset sees those instead;
+   - `subsetSpatialCoords<-` and `subsetColTree<-` stop with the class
+     message;
+   - with an ADT that is a SpatialExperiment, `subsetSpatialCoords<-`
+     stores coordinates on the ADT subset.
 10. **`[`:** `es[1:5, ]` leaves the root's rows alone; `es[, 3:20]` cuts
     its cells and those below.
 11. **Other rows:**
