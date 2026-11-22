@@ -36,7 +36,7 @@ We will add a slot `altExpName` (`NullOrCharacter`, prototype `NULL`) to
 `AssaySubset`. It's set only on the subset made with
 `createSubset(altExp =)` and holds the altExp's name.
 
-The internal accessor `.altExpName()` returns `NULL` when the slot is
+The internal accessor `.rootAltExp()` returns `NULL` when the slot is
 missing, so objects saved before the change keep working without
 `updateObject()`. `updateObject()` methods for `AssaySubset` and the
 five `Subset*` classes add the slot.
