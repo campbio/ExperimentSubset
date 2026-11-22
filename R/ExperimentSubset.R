@@ -1527,8 +1527,9 @@ NULL
 # differs.
 .altExpPart <- function(old, new, own) {
   part <- new
+  # by position: new's assays may have no names when own is empty (#121)
   assays(part, withDimnames = FALSE) <-
-    assays(new, withDimnames = FALSE)[own]
+    assays(new, withDimnames = FALSE)[assayNames(new) %in% own]
   if (.sameColumns(rowData(new), rowData(old)))
     rowData(part) <- rowData(part)[, 0]
   if (.sameColumns(colData(new), colData(old)))

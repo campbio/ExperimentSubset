@@ -5419,3 +5419,32 @@ test_that("Code review fixes for altExp subsets (#92)", {
   )
   expect_equal(nrow(imgData(stored)), 0)
 })
+
+test_that("A subset stores an altExp next to an unnamed assay (#121)", {
+  m <- matrix(as.numeric(1:40), 4, 10,
+              dimnames = list(paste0("g", 1:4), paste0("c", 1:10)))
+  adt <- SingleCellExperiment(list(counts = m[1:3, ]))
+  hto <- SingleCellExperiment(list(m[1:2, ]))
+  sce <- SingleCellExperiment(list(counts = m),
+                              altExps = list(ADT = adt, HTO = hto))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "clean", cols = 1:5, parentAssay = "counts")
+
+  # storing ADT, which HTO's unnamed assay used to break
+  newAdt <- altExp(es, "ADT", subsetName = "clean")
+  assay(newAdt, "clr", withDimnames = FALSE) <-
+    log1p(assay(newAdt, "counts"))
+  expect_no_error(altExp(es, "ADT", subsetName = "clean") <- newAdt)
+  stored <- altExp(es, "ADT", subsetName = "clean")
+  expect_equal(assayNames(stored), c("counts", "clr"))
+  expect_equal(assay(stored, "clr"), log1p(m[1:3, 1:5]))
+  expect_equal(assay(altExp(es, "HTO", subsetName = "clean")), m[1:2, 1:5])
+
+  # storing HTO itself, with new colData and its assay unchanged
+  newHto <- altExp(es, "HTO", subsetName = "clean")
+  newHto$tag <- letters[1:5]
+  expect_no_error(altExp(es, "HTO", subsetName = "clean") <- newHto)
+  storedHto <- altExp(es, "HTO", subsetName = "clean")
+  expect_equal(storedHto$tag, letters[1:5])
+  expect_equal(assay(storedHto), m[1:2, 1:5])
+})
