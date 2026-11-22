@@ -360,15 +360,25 @@ NULL
 
   rows <- .selectIndices(x, rows, parentAssay, ref, "row")
   cols <- .selectIndices(x, cols, parentAssay, ref, "col")
-  # a subset of a subset made from an altExp keeps its parent's class
-  if (ref$kind != "main" && !is.null(.rowRoot(x, ref$subset))) {
-    parent <- .internalAssay(.subsets(x)[[ref$subset]])
-    scs <- AssaySubset(subsetName = subsetName, rowIndices = rows,
-                       colIndices = cols, parentAssay = parentAssay,
-                       internalAssay = .emptyCut(parent, rows, cols))
-    .subsets(x)[[subsetName]] <- scs
-    return(x)
-  }
+  scs <- AssaySubset(
+    subsetName = subsetName,
+    rowIndices = rows,
+    colIndices = cols,
+    parentAssay = parentAssay,
+    internalAssay = .newInternal(x, rows, cols, parentAssay, ref)
+  )
+
+  .subsets(x)[[subsetName]] <- scs
+  return(x)
+}
+
+# The internal object of a new subset with rows and cols of parentAssay
+# (ref is .resolveAssay(x, parentAssay)), with no data: of the class the
+# main object extends, with its names, or, below a subset made from an
+# altExp, of that subset's class, with its names
+.newInternal <- function(x, rows, cols, parentAssay, ref) {
+  if (ref$kind != "main" && !is.null(.rowRoot(x, ref$subset)))
+    return(.emptyCut(.internalAssay(.subsets(x)[[ref$subset]]), rows, cols))
   # rows and cols are relative to the parent; names come from the main object
   rootRows <- .liftIndices(x, parentAssay, rows, .rowIndices)
   rootCols <- .liftIndices(x, parentAssay, cols, .colIndices)
@@ -388,20 +398,8 @@ NULL
 
   rownames(internalAssay) <- rownames(x)[rootRows]
   colnames(internalAssay) <- colnames(x)[rootCols]
-
-  scs <- AssaySubset(
-    subsetName = subsetName,
-    rowIndices = rows,
-    colIndices = cols,
-    parentAssay = parentAssay,
-    internalAssay = internalAssay
-  )
-
-  assay(.internalAssay(scs),
-        withDimnames = FALSE, "temp") <- NULL
-
-  .subsets(x)[[subsetName]] <- scs
-  return(x)
+  assay(internalAssay, withDimnames = FALSE, "temp") <- NULL
+  internalAssay
 }
 
 # createSubset() with altExp: a subset whose rows are features of the
@@ -677,23 +675,7 @@ NULL
   .isSubset(x, subsetName)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   root <- .rowRoot(x, subsetName)
-  if (is.null(root)) {
-    out <- as(x, class(internal))
-    # the main object's assays and reduced data are replaced, so not cut;
-    # rownames<- and colnames<- are the generics, which keep tree links
-    assays(out, withDimnames = FALSE) <- S4Vectors::SimpleList()
-    if (methods::is(out, "SingleCellExperiment")) {
-      SingleCellExperiment::reducedDims(out) <- list()
-      altExps(out) <- list()
-    }
-    out <- out[.indicesIn(x, subsetName, .rowIndices),
-               .indicesIn(x, subsetName, .colIndices)]
-  } else {
-    # the altExp the rows come from, as its container sees it
-    out <- .emptyCut(.rootObject(x, root),
-                     .indicesIn(x, subsetName, .rowIndices),
-                     .indicesIn(x, subsetName, .colIndices, root$container))
-  }
+  out <- .subsetFrame(x, subsetName, internal, root)
   rownames(out) <- rownames(internal)
   colnames(out) <- colnames(internal)
 
@@ -726,6 +708,26 @@ NULL
   if (methods::is(out, "TreeSummarizedExperiment"))
     out <- .withSubsetTrees(x, subsetName, out)
   out
+}
+
+# The object .getSubsetExperiment() starts from, without data: the main
+# object, or for a subset made from an altExp (root from .rowRoot()) that
+# altExp as its container sees it, cut to the subset's rows and columns
+.subsetFrame <- function(x, subsetName, internal, root) {
+  if (!is.null(root))
+    return(.emptyCut(.rootObject(x, root),
+                     .indicesIn(x, subsetName, .rowIndices),
+                     .indicesIn(x, subsetName, .colIndices, root$container)))
+  out <- as(x, class(internal))
+  # the main object's assays and reduced data are replaced, so not cut;
+  # rownames<- and colnames<- are the generics, which keep tree links
+  assays(out, withDimnames = FALSE) <- S4Vectors::SimpleList()
+  if (methods::is(out, "SingleCellExperiment")) {
+    SingleCellExperiment::reducedDims(out) <- list()
+    altExps(out) <- list()
+  }
+  out[.indicesIn(x, subsetName, .rowIndices),
+      .indicesIn(x, subsetName, .colIndices)]
 }
 
 # Stores what a tool added to an object from .getSubsetExperiment(); value
@@ -775,7 +777,6 @@ NULL
   x <- .storeChangedTrees(x, subsetName, value)
   if (isSce) {
     x <- .applyAltExps(x, subsetName, altExpPlan)
-    .checkAltExpParents(x, subsetName)
     x <- .carryAltExps(before, x, subsetName)
   }
   for (name in names(sources))
@@ -1434,9 +1435,7 @@ NULL
 .storeAltExps <- function(x, subsetName, value, unlink) {
   plan <- .planAltExps(x, subsetName, value)
   sources <- .checkUnlinked(plan$sources, subsetName, unlink)
-  after <- .applyAltExps(x, subsetName, plan)
-  .checkAltExpParents(after, subsetName)
-  x <- .carryAltExps(x, after, subsetName)
+  x <- .carryAltExps(x, .applyAltExps(x, subsetName, plan), subsetName)
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
@@ -1557,13 +1556,16 @@ NULL
 }
 
 # Stores parts (from .planAltExps()) as subsetName's own altExps, in place
-# of those it had, recording which are pieces; NULL parts are left out
+# of those it had, recording which are pieces; NULL parts are left out.
+# Stops if that removes an assay a subset made from an altExp was made
+# from (.checkAltExpParents())
 .applyAltExps <- function(x, subsetName, plan) {
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   parts <- plan$parts[!vapply(plan$parts, is.null, logical(1))]
   internal <- .setPieces(internal, intersect(plan$pieces, names(parts)))
   SingleCellExperiment::altExps(internal, withDimnames = FALSE) <- parts
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
+  .checkAltExpParents(x, subsetName)
   x
 }
 
@@ -1614,40 +1616,54 @@ NULL
       next
     }
     old <- .altExpView(before, container, oldName)
-    oldNames <- rownames(old)
-    newNames <- rownames(new)
-    if (byPosition && !identical(oldNames, newNames))
-      after <- .followRootNames(after, below, oldNames, newNames)
-    if (!byPosition && !identical(oldNames, newNames)) {
-      if (is.null(oldNames) || is.null(newNames))
-        stop("Subset '", start, "' can't follow the new rows of altExp '",
-             name, "': they have no names to match.")
-      kept <- list(match(newNames, oldNames))
-      names(kept) <- start
-      after <- .remapFrom(after, after, startRows = kept, only = below)
-    } else if (!byPosition && nrow(old) != nrow(new)) {
-      stop("Subset '", start, "' can't follow the new rows of altExp '",
-           name, "': they have no names to match.")
-    }
-    if (!identical(class(old), class(new))) {
-      for (member in below) {
-        internal <- .internalAssay(.subsets(after)[[member]])
-        .internalAssay(.subsets(after)[[member]]) <-
-          methods::as(internal, class(new))
-      }
-    }
+    after <- .followRootRows(after, below, old, new, name, byPosition)
   }
-  for (name in names(dropped)) {
-    gone <- subsetNames(after)[subsetNames(after) %in% dropped[[name]]]
-    .subsets(after) <- .subsets(after)[!subsetNames(after) %in% gone]
-    quoted <- .andList(sprintf("'%s'", gone))
-    if (length(gone) == 1)
-      what <- paste0("subset ", quoted, ": the altExp '", name, "' it was")
-    else
-      what <- paste0("subsets ", quoted, ": the altExp '", name, "' they were")
-    warning("Dropped ", what, " made from was removed.", call. = FALSE)
-  }
+  for (name in names(dropped))
+    after <- .dropSubsets(after, dropped[[name]], name)
   after
+}
+
+# x with the subsets in below, the first made from the altExp called name
+# and the rest from it, following that altExp from old to new: its rows,
+# by name or with byPosition by position (see .carryRowRoots()), and its
+# class
+.followRootRows <- function(x, below, old, new, name, byPosition) {
+  oldNames <- rownames(old)
+  newNames <- rownames(new)
+  if (byPosition && !identical(oldNames, newNames))
+    x <- .followRootNames(x, below, oldNames, newNames)
+  unmatched <- (is.null(oldNames) || is.null(newNames)) &&
+    !(identical(oldNames, newNames) && nrow(old) == nrow(new))
+  if (!byPosition && unmatched)
+    stop("Subset '", below[1], "' can't follow the new rows of altExp '",
+         name, "': they have no names to match.")
+  if (!byPosition && !identical(oldNames, newNames)) {
+    kept <- list(match(newNames, oldNames))
+    names(kept) <- below[1]
+    x <- .remapFrom(x, x, startRows = kept, only = below)
+  }
+  if (!identical(class(old), class(new))) {
+    for (member in below) {
+      internal <- .internalAssay(.subsets(x)[[member]])
+      .internalAssay(.subsets(x)[[member]]) <-
+        methods::as(internal, class(new))
+    }
+  }
+  x
+}
+
+# x without the subsets in gone, made from the altExp called name that was
+# removed, with a warning naming them
+.dropSubsets <- function(x, gone, name) {
+  gone <- subsetNames(x)[subsetNames(x) %in% gone]
+  .subsets(x) <- .subsets(x)[!subsetNames(x) %in% gone]
+  quoted <- .andList(sprintf("'%s'", gone))
+  if (length(gone) == 1)
+    what <- paste0("subset ", quoted, ": the altExp '", name, "' it was")
+  else
+    what <- paste0("subsets ", quoted, ": the altExp '", name, "' they were")
+  warning("Dropped ", what, " made from was removed.", call. = FALSE)
+  x
 }
 
 # The subsets in members, made from an altExp or from one, with the row
@@ -1682,8 +1698,8 @@ NULL
     # a subset made from an altExp, or from one, doesn't see the altExps
     # stored above it, so what it stores doesn't follow them
     root <- .rowRoot(after, subset)
-    if (!is.null(root) && (holder == "" || !holder %in%
-                           .rootChain(.subsetChain(after, subset), root)))
+    seen <- .rootChain(.subsetChain(after, subset), root)
+    if (!is.null(root) && (holder == "" || !holder %in% seen))
       next
     internal <- .internalAssay(.subsets(after)[[subset]])
     oldNames <- altExpNames(internal)
@@ -2321,7 +2337,6 @@ NULL
   maps <- .combineMaps(objects, out, along, useNames)
   baseClass <- .baseClass(out)
   byCols <- along == "cols"
-  getOtherIndices <- if (byCols) .rowIndices else .colIndices
   getOtherNames <- if (byCols) rownames else colnames
   subsets <- list()
   for (k in which(.hasSubsets(objects))) {
@@ -2349,19 +2364,8 @@ NULL
       if (!fromAltExp
           && !identical(as.character(class(internal)), baseClass))
         internal <- methods::as(internal, baseClass)
-      if (renamed && !(byCols && fromAltExp)) {
-        positions <- .indicesIn(object, name, getOtherIndices)
-        stored <- getOtherNames(internal)
-        followed <- .followNames(stored,
-                                 getOtherNames(object)[positions],
-                                 getOtherNames(out)[positions])
-        if (!identical(followed, stored)) {
-          if (byCols)
-            rownames(internal) <- followed
-          else
-            colnames(internal) <- followed
-        }
-      }
+      if (renamed && !(byCols && fromAltExp))
+        internal <- .followCombinedNames(object, out, name, internal, byCols)
       subsets[[name]] <- .copySubset(
         subset,
         rowIndices = rows,
@@ -2387,6 +2391,25 @@ NULL
     .subsets(out) <- subsets
   }
   .carryCombined(out, objects, useNames)
+}
+
+# internal, the stored object of subset name of object, with its names on
+# the dimension matched when combining into out by position (the rows if
+# byCols, else the columns) following out's (see .followNames())
+.followCombinedNames <- function(object, out, name, internal, byCols) {
+  getIndices <- if (byCols) .rowIndices else .colIndices
+  getNames <- if (byCols) rownames else colnames
+  positions <- .indicesIn(object, name, getIndices)
+  stored <- getNames(internal)
+  followed <- .followNames(stored, getNames(object)[positions],
+                           getNames(out)[positions])
+  if (identical(followed, stored))
+    return(internal)
+  if (byCols)
+    rownames(internal) <- followed
+  else
+    colnames(internal) <- followed
+  internal
 }
 
 # After objects are combined into out, carries along what their subsets
