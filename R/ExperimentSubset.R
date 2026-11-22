@@ -716,9 +716,11 @@ NULL
       altExps(.withSubsetAltExps(x, subsetName), withDimnames = FALSE)
   }
   metadata(out) <- metadata(internal)
-  # coordinates the subset, or one it was made from, stores (#72)
+  # coordinates the subset, or one it was made from, stores (#72); for
+  # a subset made from an altExp, which stores none, also the main
+  # object's
   if (methods::is(out, "SpatialExperiment")
-      && !is.null(.spatialCoordsOwner(x, subsetName)))
+      && (!is.null(root) || !is.null(.spatialCoordsOwner(x, subsetName))))
     spatialCoords(out) <- .subsetSpatialCoords(x, subsetName)
   # trees the subset, or one it was made from, stores (#35)
   if (methods::is(out, "TreeSummarizedExperiment"))
@@ -773,6 +775,7 @@ NULL
   x <- .storeChangedTrees(x, subsetName, value)
   if (isSce) {
     x <- .applyAltExps(x, subsetName, altExpPlan)
+    .checkAltExpParents(x, subsetName)
     x <- .carryAltExps(before, x, subsetName)
   }
   for (name in names(sources))
@@ -828,6 +831,31 @@ NULL
     if (primary %in% assayNames && primary %in% names(owners)
         && owners[[primary]] == subsetName)
       used[name] <- primary
+  }
+  if (length(used) > 0)
+    stop("'value' has no assay ",
+         paste0("'", unique(used), "'", collapse = ", "),
+         ", which subsets ", paste0("'", names(used), "'", collapse = ", "),
+         " were made from. Keep it in 'value'.")
+}
+
+# For a change to the altExps stored at holder, from before to after:
+# stops if a subset made with createSubset(altExp =) from the view of an
+# altExp at holder, or at a subset below it, was made from an assay that
+# view no longer has, as .checkNotParents() does for assays. When the
+# altExp itself is gone, .carryRowRoots() drops the subset instead.
+.checkAltExpParents <- function(after, holder) {
+  scope <- c(holder, .subsetsBelow(after, holder))
+  used <- character(0)
+  for (name in subsetNames(after)) {
+    subset <- .subsets(after)[[name]]
+    altExp <- .rootAltExp(subset)
+    parts <- .splitQualified(.parentAssay(subset))
+    if (is.null(altExp) || is.null(parts) || !parts[1] %in% scope)
+      next
+    view <- .altExpView(after, parts[1], altExp)
+    if (!is.null(view) && !parts[2] %in% assayNames(view))
+      used[name] <- paste0(altExp, "/", parts[2])
   }
   if (length(used) > 0)
     stop("'value' has no assay ",
@@ -1406,7 +1434,9 @@ NULL
 .storeAltExps <- function(x, subsetName, value, unlink) {
   plan <- .planAltExps(x, subsetName, value)
   sources <- .checkUnlinked(plan$sources, subsetName, unlink)
-  x <- .carryAltExps(x, .applyAltExps(x, subsetName, plan), subsetName)
+  after <- .applyAltExps(x, subsetName, plan)
+  .checkAltExpParents(after, subsetName)
+  x <- .carryAltExps(x, after, subsetName)
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
@@ -1549,8 +1579,8 @@ NULL
 # After a change to the altExps at holder, from before to after, carries
 # along the subsets made with createSubset(altExp =) that were in before,
 # and those made from them (ADR 0007): each follows a rename of its
-# altExp, one of the main object's (renamed holds new names, named by old
-# name, when holder is the main object, ""); is dropped, with those
+# altExp (renamed holds new names, named by old name) at holder, the main
+# object or a subset its container was made from; is dropped, with those
 # below it, with a warning, when its container no longer sees the altExp;
 # keeps the features whose names remain when the altExp's rows change,
 # or, with byPosition, those at the same positions; and takes the new
@@ -1568,7 +1598,11 @@ NULL
     oldName <- .rootAltExp(subset)
     container <- .parentSubsetName(after, .parentAssay(subset), oldName)
     name <- oldName
-    if (holder == "" && oldName %in% names(renamed)) {
+    # the main object's altExp, or the container's own whole one, which
+    # it can rename once the main object's is gone
+    upChain <- if (is.null(container)) character(0) else
+      .subsetChain(after, container)
+    if (oldName %in% names(renamed) && (holder == "" || holder %in% upChain)) {
       name <- renamed[[oldName]]
       subset <- .copySubset(subset, altExpName = name)
       .subsets(after)[[start]] <- subset
@@ -1582,6 +1616,8 @@ NULL
     old <- .altExpView(before, container, oldName)
     oldNames <- rownames(old)
     newNames <- rownames(new)
+    if (byPosition && !identical(oldNames, newNames))
+      after <- .followRootNames(after, below, oldNames, newNames)
     if (!byPosition && !identical(oldNames, newNames)) {
       if (is.null(oldNames) || is.null(newNames))
         stop("Subset '", start, "' can't follow the new rows of altExp '",
@@ -1614,6 +1650,25 @@ NULL
   after
 }
 
+# The subsets in members, made from an altExp or from one, with the row
+# names they store that were the altExp's at their positions, oldNames,
+# changed to its new ones there, newNames, when its rows are matched by
+# position (as .followNames() does for the main object's, #73)
+.followRootNames <- function(x, members, oldNames, newNames) {
+  for (member in members) {
+    positions <- .indicesIn(x, member, .rowIndices)
+    internal <- .internalAssay(.subsets(x)[[member]])
+    stored <- rownames(internal)
+    followed <- .followNames(stored, oldNames[positions],
+                             newNames[positions])
+    if (!identical(followed, stored)) {
+      rownames(internal) <- followed
+      .internalAssay(.subsets(x)[[member]]) <- internal
+    }
+  }
+  x
+}
+
 # After a change to the altExps stored at holder ("" for the main object,
 # or a subset), from before to after, carries along what the subsets below
 # holder store of them: their parts follow a rename (renamed holds new
@@ -1624,6 +1679,12 @@ NULL
                               renamed = character(0)) {
   below <- .subsetsBelow(after, holder)
   for (subset in below[below %in% subsetNames(before)]) {
+    # a subset made from an altExp, or from one, doesn't see the altExps
+    # stored above it, so what it stores doesn't follow them
+    root <- .rowRoot(after, subset)
+    if (!is.null(root) && (holder == "" || !holder %in%
+                           .rootChain(.subsetChain(after, subset), root)))
+      next
     internal <- .internalAssay(.subsets(after)[[subset]])
     oldNames <- altExpNames(internal)
     newNames <- oldNames
@@ -2486,9 +2547,15 @@ NULL
     rootCols <- .indicesIn(x, subsetName, .colIndices)
     parentCols <- colData(x)[rootCols, , drop = FALSE]
     # a SpatialExperiment subset stores a copy of sample_id, made by
-    # createSubset(); the main object's current one is used instead
-    if (methods::is(x, "SpatialExperiment"))
+    # createSubset(); the main object's current one is used instead. A
+    # subset made from an altExp has the altExp's, if any, and never the
+    # main object's, which may name other samples
+    fromAltExp <- !is.null(.rowRoot(x, subsetName))
+    if (methods::is(x, "SpatialExperiment") && !fromAltExp)
       out <- out[, colnames(out) != "sample_id", drop = FALSE]
+    else if (methods::is(x, "SpatialExperiment"))
+      parentCols <- parentCols[, colnames(parentCols) != "sample_id",
+                               drop = FALSE]
     parentCols <- .hideParentColumns(parentCols, out, subsetName, "colData")
     out <- .tagParentColumns(cbind(parentCols, out), ncol(parentCols))
     # the subset's own column names, which subsetColnames<- may have changed
@@ -3210,6 +3277,10 @@ NULL
   .isSubset(x, subsetName)
   rootCols <- .indicesIn(x, subsetName, .colIndices)
   owner <- .spatialCoordsOwner(x, subsetName)
+  # a subset made from a SpatialExperiment altExp of a main object that
+  # isn't one has no coordinates but its own
+  if (is.null(owner) && !methods::is(x, "SpatialExperiment"))
+    return(matrix(numeric(0), nrow = length(rootCols), ncol = 0))
   if (is.null(owner))
     return(spatialCoords(x)[rootCols, , drop = FALSE])
   ownerCoords <- spatialCoords(.internalAssay(.subsets(x)[[owner]]))
@@ -3308,9 +3379,13 @@ NULL
     out <- suppressMessages(spatialData(x))[rootCols, , drop = FALSE]
   }
   internal <- .internalAssay(.subsets(x)[[subsetName]])
-  subsetSpatialData <- suppressMessages(spatialData(internal))
-  if (ncol(subsetSpatialData) > 0)
-    out <- cbind(out, subsetSpatialData)
+  # the internal object of a subset made from an altExp may not be a
+  # SpatialExperiment
+  if (methods::is(internal, "SpatialExperiment")) {
+    subsetSpatialData <- suppressMessages(spatialData(internal))
+    if (ncol(subsetSpatialData) > 0)
+      out <- cbind(out, subsetSpatialData)
+  }
   # the subset's own column names, which subsetColnames<- may have changed
   spots <- colnames(.internalAssay(.subsets(x)[[subsetName]]))
   if (!is.null(spots))

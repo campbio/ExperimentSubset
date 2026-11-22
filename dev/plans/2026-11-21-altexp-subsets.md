@@ -47,7 +47,10 @@ Decided in chat (2026-11-21):
     `counts`, `decontPro` and `clr`;
   - it stores its own assays and a PCA;
   - dropping the isotype controls from the main ADT, or renaming the
-    main ADT, carries along to it;
+    main ADT, carries along to it (see "Found during implementation":
+    when `clean` stored `clr` in ADT, dropping rows from the main ADT
+    drops that `clr`, and the subset made from it is then left without
+    its parent assay, as for a main assay);
 - objects saved before this change still work, with and without
   `updateObject()`;
 - the existing tests pass unchanged, apart from the S4 method snapshot,
@@ -519,3 +522,34 @@ The fixture, built with a helper in the test file:
   subset (`altExp(x, e, subsetName = s) <-`) fails with "cannot subset by
   character when names are NULL" when another altExp the subset sees has
   an unnamed assay. To be logged as an issue.
+- **Spec review findings, fixed:**
+  - the deprecated `subsetSpatialData()` called `spatialData()` on a
+    SingleCellExperiment internal object;
+  - for a SpatialExperiment ADT, `getSubsetExperiment()` lost the
+    coordinates, so `setSubsetExperiment()` saw them as changed. It now
+    sets the main object's (or none, when the main object isn't a
+    SpatialExperiment), and keeps the ADT's own `sample_id` rather than
+    the main object's, which may name other samples;
+  - a rename of the container's own whole ADT, once the main ADT is gone,
+    dropped the subset: `.carryRowRoots()` follows renames at the main
+    object or a subset in the container's chain again. The note above
+    about renames was wrong in that case;
+  - a main altExp rename reached same-named altExps that altExp-rooted
+    subsets store themselves: `.carryAltExpParts()` now skips those
+    subsets for changes above their root;
+  - combining by position (`cbind()`, `combineCols(use.names = FALSE)`)
+    now makes their stored row names follow the altExp's
+    (`.followRootNames()`), as `.followNames()` does for the main
+    object's (#73).
+- **When the assay an altExp subset was made from goes (decided in chat,
+  2026-11-22), it behaves as for main assays:**
+  - a change to the main altExp that drops what the container stored in
+    it (the #58 rule) leaves the subset without its parent assay, as
+    `assay(x, "counts") <- NULL` leaves a subset made from `counts`;
+  - storing the container's altExp without that assay
+    (`altExp(x, e, subsetName =) <-`, `altExps<-`,
+    `setSubsetExperiment()`) stops with "'value' has no assay 'ADT/clr',
+    which subsets 'clean.antibodies' were made from. Keep it in
+    'value'.", as `.checkNotParents()` does (`.checkAltExpParents()`).
+  - Dropping subsets in both cases, for main assays too, would change
+    existing behavior and is left to its own issue.

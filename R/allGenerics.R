@@ -53,7 +53,10 @@
 #'   in the subset it was made from, renames what the subset records; if it
 #'   gets other rows, the subset keeps the features whose names remain; if
 #'   it is removed, the subset and those made from it are dropped, with a
-#'   warning.
+#'   warning. If the assay the subset was made from goes, it behaves as for
+#'   a main assay: storing a subset's view of the altExp without that assay
+#'   is an error, and a change to the main object's altExp that drops it
+#'   leaves the subset without its parent assay.
 #' @return An \code{ExperimentSubset} object that now contains the newly created
 #'   subset.
 #' @rdname createSubset
