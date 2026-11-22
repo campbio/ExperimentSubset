@@ -4882,8 +4882,9 @@ test_that("rowData, colData and getSubsetExperiment() of an altExp subset", {
   es <- setSubsetExperiment(es, "clean.antibodies", out)
   expect_equal(subsetAssayNames(es, "clean.antibodies"),
                c("counts", "clr", "scaled"))
-  expect_equal(assayNames(ExperimentSubset:::.internalAssay(
-    ExperimentSubset:::.subsets(es)[["clean.antibodies"]])), "scaled")
+  stored <- ExperimentSubset:::.subsets(es)[["clean.antibodies"]]
+  expect_equal(assayNames(ExperimentSubset:::.internalAssay(stored)),
+               "scaled")
   expect_equal(reducedDimNames(es, subsetName = "clean.antibodies"), "PCA")
 })
 
@@ -5063,9 +5064,9 @@ test_that("Combining objects keeps subsets made from an altExp (#92)", {
   altExp(proteins, "ADT") <- adt
   combined <- combineCols(proteins, es)
   expect_equal(subsetRownames(combined, "adt"), c("CD3", "CD8"))
+  combinedAdt <- assay(altExp(combined, "ADT"), "counts")
   expect_equal(assay(combined, "adt"),
-               assay(altExp(combined, "ADT"), "counts")[c("CD3", "CD8"),
-                                                         paste0("cell", 2:5)])
+               combinedAdt[c("CD3", "CD8"), paste0("cell", 2:5)])
   # by position: the proteins keep their positions
   renamed <- makeAdtEs(cleanClr = FALSE)
   colnames(renamed) <- paste0("other", 1:20)
