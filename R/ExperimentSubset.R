@@ -456,6 +456,9 @@ NULL
   object <- .altExpView(x, container, altExp)
   if (is.null(object))
     stop("'", altExp, "' is not an altExp of ", where, ".")
+  if (!altExp %in% altExpNames(x))
+    stop("'", altExp, "' is stored only in subsets; a subset can be made ",
+         "only from an altExp of the main object.")
   source <- paste0("altExp '", altExp, "'")
   if (!is.null(container))
     source <- paste0(source, " of subset '", container, "'")
@@ -690,8 +693,6 @@ NULL
     out <- .emptyCut(.rootObject(x, root),
                      .indicesIn(x, subsetName, .rowIndices),
                      .indicesIn(x, subsetName, .colIndices, root$container))
-    if (!identical(class(out), class(internal)))
-      out <- as(out, class(internal))
   }
   rownames(out) <- rownames(internal)
   colnames(out) <- colnames(internal)
@@ -1548,8 +1549,8 @@ NULL
 # After a change to the altExps at holder, from before to after, carries
 # along the subsets made with createSubset(altExp =) that were in before,
 # and those made from them (ADR 0007): each follows a rename of its
-# altExp (renamed holds new names, named by old name) at holder, the main
-# object or a subset its container was made from; is dropped, with those
+# altExp, one of the main object's (renamed holds new names, named by old
+# name, when holder is the main object, ""); is dropped, with those
 # below it, with a warning, when its container no longer sees the altExp;
 # keeps the features whose names remain when the altExp's rows change,
 # or, with byPosition, those at the same positions; and takes the new
@@ -1567,9 +1568,7 @@ NULL
     oldName <- .rootAltExp(subset)
     container <- .parentSubsetName(after, .parentAssay(subset), oldName)
     name <- oldName
-    upChain <- if (is.null(container)) character(0) else
-      .subsetChain(after, container)
-    if (oldName %in% names(renamed) && (holder == "" || holder %in% upChain)) {
+    if (holder == "" && oldName %in% names(renamed)) {
       name <- renamed[[oldName]]
       subset <- .copySubset(subset, altExpName = name)
       .subsets(after)[[start]] <- subset

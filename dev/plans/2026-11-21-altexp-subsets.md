@@ -503,3 +503,19 @@ The fixture, built with a helper in the test file:
   8.1.0, as AGENTS.md asks.
 - **The full suite takes over 10 minutes** here, so it ran in the
   background.
+- **Only the main object's altExps can be roots, now checked.** The spec
+  left out an altExp stored only in a subset as a root, but nothing
+  stopped it. `createSubset()` now stops with "'own' is stored only in
+  subsets; a subset can be made only from an altExp of the main
+  object." So a subset can't rename a root's altExp (renaming a linked
+  altExp is already an error), and `.carryRowRoots()` follows only
+  renames on the main object.
+- **A dead branch removed.** `getSubsetExperiment()` converted its result
+  when its class differed from the subset's internal object's, but the
+  carry step keeps them the same.
+- **Coverage:** the first full run gave 98.52% against devel's 98.69%
+  (Codecov, 3c7b519). Tests were added for the paths it missed.
+- **An existing bug, not from this branch:** storing an altExp in a
+  subset (`altExp(x, e, subsetName = s) <-`) fails with "cannot subset by
+  character when names are NULL" when another altExp the subset sees has
+  an unnamed assay. To be logged as an issue.

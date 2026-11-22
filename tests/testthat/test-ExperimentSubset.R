@@ -5174,3 +5174,59 @@ test_that("Objects saved before the altExpName slot still work (#92)", {
   }
   expect_equal(assay(updated, "second"), expected)
 })
+
+test_that("More checks and carry-along cases of altExp subsets (#92)", {
+  # an altExp whose first assay has no name
+  es <- makeAdtEs(cleanClr = FALSE)
+  withHto <- es
+  altExp(withHto, "HTO") <- SummarizedExperiment(
+    list(assay(altExp(es, "ADT")))
+  )
+  expect_error(createSubset(withHto, "a", altExp = "HTO"),
+               paste0("'parentAssay' is needed: altExp 'HTO' has no named ",
+                      "first assay to make the subset from."), fixed = TRUE)
+  # a linked assay of the main altExp
+  es <- createSubset(es, "adt", rows = 1:2, altExp = "ADT")
+  expect_error(setSubsetAssay(es, "adt", assay(es, "adt") + 1, "counts"),
+               paste0("'counts' in subset 'adt' is linked to the main altExp ",
+                      "'ADT'."), fixed = TRUE)
+  # rows that lose their names can't be matched
+  adt <- altExp(es, "ADT")
+  rownames(adt) <- NULL
+  expect_error(altExp(es, "ADT") <- adt,
+               "Subset 'adt' can't follow the new rows of altExp 'ADT'",
+               fixed = TRUE)
+  # an altExp stored only in a subset can't be a root
+  own <- SummarizedExperiment(list(counts = matrix(1, 2, 12)))
+  colnames(own) <- subsetColnames(es, "clean")
+  altExp(es, "own", subsetName = "clean") <- own
+  expect_error(createSubset(es, "a", parentAssay = "clean", altExp = "own"),
+               paste0("'own' is stored only in subsets; a subset can be made ",
+                      "only from an altExp of the main object."), fixed = TRUE)
+  # a rename of the main altExp carries along to a subset made from
+  # clean's own whole ADT, which follows it
+  es <- createSubset(es, "clean.antibodies", rows = 1:2,
+                     parentAssay = "clean", altExp = "ADT")
+  cleanAdt <- altExp(es, "ADT", subsetName = "clean")[1:3, ]
+  suppressMessages(
+    altExp(es, "ADT", subsetName = "clean", unlink = TRUE) <- cleanAdt
+  )
+  altExpNames(es) <- "protein"
+  expect_equal(subsetParent(es, "clean.antibodies"),
+               list("clean/protein/counts", "clean", "counts"))
+  expect_equal(subsetParent(es, "adt"), list("protein/counts"))
+  expect_equal(assay(es, "clean.antibodies"), assay(cleanAdt, "counts")[1:2, ])
+  # an altExp that is a TreeSummarizedExperiment keeps its class
+  treeAdt <- makeAdtEs(cleanClr = FALSE)
+  altExp(treeAdt, "ADT") <- TreeSummarizedExperiment(
+    assays = list(counts = assay(altExp(treeAdt, "ADT")))
+  )
+  treeAdt <- createSubset(treeAdt, "adt", rows = 1:2, altExp = "ADT")
+  expect_s4_class(getSubsetExperiment(treeAdt, "adt"),
+                  "TreeSummarizedExperiment")
+  # updateObject() says what it updates
+  old <- readRDS(test_path("fixtures", "es-1.23.54.rds"))
+  said <- capture_messages(updateObject(old, verbose = TRUE))
+  expect_true(any(grepl("updateObject(object = \"AssaySubset\")", said,
+                        fixed = TRUE)))
+})
