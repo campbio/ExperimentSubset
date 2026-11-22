@@ -201,6 +201,10 @@ A subset sees the main object's altExps, and those stored on
   show in them. Renaming it renames what they store of it. Removing it,
   or storing it with other rows or another class, drops what they added
   to it, with a warning; an altExp a subset stores whole is kept.
+
+  A subset can also be made from an altExp, with its own features, by
+  \code{createSubset(altExp =)}; see \code{\link{createSubset}}. Such a
+  subset sees only the altExps it, or a subset it was made from, stores.
 }
 \examples{
 # an object with 10 genes and 20 cells

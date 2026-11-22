@@ -29,7 +29,12 @@ assay stored in a subset as \code{"subset/assay"}, against which the
 'subset to parent link' should be retrieved.}
 }
 \value{
-A \code{list} containing the 'subset to parent' link.
+A \code{list} containing the 'subset to parent' link. For a
+  subset made with \code{createSubset(altExp =)}, the altExp's assay it
+  was made from is written as \code{"altExp/assay"}, such as
+  \code{"ADT/counts"}, or as \code{"subset/altExp/assay"} when it was
+  made from a subset's view of the altExp; the list then goes on through
+  the subsets its cells come from.
 }
 \description{
 Retrieves a complete 'subset to parent' link from a specified

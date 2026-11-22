@@ -23,6 +23,10 @@ in the subset.}
 
 \item{\code{internalAssay}}{\code{SummarizedExperiment} An internal experiment object
 to store additional subset data.}
+
+\item{\code{altExpName}}{\code{character(1)} or \code{NULL}. For a subset made
+with \code{createSubset(altExp =)}, the name of the altExp whose
+features its rows index; \code{NULL} for other subsets (ADR 0007).}
 }}
 
 \keyword{internal}

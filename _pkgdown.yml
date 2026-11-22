@@ -19,6 +19,7 @@ reference:
   contents:
   - ExperimentSubset
   - ends_with("-class")
+  - ExperimentSubset-updateObject
 - title: Creating and managing subsets
   contents:
   - createSubset

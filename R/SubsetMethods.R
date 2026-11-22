@@ -162,7 +162,65 @@ NULL
 #' @eval .rdMethods(c("cbind", "rbind", "combineCols", "combineRows"))
 NULL
 
+#' @title Update an ExperimentSubset object saved by an older version
+#' @description \code{updateObject()} brings an \code{ExperimentSubset}
+#'   object saved by an older version of the package up to date: the class
+#'   it extends updates the main object, and each subset is updated too.
+#'   Since version 1.23.55, each subset records whether it was made from an
+#'   altExp with \code{createSubset(altExp =)}; subsets of objects saved
+#'   before then record that they weren't. Such objects also work without
+#'   \code{updateObject()}.
+#' @param object An \code{ExperimentSubset} object.
+#' @param ... Passed on to \code{updateObject()} of the class the object
+#'   extends, and of each subset's stored object.
+#' @param verbose \code{logical(1)} Whether to say what is updated. Default
+#'   \code{FALSE}.
+#' @return \code{object}, updated.
+#' @seealso \code{\link[BiocGenerics]{updateObject}}
+#' @name ExperimentSubset-updateObject
+#' @eval .rdMethods("updateObject", c(.esClasses, "AssaySubset"))
+#' @importFrom S4Vectors updateObject
+#' @examples
+#' # an object with a subset
+#' counts <- matrix(rpois(60, lambda = 5), nrow = 6)
+#' rownames(counts) <- paste0("gene", 1:6)
+#' colnames(counts) <- paste0("cell", 1:10)
+#' es <- ExperimentSubset(list(counts = counts))
+#' es <- createSubset(es, subsetName = "first", rows = 1:4, cols = 1:8)
+#' # an object saved by an older version is updated the same way
+#' es <- updateObject(es)
+#' subsetNames(es)
+NULL
+
+# A subset, with the slots that objects saved before them lack, and its
+# stored object updated
+setMethod(
+  f = "updateObject",
+  signature = "AssaySubset",
+  definition = function(object, ..., verbose = FALSE) {
+    if (isTRUE(verbose))
+      message("updateObject(object = \"AssaySubset\")")
+    .copySubset(object,
+                internalAssay = updateObject(.internalAssay(object), ...,
+                                             verbose = verbose))
+  }
+)
+
 for (cls in .esClasses) {
+  setMethod(
+    f = "updateObject",
+    signature = cls,
+    definition = function(object, ..., verbose = FALSE) {
+      object <- callNextMethod()
+      subsets <- .subsets(object)
+      for (name in names(subsets))
+        subsets[[name]] <- updateObject(subsets[[name]], ...,
+                                        verbose = verbose)
+      .subsets(object) <- subsets
+      object
+    }
+  )
+
   setMethod(
     f = "subsetColnames",
     signature = signature(x = cls),
@@ -277,12 +335,14 @@ for (cls in .esClasses) {
                           subsetName,
                           rows,
                           cols,
-                          parentAssay) {
+                          parentAssay,
+                          altExp) {
       return(.createSubset(x,
                            subsetName,
                            rows,
                            cols,
-                           parentAssay))
+                           parentAssay,
+                           altExp))
     }
   )
 

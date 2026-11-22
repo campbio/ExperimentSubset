@@ -13,6 +13,9 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
 #' @slot parentAssay \code{character(1)} Name of the parent of this subset.
 #' @slot internalAssay \code{SummarizedExperiment} An internal experiment object
 #'   to store additional subset data.
+#' @slot altExpName \code{character(1)} or \code{NULL}. For a subset made
+#'   with \code{createSubset(altExp =)}, the name of the altExp whose
+#'   features its rows index; \code{NULL} for other subsets (ADR 0007).
 #' @import methods
 .AssaySubset <- setClass(
   "AssaySubset",
@@ -21,7 +24,8 @@ setClassUnion("NullOrNumeric", c("NULL", "numeric"))
     rowIndices = "NullOrNumeric",
     colIndices = "NullOrNumeric",
     parentAssay = "NullOrCharacter",
-    internalAssay = "ANY"
+    internalAssay = "ANY",
+    altExpName = "NullOrCharacter"
   )
 )
 
