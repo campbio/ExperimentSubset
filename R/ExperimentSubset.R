@@ -1486,7 +1486,7 @@ NULL
     # a whole altExp the subset stores stays whole
     if (!(stored && isFALSE(.isPiece(internal, name)))
         && .sameAltExpShape(old$altExp, new)) {
-      changed <- .changedAssays(old$altExp, new)
+      changed <- .changedAssays(old$altExp, new, name)
       parts[i] <- list(.altExpPart(old$altExp, new, changed))
       pieces <- c(pieces, name)
     } else {
@@ -1509,8 +1509,14 @@ NULL
 }
 
 # Names of the assays of new that old doesn't have or holds other values
-# for
-.changedAssays <- function(old, new) {
+# for. Assays are matched by name, so if either has assays without names,
+# stops unless new's assays are old's, unchanged (#121); name is the
+# altExp's, for the message
+.changedAssays <- function(old, new, name) {
+  if (.hasUnnamedAssays(old) || .hasUnnamedAssays(new)) {
+    .checkSameAssays(old, new, name)
+    return(character(0))
+  }
   changed <- character(0)
   for (name in assayNames(new)) {
     if (!name %in% assayNames(old)
@@ -1521,13 +1527,34 @@ NULL
   changed
 }
 
+# TRUE if object has assays and any of them has no name
+.hasUnnamedAssays <- function(object) {
+  n <- assayNames(object)
+  length(assays(object, withDimnames = FALSE)) > 0 &&
+    (is.null(n) || !all(nzchar(n)))
+}
+
+# Stops unless new has old's assays, with the same names, in the same
+# order and with the same values; name is the altExp's
+.checkSameAssays <- function(old, new, name) {
+  oldAssays <- assays(old, withDimnames = FALSE)
+  newAssays <- assays(new, withDimnames = FALSE)
+  same <- length(oldAssays) == length(newAssays) &&
+    identical(names(oldAssays), names(newAssays)) &&
+    all(mapply(.sameAssay, as.list(newAssays), as.list(oldAssays)))
+  if (!same)
+    stop("altExp '", name, "' has assays without names, so changes to ",
+         "its assays can't be stored. Name them with assayNames<- first.")
+}
+
 # new, of the same shape as the linked altExp old, without what old
 # already has: assays other than own (from .changedAssays()), and rowData,
 # colData, metadata and reducedDims that are the same. NULL if nothing
 # differs.
 .altExpPart <- function(old, new, own) {
   part <- new
-  # by position: new's assays may have no names when own is empty (#121)
+  # a logical match, since indexing by character fails when new's assays
+  # have no names, even with own empty (#121)
   assays(part, withDimnames = FALSE) <-
     assays(new, withDimnames = FALSE)[assayNames(new) %in% own]
   if (.sameColumns(rowData(new), rowData(old)))
