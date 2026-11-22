@@ -39,7 +39,8 @@ setGeneric(
                  subsetName,
                  rows = NULL,
                  cols = NULL,
-                 parentAssay = NULL)
+                 parentAssay = NULL,
+                 altExp = NULL)
     standardGeneric("createSubset"),
   # nolint end
   signature = "x"

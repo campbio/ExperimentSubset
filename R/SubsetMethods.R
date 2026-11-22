@@ -277,12 +277,14 @@ for (cls in .esClasses) {
                           subsetName,
                           rows,
                           cols,
-                          parentAssay) {
+                          parentAssay,
+                          altExp) {
       return(.createSubset(x,
                            subsetName,
                            rows,
                            cols,
-                           parentAssay))
+                           parentAssay,
+                           altExp))
     }
   )
 

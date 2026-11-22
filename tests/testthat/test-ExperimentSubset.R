@@ -4686,3 +4686,470 @@ test_that("A parent cycle stops instead of hanging (#36)", {
   expect_error(createSubset(es, "child", rows = 1, parentAssay = "s1a"),
                cycle)
 })
+
+# Subsets made from an altExp (#92) ----------------------------------------
+
+# A small CITE-seq-like object: 10 genes and 20 cells, with an altExp
+# "ADT" of 4 proteins, the last an isotype control, and a rowData column.
+# Subset "clean" holds cells 3 to 14; with cleanClr, its ADT stores its
+# own "clr". adt picks the class of ADT
+makeAdtEs <- function(cleanClr = TRUE, adt = c("sce", "se")) {
+  adt <- match.arg(adt)
+  set.seed(2)
+  counts <- matrix(rpois(200, lambda = 5), nrow = 10,
+                   dimnames = list(paste0("gene", 1:10),
+                                   paste0("cell", 1:20)))
+  adtCounts <- matrix(rpois(80, lambda = 20), nrow = 4,
+                      dimnames = list(c("CD3", "CD4", "CD8", "Isotype"),
+                                      colnames(counts)))
+  if (adt == "sce") {
+    adtObject <- SingleCellExperiment(list(counts = adtCounts))
+  } else {
+    adtObject <- SummarizedExperiment(list(counts = adtCounts))
+  }
+  rowData(adtObject)$isotype <- c(FALSE, FALSE, FALSE, TRUE)
+  es <- ExperimentSubset(list(counts = counts))
+  es$batch <- rep(c("a", "b"), 10)
+  altExp(es, "ADT") <- adtObject
+  es <- createSubset(es, "clean", cols = 3:14)
+  if (cleanClr) {
+    cleanAdt <- altExp(es, "ADT", subsetName = "clean")
+    assay(cleanAdt, "clr") <- log1p(assay(cleanAdt, "counts"))
+    altExp(es, "ADT", subsetName = "clean") <- cleanAdt
+  }
+  es
+}
+
+test_that("createSubset(altExp =) makes a subset of the main altExp (#92)", {
+  es <- makeAdtEs()
+  adtCounts <- assay(altExp(es, "ADT"), "counts")
+  es <- createSubset(es, "adt", rows = c("CD3", "CD8"), cols = 2:5,
+                     altExp = "ADT")
+  expect_equal(subsetDim(es, "adt"), c(2L, 4L))
+  expect_equal(subsetRownames(es, "adt"), c("CD3", "CD8"))
+  expect_equal(subsetColnames(es, "adt"), paste0("cell", 2:5))
+  expect_equal(assay(es, "adt"), adtCounts[c("CD3", "CD8"), 2:5])
+  expect_equal(subsetAssayNames(es, "adt"), "counts")
+  expect_equal(subsetParent(es, "adt"), list("ADT/counts"))
+  # rows by position, the default parentAssay: ADT's first assay
+  es <- createSubset(es, "adt2", rows = 1:2, altExp = "ADT")
+  expect_equal(assay(es, "adt2"), adtCounts[1:2, ])
+  expect_equal(subsetParent(es, "adt2"), list("ADT/counts"))
+  # the main object and its other subsets don't change
+  expect_equal(dim(es), c(10L, 20L))
+  expect_equal(assay(es, "clean"), assay(es, "counts")[, 3:14])
+})
+
+test_that("createSubset(altExp =) starts from a subset's view (#92)", {
+  es <- makeAdtEs()
+  cleanAdt <- altExp(es, "ADT", subsetName = "clean")
+  es <- createSubset(es, "clean.antibodies", rows = 1:3,
+                     parentAssay = "clean/clr", altExp = "ADT")
+  expect_equal(assay(es, "clean.antibodies"), assay(cleanAdt, "clr")[1:3, ])
+  expect_equal(assay(es, "clean.antibodies/counts"),
+               assay(cleanAdt, "counts")[1:3, ])
+  expect_equal(subsetAssayNames(es, "clean.antibodies"), c("counts", "clr"))
+  expect_equal(subsetColnames(es, "clean.antibodies"), paste0("cell", 3:14))
+  expect_equal(subsetParent(es, "clean.antibodies"),
+               list("clean/ADT/clr", "clean", "counts"))
+  # cols are relative to clean; "clean" alone is its first ADT assay,
+  # recorded explicitly
+  es <- createSubset(es, "two", rows = c("CD4", "CD8"), cols = c(1, 3),
+                     parentAssay = "clean", altExp = "ADT")
+  expect_equal(subsetColnames(es, "two"), c("cell3", "cell5"))
+  expect_equal(assay(es, "two"),
+               assay(cleanAdt, "counts")[c("CD4", "CD8"), c(1, 3)])
+  expect_equal(subsetParent(es, "two"),
+               list("clean/ADT/counts", "clean", "counts"))
+})
+
+test_that("createSubset(altExp =) checks its arguments (#92)", {
+  es <- makeAdtEs()
+  se <- ExperimentSubset(SummarizedExperiment(
+    list(counts = assay(es, "counts"))
+  ))
+  expect_error(createSubset(se, "a", altExp = "ADT"),
+               paste0("'altExp' needs an object with altExps, such as a ",
+                      "SubsetSingleCellExperiment; 'x' is a ",
+                      "SubsetSummarizedExperiment."), fixed = TRUE)
+  expect_error(createSubset(es, "a", altExp = c("ADT", "ADT")),
+               "'altExp' must be NULL or a single, non-empty character",
+               fixed = TRUE)
+  expect_error(createSubset(es, "a", altExp = "HTO"),
+               "'HTO' is not an altExp of the main object.", fixed = TRUE)
+  expect_error(createSubset(es, "a", parentAssay = "clean", altExp = "HTO"),
+               "'HTO' is not an altExp of subset 'clean'.", fixed = TRUE)
+  expect_error(createSubset(es, "a", parentAssay = "clr", altExp = "ADT"),
+               "'clr' is not an assay of altExp 'ADT'.", fixed = TRUE)
+  expect_error(createSubset(es, "a", parentAssay = "clean/nope",
+                            altExp = "ADT"),
+               "'nope' is not an assay of altExp 'ADT' of subset 'clean'.",
+               fixed = TRUE)
+  expect_error(createSubset(es, "a", rows = "CD99", altExp = "ADT"),
+               "Selected rows not available in the specified assay.",
+               fixed = TRUE)
+  es <- createSubset(es, "adt", rows = 1:2, altExp = "ADT")
+  expect_error(createSubset(es, "a", parentAssay = "adt", altExp = "ADT"),
+               paste0("Subset 'adt' is made from altExp 'ADT', so a subset ",
+                      "of it can't use 'altExp'; leave 'altExp' out to ",
+                      "subset its rows."), fixed = TRUE)
+  expect_equal(subsetNames(es), c("clean", "adt"))
+})
+
+test_that("A subset made from an altExp stores its own data (#92)", {
+  es <- makeAdtEs()
+  es <- createSubset(es, "clean.antibodies", rows = 1:3,
+                     parentAssay = "clean/clr", altExp = "ADT")
+  scaled <- assay(es, "clean.antibodies") * 2
+  es <- setSubsetAssay(es, "clean.antibodies", scaled, "scaled")
+  expect_equal(subsetAssayNames(es, "clean.antibodies"),
+               c("counts", "clr", "scaled"))
+  expect_equal(assay(es, "clean.antibodies/scaled"), scaled)
+  # a linked assay needs unlink, and messages name where it is linked from
+  expect_error(setSubsetAssay(es, "clean.antibodies", scaled, "clr"),
+               paste0("'clr' in subset 'clean.antibodies' is linked to ",
+                      "altExp 'ADT' of subset 'clean'."), fixed = TRUE)
+  expect_error(setSubsetAssay(es, "clean.antibodies", scaled, "counts"),
+               "is linked to the main altExp 'ADT'.", fixed = TRUE)
+  expect_message(
+    unlinked <- setSubsetAssay(es, "clean.antibodies", scaled, "clr",
+                               unlink = TRUE),
+    "unlinked from altExp 'ADT' of subset 'clean'.", fixed = TRUE
+  )
+  expect_equal(assay(unlinked, "clean.antibodies"), scaled)
+  expect_equal(assay(altExp(unlinked, "ADT", subsetName = "clean"), "clr"),
+               assay(altExp(es, "ADT", subsetName = "clean"), "clr"))
+  # a PCA of its cells
+  pca <- matrix(seq_len(24), nrow = 12)
+  reducedDim(es, "PCA", subsetName = "clean.antibodies") <- pca
+  expect_equal(reducedDimNames(es, subsetName = "clean.antibodies"), "PCA")
+  expect_equal(unname(reducedDim(es, "PCA", subsetName = "clean.antibodies")),
+               pca)
+  # a subset of a SummarizedExperiment altExp can't hold one
+  seEs <- makeAdtEs(cleanClr = FALSE, adt = "se")
+  seEs <- createSubset(seEs, "adt", rows = 1:2, altExp = "ADT")
+  expect_s4_class(getSubsetExperiment(seEs, "adt"), "SummarizedExperiment")
+  expect_false(is(getSubsetExperiment(seEs, "adt"), "SingleCellExperiment"))
+  expect_error(reducedDim(seEs, "PCA", subsetName = "adt") <-
+                 matrix(seq_len(40), nrow = 20), "reducedDim")
+})
+
+test_that("Subsets made from an altExp-rooted subset index its rows (#92)", {
+  es <- makeAdtEs()
+  es <- createSubset(es, "clean.antibodies", rows = 1:3,
+                     parentAssay = "clean/clr", altExp = "ADT")
+  es <- createSubset(es, "cd", rows = 2:3, cols = 1:4,
+                     parentAssay = "clean.antibodies")
+  expect_equal(assay(es, "cd"), assay(es, "clean.antibodies")[2:3, 1:4])
+  expect_equal(subsetRownames(es, "cd"), c("CD4", "CD8"))
+  expect_equal(subsetColnames(es, "cd"), paste0("cell", 3:6))
+  expect_equal(subsetParent(es, "cd"),
+               list("clean.antibodies", "clean/ADT/clr", "clean", "counts"))
+  es <- createSubset(es, "cdCounts", rows = 1,
+                     parentAssay = "clean.antibodies/counts")
+  expect_equal(assay(es, "cdCounts"),
+               assay(es, "clean.antibodies/counts")[1, , drop = FALSE])
+  out <- getSubsetExperiment(es, "cd")
+  expect_s4_class(out, "SingleCellExperiment")
+  expect_equal(dim(out), c(2L, 4L))
+  expect_equal(rowData(out)$isotype, c(FALSE, FALSE))
+})
+
+test_that("rowData, colData and getSubsetExperiment() of an altExp subset", {
+  es <- makeAdtEs()
+  es <- createSubset(es, "clean.antibodies", rows = c(1, 4),
+                     parentAssay = "clean/clr", altExp = "ADT")
+  rows <- rowData(es, subsetName = "clean.antibodies", parentRowData = TRUE)
+  expect_equal(rows$isotype, c(FALSE, TRUE))
+  expect_equal(rownames(rows), c("CD3", "Isotype"))
+  expect_equal(ncol(rowData(es, subsetName = "clean.antibodies")), 0)
+  cols <- colData(es, subsetName = "clean.antibodies", parentColData = TRUE)
+  expect_equal(cols$batch, es$batch[3:14])
+
+  out <- getSubsetExperiment(es, "clean.antibodies")
+  cleanAdt <- altExp(es, "ADT", subsetName = "clean")
+  expect_s4_class(out, "SingleCellExperiment")
+  expect_equal(dim(out), c(2L, 12L))
+  expect_equal(assayNames(out), c("clr", "counts"))
+  expect_equal(assay(out, "clr"), assay(cleanAdt, "clr")[c(1, 4), ])
+  expect_equal(rowData(out)$isotype, c(FALSE, TRUE))
+  expect_equal(out$batch, es$batch[3:14])
+  expect_equal(altExpNames(out), character(0))
+
+  # a tool adds an assay and a PCA; the linked assays stay linked
+  assay(out, "scaled") <- assay(out, "clr") * 2
+  reducedDim(out, "PCA") <- matrix(seq_len(24), nrow = 12)
+  es <- setSubsetExperiment(es, "clean.antibodies", out)
+  expect_equal(subsetAssayNames(es, "clean.antibodies"),
+               c("counts", "clr", "scaled"))
+  expect_equal(assayNames(ExperimentSubset:::.internalAssay(
+    ExperimentSubset:::.subsets(es)[["clean.antibodies"]])), "scaled")
+  expect_equal(reducedDimNames(es, subsetName = "clean.antibodies"), "PCA")
+})
+
+test_that("A subset made from an altExp sees only altExps below it (#92)", {
+  es <- makeAdtEs()
+  es <- createSubset(es, "clean.antibodies", rows = 1:3,
+                     parentAssay = "clean/clr", altExp = "ADT")
+  expect_equal(altExpNames(es, subsetName = "clean"), "ADT")
+  expect_equal(altExpNames(es, subsetName = "clean.antibodies"),
+               character(0))
+  extra <- SummarizedExperiment(list(counts = matrix(1, 2, 12)))
+  altExp(es, "extra", subsetName = "clean.antibodies") <- extra
+  es <- createSubset(es, "cd", rows = 1:2, parentAssay = "clean.antibodies")
+  expect_equal(altExpNames(es, subsetName = "clean.antibodies"), "extra")
+  expect_equal(altExpNames(es, subsetName = "cd"), "extra")
+  expect_equal(dim(altExp(es, "extra", subsetName = "cd")), c(2L, 12L))
+})
+
+test_that("subsetSummary() shows the altExp a subset was made from (#92)", {
+  es <- makeAdtEs()
+  es <- createSubset(es, "clean.antibodies", rows = 1:3,
+                     parentAssay = "clean/clr", altExp = "ADT")
+  expect_output(subsetSummary(es),
+                "clean.antibodies +3, 12 +clean/ADT/clr -> clean -> counts")
+})
+
+test_that("x[i, j] cuts the cells of an altExp subset, not its rows (#92)", {
+  es <- makeAdtEs()
+  es <- createSubset(es, "clean.antibodies", rows = 2:4,
+                     parentAssay = "clean/clr", altExp = "ADT")
+  es <- createSubset(es, "cd", cols = 1:6, parentAssay = "clean.antibodies")
+  fewerGenes <- es[1:5, ]
+  expect_equal(subsetRownames(fewerGenes, "clean.antibodies"),
+               c("CD4", "CD8", "Isotype"))
+  expect_equal(assay(fewerGenes, "clean.antibodies"),
+               assay(es, "clean.antibodies"))
+  fewerCells <- es[, 5:20]
+  expect_equal(subsetColnames(fewerCells, "clean.antibodies"),
+               paste0("cell", 5:14))
+  expect_equal(assay(fewerCells, "clean.antibodies"),
+               assay(es, "clean.antibodies")[, 3:12])
+  expect_equal(subsetColnames(fewerCells, "cd"), paste0("cell", 5:8))
+  expect_equal(subsetRownames(fewerCells, "cd"), c("CD4", "CD8", "Isotype"))
+})
+
+test_that("altExp subsets follow their features by name (#92)", {
+  es <- makeAdtEs(cleanClr = FALSE)
+  es <- createSubset(es, "adt", rows = c("CD4", "Isotype", "CD3"),
+                     cols = 1:6, altExp = "ADT")
+  es <- createSubset(es, "below", rows = 2:3, parentAssay = "adt")
+  setSubsetAssay(es, "adt", assay(es, "adt") + 1, "plusOne") -> es
+  # drop the isotype control from the main ADT, in another order
+  noIsotype <- es
+  altExp(noIsotype, "ADT") <- altExp(es, "ADT")[c("CD8", "CD3", "CD4"), ]
+  expect_equal(subsetRownames(noIsotype, "adt"), c("CD4", "CD3"))
+  expect_equal(assay(noIsotype, "adt/counts"),
+               assay(altExp(es, "ADT"), "counts")[c("CD4", "CD3"), 1:6])
+  expect_equal(assay(noIsotype, "adt/plusOne"),
+               assay(es, "adt/plusOne")[c(1, 3), ])
+  expect_equal(subsetRownames(noIsotype, "below"), "CD3")
+  expect_equal(assay(noIsotype, "below"),
+               assay(es, "below")[2, , drop = FALSE])
+  # no names on either side and the same number of rows: no change
+  unnamed <- makeAdtEs(cleanClr = FALSE)
+  adt <- altExp(unnamed, "ADT")
+  rownames(adt) <- NULL
+  altExp(unnamed, "ADT") <- adt
+  unnamed <- createSubset(unnamed, "adt", rows = 2:3, altExp = "ADT")
+  assay(adt, "counts") <- assay(adt, "counts") + 1L
+  same <- unnamed
+  altExp(same, "ADT") <- adt
+  expect_equal(assay(same, "adt"), assay(adt, "counts")[2:3, ])
+  # other rows without names can't be matched
+  expect_error(altExp(unnamed, "ADT") <- adt[1:3, ],
+               paste0("Subset 'adt' can't follow the new rows of altExp ",
+                      "'ADT': they have no names to match."), fixed = TRUE)
+})
+
+test_that("altExp subsets follow a subset's own whole altExp (#92)", {
+  es <- makeAdtEs(cleanClr = FALSE)
+  es <- createSubset(es, "clean.antibodies", rows = c("CD3", "Isotype"),
+                     parentAssay = "clean", altExp = "ADT")
+  # clean stores its own ADT without the isotype control, whole
+  cleanAdt <- altExp(es, "ADT", subsetName = "clean")[1:3, ]
+  expect_message(
+    altExp(es, "ADT", subsetName = "clean", unlink = TRUE) <- cleanAdt,
+    "now stores its own 'ADT/counts'"
+  )
+  expect_equal(subsetRownames(es, "clean.antibodies"), "CD3")
+  expect_equal(assay(es, "clean.antibodies"),
+               assay(cleanAdt, "counts")["CD3", , drop = FALSE])
+})
+
+test_that("Renaming an altExp carries along to subsets made from it (#92)", {
+  es <- makeAdtEs()
+  es <- createSubset(es, "adt", rows = 1:2, altExp = "ADT")
+  es <- createSubset(es, "clean.antibodies", rows = 1:3,
+                     parentAssay = "clean/clr", altExp = "ADT")
+  before <- assay(es, "clean.antibodies")
+  altExpNames(es) <- "protein"
+  expect_equal(subsetParent(es, "adt"), list("protein/counts"))
+  expect_equal(subsetParent(es, "clean.antibodies"),
+               list("clean/protein/clr", "clean", "counts"))
+  expect_equal(assay(es, "clean.antibodies"), before)
+  expect_equal(assay(es, "adt"),
+               assay(altExp(es, "protein"), "counts")[1:2, ])
+})
+
+test_that("Removing an altExp drops the subsets made from it (#92)", {
+  es <- makeAdtEs(cleanClr = FALSE)
+  es <- createSubset(es, "adt", rows = 1:2, altExp = "ADT")
+  es <- createSubset(es, "below", rows = 1, parentAssay = "adt")
+  es <- createSubset(es, "clean.antibodies", rows = 1:3,
+                     parentAssay = "clean", altExp = "ADT")
+  removed <- es
+  expect_warning(
+    altExp(removed, "ADT") <- NULL,
+    paste0("Dropped subsets 'adt', 'below' and 'clean.antibodies': the ",
+           "altExp 'ADT' they were made from was removed."), fixed = TRUE
+  )
+  expect_equal(subsetNames(removed), "clean")
+  removed <- es
+  expect_warning(altExps(removed) <- list(), "Dropped subsets")
+  expect_equal(subsetNames(removed), "clean")
+  # clean's own whole ADT stays, so subsets made from it stay
+  cleanAdt <- altExp(es, "ADT", subsetName = "clean")[1:3, ]
+  suppressMessages(
+    altExp(es, "ADT", subsetName = "clean", unlink = TRUE) <- cleanAdt
+  )
+  expect_warning(altExp(es, "ADT") <- NULL,
+                 "Dropped subsets 'adt' and 'below':", fixed = TRUE)
+  expect_equal(subsetNames(es), c("clean", "clean.antibodies"))
+  expect_equal(assay(es, "clean.antibodies"), assay(cleanAdt, "counts"))
+})
+
+test_that("A new altExp class carries along to subsets made from it", {
+  es <- makeAdtEs(cleanClr = FALSE)
+  es <- createSubset(es, "adt", rows = 1:2, altExp = "ADT")
+  es <- createSubset(es, "below", rows = 1, parentAssay = "adt")
+  altExp(es, "ADT") <- as(altExp(es, "ADT"), "SummarizedExperiment")
+  for (name in c("adt", "below")) {
+    out <- getSubsetExperiment(es, name)
+    expect_false(is(out, "SingleCellExperiment"))
+    expect_s4_class(out, "SummarizedExperiment")
+  }
+})
+
+test_that("Combining objects keeps subsets made from an altExp (#92)", {
+  es <- makeAdtEs(cleanClr = FALSE)
+  es <- createSubset(es, "adt", rows = c("CD3", "CD8"), cols = 2:5,
+                     altExp = "ADT")
+  # other cells, the same genes and proteins
+  other <- makeAdtEs(cleanClr = FALSE)
+  colnames(other) <- paste0("other", 1:20)
+  other <- ExperimentSubset(as(other, "SingleCellExperiment"))
+  both <- cbind(other, es)
+  expect_equal(subsetColnames(both, "adt"), paste0("cell", 2:5))
+  expect_equal(assay(both, "adt"), assay(es, "adt"))
+  # other genes, the same cells and proteins
+  genes <- makeAdtEs(cleanClr = FALSE)
+  rownames(genes) <- paste0("other", 1:10)
+  genes <- ExperimentSubset(as(genes, "SingleCellExperiment"))
+  stacked <- rbind(genes, es)
+  expect_equal(subsetRownames(stacked, "adt"), c("CD3", "CD8"))
+  expect_equal(assay(stacked, "adt"), assay(es, "adt"))
+  # other cells and proteins: the proteins are matched by name
+  proteins <- makeAdtEs(cleanClr = FALSE)
+  colnames(proteins) <- paste0("other", 1:20)
+  proteins <- ExperimentSubset(as(proteins, "SingleCellExperiment"))
+  adt <- altExp(proteins, "ADT")[2:3, ]
+  rownames(adt) <- c("CD99", "CD8")
+  altExp(proteins, "ADT") <- adt
+  combined <- combineCols(proteins, es)
+  expect_equal(subsetRownames(combined, "adt"), c("CD3", "CD8"))
+  expect_equal(assay(combined, "adt"),
+               assay(altExp(combined, "ADT"), "counts")[c("CD3", "CD8"),
+                                                         paste0("cell", 2:5)])
+  # combineRows() keeps no altExps
+  expect_warning(byRows <- combineRows(es, genes), "Dropped subsets 'adt'")
+  expect_equal(subsetNames(byRows), "clean")
+})
+
+# A SpatialExperiment and a TreeSummarizedExperiment, each with 6 spots or
+# columns and an ADT altExp of 3 proteins
+makeAdtSpatial <- function(adt = c("sce", "spe")) {
+  adt <- match.arg(adt)
+  spe <- makeImageSpe()
+  adtCounts <- matrix(as.numeric(1:18), nrow = 3,
+                      dimnames = list(c("CD3", "CD4", "CD8"),
+                                      colnames(spe)))
+  if (adt == "sce") {
+    altExp(spe, "ADT") <- SingleCellExperiment(list(counts = adtCounts))
+  } else {
+    altExp(spe, "ADT") <- SpatialExperiment(list(counts = adtCounts))
+  }
+  ExperimentSubset(spe)
+}
+makeAdtTree <- function() {
+  tse <- makeTreeTse()
+  adtCounts <- matrix(as.numeric(1:18), nrow = 3,
+                      dimnames = list(c("CD3", "CD4", "CD8"),
+                                      colnames(tse)))
+  altExp(tse, "ADT") <- SingleCellExperiment(list(counts = adtCounts))
+  ExperimentSubset(tse)
+}
+
+test_that("altExp subsets read spatial data at their cells (#92)", {
+  es <- makeAdtSpatial()
+  es <- createSubset(es, "adt", rows = 1:2, cols = 2:5, altExp = "ADT")
+  expect_equal(subsetSpatialCoords(es, "adt"),
+               spatialCoords(es)[2:5, , drop = FALSE])
+  expect_equal(spatialCoords(es, subsetName = "adt"),
+               subsetSpatialCoords(es, "adt"))
+  expect_equal(subsetImgData(es, "adt"), imgData(es))
+  expect_error(subsetSpatialCoords(es, "adt") <- matrix(1, 4, 2),
+               paste0("Subset 'adt' is a SingleCellExperiment, which can't ",
+                      "store spatialCoords."), fixed = TRUE)
+  # coordinates stored on the subset it was made from
+  es <- createSubset(es, "spots", cols = 3:6)
+  subsetSpatialCoords(es, "spots") <- spatialCoords(es)[3:6, ] * 2
+  es <- createSubset(es, "spotsAdt", rows = 1:3, cols = 1:2,
+                     parentAssay = "spots", altExp = "ADT")
+  expect_equal(unname(subsetSpatialCoords(es, "spotsAdt")),
+               unname(spatialCoords(es)[3:4, ] * 2))
+  # an ADT that is a SpatialExperiment can store its own
+  speAdt <- makeAdtSpatial(adt = "spe")
+  speAdt <- createSubset(speAdt, "adt", rows = 1:2, cols = 2:5,
+                         altExp = "ADT")
+  own <- matrix(as.numeric(1:8), nrow = 4)
+  subsetSpatialCoords(speAdt, "adt") <- own
+  expect_equal(unname(subsetSpatialCoords(speAdt, "adt")), own)
+})
+
+test_that("altExp subsets read column trees but not row trees (#92)", {
+  es <- makeAdtTree()
+  es <- createSubset(es, "adt", rows = 1:2, cols = 2:5, altExp = "ADT")
+  rowTreeError <- paste0("Subset 'adt' is made from altExp 'ADT'; its rows ",
+                         "aren't the main object's, so the row tree doesn't ",
+                         "apply.")
+  expect_error(subsetRowTree(es, "adt"), rowTreeError, fixed = TRUE)
+  expect_error(subsetRowLinks(es, "adt"), rowTreeError, fixed = TRUE)
+  expect_error(subsetRowTree(es, "adt") <- rowTree(es), rowTreeError,
+               fixed = TRUE)
+  expect_equal(subsetColTree(es, "adt"), colTree(es))
+  links <- subsetColLinks(es, "adt")
+  expect_equal(links$nodeLab, colLinks(es)$nodeLab[2:5])
+  expect_equal(rownames(links), colnames(es)[2:5])
+  expect_error(subsetColTree(es, "adt") <- colTree(es),
+               paste0("Subset 'adt' is a SingleCellExperiment, which can't ",
+                      "store a colTree."), fixed = TRUE)
+})
+
+test_that("Objects saved before the altExpName slot still work (#92)", {
+  old <- readRDS(test_path("fixtures", "es-1.23.54.rds"))
+  subsets <- ExperimentSubset:::.subsets(old)
+  expect_false(methods::.hasSlot(subsets[["first"]], "altExpName"))
+  expected <- assay(old, "first/plusOne")[2:3, 3:6]
+  expect_equal(assay(old, "second"), expected)
+  expect_equal(subsetParent(old, "second"),
+               list("first/plusOne", "first", "counts"))
+  old <- createSubset(old, "third", rows = 1, parentAssay = "second")
+  expect_equal(assay(old, "third"), expected[1, , drop = FALSE])
+  updated <- updateObject(readRDS(test_path("fixtures", "es-1.23.54.rds")))
+  for (subset in as.list(ExperimentSubset:::.subsets(updated))) {
+    expect_true(methods::.hasSlot(subset, "altExpName"))
+    expect_true(validObject(subset))
+  }
+  expect_equal(assay(updated, "second"), expected)
+})

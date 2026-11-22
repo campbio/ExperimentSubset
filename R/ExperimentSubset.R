@@ -305,7 +305,8 @@ NULL
                           subsetName,
                           rows,
                           cols,
-                          parentAssay) {
+                          parentAssay,
+                          altExp = NULL) {
   x <- .qualifyParents(x)
   # clean the name before the uniqueness check and use it as the key
   if (is.character(subsetName) && any(grepl("\\s", subsetName))) {
