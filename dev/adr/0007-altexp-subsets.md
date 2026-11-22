@@ -1,6 +1,6 @@
 # 0007. Subsets made from an altExp: an altExpName slot on AssaySubset
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-11-21
 - **Deciders:** Joshua D. Campbell
 

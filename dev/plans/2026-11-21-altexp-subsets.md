@@ -1,12 +1,11 @@
 # Subsets made from an altExp: their own features and cells (#92)
 
-- **Status:** Proposed
+- **Status:** Approved
 - **Date:** 2026-11-21
 - **Branch:** `feature/altexp-subsets`, from `devel`
 - **Lands:** one PR to `devel` (1.23.55); devel only, no release port.
   The CITE-seq article section is a follow-up PR.
-- **ADR:** [0007](../adr/0007-altexp-subsets.md), Proposed. The class
-  doesn't change until the ADR is accepted.
+- **ADR:** [0007](../adr/0007-altexp-subsets.md), Accepted.
 
 ## Intent
 

@@ -42,4 +42,4 @@ why, is the point.
 | [0004](0004-require-r-4-6.md) | Require R 4.6.0 | Accepted | 2026-11-01 |
 | [0005](0005-experimentsubset-class-union.md) | Add an ExperimentSubset class union over the Subset* classes | Accepted | 2026-11-04 |
 | [0006](0006-define-subset-methods-in-loops.md) | Define the Subset* methods once, in loops over the classes | Accepted | 2026-11-19 |
-| [0007](0007-altexp-subsets.md) | Subsets made from an altExp: an altExpName slot on AssaySubset | Proposed | 2026-11-21 |
+| [0007](0007-altexp-subsets.md) | Subsets made from an altExp: an altExpName slot on AssaySubset | Accepted | 2026-11-21 |
