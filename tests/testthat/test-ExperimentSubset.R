@@ -5419,3 +5419,91 @@ test_that("Code review fixes for altExp subsets (#92)", {
   )
   expect_equal(nrow(imgData(stored)), 0)
 })
+
+test_that("A subset stores an altExp next to an unnamed assay (#121)", {
+  m <- matrix(as.numeric(1:40), 4, 10,
+              dimnames = list(paste0("g", 1:4), paste0("c", 1:10)))
+  adt <- SingleCellExperiment(list(counts = m[1:3, ]))
+  hto <- SingleCellExperiment(list(m[1:2, ]))
+  sce <- SingleCellExperiment(list(counts = m),
+                              altExps = list(ADT = adt, HTO = hto))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "clean", cols = 1:5, parentAssay = "counts")
+
+  # storing ADT, which HTO's unnamed assay used to break
+  newAdt <- altExp(es, "ADT", subsetName = "clean")
+  assay(newAdt, "clr", withDimnames = FALSE) <-
+    log1p(assay(newAdt, "counts"))
+  expect_no_error(altExp(es, "ADT", subsetName = "clean") <- newAdt)
+  stored <- altExp(es, "ADT", subsetName = "clean")
+  expect_equal(assayNames(stored), c("counts", "clr"))
+  expect_equal(assay(stored, "clr"), log1p(m[1:3, 1:5]))
+  expect_equal(assay(altExp(es, "HTO", subsetName = "clean")), m[1:2, 1:5])
+
+  # storing HTO itself, with new colData and its assay unchanged
+  newHto <- altExp(es, "HTO", subsetName = "clean")
+  newHto$tag <- letters[1:5]
+  expect_no_error(altExp(es, "HTO", subsetName = "clean") <- newHto)
+  storedHto <- altExp(es, "HTO", subsetName = "clean")
+  expect_equal(storedHto$tag, letters[1:5])
+  expect_equal(assay(storedHto), m[1:2, 1:5])
+})
+
+test_that("A subset can't change unnamed assays of an altExp (#121)", {
+  m <- matrix(as.numeric(1:40), 4, 10,
+              dimnames = list(paste0("g", 1:4), paste0("c", 1:10)))
+  hto <- SingleCellExperiment(list(m[1:2, ]))
+  sce <- SingleCellExperiment(list(counts = m), altExps = list(HTO = hto))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "clean", cols = 1:5, parentAssay = "counts")
+  msg <- paste0("altExp 'HTO' has assays without names, so changes to its ",
+                "assays can't be stored. Name them with assayNames<- first.")
+
+  # adding a named assay next to the unnamed one
+  added <- altExp(es, "HTO", subsetName = "clean")
+  assay(added, "clr", withDimnames = FALSE) <- log1p(assay(added))
+  expect_error(altExp(es, "HTO", subsetName = "clean") <- added, msg,
+               fixed = TRUE)
+  # changing the unnamed assay, even with unlink
+  changed <- altExp(es, "HTO", subsetName = "clean")
+  assay(changed, withDimnames = FALSE) <- assay(changed) * 100
+  expect_error(
+    altExp(es, "HTO", subsetName = "clean", unlink = TRUE) <- changed,
+    msg, fixed = TRUE
+  )
+  expect_error(
+    altExps(es, subsetName = "clean", unlink = TRUE) <- list(HTO = changed),
+    msg, fixed = TRUE
+  )
+  out <- getSubsetExperiment(es, "clean")
+  altExp(out, "HTO") <- changed
+  expect_error(setSubsetExperiment(es, "clean", out, unlink = TRUE), msg,
+               fixed = TRUE)
+  # removing it
+  removed <- altExp(es, "HTO", subsetName = "clean")
+  assays(removed) <- list()
+  expect_error(altExp(es, "HTO", subsetName = "clean") <- removed, msg,
+               fixed = TRUE)
+  # nothing was stored, and the subset still reads HTO
+  expect_equal(assay(altExp(es, "HTO", subsetName = "clean")), m[1:2, 1:5])
+
+  # partly named assays: a change to the named one stops too, and storing
+  # them unchanged, with new colData, works
+  hto <- SingleCellExperiment(list(counts = m[1:2, ], m[1:2, ] + 1))
+  sce <- SingleCellExperiment(list(counts = m), altExps = list(HTO = hto))
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "clean", cols = 1:5, parentAssay = "counts")
+  changed <- altExp(es, "HTO", subsetName = "clean")
+  assay(changed, "counts", withDimnames = FALSE) <- assay(changed, 1) * 2
+  expect_error(
+    altExp(es, "HTO", subsetName = "clean", unlink = TRUE) <- changed,
+    msg, fixed = TRUE
+  )
+  tagged <- altExp(es, "HTO", subsetName = "clean")
+  tagged$tag <- letters[1:5]
+  expect_no_error(altExp(es, "HTO", subsetName = "clean") <- tagged)
+  stored <- altExp(es, "HTO", subsetName = "clean")
+  expect_equal(stored$tag, letters[1:5])
+  expect_equal(assayNames(stored), c("counts", ""))
+  expect_equal(assay(stored, 2), m[1:2, 1:5] + 1)
+})
