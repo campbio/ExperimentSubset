@@ -25,6 +25,11 @@ does. A name with a `"/"` is read as `"subset/assay"` unless it is the
 name of a main assay, and a subset name without `subsetAssayName` is an
 error. Any other name stores a main assay.
 
+Removing a main assay that subsets were made from, with
+`assay(x, i) <- NULL` or `assays(x) <- value`, stops unless `dependents`
+says what happens to them (see
+[`removeSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/removeSubset.md)).
+
 ## Usage
 
 ``` r
@@ -34,11 +39,23 @@ assay(x, i, withDimnames = TRUE, ...)
 # S4 method for class 'SubsetSummarizedExperiment,character'
 assay(x, i, withDimnames = TRUE, ...) <- value
 
+# S4 method for class 'SubsetSummarizedExperiment,SimpleList'
+assays(x, withDimnames = TRUE, ...) <- value
+
+# S4 method for class 'SubsetSummarizedExperiment,list'
+assays(x, withDimnames = TRUE, ...) <- value
+
 # S4 method for class 'SubsetRangedSummarizedExperiment,character'
 assay(x, i, withDimnames = TRUE, ...)
 
 # S4 method for class 'SubsetRangedSummarizedExperiment,character'
 assay(x, i, withDimnames = TRUE, ...) <- value
+
+# S4 method for class 'SubsetRangedSummarizedExperiment,SimpleList'
+assays(x, withDimnames = TRUE, ...) <- value
+
+# S4 method for class 'SubsetRangedSummarizedExperiment,list'
+assays(x, withDimnames = TRUE, ...) <- value
 
 # S4 method for class 'SubsetSingleCellExperiment,character'
 assay(x, i, withDimnames = TRUE, ...)
@@ -46,17 +63,35 @@ assay(x, i, withDimnames = TRUE, ...)
 # S4 method for class 'SubsetSingleCellExperiment,character'
 assay(x, i, withDimnames = TRUE, ...) <- value
 
+# S4 method for class 'SubsetSingleCellExperiment,SimpleList'
+assays(x, withDimnames = TRUE, ...) <- value
+
+# S4 method for class 'SubsetSingleCellExperiment,list'
+assays(x, withDimnames = TRUE, ...) <- value
+
 # S4 method for class 'SubsetTreeSummarizedExperiment,character'
 assay(x, i, withDimnames = TRUE, ...)
 
 # S4 method for class 'SubsetTreeSummarizedExperiment,character'
 assay(x, i, withDimnames = TRUE, ...) <- value
 
+# S4 method for class 'SubsetTreeSummarizedExperiment,SimpleList'
+assays(x, withDimnames = TRUE, ...) <- value
+
+# S4 method for class 'SubsetTreeSummarizedExperiment,list'
+assays(x, withDimnames = TRUE, ...) <- value
+
 # S4 method for class 'SubsetSpatialExperiment,character'
 assay(x, i, withDimnames = TRUE, ...)
 
 # S4 method for class 'SubsetSpatialExperiment,character'
 assay(x, i, withDimnames = TRUE, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,SimpleList'
+assays(x, withDimnames = TRUE, ...) <- value
+
+# S4 method for class 'SubsetSpatialExperiment,list'
+assays(x, withDimnames = TRUE, ...) <- value
 ```
 
 ## Arguments
@@ -95,6 +130,13 @@ assay(x, i, withDimnames = TRUE, ...) <- value
     [`setSubsetAssay`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetAssay.md).
     It is an error when storing a main assay. Default `FALSE`.
 
+  `dependents`
+
+  : `"error"`, `"keep"` or `"remove"`: what happens to the subsets made
+    from a main assay that is removed; see
+    [`removeSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/removeSubset.md).
+    Default `"error"`.
+
   For a main assay, other arguments are passed on to the method of the
   class `x` extends.
 
@@ -106,7 +148,7 @@ assay(x, i, withDimnames = TRUE, ...) <- value
 ## Value
 
 `assay()` returns a matrix-like assay. `assay<-` returns `x` with the
-assay stored.
+assay stored, and `assays<-` with the main assays replaced.
 
 ## See also
 

@@ -1059,7 +1059,7 @@ are named after the methods.
     ##  [7] singleCellTK_2.23.6             DelayedArray_0.39.8            
     ##  [9] SparseArray_1.13.5              S4Arrays_1.13.3                
     ## [11] abind_1.4-8                     Matrix_1.7-6                   
-    ## [13] ExperimentSubset_1.23.56        TreeSummarizedExperiment_2.21.0
+    ## [13] ExperimentSubset_1.23.57        TreeSummarizedExperiment_2.21.0
     ## [15] Biostrings_2.81.9               XVector_0.53.0                 
     ## [17] SpatialExperiment_1.23.0        scuttle_1.23.2                 
     ## [19] DropletUtils_1.33.2             SingleCellExperiment_1.35.2    
@@ -1093,7 +1093,7 @@ are named after the methods.
     ##  [39] inline_0.3.21             loo_2.10.1               
     ##  [41] ggbeeswarm_0.7.3          R.methodsS3_1.8.2        
     ##  [43] lifecycle_1.0.5           yaml_2.3.12              
-    ##  [45] edgeR_4.99.15             rhdf5_2.57.20            
+    ##  [45] edgeR_4.99.16             rhdf5_2.57.20            
     ##  [47] BiocFileCache_3.3.3       grid_4.6.1               
     ##  [49] blob_1.3.0                dqrng_0.4.1              
     ##  [51] ExperimentHub_3.3.2       crayon_1.5.3             

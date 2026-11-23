@@ -17,7 +17,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.56</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.57</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -204,6 +204,12 @@ Default <code>FALSE</code>.</p></dd>
     <code>FALSE</code>. Any other value is an error without
     <code>subsetName</code>.</p></dd>
 
+  <dt><code>dependents</code></dt>
+<dd><p>For <code>altExp&lt;-</code> and <code>altExps&lt;-</code>:
+    <code>"error"</code>, <code>"keep"</code> or <code>"remove"</code>, what happens to
+    the subsets made from an assay or an altExp that goes; see
+    <code><a href="removeSubset.html">removeSubset</a></code>. Default <code>"error"</code>.</p></dd>
+
 
 </dl><p>Other arguments are passed on to the <code>SingleCellExperiment</code>
 method. With <code>subsetName</code>, <code>altExpNames()</code> and
@@ -266,6 +272,11 @@ differ, and only the subset's own altExps can get new names.</p></dd>
   show in them. Renaming it renames what they store of it. Removing it,
   or storing it with other rows or another class, drops what they added
   to it, with a warning; an altExp a subset stores whole is kept.</p>
+<p>When that removes an assay or an altExp that subsets were made from, it
+  stops unless <code>dependents</code> says what happens to them (see
+  <code><a href="removeSubset.html">removeSubset</a></code>). The same holds when a subset's
+  <code>altExp&lt;-</code> or <code>altExps&lt;-</code> removes an assay of an altExp it
+  stores.</p>
 <p>A subset can also be made from an altExp, with its own features, by
   <code>createSubset(altExp =)</code>; see <code><a href="createSubset.html">createSubset</a></code>. Such a
   subset sees only the altExps it, or a subset it was made from, stores.</p>

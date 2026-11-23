@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.56</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.57</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -119,6 +119,13 @@
 
         </dt>
         <dd>Subset creation method for ExperimentSubset objects</dd>
+
+        <dt>
+
+          <code><a href="removeSubset.html">removeSubset()</a></code>
+
+        </dt>
+        <dd>Remove subsets, and what happens to the subsets made from them</dd>
 
         <dt>
 
@@ -317,7 +324,7 @@
 
       <dl><dt>
 
-          <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code>
+          <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assays&lt;-`(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;SimpleList&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assays&lt;-`(<i>&lt;SubsetSummarizedExperiment&gt;</i>,<i>&lt;list&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assays&lt;-`(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;SimpleList&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assays&lt;-`(<i>&lt;SubsetRangedSummarizedExperiment&gt;</i>,<i>&lt;list&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assays&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;SimpleList&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assays&lt;-`(<i>&lt;SubsetSingleCellExperiment&gt;</i>,<i>&lt;list&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assays&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;SimpleList&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assays&lt;-`(<i>&lt;SubsetTreeSummarizedExperiment&gt;</i>,<i>&lt;list&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">assay(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assay&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;character&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assays&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;SimpleList&gt;</i>)</a></code> <code><a href="ExperimentSubset-assay.html">`assays&lt;-`(<i>&lt;SubsetSpatialExperiment&gt;</i>,<i>&lt;list&gt;</i>)</a></code>
 
         </dt>
         <dd>Assays of subsets in ExperimentSubset objects</dd>

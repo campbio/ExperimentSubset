@@ -7,22 +7,22 @@ metadata.
 ## Usage
 
 ``` r
-setSubsetExperiment(x, subsetName, value, unlink = FALSE)
+setSubsetExperiment(x, subsetName, value, unlink = FALSE, dependents = "error")
 
 # S4 method for class 'SubsetSummarizedExperiment'
-setSubsetExperiment(x, subsetName, value, unlink = FALSE)
+setSubsetExperiment(x, subsetName, value, unlink = FALSE, dependents = "error")
 
 # S4 method for class 'SubsetRangedSummarizedExperiment'
-setSubsetExperiment(x, subsetName, value, unlink = FALSE)
+setSubsetExperiment(x, subsetName, value, unlink = FALSE, dependents = "error")
 
 # S4 method for class 'SubsetSingleCellExperiment'
-setSubsetExperiment(x, subsetName, value, unlink = FALSE)
+setSubsetExperiment(x, subsetName, value, unlink = FALSE, dependents = "error")
 
 # S4 method for class 'SubsetTreeSummarizedExperiment'
-setSubsetExperiment(x, subsetName, value, unlink = FALSE)
+setSubsetExperiment(x, subsetName, value, unlink = FALSE, dependents = "error")
 
 # S4 method for class 'SubsetSpatialExperiment'
-setSubsetExperiment(x, subsetName, value, unlink = FALSE)
+setSubsetExperiment(x, subsetName, value, unlink = FALSE, dependents = "error")
 ```
 
 ## Arguments
@@ -56,6 +56,14 @@ setSubsetExperiment(x, subsetName, value, unlink = FALSE)
   `decontXcounts` but stops if `counts` was changed too. Default
   `FALSE`.
 
+- dependents:
+
+  `"error"`, `"keep"` or `"remove"`: what happens to the subsets made
+  from an assay that `value` no longer has, of the subset or of an
+  altExp it stores. See
+  [`removeSubset`](https://campbio.github.io/ExperimentSubset/dev/reference/removeSubset.md).
+  Default `"error"`.
+
 ## Value
 
 Updated `ExperimentSubset` object. Linked assays that are in `value`
@@ -67,8 +75,8 @@ as `altExp<-` stores them (see
 only the assays and data that differ from a linked altExp, and a linked
 altExp missing from `value` stays linked. Everything else in `value`
 replaces the subset's own data: an own assay, reducedDim, altExp or
-column that `value` no longer has is removed from the subset, except an
-assay another subset was made from, which is an error. Nothing else is
+column that `value` no longer has is removed from the subset; for an
+assay another subset was made from, see `dependents`. Nothing else is
 stored: not row ranges, row and column trees, spatial coordinates,
 images, `colPairs`, `rowPairs` or `mainExpName`.
 

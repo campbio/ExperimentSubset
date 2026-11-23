@@ -1,5 +1,70 @@
 # Changelog
 
+## ExperimentSubset 1.23.57 (2026-11-23)
+
+- New `removeSubset(x, subsetName, dependents = "error")` removes one or
+  more subsets. Before, there was no way to remove a subset. A new
+  `dependents` argument says what happens to the subsets made from what
+  goes away, on every path that can remove it: a main assay
+  (`assay(x, i) <- NULL` and `assays(x) <- value`, through a new
+  `assays<-` method), a subset’s own assay
+  ([`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md)),
+  an assay of an altExp (`altExp<-`, `altExps<-` and
+  [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md),
+  with or without `subsetName`), an altExp that subsets were made from
+  with `createSubset(altExp =)`, and a subset
+  ([`removeSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/removeSubset.md)).
+  `"error"`, the default, stops and changes nothing, with a message such
+  as “Assay ‘counts’ is the parent assay of subset ‘s’. Use dependents
+  =”keep” to keep it, with its own copy of that data, or dependents =
+  “remove” to remove it and the subsets made from it.” `"keep"` keeps
+  them intact: each subset made directly from what goes stores its own
+  copy of what it saw of it, with the message “Subset ‘s’ now stores its
+  own assay ‘counts’.”, and the subsets made from it see the same data
+  as before. That copy isn’t linked, so an assay of the same name added
+  to the main object later doesn’t replace it. For
+  [`removeSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/removeSubset.md),
+  the subsets made from a removed subset are made from its parent
+  instead, and store their own copy of the assays, altExps, spatial
+  coordinates and trees they saw from it. `"remove"` removes them and
+  every subset made from them, with a warning such as “Removed subsets
+  ‘s’, ‘t’ and ‘u’: the assay ‘counts’ they were made from was removed.”
+  A subset that only saw a removed assay as an extra linked assay, while
+  made from another one, isn’t affected. When a whole altExp is removed,
+  `"keep"` isn’t supported yet and stops
+  ([\#127](https://github.com/campbio/ExperimentSubset/issues/127)).
+  Renaming a main assay still leaves the subsets made from it pointing
+  at the old name
+  ([\#126](https://github.com/campbio/ExperimentSubset/issues/126)).
+  This is a change in behavior
+  ([\#122](https://github.com/campbio/ExperimentSubset/issues/122)):
+  - Removing a main assay that subsets were made from now stops by
+    default. Before, it worked and left those subsets broken:
+    `assay(x, "s")` gave “‘counts’ is not an assay of subset ‘s’.”. Use
+    `dependents = "keep"` or `"remove"`.
+  - Removing an altExp that subsets were made from with
+    `createSubset(altExp =)` now stops by default. Before, it removed
+    them with a warning; `dependents = "remove"` does that, and the
+    warning now begins “Removed subsets” instead of “Dropped subsets”.
+    [`combineRows()`](https://rdrr.io/pkg/S4Vectors/man/RectangularData-class.html),
+    which can return a class without altExps, still removes them, with
+    the new wording. SingleCellExperiment’s
+    [`removeAltExps()`](https://rdrr.io/pkg/SingleCellExperiment/man/altExps.html)
+    also stops then; use `altExps(x, dependents = "remove") <- NULL`
+    instead.
+  - Giving the main altExp other rows, when that drops what a subset
+    stored in it that other subsets were made from, now stops by
+    default. Before, it left those subsets without their parent assay.
+    The warning “Dropped what subset ‘clean’ stored in altExp ‘ADT’” now
+    comes only if the change goes ahead.
+  - [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md),
+    `altExp<-` and `altExps<-` with `subsetName`, when they remove an
+    assay other subsets were made from, now stop with the new message
+    instead of “‘value’ has no assay ‘scaled’, which subsets ‘t’ were
+    made from. Keep it in ‘value’.”, and also take `dependents`. A
+    subset that removes its own copy of the assay it was made from,
+    stored with `unlink`, goes back to the linked one, as before.
+
 ## ExperimentSubset 1.23.56 (2026-11-22)
 
 - Storing an altExp in a subset, with `altExp(x, e, subsetName =) <-`,

@@ -50,6 +50,8 @@
 
 - [`createSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/createSubset.md)
   : Subset creation method for ExperimentSubset objects
+- [`removeSubset()`](https://campbio.github.io/ExperimentSubset/dev/reference/removeSubset.md)
+  : Remove subsets, and what happens to the subsets made from them
 - [`subsetNames()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetNames.md)
   : Get names of only the subsets in ExperimentSubset objects
 - [`subsetCount()`](https://campbio.github.io/ExperimentSubset/dev/reference/subsetCount.md)
@@ -164,14 +166,24 @@ assay\<- name the subset with i instead.
 
 - [`assay(`*`<SubsetSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
   [`` `assay<-`( ``*`<SubsetSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assays<-`( ``*`<SubsetSummarizedExperiment>`*`,`*`<SimpleList>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assays<-`( ``*`<SubsetSummarizedExperiment>`*`,`*`<list>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
   [`assay(`*`<SubsetRangedSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
   [`` `assay<-`( ``*`<SubsetRangedSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assays<-`( ``*`<SubsetRangedSummarizedExperiment>`*`,`*`<SimpleList>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assays<-`( ``*`<SubsetRangedSummarizedExperiment>`*`,`*`<list>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
   [`assay(`*`<SubsetSingleCellExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
   [`` `assay<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assays<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<SimpleList>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assays<-`( ``*`<SubsetSingleCellExperiment>`*`,`*`<list>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
   [`assay(`*`<SubsetTreeSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
   [`` `assay<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assays<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<SimpleList>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assays<-`( ``*`<SubsetTreeSummarizedExperiment>`*`,`*`<list>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
   [`assay(`*`<SubsetSpatialExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
   [`` `assay<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<character>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assays<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<SimpleList>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
+  [`` `assays<-`( ``*`<SubsetSpatialExperiment>`*`,`*`<list>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-assay.md)
   : Assays of subsets in ExperimentSubset objects
 - [`rowData(`*`<SubsetSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
   [`colData(`*`<SubsetSummarizedExperiment>`*`)`](https://campbio.github.io/ExperimentSubset/dev/reference/ExperimentSubset-rowData-colData.md)
