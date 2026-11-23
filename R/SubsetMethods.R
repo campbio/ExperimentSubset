@@ -312,6 +312,7 @@ for (cls in .esClasses) {
                           value,
                           unlink = FALSE,
                           dependents = "error") {
+      .checkDependents(dependents)
       .setSubsetExperiment(x, subsetName, value, unlink = unlink,
                            dependents = dependents)
     }

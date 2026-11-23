@@ -8,8 +8,11 @@
 
 # Stops unless dependents is one of .dependentsValues
 .checkDependents <- function(dependents) {
-  if (!.isOneString(dependents) || !dependents %in% .dependentsValues)
-    stop("'dependents' must be \"error\", \"keep\" or \"remove\".")
+  if (!.isOneString(dependents) || !dependents %in% .dependentsValues) {
+    quoted <- sprintf("\"%s\"", .dependentsValues)
+    stop("'dependents' must be ", quoted[1], ", ", quoted[2], " or ",
+         quoted[3], ".")
+  }
   invisible(dependents)
 }
 
@@ -51,11 +54,11 @@
   lost <- .lostParents(before, after)
   if (length(lost) == 0)
     return(after)
-  top <- lost[.topSubsets(after, names(lost))]
+  top <- lost[.topSubsets(before, names(lost))]
   if (dependents == "error")
     .stopLost(top)
   if (dependents == "remove")
-    return(.removeLost(after, top))
+    return(.removeLost(after, top, before))
   .keepLost(before, after, lost)
 }
 
@@ -66,11 +69,15 @@
 # subset below where it was stored, hasn't lost it, and nor has one that
 # stored it itself: it wasn't made from its own copy. A list named by subset
 # of list(kind, assay, what): kind is "altExp" or "assay", assay the name
-# of the lost assay, and what names what was lost, for messages.
+# of the lost assay, and what names what was lost, for messages. Chains
+# are read in before: in after, a bare parentAssay naming a removed main
+# assay could resolve to a subset that stores an assay of that name.
 .lostParents <- function(before, after) {
   lost <- list()
   for (name in intersect(subsetNames(after), subsetNames(before))) {
-    root <- .rowRoot(after, name)
+    chain <- .subsetChain(before, name)
+    oldRoot <- .rowRoot(before, name)
+    root <- .renamedRoot(after, oldRoot)
     if (!is.null(root)
         && is.null(.rootShape(after, root$container, root$altExp))) {
       lost[[name]] <- list(kind = "altExp", assay = NULL,
@@ -78,13 +85,12 @@
       next
     }
     primary <- .primaryAssayName(before, name)
-    owners <- .assayOwners(before, name)
+    owners <- .assayOwners(before, name, oldRoot, chain)
     if (!primary %in% names(owners))
       next
     owner <- owners[[primary]]
     if (owner == name)
       next
-    oldRoot <- .rowRoot(before, name)
     holder <- owner
     altExp <- NULL
     if (owner == "") {
@@ -92,7 +98,7 @@
       altExp <- root$altExp
     }
     if (primary %in% .heldAssays(after, holder, altExp)
-        || .heldCloser(after, name, root, primary, owner))
+        || .heldCloser(after, name, root, chain, primary, owner))
       next
     lost[[name]] <- list(kind = "assay", assay = primary,
                          what = .assayWords(primary, holder, owner,
@@ -118,16 +124,25 @@
   assayNames(.storedAltExp(object, altExp))
 }
 
-# TRUE if subset name, with row root root in x, sees assayName from a
-# subset of its chain below owner, where it saw it before ("" for the
-# root): a copy stored since, not a loss
-.heldCloser <- function(x, name, root, assayName, owner) {
-  owners <- .assayOwners(x, name)
+# The row root of a subset in before (from .rowRoot()), with the name its
+# altExp has in after, which may have renamed it; NULL for NULL
+.renamedRoot <- function(after, root) {
+  if (is.null(root))
+    return(NULL)
+  root$altExp <- .rootAltExp(.subsets(after)[[root$start]])
+  root
+}
+
+# TRUE if subset name, with row root root and chain (from before) in x,
+# sees assayName from a subset of its chain below owner, where it saw it
+# before ("" for the root): a copy stored since, not a loss
+.heldCloser <- function(x, name, root, chain, assayName, owner) {
+  owners <- .assayOwners(x, name, root, chain)
   if (!assayName %in% names(owners) || owners[[assayName]] == "")
     return(FALSE)
   if (owner == "")
     return(TRUE)
-  chain <- .rootChain(.subsetChain(x, name), root)
+  chain <- .rootChain(chain, root)
   isTRUE(match(owners[[assayName]], chain) > match(owner, chain))
 }
 
@@ -188,13 +203,16 @@
        .dependentsHint(length(lost), keep = !any(altExps)))
 }
 
-# x without the subsets in lost (from .lostParents()) and those below them,
-# with a warning for each thing lost that names them
-.removeLost <- function(x, lost) {
+# x without the subsets in lost (from .lostParents()) and those below them
+# in chains (the object their chains are read in), with a warning for each
+# thing lost that names them
+.removeLost <- function(x, lost, chains = x) {
   whats <- vapply(lost, `[[`, character(1), "what")
   for (what in unique(whats)) {
     top <- names(lost)[whats == what]
-    gone <- c(top, unlist(lapply(top, function(name) .subsetsBelow(x, name))))
+    gone <- c(top, unlist(lapply(top, function(name) {
+      .subsetsBelow(chains, name)
+    })))
     gone <- subsetNames(x)[subsetNames(x) %in% gone]
     x <- .withoutSubsets(x, gone)
     warning("Removed ", .subsetWords(gone), ": the ", what,
@@ -212,21 +230,22 @@
 
 # after, with each subset in lost (from .lostParents()) storing as its own
 # what it saw of its lost assay in before, with a message; parents first,
-# so one that sees its parent's copy needs none. Stops, before anything
+# by their chains in before, so one that sees its parent's copy needs
+# none. Stops, before anything
 # is stored, if an altExp they were made from was removed (#127).
 .keepLost <- function(before, after, lost) {
   if (any(vapply(lost, function(l) l$kind == "altExp", logical(1))))
     stop("dependents = \"keep\" isn't supported yet when an altExp is ",
          "removed (#127). Use dependents = \"remove\".")
-  depth <- vapply(names(lost), function(name) {
-    length(.subsetChain(after, name))
-  }, integer(1))
+  chains <- lapply(names(lost), function(name) .subsetChain(before, name))
+  names(chains) <- names(lost)
   kept <- character(0)
-  for (name in names(lost)[order(depth)]) {
+  for (name in names(lost)[order(lengths(chains))]) {
     assayName <- lost[[name]]$assay
-    chain <- .subsetChain(after, name)
+    chain <- chains[[name]]
+    root <- .renamedRoot(after, .rowRoot(before, name))
     if (any(chain[-length(chain)] %in% kept)
-        && assayName %in% names(.assayOwners(after, name)))
+        && assayName %in% names(.assayOwners(after, name, root, chain)))
       next
     after <- .storeOwnAssay(after, name, assayName,
                             .subsetAssayView(before, name, assayName,
@@ -331,11 +350,30 @@
   }
   primary <- .primaryAssayName(before, child)
   parentAssay <- if (is.null(up)) primary else paste0(up, "/", primary)
+  # made from what removed was made from, linked: made from that too
+  if (is.null(.rootAltExp(subset))
+      && .madeFromLinked(before, removed, primary))
+    parentAssay <- .parentAssay(parent)
   .subsets(x)[[child]] <- .copySubset(subset, rowIndices = rows,
                                       colIndices = cols,
                                       parentAssay = parentAssay,
                                       altExpName = altExp)
   x
+}
+
+# TRUE if primary is the primary assay of subset removed, which it sees
+# linked rather than stores itself
+.madeFromLinked <- function(x, removed, primary) {
+  if (is.null(.parentAssay(.subsets(x)[[removed]]))
+      || !identical(.primaryAssayName(x, removed), primary))
+    return(FALSE)
+  owners <- .assayOwners(x, removed)
+  if (!primary %in% names(owners))
+    return(FALSE)
+  owner <- owners[[primary]]
+  if (owner == "")
+    owner <- .rootAssayHolders(x, .rowRoot(x, removed))[[primary]]
+  owner != removed
 }
 
 # Stops unless up (a subset, or NULL for the main object) sees the altExp
@@ -410,7 +448,7 @@
   ownBefore <- .ownAltExpAssays(x, child)
   views <- SingleCellExperiment::altExps(.withSubsetAltExps(before, child),
                                          withDimnames = FALSE)
-  x <- suppressMessages(.storeAltExps(x, child, views, unlink = TRUE))
+  x <- .storeAltExps(x, child, views, unlink = TRUE, quiet = TRUE)
   list(x = x, stored = setdiff(.ownAltExpAssays(x, child), ownBefore))
 }
 

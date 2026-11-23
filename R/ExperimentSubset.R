@@ -745,11 +745,9 @@ NULL
 # Stores what a tool added to an object from .getSubsetExperiment(); value
 # replaces the subset's own data, and unchanged linked assays and the main
 # object's tagged columns are left out
-.setSubsetExperiment <- function(x, subsetName, value, unlink = FALSE,
-                                 dependents = "error") {
+.setSubsetExperiment <- function(x, subsetName, value, unlink, dependents) {
   .isSubset(x, subsetName)
   .checkUnlink(unlink)
-  .checkDependents(dependents)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   .checkSubsetValue(internal, subsetName, value)
 
@@ -1425,14 +1423,16 @@ NULL
 
 # Stores value, every altExp subsetName should see, as the subset's own
 # altExps, with the unlink rule for changed linked assays, and says which
-# assays are unlinked; the subsets made from an assay that goes follow
-# dependents
+# assays are unlinked, unless quiet; the subsets made from an assay that
+# goes follow dependents
 .storeAltExps <- function(x, subsetName, value, unlink,
-                          dependents = "error") {
+                          dependents = "error", quiet = FALSE) {
   plan <- .planAltExps(x, subsetName, value)
   sources <- .checkUnlinked(plan$sources, subsetName, unlink)
   x <- .carryAltExps(x, .applyAltExps(x, subsetName, plan), subsetName,
                      dependents = dependents)
+  if (quiet)
+    return(x)
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
@@ -1600,15 +1600,16 @@ NULL
 # were made from. Warnings come only once nothing stops, in order.
 .carryAltExps <- function(before, after, holder, renamed = character(0),
                           dependents = "error") {
-  warned <- character(0)
+  warned <- new.env()
+  warned$messages <- character(0)
   after <- withCallingHandlers({
     after <- .carryAltExpParts(before, after, holder, renamed)
     .carryRowRoots(before, after, holder, renamed, dependents = dependents)
   }, warning = function(w) {
-    warned <<- c(warned, conditionMessage(w))
+    warned$messages <- c(warned$messages, conditionMessage(w))
     invokeRestart("muffleWarning")
   })
-  for (w in warned)
+  for (w in warned$messages)
     warning(w, call. = FALSE)
   after
 }
@@ -2095,12 +2096,14 @@ NULL
 # Assays visible in a subset: a named vector from assay name to where it is
 # stored, "" for the main object or a subset name. Each subset's own
 # assays hide those of the same name linked from further up the chain.
-.assayOwners <- function(x, subsetName) {
-  root <- .rowRoot(x, subsetName)
+# root (from .rowRoot()) and chain (from .subsetChain()) can be given, to
+# read x's assays along the subset's chain in another object.
+.assayOwners <- function(x, subsetName, root = .rowRoot(x, subsetName),
+                         chain = .subsetChain(x, subsetName)) {
   rootAssays <- names(.rootAssayHolders(x, root))
   owners <- rep("", length(rootAssays))
   names(owners) <- rootAssays
-  for (subset in .rootChain(.subsetChain(x, subsetName), root)) {
+  for (subset in .rootChain(chain, root)) {
     own <- assayNames(.internalAssay(.subsets(x)[[subset]]))
     owners[own] <- subset
   }

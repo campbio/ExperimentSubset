@@ -5640,6 +5640,19 @@ test_that("Removing a main assay that subsets were made from stops (#122)", {
   # an assay no subset was made from is removed as before
   assay(removed, "extra") <- NULL
   expect_equal(assayNames(removed), c("counts", "logcounts"))
+
+  # a subset that stores its own counts, with unlink, doesn't hide that
+  # another one made from counts loses it
+  es <- createSubset(es, "s2", rows = 1:2, cols = 1:4, parentAssay = "counts")
+  suppressMessages(
+    es <- setSubsetAssay(es, "s", assay(es, "s") + 100, "counts",
+                         unlink = TRUE)
+  )
+  removed <- es
+  expect_error(assay(removed, "counts") <- NULL,
+               paste0("Assay 'counts' is the parent assay of subset 's2'.",
+                      dependentsHint(1)), fixed = TRUE)
+  expect_identical(removed, es)
 })
 
 test_that("dependents = \"keep\" keeps subsets of a removed assay (#122)", {
@@ -5668,6 +5681,22 @@ test_that("dependents = \"keep\" keeps subsets of a removed assay (#122)", {
   # new subsets can be made from the kept subset
   kept <- createSubset(kept, "k", rows = 1, cols = 1:2, parentAssay = "s")
   expect_equal(assay(kept, "k"), assay(es, "s")[1, 1:2, drop = FALSE])
+
+  # two subsets made from counts each keep their own copy
+  es2 <- createSubset(es, "s2", rows = 1:2, cols = 1:4,
+                      parentAssay = "counts")
+  kept <- es2
+  expect_equal(
+    capture_messages(assay(kept, "counts", dependents = "keep") <- NULL),
+    c("Subset 's' now stores its own assay 'counts'.\n",
+      "Subset 's2' now stores its own assay 'counts'.\n")
+  )
+  for (name in subsetNames(es2)) {
+    expect_equal(assay(kept, name), assay(es2, name))
+    expect_equal(subsetParent(kept, name), subsetParent(es2, name))
+  }
+  assay(kept, "counts") <- assay(es, "counts") * 0
+  expect_equal(assay(kept, "s2"), assay(es2, "s2"))
 
   # through assays<-, with logcounts removed too: w keeps its own copy
   kept <- es
@@ -5795,6 +5824,11 @@ test_that("removeSubset(dependents = \"keep\") re-roots children (#122)", {
   }
   expect_equal(subsetParent(kept, "t"), list("scaled"))
   expect_equal(subsetParent(kept, "u"), list("counts"))
+  # a child made from u, which was made from s: made from s itself now
+  below <- createSubset(es, "c", rows = 1, cols = 1:2, parentAssay = "u")
+  keptC <- removeSubset(below, "u", dependents = "keep")
+  expect_equal(subsetParent(keptC, "c"), list("s", "counts"))
+  expect_equal(assay(keptC, "c"), assay(below, "c"))
   # u's counts stay linked to the main object's
   assay(kept, "counts") <- assay(es, "counts") + 1
   expect_equal(assay(kept, "u"), assay(kept, "counts")[2:3, 3:5])
