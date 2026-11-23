@@ -66,11 +66,11 @@
 # they were made from: the altExp they were made from with
 # createSubset(altExp =), or their primary assay, where it was stored in
 # before. A subset that stored the assay itself hasn't lost it: it wasn't
-# made from its own copy. A list named by subset
-# of list(kind, assay, what): kind is "altExp" or "assay", assay the name
-# of the lost assay, and what names what was lost, for messages. Chains
-# are read in before: in after, a bare parentAssay naming a removed main
-# assay could resolve to a subset that stores an assay of that name.
+# made from its own copy. A list named by subset of list(kind, assay,
+# what): kind is "altExp" or "assay", assay the name of the lost assay,
+# and what names what was lost, for messages. Chains are read in before:
+# in after, a bare parentAssay naming a removed main assay could resolve
+# to a subset that stores an assay of that name.
 .lostParents <- function(before, after) {
   lost <- list()
   for (name in intersect(subsetNames(after), subsetNames(before))) {
