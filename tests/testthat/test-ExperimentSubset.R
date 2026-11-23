@@ -5950,3 +5950,42 @@ test_that("removeSubset(dependents = \"keep\") keeps what a child saw (#122)", {
   expect_identical(subsetRowTree(kept, "s2"), makeOwnTree(tse))
   expect_equal(subsetRowLinks(kept, "s2"), links)
 })
+
+test_that("dependents skips a subset whose parent was already gone (#122)", {
+  es <- makeParentEs()
+  # a rename leaves s and u without their parent assay (#126)
+  assayNames(es)[assayNames(es) == "counts"] <- "raw"
+  expect_warning(
+    assay(es, "logcounts", dependents = "remove") <- NULL,
+    "Removed subset 'w': the assay 'logcounts' it was made from was removed.",
+    fixed = TRUE
+  )
+  expect_equal(subsetNames(es), c("s", "t", "u"))
+})
+
+test_that("removeSubset(dependents = \"keep\") below a lost parent (#122)", {
+  es <- makeParentEs()
+  es <- createSubset(es, "c", rows = 1, cols = 1:2, parentAssay = "u")
+  expected <- assay(es, "c")
+  # u saw counts linked, so c is made from s, as when nothing is missing
+  assayNames(es)[assayNames(es) == "counts"] <- "raw"
+  expect_silent(kept <- removeSubset(es, "u", dependents = "keep"))
+  expect_equal(subsetParent(kept, "c")[[1]], "s")
+  # and still sees its data once counts is back
+  assayNames(kept)[assayNames(kept) == "raw"] <- "counts"
+  expect_equal(assay(kept, "c"), expected)
+})
+
+test_that("removeSubset() keeps a SummarizedExperiment's subsets (#122)", {
+  m <- matrix(as.numeric(1:40), nrow = 4,
+              dimnames = list(paste0("g", 1:4), paste0("c", 1:10)))
+  es <- ExperimentSubset(SummarizedExperiment(list(counts = m)))
+  es <- createSubset(es, "s", rows = 1:3, cols = 2:7, parentAssay = "counts")
+  es <- setSubsetAssay(es, "s", assay(es, "s") * 2, "scaled")
+  es <- createSubset(es, "t", rows = 1:2, cols = 1:3,
+                     parentAssay = "s/scaled")
+  expect_message(kept <- removeSubset(es, "s", dependents = "keep"),
+                 "Subset 't' now stores its own assay 'scaled'.", fixed = TRUE)
+  expect_equal(assay(kept, "t"), assay(es, "t"))
+  expect_equal(subsetParent(kept, "t"), list("scaled"))
+})

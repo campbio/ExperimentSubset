@@ -65,9 +65,8 @@
 # The subsets of both before and after that, in after, no longer see what
 # they were made from: the altExp they were made from with
 # createSubset(altExp =), or their primary assay, where it was stored in
-# before. A subset that now stores the assay itself, or sees it from a
-# subset below where it was stored, hasn't lost it, and nor has one that
-# stored it itself: it wasn't made from its own copy. A list named by subset
+# before. A subset that stored the assay itself hasn't lost it: it wasn't
+# made from its own copy. A list named by subset
 # of list(kind, assay, what): kind is "altExp" or "assay", assay the name
 # of the lost assay, and what names what was lost, for messages. Chains
 # are read in before: in after, a bare parentAssay naming a removed main
@@ -97,8 +96,7 @@
       holder <- .rootAssayHolders(before, oldRoot)[[primary]]
       altExp <- root$altExp
     }
-    if (primary %in% .heldAssays(after, holder, altExp)
-        || .heldCloser(after, name, root, chain, primary, owner))
+    if (primary %in% .heldAssays(after, holder, altExp))
       next
     lost[[name]] <- list(kind = "assay", assay = primary,
                          what = .assayWords(primary, holder, owner,
@@ -110,13 +108,7 @@
 # Names of the assays that holder ("" for the main object, or a subset)
 # stores in x: its own, or with altExp those of its altExp of that name
 .heldAssays <- function(x, holder, altExp = NULL) {
-  if (holder == "") {
-    object <- x
-  } else {
-    if (!holder %in% subsetNames(x))
-      return(character(0))
-    object <- .internalAssay(.subsets(x)[[holder]])
-  }
+  object <- if (holder == "") x else .internalAssay(.subsets(x)[[holder]])
   if (is.null(altExp))
     return(assayNames(object))
   if (!altExp %in% .storedAltExpNames(object))
@@ -131,19 +123,6 @@
     return(NULL)
   root$altExp <- .rootAltExp(.subsets(after)[[root$start]])
   root
-}
-
-# TRUE if subset name, with row root root and chain (from before) in x,
-# sees assayName from a subset of its chain below owner, where it saw it
-# before ("" for the root): a copy stored since, not a loss
-.heldCloser <- function(x, name, root, chain, assayName, owner) {
-  owners <- .assayOwners(x, name, root, chain)
-  if (!assayName %in% names(owners) || owners[[assayName]] == "")
-    return(FALSE)
-  if (owner == "")
-    return(TRUE)
-  chain <- .rootChain(chain, root)
-  isTRUE(match(owners[[assayName]], chain) > match(owner, chain))
 }
 
 # How a message names a lost assay: stored in holder, where owner is ""
@@ -215,8 +194,6 @@
       .subsetsBelow(chains, name)
     })))
     gone <- subsetNames(x)[subsetNames(x) %in% setdiff(gone, named)]
-    if (length(gone) == 0)
-      next
     x <- .withoutSubsets(x, gone)
     warning("Removed ", .subsetWords(gone), ": the ", what,
             if (length(gone) == 1) " it was" else " they were",
@@ -366,14 +343,16 @@
 }
 
 # TRUE if primary is the primary assay of subset removed, which it sees
-# linked rather than stores itself
+# linked rather than stores itself, or no longer sees at all, as it was
+# made from an assay that was gone already: once that is back, it sees it
+# linked again
 .madeFromLinked <- function(x, removed, primary) {
   if (is.null(.parentAssay(.subsets(x)[[removed]]))
       || !identical(.primaryAssayName(x, removed), primary))
     return(FALSE)
   owners <- .assayOwners(x, removed)
   if (!primary %in% names(owners))
-    return(FALSE)
+    return(TRUE)
   owner <- owners[[primary]]
   if (owner == "")
     owner <- .rootAssayHolders(x, .rowRoot(x, removed))[[primary]]
