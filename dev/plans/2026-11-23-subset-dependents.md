@@ -1,6 +1,6 @@
 # What happens to subsets when what they were made from goes (#122)
 
-- **Status:** Draft, for review
+- **Status:** Approved (2026-11-23)
 - **Date:** 2026-11-23
 - **Branch:** `feature/subset-dependents`, from `devel`
 - **Lands:** one PR to `devel` (1.23.57); devel only, no release port.
