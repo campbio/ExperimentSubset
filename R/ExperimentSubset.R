@@ -786,7 +786,6 @@ NULL
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
   x <- .storeChangedSpatialCoords(x, subsetName, value)
   x <- .storeChangedTrees(x, subsetName, value)
-  # carrying the altExps along also resolves the subsets made from what went
   if (isSce)
     x <- .carryAltExps(before, .applyAltExps(x, subsetName, altExpPlan),
                        subsetName, dependents = dependents)
