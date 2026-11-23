@@ -761,16 +761,16 @@ setGeneric(
 #' @examples
 #' data(sce_chcl, package = "scds")
 #' es <- ExperimentSubset(sce_chcl)
-#' es <- createSubset(es, "subset1", rows = 1:100, cols = 1:50)
-#' es <- createSubset(es, "subset2", rows = 1:10, cols = 1:5,
+#' es <- createSubset(es, subsetName = "subset1", rows = 1:100, cols = 1:50)
+#' es <- createSubset(es, subsetName = "subset2", rows = 1:10, cols = 1:5,
 #'                    parentAssay = "subset1")
 #' # subset2 was made from subset1, so removing subset1 stops unless
 #' # dependents says what happens to subset2
-#' es2 <- removeSubset(es, "subset1", dependents = "keep")
+#' es2 <- removeSubset(es, subsetName = "subset1", dependents = "keep")
 #' subsetNames(es2)
 #' # the same for a main assay that subsets were made from
 #' assay(es, "counts", dependents = "keep") <- NULL
-#' subsetAssayNames(es, "subset1")
+#' subsetAssayNames(es, subsetName = "subset1")
 setGeneric(
   name = "removeSubset",
   def = function(x, subsetName, dependents = "error") {

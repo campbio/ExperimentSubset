@@ -786,11 +786,12 @@ NULL
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
   x <- .storeChangedSpatialCoords(x, subsetName, value)
   x <- .storeChangedTrees(x, subsetName, value)
-  if (isSce) {
-    x <- .applyAltExps(x, subsetName, altExpPlan)
-    x <- .carryAltExps(before, x, subsetName, dependents = dependents)
-  }
-  x <- .resolveDependents(before, x, dependents)
+  # carrying the altExps along also resolves the subsets made from what went
+  if (isSce)
+    x <- .carryAltExps(before, .applyAltExps(x, subsetName, altExpPlan),
+                       subsetName, dependents = dependents)
+  else
+    x <- .resolveDependents(before, x, dependents)
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
@@ -1423,16 +1424,14 @@ NULL
 
 # Stores value, every altExp subsetName should see, as the subset's own
 # altExps, with the unlink rule for changed linked assays, and says which
-# assays are unlinked, unless quiet; the subsets made from an assay that
-# goes follow dependents
+# assays are unlinked; the subsets made from an assay that goes follow
+# dependents
 .storeAltExps <- function(x, subsetName, value, unlink,
-                          dependents = "error", quiet = FALSE) {
+                          dependents = "error") {
   plan <- .planAltExps(x, subsetName, value)
   sources <- .checkUnlinked(plan$sources, subsetName, unlink)
   x <- .carryAltExps(x, .applyAltExps(x, subsetName, plan), subsetName,
                      dependents = dependents)
-  if (quiet)
-    return(x)
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
@@ -1597,21 +1596,13 @@ NULL
 # or a subset), from before to after, carries along what the subsets below
 # holder store of them (.carryAltExpParts()), then the subsets made from
 # them (.carryRowRoots()), with dependents for those that lose what they
-# were made from. Warnings come only once nothing stops, in order.
+# were made from. Messages and warnings come only once nothing stops.
 .carryAltExps <- function(before, after, holder, renamed = character(0),
                           dependents = "error") {
-  warned <- new.env()
-  warned$messages <- character(0)
-  after <- withCallingHandlers({
+  .deferConditions({
     after <- .carryAltExpParts(before, after, holder, renamed)
     .carryRowRoots(before, after, holder, renamed, dependents = dependents)
-  }, warning = function(w) {
-    warned$messages <- c(warned$messages, conditionMessage(w))
-    invokeRestart("muffleWarning")
   })
-  for (w in warned$messages)
-    warning(w, call. = FALSE)
-  after
 }
 
 # After a change to the altExps at holder, from before to after, carries

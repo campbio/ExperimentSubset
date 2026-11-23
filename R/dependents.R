@@ -205,15 +205,18 @@
 
 # x without the subsets in lost (from .lostParents()) and those below them
 # in chains (the object their chains are read in), with a warning for each
-# thing lost that names them
-.removeLost <- function(x, lost, chains = x) {
+# thing lost that names them, except those in named, which are being
+# removed anyway
+.removeLost <- function(x, lost, chains = x, named = character(0)) {
   whats <- vapply(lost, `[[`, character(1), "what")
   for (what in unique(whats)) {
     top <- names(lost)[whats == what]
     gone <- c(top, unlist(lapply(top, function(name) {
       .subsetsBelow(chains, name)
     })))
-    gone <- subsetNames(x)[subsetNames(x) %in% gone]
+    gone <- subsetNames(x)[subsetNames(x) %in% setdiff(gone, named)]
+    if (length(gone) == 0)
+      next
     x <- .withoutSubsets(x, gone)
     warning("Removed ", .subsetWords(gone), ": the ", what,
             if (length(gone) == 1) " it was" else " they were",
@@ -287,7 +290,7 @@
   if (length(children) == 0)
     return(.withoutSubsets(x, named))
   if (dependents == "keep")
-    return(.removeKeeping(x, named))
+    return(.deferConditions(.removeKeeping(x, named)))
   lost <- lapply(children, function(name) {
     list(kind = "subset", assay = NULL,
          what = paste0("subset '", .parentSubset(x, name), "'"))
@@ -295,7 +298,8 @@
   names(lost) <- children
   if (dependents == "error")
     .stopLost(lost)
-  .withoutSubsets(.removeLost(x, lost), named)
+  lost <- lost[.topSubsets(x, children)]
+  .withoutSubsets(.removeLost(x, lost, named = named), named)
 }
 
 # The subset subsetName was made from, or NULL for the main object
@@ -448,7 +452,10 @@
   ownBefore <- .ownAltExpAssays(x, child)
   views <- SingleCellExperiment::altExps(.withSubsetAltExps(before, child),
                                          withDimnames = FALSE)
-  x <- .storeAltExps(x, child, views, unlink = TRUE, quiet = TRUE)
+  # stored without carrying anything along: the child sees what it saw,
+  # and so do the subsets below it, while x, without the removed subset,
+  # doesn't yet show them that
+  x <- .applyAltExps(x, child, .planAltExps(x, child, views))
   list(x = x, stored = setdiff(.ownAltExpAssays(x, child), ownBefore))
 }
 
@@ -461,4 +468,28 @@
     out <- c(out, paste0(altExp, "/",
                          assayNames(.storedAltExp(internal, altExp))))
   out
+}
+
+# The value of expr, with the messages and warnings it signals held back
+# until it returns and then signalled again, in order, so that nothing is
+# said about a change that then stops
+.deferConditions <- function(expr) {
+  held <- new.env()
+  held$conditions <- list()
+  hold <- function(condition, restart) {
+    held$conditions <- c(held$conditions, list(condition))
+    invokeRestart(restart)
+  }
+  value <- withCallingHandlers(
+    expr,
+    message = function(m) hold(m, "muffleMessage"),
+    warning = function(w) hold(w, "muffleWarning")
+  )
+  for (condition in held$conditions) {
+    if (inherits(condition, "warning"))
+      warning(conditionMessage(condition), call. = FALSE)
+    else
+      message(conditionMessage(condition), appendLF = FALSE)
+  }
+  value
 }

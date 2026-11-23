@@ -5064,6 +5064,16 @@ test_that("Removing an altExp drops the subsets made from it (#92)", {
            "altExp 'ADT' they were made from was removed."), fixed = TRUE
   )
   expect_equal(subsetNames(removed), "clean")
+  # nothing is said about keeping when the change then stops
+  # other rows without names, which subsets can't follow
+  noNames <- SingleCellExperiment(list(other = matrix(1, 4, 20)))
+  colnames(noNames) <- colnames(es)
+  unchanged <- es
+  expect_length(capture_messages(
+    expect_error(altExp(unchanged, "ADT", dependents = "keep") <- noNames,
+                 "they have no names to match", fixed = TRUE)
+  ), 0)
+  expect_identical(unchanged, es)
   removed <- es
   expect_warning(altExps(removed, dependents = "remove") <- list(),
                  "Removed subsets")
@@ -5803,6 +5813,19 @@ test_that("removeSubset() removes subsets (#122)", {
   )
   expect_equal(subsetNames(removed), "w")
   expect_s4_class(removed, "SubsetSingleCellExperiment")
+  # named subsets below another named one aren't reported
+  chain <- createSubset(es, "a", rows = 1:3, cols = 1:8)
+  chain <- createSubset(chain, "b", rows = 1:3, cols = 1:6, parentAssay = "a")
+  chain <- createSubset(chain, "c", rows = 1:2, cols = 1:4, parentAssay = "b")
+  chain <- createSubset(chain, "d", rows = 1, cols = 1:2, parentAssay = "c")
+  expect_equal(
+    capture_warnings(
+      removed <- removeSubset(chain, c("a", "c"), dependents = "remove")
+    ),
+    paste0("Removed subsets 'b' and 'd': the subset 'a' they were made from ",
+           "was removed.")
+  )
+  expect_equal(subsetNames(removed), subsetNames(es))
   expect_error(removeSubset(es, "t", dependents = "all"),
                "'dependents' must be", fixed = TRUE)
 })
@@ -5888,6 +5911,21 @@ test_that("removeSubset(dependents = \"keep\") keeps what a child saw (#122)", {
            "dependents = \"remove\"."),
     fixed = TRUE
   )
+
+  # a subset made from the ADT a child saw from a removed subset that
+  # stores a whole ADT keeps its features
+  es <- makeAdtEs(cleanClr = FALSE)
+  cleanAdt <- altExp(es, "ADT", subsetName = "clean")[c("CD8", "Isotype"), ]
+  suppressMessages(
+    altExp(es, "ADT", subsetName = "clean", unlink = TRUE) <- cleanAdt
+  )
+  es <- createSubset(es, "child", cols = 2:6, parentAssay = "clean")
+  es <- createSubset(es, "g", rows = "Isotype", parentAssay = "child/counts",
+                     altExp = "ADT")
+  suppressMessages(kept <- removeSubset(es, "clean", dependents = "keep"))
+  expect_equal(assay(kept, "g"), assay(es, "g"))
+  expect_equal(altExp(kept, "ADT", subsetName = "child"),
+               altExp(es, "ADT", subsetName = "child"))
 
   # spatial coordinates a removed subset stored
   es <- ExperimentSubset(makeImageSpe())
