@@ -50,6 +50,11 @@ NULL
 #' @eval .rdMethods("setSubsetExperiment")
 NULL
 
+#' @name removeSubset
+#' @rdname removeSubset
+#' @eval .rdMethods("removeSubset")
+NULL
+
 #' @name ExperimentSubset-metadata
 #' @rdname ExperimentSubset-metadata
 #' @eval .rdMethods(c("metadata", "metadata<-"))
@@ -57,7 +62,7 @@ NULL
 
 #' @name ExperimentSubset-assay
 #' @rdname ExperimentSubset-assay
-#' @eval .rdMethods(c("assay", "assay<-"))
+#' @eval .rdMethods(c("assay", "assay<-", "assays<-"))
 NULL
 
 #' @name createSubset
@@ -305,10 +310,33 @@ for (cls in .esClasses) {
     definition = function(x,
                           subsetName,
                           value,
-                          unlink = FALSE) {
-      .setSubsetExperiment(x, subsetName, value, unlink = unlink)
+                          unlink = FALSE,
+                          dependents = "error") {
+      .setSubsetExperiment(x, subsetName, value, unlink = unlink,
+                           dependents = dependents)
     }
   )
+
+  setMethod(
+    f = "removeSubset",
+    signature = signature(x = cls),
+    definition = function(x, subsetName, dependents = "error") {
+      .removeSubset(x, subsetName, dependents)
+    }
+  )
+
+  # for both value classes SummarizedExperiment has methods for, which
+  # would otherwise be chosen first
+  for (valueClass in c("SimpleList", "list")) {
+    setReplaceMethod(
+      f = "assays",
+      signature = signature(x = cls, value = valueClass),
+      definition = function(x, withDimnames = TRUE, ..., value) {
+        .assays(x, withDimnames = withDimnames, ...) <- value
+        return(x)
+      }
+    )
+  }
 
   setMethod(
     f = "metadata",
@@ -771,7 +799,7 @@ for (cls in .esSCEClasses) {
 }
 
 # the loop variable would otherwise stay in the namespace
-rm(cls)
+rm(cls, valueClass)
 
 # Documentation helpers -----------------------------------------------------
 

@@ -4,35 +4,65 @@
 \alias{ExperimentSubset-assay}
 \alias{assay,SubsetSummarizedExperiment,character-method}
 \alias{assay<-,SubsetSummarizedExperiment,character-method}
+\alias{assays<-,SubsetSummarizedExperiment,SimpleList-method}
+\alias{assays<-,SubsetSummarizedExperiment,list-method}
 \alias{assay,SubsetRangedSummarizedExperiment,character-method}
 \alias{assay<-,SubsetRangedSummarizedExperiment,character-method}
+\alias{assays<-,SubsetRangedSummarizedExperiment,SimpleList-method}
+\alias{assays<-,SubsetRangedSummarizedExperiment,list-method}
 \alias{assay,SubsetSingleCellExperiment,character-method}
 \alias{assay<-,SubsetSingleCellExperiment,character-method}
+\alias{assays<-,SubsetSingleCellExperiment,SimpleList-method}
+\alias{assays<-,SubsetSingleCellExperiment,list-method}
 \alias{assay,SubsetTreeSummarizedExperiment,character-method}
 \alias{assay<-,SubsetTreeSummarizedExperiment,character-method}
+\alias{assays<-,SubsetTreeSummarizedExperiment,SimpleList-method}
+\alias{assays<-,SubsetTreeSummarizedExperiment,list-method}
 \alias{assay,SubsetSpatialExperiment,character-method}
 \alias{assay<-,SubsetSpatialExperiment,character-method}
+\alias{assays<-,SubsetSpatialExperiment,SimpleList-method}
+\alias{assays<-,SubsetSpatialExperiment,list-method}
 \title{Assays of subsets in ExperimentSubset objects}
 \usage{
 \S4method{assay}{SubsetSummarizedExperiment,character}(x, i, withDimnames = TRUE, ...)
 
 \S4method{assay}{SubsetSummarizedExperiment,character}(x, i, withDimnames = TRUE, ...) <- value
 
+\S4method{assays}{SubsetSummarizedExperiment,SimpleList}(x, withDimnames = TRUE, ...) <- value
+
+\S4method{assays}{SubsetSummarizedExperiment,list}(x, withDimnames = TRUE, ...) <- value
+
 \S4method{assay}{SubsetRangedSummarizedExperiment,character}(x, i, withDimnames = TRUE, ...)
 
 \S4method{assay}{SubsetRangedSummarizedExperiment,character}(x, i, withDimnames = TRUE, ...) <- value
+
+\S4method{assays}{SubsetRangedSummarizedExperiment,SimpleList}(x, withDimnames = TRUE, ...) <- value
+
+\S4method{assays}{SubsetRangedSummarizedExperiment,list}(x, withDimnames = TRUE, ...) <- value
 
 \S4method{assay}{SubsetSingleCellExperiment,character}(x, i, withDimnames = TRUE, ...)
 
 \S4method{assay}{SubsetSingleCellExperiment,character}(x, i, withDimnames = TRUE, ...) <- value
 
+\S4method{assays}{SubsetSingleCellExperiment,SimpleList}(x, withDimnames = TRUE, ...) <- value
+
+\S4method{assays}{SubsetSingleCellExperiment,list}(x, withDimnames = TRUE, ...) <- value
+
 \S4method{assay}{SubsetTreeSummarizedExperiment,character}(x, i, withDimnames = TRUE, ...)
 
 \S4method{assay}{SubsetTreeSummarizedExperiment,character}(x, i, withDimnames = TRUE, ...) <- value
 
+\S4method{assays}{SubsetTreeSummarizedExperiment,SimpleList}(x, withDimnames = TRUE, ...) <- value
+
+\S4method{assays}{SubsetTreeSummarizedExperiment,list}(x, withDimnames = TRUE, ...) <- value
+
 \S4method{assay}{SubsetSpatialExperiment,character}(x, i, withDimnames = TRUE, ...)
 
 \S4method{assay}{SubsetSpatialExperiment,character}(x, i, withDimnames = TRUE, ...) <- value
+
+\S4method{assays}{SubsetSpatialExperiment,SimpleList}(x, withDimnames = TRUE, ...) <- value
+
+\S4method{assays}{SubsetSpatialExperiment,list}(x, withDimnames = TRUE, ...) <- value
 }
 \arguments{
 \item{x}{An \code{ExperimentSubset} object.}
@@ -57,6 +87,10 @@ method of the class \code{x} extends. Default \code{TRUE}.}
     parent, with \code{TRUE} or a vector that contains its name, as for
     \code{\link{setSubsetAssay}}. It is an error when storing a main
     assay. Default \code{FALSE}.}
+  \item{\code{dependents}}{\code{"error"}, \code{"keep"} or
+    \code{"remove"}: what happens to the subsets made from a main
+    assay that is removed; see \code{\link{removeSubset}}. Default
+    \code{"error"}.}
 }
 For a main assay, other arguments are passed on to the method of the
 class \code{x} extends.}
@@ -66,7 +100,8 @@ to store it in a subset, the subset's.}
 }
 \value{
 \code{assay()} returns a matrix-like assay. \code{assay<-}
-  returns \code{x} with the assay stored.
+  returns \code{x} with the assay stored, and \code{assays<-} with the
+  main assays replaced.
 }
 \description{
 Get or set an assay of the main object or of a subset.
@@ -94,6 +129,11 @@ Get or set an assay of the main object or of a subset.
   name of a main assay, and a subset name without
   \code{subsetAssayName} is an error. Any other name stores a main
   assay.
+
+  Removing a main assay that subsets were made from, with
+  \code{assay(x, i) <- NULL} or \code{assays(x) <- value}, stops unless
+  \code{dependents} says what happens to them (see
+  \code{\link{removeSubset}}).
 }
 \examples{
 # an object with 10 genes and 20 cells

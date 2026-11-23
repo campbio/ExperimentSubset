@@ -199,6 +199,11 @@ NULL
 #'   name of a main assay, and a subset name without
 #'   \code{subsetAssayName} is an error. Any other name stores a main
 #'   assay.
+#'
+#'   Removing a main assay that subsets were made from, with
+#'   \code{assay(x, i) <- NULL} or \code{assays(x) <- value}, stops unless
+#'   \code{dependents} says what happens to them (see
+#'   \code{\link{removeSubset}}).
 #' @param x An \code{ExperimentSubset} object.
 #' @param i \code{character(1)} The name of a main assay, a subset name, or
 #'   \code{"subset/assay"}.
@@ -218,13 +223,18 @@ NULL
 #'       parent, with \code{TRUE} or a vector that contains its name, as for
 #'       \code{\link{setSubsetAssay}}. It is an error when storing a main
 #'       assay. Default \code{FALSE}.}
+#'     \item{\code{dependents}}{\code{"error"}, \code{"keep"} or
+#'       \code{"remove"}: what happens to the subsets made from a main
+#'       assay that is removed; see \code{\link{removeSubset}}. Default
+#'       \code{"error"}.}
 #'   }
 #'   For a main assay, other arguments are passed on to the method of the
 #'   class \code{x} extends.
 #' @param value A matrix-like assay with the main object's dimensions, or,
 #'   to store it in a subset, the subset's.
 #' @return \code{assay()} returns a matrix-like assay. \code{assay<-}
-#'   returns \code{x} with the assay stored.
+#'   returns \code{x} with the assay stored, and \code{assays<-} with the
+#'   main assays replaced.
 #' @seealso \code{\link{getSubsetAssay}}, \code{\link{setSubsetAssay}},
 #'   \code{\link[SummarizedExperiment]{assay}}
 #' @name ExperimentSubset-assay
@@ -735,9 +745,11 @@ NULL
 # Stores what a tool added to an object from .getSubsetExperiment(); value
 # replaces the subset's own data, and unchanged linked assays and the main
 # object's tagged columns are left out
-.setSubsetExperiment <- function(x, subsetName, value, unlink = FALSE) {
+.setSubsetExperiment <- function(x, subsetName, value, unlink = FALSE,
+                                 dependents = "error") {
   .isSubset(x, subsetName)
   .checkUnlink(unlink)
+  .checkDependents(dependents)
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   .checkSubsetValue(internal, subsetName, value)
 
@@ -757,10 +769,9 @@ NULL
                altExpPlan$sources)
   sources <- .checkUnlinked(sources, subsetName, unlink)
 
-  # own assays that value no longer has are removed, unless a subset was
-  # made from them
+  # own assays that value no longer has are removed; the subsets made from
+  # them follow dependents, at the end
   kept <- assayNames(internal) %in% assayNames(value)
-  .checkNotParents(x, subsetName, assayNames(internal)[!kept])
   assays(internal, withDimnames = FALSE) <-
     assays(internal, withDimnames = FALSE)[kept]
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
@@ -779,8 +790,9 @@ NULL
   x <- .storeChangedTrees(x, subsetName, value)
   if (isSce) {
     x <- .applyAltExps(x, subsetName, altExpPlan)
-    x <- .carryAltExps(before, x, subsetName)
+    x <- .carryAltExps(before, x, subsetName, dependents = dependents)
   }
+  x <- .resolveDependents(before, x, dependents)
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
@@ -822,53 +834,6 @@ NULL
   invisible(NULL)
 }
 
-# Stops if removing subsetName's own assays in assayNames would change or
-# break another subset: one whose primary assay is one of them, reached
-# directly ("s/scaled"), through the subset ("s") or through a descendant
-# ("child/scaled")
-.checkNotParents <- function(x, subsetName, assayNames) {
-  used <- character(0)
-  for (name in setdiff(subsetNames(x), subsetName)) {
-    primary <- .primaryAssayName(x, name)
-    owners <- .assayOwners(x, name)
-    if (primary %in% assayNames && primary %in% names(owners)
-        && owners[[primary]] == subsetName)
-      used[name] <- primary
-  }
-  .stopUsedParents(used)
-}
-
-# Stops, if used isn't empty, naming the assays in used that 'value'
-# lacks and the subsets, its names, made from them
-.stopUsedParents <- function(used) {
-  if (length(used) > 0)
-    stop("'value' has no assay ",
-         paste0("'", unique(used), "'", collapse = ", "),
-         ", which subsets ", paste0("'", names(used), "'", collapse = ", "),
-         " were made from. Keep it in 'value'.")
-}
-
-# For a change to the altExps stored at holder, from before to after:
-# stops if a subset made from an altExp, or from one, whose altExp is seen
-# from holder or a subset below it, no longer sees the assay it was made
-# from, as .checkNotParents() does for assays. When the altExp itself is
-# gone, .carryRowRoots() drops the subset instead.
-.checkAltExpParents <- function(before, after, holder) {
-  scope <- c(holder, .subsetsBelow(after, holder))
-  used <- character(0)
-  for (name in subsetNames(after)) {
-    root <- .rowRoot(after, name)
-    if (is.null(root) || !isTRUE(root$container %in% scope)
-        || is.null(.rootShape(after, root$container, root$altExp)))
-      next
-    primary <- .primaryAssayName(after, name)
-    if (primary %in% names(.assayOwners(before, name))
-        && !primary %in% names(.assayOwners(after, name)))
-      used[name] <- paste0(root$altExp, "/", primary)
-  }
-  .stopUsedParents(used)
-}
-
 # TRUE if two assays hold the same values, whatever their dimnames, type
 # (integer or double) or class (for example dense or sparse)
 .sameAssay <- function(a, b) {
@@ -893,6 +858,8 @@ NULL
 
 `.assay<-` <- function(x, i, ..., subsetAssayName = NULL, value) {
   .checkAssayI(i)
+  # used by assays<-, which assay<- of the main object calls
+  .dependentsArg(list(...))
   unlink <- list(...)[["unlink"]]
   if (is.null(unlink))
     unlink <- FALSE
@@ -1082,6 +1049,12 @@ NULL
 #'   or storing it with other rows or another class, drops what they added
 #'   to it, with a warning; an altExp a subset stores whole is kept.
 #'
+#'   When that removes an assay or an altExp that subsets were made from, it
+#'   stops unless \code{dependents} says what happens to them (see
+#'   \code{\link{removeSubset}}). The same holds when a subset's
+#'   \code{altExp<-} or \code{altExps<-} removes an assay of an altExp it
+#'   stores.
+#'
 #'   A subset can also be made from an altExp, with its own features, by
 #'   \code{createSubset(altExp =)}; see \code{\link{createSubset}}. Such a
 #'   subset sees only the altExps it, or a subset it was made from, stores.
@@ -1108,6 +1081,10 @@ NULL
 #'       stored. A message names each assay that is unlinked. Default
 #'       \code{FALSE}. Any other value is an error without
 #'       \code{subsetName}.}
+#'     \item{\code{dependents}}{For \code{altExp<-} and \code{altExps<-}:
+#'       \code{"error"}, \code{"keep"} or \code{"remove"}, what happens to
+#'       the subsets made from an assay or an altExp that goes; see
+#'       \code{\link{removeSubset}}. Default \code{"error"}.}
 #'   }
 #'   Other arguments are passed on to the \code{SingleCellExperiment}
 #'   method. With \code{subsetName}, \code{altExpNames()} and
@@ -1271,12 +1248,13 @@ NULL
 `.altExp<-` <- function(x, e, ..., value) {
   arglist <- list(...)
   unlink <- .unlinkArg(arglist)
+  dependents <- .dependentsArg(arglist)
   if (!"subsetName" %in% names(arglist)) {
     if (missing(e))
       out <- callNextMethod(x, ..., value = value)
     else
       out <- callNextMethod(x, e, ..., value = value)
-    return(.carryAltExps(x, out, ""))
+    return(.carryAltExps(x, out, "", dependents = dependents))
   }
   subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
@@ -1291,15 +1269,17 @@ NULL
     args <- c(list(internal, e), .otherArgs(...), list(value = value))
   internal <- do.call(`altExp<-`, args)
   .storeAltExps(x, subsetName, altExps(internal, withDimnames = FALSE),
-                unlink)
+                unlink, dependents)
 }
 
 #' @importMethodsFrom SingleCellExperiment altExps<-
 `.altExps<-` <- function(x, ..., value) {
   arglist <- list(...)
   unlink <- .unlinkArg(arglist)
+  dependents <- .dependentsArg(arglist)
   if (!"subsetName" %in% names(arglist))
-    return(.carryAltExps(x, callNextMethod(x, ..., value = value), ""))
+    return(.carryAltExps(x, callNextMethod(x, ..., value = value), "",
+                         dependents = dependents))
   subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
   .checkCanStore(.internalAssay(.subsets(x)[[subsetName]]), subsetName,
@@ -1308,7 +1288,7 @@ NULL
   args <- c(list(internal), .otherArgs(...), list(value = value))
   internal <- do.call(`altExps<-`, args)
   .storeAltExps(x, subsetName, altExps(internal, withDimnames = FALSE),
-                unlink)
+                unlink, dependents)
 }
 
 # The unlink argument of the altExp setters, checked; FALSE if not given.
@@ -1445,11 +1425,14 @@ NULL
 
 # Stores value, every altExp subsetName should see, as the subset's own
 # altExps, with the unlink rule for changed linked assays, and says which
-# assays are unlinked
-.storeAltExps <- function(x, subsetName, value, unlink) {
+# assays are unlinked; the subsets made from an assay that goes follow
+# dependents
+.storeAltExps <- function(x, subsetName, value, unlink,
+                          dependents = "error") {
   plan <- .planAltExps(x, subsetName, value)
   sources <- .checkUnlinked(plan$sources, subsetName, unlink)
-  x <- .carryAltExps(x, .applyAltExps(x, subsetName, plan), subsetName)
+  x <- .carryAltExps(x, .applyAltExps(x, subsetName, plan), subsetName,
+                     dependents = dependents)
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
@@ -1599,70 +1582,79 @@ NULL
 
 # Stores parts (from .planAltExps()) as subsetName's own altExps, in place
 # of those it had, recording which are pieces; NULL parts are left out.
-# Stops if that removes an assay a subset made from an altExp was made
-# from (.checkAltExpParents())
+# The subsets made from an assay that goes follow dependents, in
+# .carryAltExps().
 .applyAltExps <- function(x, subsetName, plan) {
   internal <- .internalAssay(.subsets(x)[[subsetName]])
   parts <- plan$parts[!vapply(plan$parts, is.null, logical(1))]
   internal <- .setPieces(internal, intersect(plan$pieces, names(parts)))
   SingleCellExperiment::altExps(internal, withDimnames = FALSE) <- parts
-  before <- x
   .internalAssay(.subsets(x)[[subsetName]]) <- internal
-  .checkAltExpParents(before, x, subsetName)
   x
 }
 
 # After a change to the altExps stored at holder ("" for the main object,
 # or a subset), from before to after, carries along what the subsets below
 # holder store of them (.carryAltExpParts()), then the subsets made from
-# them (.carryRowRoots())
-.carryAltExps <- function(before, after, holder, renamed = character(0)) {
-  after <- .carryAltExpParts(before, after, holder, renamed)
-  .carryRowRoots(before, after, holder, renamed)
+# them (.carryRowRoots()), with dependents for those that lose what they
+# were made from. Warnings come only once nothing stops, in order.
+.carryAltExps <- function(before, after, holder, renamed = character(0),
+                          dependents = "error") {
+  warned <- character(0)
+  after <- withCallingHandlers({
+    after <- .carryAltExpParts(before, after, holder, renamed)
+    .carryRowRoots(before, after, holder, renamed, dependents = dependents)
+  }, warning = function(w) {
+    warned <<- c(warned, conditionMessage(w))
+    invokeRestart("muffleWarning")
+  })
+  for (w in warned)
+    warning(w, call. = FALSE)
+  after
 }
 
 # After a change to the altExps at holder, from before to after, carries
 # along the subsets made with createSubset(altExp =) that were in before,
 # and those made from them (ADR 0007): each follows a rename of its
 # altExp (renamed holds new names, named by old name) at holder, the main
-# object or a subset its container was made from; is dropped, with those
-# below it, with a warning, when its container no longer sees the altExp;
-# keeps the features whose names remain when the altExp's rows change,
-# or, with byPosition, those at the same positions; and takes the new
-# class when the altExp's changes. Rows that can't be matched are an
-# error, before anything is stored.
+# object or a subset its container was made from; follows dependents
+# (.resolveDependents()), as every subset that lost what it was made from
+# does, when its container no longer sees the altExp; keeps the features
+# whose names remain when the altExp's rows change, or, with byPosition,
+# those at the same positions; and takes the new class when the altExp's
+# changes. Rows that can't be matched are an error, before anything is
+# stored.
 .carryRowRoots <- function(before, after, holder, renamed = character(0),
-                           byPosition = FALSE) {
+                           byPosition = FALSE, dependents = "error") {
   starts <- Filter(function(name) {
     name %in% subsetNames(before) &&
       !is.null(.rootAltExp(.subsets(after)[[name]]))
   }, subsetNames(after))
-  dropped <- list()
   for (start in starts) {
     subset <- .subsets(after)[[start]]
     oldName <- .rootAltExp(subset)
     container <- .parentSubsetName(after, .parentAssay(subset), oldName)
-    name <- oldName
     # the main object's altExp, or the container's own whole one, which
     # it can rename once the main object's is gone
     upChain <- if (is.null(container)) character(0) else
       .subsetChain(after, container)
-    if (oldName %in% names(renamed) && (holder == "" || holder %in% upChain)) {
-      name <- renamed[[oldName]]
-      subset <- .copySubset(subset, altExpName = name)
-      .subsets(after)[[start]] <- subset
-    }
+    if (oldName %in% names(renamed) && (holder == "" || holder %in% upChain))
+      .subsets(after)[[start]] <- .copySubset(
+        subset, altExpName = renamed[[oldName]]
+      )
+  }
+  # kept subsets store their copies at the old rows, which they then follow
+  after <- .resolveDependents(before, after, dependents)
+  for (start in intersect(starts, subsetNames(after))) {
+    subset <- .subsets(after)[[start]]
+    name <- .rootAltExp(subset)
+    oldName <- .rootAltExp(.subsets(before)[[start]])
+    container <- .parentSubsetName(after, .parentAssay(subset), name)
     below <- c(start, .subsetsBelow(after, start))
     new <- .rootShape(after, container, name)
-    if (is.null(new)) {
-      dropped[[name]] <- c(dropped[[name]], below)
-      next
-    }
     old <- .rootShape(before, container, oldName)
     after <- .followRootRows(after, below, old, new, name, byPosition)
   }
-  for (name in names(dropped))
-    after <- .dropSubsets(after, dropped[[name]], name)
   after
 }
 
@@ -1708,20 +1700,6 @@ NULL
     warning("Dropped the reducedDims and altExps of subset ",
             .andList(sprintf("'%s'", lost)), ": altExp '", name, "' is now ",
             "a ", class, ", which can't hold them.", call. = FALSE)
-  x
-}
-
-# x without the subsets in gone, made from the altExp called name that was
-# removed, with a warning naming them
-.dropSubsets <- function(x, gone, name) {
-  gone <- subsetNames(x)[subsetNames(x) %in% gone]
-  .subsets(x) <- .subsets(x)[!subsetNames(x) %in% gone]
-  quoted <- .andList(sprintf("'%s'", gone))
-  if (length(gone) == 1)
-    what <- paste0("subset ", quoted, ": the altExp '", name, "' it was")
-  else
-    what <- paste0("subsets ", quoted, ": the altExp '", name, "' they were")
-  warning("Dropped ", what, " made from was removed.", call. = FALSE)
   x
 }
 
@@ -1943,7 +1921,10 @@ NULL
 # name; it resolves when one subset stores it. NULL if nothing matches.
 # With altExp, parentAssay names an assay of that altExp: a bare name is
 # the main object's altExp's, and only "P/assay" points into a subset.
-.parentSubsetName <- function(x, parentAssay, altExp = NULL) {
+# self is the subset whose parentAssay it is, if known: one that stores
+# its bare parent assay itself, kept when that main assay was removed
+# (#122), is made from the main object.
+.parentSubsetName <- function(x, parentAssay, altExp = NULL, self = NULL) {
   if (!is.null(altExp)) {
     parts <- if (is.null(parentAssay)) NULL else .splitQualified(parentAssay)
     if (!is.null(parts) && parts[1] %in% subsetNames(x))
@@ -1961,6 +1942,8 @@ NULL
     return(NULL)
   }
   holders <- .assayHolders(x, parentAssay)
+  if (!is.null(self) && self %in% holders)
+    return(NULL)
   if (length(holders) > 1)
     stop("The parent '", parentAssay, "' is stored in subsets ",
          paste0("'", holders, "'", collapse = ", "), ".")
@@ -1974,20 +1957,21 @@ NULL
 # up the parent chain: each step moves up one subset, so a longer walk
 # means a cycle. label names where the walk started, in the error. altExp
 # is that of the subset whose parent parentAssay is, if it was made from an
-# altExp.
+# altExp, and self its name, if it is a subset (see .parentSubsetName()).
 .containerChain <- function(x, parentAssay, label = parentAssay,
-                            altExp = NULL) {
+                            altExp = NULL, self = NULL) {
   # before the loop changes parentAssay
   force(label)
   chain <- character(0)
   for (step in seq_len(subsetCount(x) + 1)) {
-    container <- .parentSubsetName(x, parentAssay, altExp)
+    container <- .parentSubsetName(x, parentAssay, altExp, self)
     if (is.null(container))
       return(chain)
     chain <- c(container, chain)
     subset <- .subsets(x)[[container]]
     parentAssay <- .parentAssay(subset)
     altExp <- .rootAltExp(subset)
+    self <- container
   }
   stop("The parent chain of '", label, "' does not lead to a main assay.")
 }
@@ -1995,8 +1979,9 @@ NULL
 # Subset names from the outermost container down to subsetName
 .subsetChain <- function(x, subsetName) {
   subset <- .subsets(x)[[subsetName]]
-  c(.containerChain(x, .parentAssay(subset), subsetName, .rootAltExp(subset)),
-    subsetName)
+  chain <- .containerChain(x, .parentAssay(subset), subsetName,
+                           .rootAltExp(subset), self = subsetName)
+  c(chain, subsetName)
 }
 
 # Where subsetName's rows come from: NULL for the main object's rows; for a
@@ -2127,15 +2112,16 @@ NULL
 # getIndices is .rowIndices or .colIndices. altExp is that of the subset
 # whose parent parentAssay is. The root of the columns is the main object;
 # the root of the rows is the main object, or the altExp of the subset
-# made with createSubset(altExp =), where lifting rows stops.
+# made with createSubset(altExp =), where lifting rows stops. self is the
+# subset whose parent parentAssay is, if it is one.
 .liftIndices <- function(x, parentAssay, indices, getIndices,
                          container = NULL, label = parentAssay,
-                         altExp = NULL) {
+                         altExp = NULL, self = NULL) {
   force(label)
   rows <- identical(getIndices, .rowIndices)
   if (rows && !is.null(altExp))
     return(indices)
-  chain <- .containerChain(x, parentAssay, label, altExp)
+  chain <- .containerChain(x, parentAssay, label, altExp, self)
   if (!is.null(container))
     chain <- chain[seq_along(chain) > match(container, chain)]
   for (subset in rev(chain)) {
@@ -2152,7 +2138,8 @@ NULL
 .indicesIn <- function(x, subsetName, getIndices, container = NULL) {
   subset <- .subsets(x)[[subsetName]]
   .liftIndices(x, .parentAssay(subset), getIndices(subset), getIndices,
-               container, label = subsetName, altExp = .rootAltExp(subset))
+               container, label = subsetName, altExp = .rootAltExp(subset),
+               self = subsetName)
 }
 
 # An assay as seen in a subset: its own, or a view of the nearest
@@ -2217,10 +2204,13 @@ NULL
   for (name in subsetNames(x)) {
     subset <- .subsets(x)[[name]]
     parent <- .parentAssay(subset)
-    # a bare name of a subset made from an altExp is the altExp's assay
+    # a bare name of a subset made from an altExp is the altExp's assay;
+    # one the subset stores itself was kept when its main assay was
+    # removed (#122)
     bare <- !is.null(parent) && !parent %in% c(assayNames(x), subsetNames(x))
     if (!bare || grepl("/", parent, fixed = TRUE)
-        || !is.null(.rootAltExp(subset)))
+        || !is.null(.rootAltExp(subset))
+        || parent %in% assayNames(.internalAssay(subset)))
       next
     holders <- .assayHolders(x, parent)
     if (length(holders) != 1)
@@ -2463,7 +2453,8 @@ NULL
       altExp <- .rootAltExp(subset)
       # rows of a subset made from an altExp follow the altExp's rows
       # later, in .carryCombined()
-      if (is.null(.parentSubsetName(object, .parentAssay(subset), altExp))) {
+      if (is.null(.parentSubsetName(object, .parentAssay(subset), altExp,
+                                    self = name))) {
         if (!is.null(maps$rows[[k]]) && is.null(altExp))
           rows <- maps$rows[[k]][rows]
         if (!is.null(maps$cols[[k]]))
@@ -2526,13 +2517,15 @@ NULL
 # After objects are combined into out, carries along what their subsets
 # store of the main altExps, which combineCols() can give other rows, and
 # the subsets made from them. combineRows() can return a class without
-# altExps, which drops those subsets. With useNames FALSE, altExp rows
-# are matched by position.
+# altExps, which removes those subsets, with a warning, as dependents =
+# "remove" does. With useNames FALSE, altExp rows are matched by
+# position.
 .carryCombined <- function(out, objects, useNames = TRUE) {
   for (object in objects[.hasSubsets(objects)]) {
     if (methods::is(out, "SingleCellExperiment"))
       out <- .carryAltExpParts(object, out, "")
-    out <- .carryRowRoots(object, out, "", byPosition = !isTRUE(useNames))
+    out <- .carryRowRoots(object, out, "", byPosition = !isTRUE(useNames),
+                          dependents = "remove")
   }
   out
 }
@@ -3595,13 +3588,13 @@ NULL
 
 #helpers
 
-# Arguments in ... other than subsetName and unlink, to pass to a subset's
-# internal object, whose methods may not accept them
+# Arguments in ... other than subsetName, unlink and dependents, to pass to
+# a subset's internal object, whose methods may not accept them
 .otherArgs <- function(...) {
   args <- list(...)
   if (is.null(names(args)))
     return(args)
-  args[!names(args) %in% c("subsetName", "unlink")]
+  args[!names(args) %in% c("subsetName", "unlink", "dependents")]
 }
 
 # TRUE if value is one non-NA string, which a name used in if() must be

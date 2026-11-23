@@ -44,6 +44,7 @@ Collate:
     'allClasses.R'
     'allGenerics.R'
     'ExperimentSubset.R'
+    'dependents.R'
     'SubsetMethods.R'
     'SubsetSpatialExperiment.R'
     'SubsetTreeSummarizedExperiment.R'

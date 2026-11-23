@@ -2851,7 +2851,8 @@ test_that("Subset experiments of subsets use the subset's assays", {
   s1 <- getSubsetExperiment(es, "s1")
   assay(s1, "scaled") <- NULL
   expect_error(setSubsetExperiment(es, "s1", s1),
-               regexp = "'scaled', which subsets 's2'")
+               paste0("Assay 'scaled' of subset 's1' is the parent assay ",
+                      "of subset 's2'."), fixed = TRUE)
   expect_equal(as.matrix(assay(es, "s2")), scaled[1:5, 1:4])
 })
 
@@ -2867,7 +2868,8 @@ test_that("setSubsetExperiment keeps assays that descendants use", {
   s1 <- getSubsetExperiment(es, "s1")
   assay(s1, "scaled") <- NULL
   expect_error(setSubsetExperiment(es, "s1", s1),
-               regexp = "'scaled', which subsets 'grandchild'")
+               paste0("Assay 'scaled' of subset 's1' is the parent assay ",
+                      "of subset 'grandchild'."), fixed = TRUE)
 
   # a subset made from s1 uses s1's own counts, stored with unlink = TRUE
   es <- ExperimentSubset(simSce)
@@ -2883,7 +2885,8 @@ test_that("setSubsetExperiment keeps assays that descendants use", {
   s1 <- getSubsetExperiment(es, "s1")
   assay(s1, "counts") <- NULL
   expect_error(setSubsetExperiment(es, "s1", s1),
-               regexp = "'counts', which subsets 'child'")
+               paste0("Assay 'counts' of subset 's1' is the parent assay ",
+                      "of subset 'child'."), fixed = TRUE)
   expect_equal(as.matrix(assay(es, "child")), ownCounts[1:5, 1:4])
 })
 
@@ -4643,8 +4646,9 @@ test_that("createSubset() needs a named first assay or parentAssay (#36)", {
 
 test_that("createSubset() stops when a parent subset lost its assay (#36)", {
   es <- bracketExample()$es
-  # s1 was made from "counts", which is gone
-  assay(es, "counts") <- NULL
+  # s1 was made from "counts", which is gone: removing it stops (#122),
+  # but subsets don't follow a rename yet (#126)
+  assayNames(es)[assayNames(es) == "counts"] <- "raw"
   expect_error(createSubset(es, "child", rows = 1:2, parentAssay = "s1"),
                "'counts' is not an assay of subset 's1'.", fixed = TRUE)
 
@@ -4686,6 +4690,46 @@ test_that("A parent cycle stops instead of hanging (#36)", {
   expect_error(createSubset(es, "child", rows = 1, parentAssay = "s1a"),
                cycle)
 })
+
+# Subsets whose parent goes away (#122) -------------------------------------
+
+# A SingleCellExperiment with counts and logcounts and four subsets: s,
+# made from counts, with its own assay scaled; t, made from s/scaled; u,
+# made from s; and w, made from logcounts (#122)
+makeParentEs <- function() {
+  m <- matrix(as.numeric(1:40), nrow = 4,
+              dimnames = list(paste0("g", 1:4), paste0("c", 1:10)))
+  es <- ExperimentSubset(SingleCellExperiment(list(counts = m,
+                                                   logcounts = log1p(m))))
+  es <- createSubset(es, "s", rows = 1:3, cols = 2:7, parentAssay = "counts")
+  es <- setSubsetAssay(es, "s", assay(es, "s") * 2, "scaled")
+  es <- createSubset(es, "t", rows = 1:2, cols = 1:3,
+                     parentAssay = "s/scaled")
+  es <- createSubset(es, "u", rows = 2:3, cols = 2:4, parentAssay = "s")
+  createSubset(es, "w", rows = 1:2, cols = 1:2, parentAssay = "logcounts")
+}
+
+# The assays each subset of es sees, by subset and assay, in name order
+subsetViews <- function(es, names = subsetNames(es)) {
+  views <- lapply(names, function(name) {
+    seen <- sort(subsetAssayNames(es, name))
+    out <- lapply(seen, function(a) getSubsetAssay(es, name, a))
+    names(out) <- seen
+    out
+  })
+  names(views) <- names
+  views
+}
+
+dependentsHint <- function(n) {
+  if (n == 1)
+    return(paste0(" Use dependents = \"keep\" to keep it, with its own copy ",
+                  "of that data, or dependents = \"remove\" to remove it ",
+                  "and the subsets made from it."))
+  paste0(" Use dependents = \"keep\" to keep them, with their own copy of ",
+         "that data, or dependents = \"remove\" to remove them and the ",
+         "subsets made from them.")
+}
 
 # Subsets made from an altExp (#92) ----------------------------------------
 
@@ -5001,22 +5045,36 @@ test_that("Removing an altExp drops the subsets made from it (#92)", {
   es <- createSubset(es, "clean.antibodies", rows = 1:3,
                      parentAssay = "clean", altExp = "ADT")
   removed <- es
-  expect_warning(
+  # stops by default, and can't keep them yet (#122, #127)
+  expect_error(
     altExp(removed, "ADT") <- NULL,
-    paste0("Dropped subsets 'adt', 'below' and 'clean.antibodies': the ",
+    paste0("altExp 'ADT' is the parent of subsets 'adt' and ",
+           "'clean.antibodies'. Use dependents = \"remove\" to remove them ",
+           "and the subsets made from them."), fixed = TRUE
+  )
+  expect_error(
+    altExp(removed, "ADT", dependents = "keep") <- NULL,
+    paste0("dependents = \"keep\" isn't supported yet when an altExp is ",
+           "removed (#127). Use dependents = \"remove\"."), fixed = TRUE
+  )
+  expect_identical(removed, es)
+  expect_warning(
+    altExp(removed, "ADT", dependents = "remove") <- NULL,
+    paste0("Removed subsets 'adt', 'below' and 'clean.antibodies': the ",
            "altExp 'ADT' they were made from was removed."), fixed = TRUE
   )
   expect_equal(subsetNames(removed), "clean")
   removed <- es
-  expect_warning(altExps(removed) <- list(), "Dropped subsets")
+  expect_warning(altExps(removed, dependents = "remove") <- list(),
+                 "Removed subsets")
   expect_equal(subsetNames(removed), "clean")
   # clean's own whole ADT stays, so subsets made from it stay
   cleanAdt <- altExp(es, "ADT", subsetName = "clean")[1:3, ]
   suppressMessages(
     altExp(es, "ADT", subsetName = "clean", unlink = TRUE) <- cleanAdt
   )
-  expect_warning(altExp(es, "ADT") <- NULL,
-                 "Dropped subsets 'adt' and 'below':", fixed = TRUE)
+  expect_warning(altExp(es, "ADT", dependents = "remove") <- NULL,
+                 "Removed subsets 'adt' and 'below':", fixed = TRUE)
   expect_equal(subsetNames(es), c("clean", "clean.antibodies"))
   expect_equal(assay(es, "clean.antibodies"), assay(cleanAdt, "counts"))
 })
@@ -5082,7 +5140,7 @@ test_that("Combining objects keeps subsets made from an altExp (#92)", {
                                                                  22:25]))
   # combineRows() keeps no altExps
   expect_warning(byRows <- combineRows(es, genes),
-                 paste0("Dropped subset 'adt': the altExp 'ADT' it was made ",
+                 paste0("Removed subset 'adt': the altExp 'ADT' it was made ",
                         "from was removed."), fixed = TRUE)
   expect_equal(subsetNames(byRows), "clean")
 })
@@ -5232,32 +5290,55 @@ test_that("More checks and carry-along cases of altExp subsets (#92)", {
 })
 
 test_that("An altExp subset whose parent assay goes is kept or protected", {
-  # as for a main assay: a change to the main ADT that drops what clean
-  # stored in it leaves the subset made from clean's clr without its
-  # parent assay
+  # as for a main assay (#122): a change to the main ADT that drops what
+  # clean stored in it, the subset's parent assay, stops
   es <- makeAdtEs()
   es <- createSubset(es, "clean.antibodies", rows = c("CD3", "CD4", "CD8"),
                      parentAssay = "clean/clr", altExp = "ADT")
+  parentError <- paste0("Assay 'ADT/clr' of subset 'clean' is the parent ",
+                        "assay of subset 'clean.antibodies'.",
+                        dependentsHint(1))
   noIsotype <- es
+  newAdt <- altExp(es, "ADT")[c("CD3", "CD4"), ]
+  # without the warning about what clean stored, since nothing changes
+  expect_length(capture_warnings(
+    expect_error(altExp(noIsotype, "ADT") <- newAdt, parentError,
+                 fixed = TRUE)
+  ), 0)
+  expect_identical(noIsotype, es)
+  # keep: the subset keeps clr, for the features that remain
   expect_warning(
-    altExp(noIsotype, "ADT") <- altExp(es, "ADT")[c("CD3", "CD4", "CD8"), ],
+    expect_message(
+      altExp(noIsotype, "ADT", dependents = "keep") <- newAdt,
+      "Subset 'clean.antibodies' now stores its own assay 'clr'.",
+      fixed = TRUE
+    ),
     "Dropped what subset 'clean' stored in altExp 'ADT'", fixed = TRUE
   )
-  expect_equal(subsetNames(noIsotype), c("clean", "clean.antibodies"))
-  expect_equal(subsetRownames(noIsotype, "clean.antibodies"),
-               c("CD3", "CD4", "CD8"))
-  expect_error(assay(noIsotype, "clean.antibodies"),
-               "'clr' is not an assay of subset 'clean.antibodies'.",
-               fixed = TRUE)
+  expect_equal(subsetRownames(noIsotype, "clean.antibodies"), c("CD3", "CD4"))
+  expect_equal(assay(noIsotype, "clean.antibodies"),
+               assay(es, "clean.antibodies")[c("CD3", "CD4"), ])
+  # remove
+  removed <- es
+  # in order: what clean stored is dropped first
+  expect_equal(
+    capture_warnings(altExp(removed, "ADT", dependents = "remove") <- newAdt),
+    c(paste0("Dropped what subset 'clean' stored in altExp 'ADT': the ",
+             "altExp it added to was removed, or now has other rows or ",
+             "another class."),
+      paste0("Removed subset 'clean.antibodies': the assay 'ADT/clr' of ",
+             "subset 'clean' it was made from was removed."))
+  )
+  expect_equal(subsetNames(removed), "clean")
+
   # as for a subset's own assay: storing clean's ADT without clr stops
-  parentError <- paste0("'value' has no assay 'ADT/clr', which subsets ",
-                        "'clean.antibodies' were made from. Keep it in ",
-                        "'value'.")
   cleanAdt <- altExp(es, "ADT", subsetName = "clean")
   assay(cleanAdt, "clr") <- NULL
   expect_error(altExp(es, "ADT", subsetName = "clean") <- cleanAdt,
                parentError, fixed = TRUE)
   expect_error(altExp(es, "ADT", subsetName = "clean") <- NULL,
+               parentError, fixed = TRUE)
+  expect_error(altExps(es, subsetName = "clean") <- list(ADT = cleanAdt),
                parentError, fixed = TRUE)
   out <- getSubsetExperiment(es, "clean")
   altExp(out, "ADT") <- cleanAdt
@@ -5265,6 +5346,23 @@ test_that("An altExp subset whose parent assay goes is kept or protected", {
                fixed = TRUE)
   expect_equal(assayNames(altExp(es, "ADT", subsetName = "clean")),
                c("counts", "clr"))
+  before <- assay(es, "clean.antibodies")
+  kept <- es
+  expect_message(
+    altExp(kept, "ADT", subsetName = "clean", dependents = "keep") <- NULL,
+    "Subset 'clean.antibodies' now stores its own assay 'clr'.", fixed = TRUE
+  )
+  expect_equal(assay(kept, "clean.antibodies"), before)
+  expect_message(
+    kept <- setSubsetExperiment(es, "clean", out, dependents = "keep"),
+    "Subset 'clean.antibodies' now stores its own assay 'clr'.", fixed = TRUE
+  )
+  expect_equal(assay(kept, "clean.antibodies"), before)
+  expect_warning(
+    removed <- setSubsetExperiment(es, "clean", out, dependents = "remove"),
+    "Removed subset 'clean.antibodies'", fixed = TRUE
+  )
+  expect_equal(subsetNames(removed), "clean")
 })
 
 test_that("Spec review fixes for altExp subsets (#92)", {
@@ -5370,8 +5468,8 @@ test_that("Code review fixes for altExp subsets (#92)", {
   cleanAdt <- altExp(es, "ADT", subsetName = "clean")
   assay(cleanAdt, "clr") <- NULL
   expect_error(altExp(es, "ADT", subsetName = "clean") <- cleanAdt,
-               paste0("'value' has no assay 'ADT/clr', which subsets 'C' ",
-                      "were made from."), fixed = TRUE)
+               paste0("Assay 'ADT/clr' of subset 'clean' is the parent ",
+                      "assay of subset 'C'."), fixed = TRUE)
 
   # a changed class says what the subsets lose
   es <- makeAdtEs(cleanClr = FALSE)
@@ -5506,4 +5604,277 @@ test_that("A subset can't change unnamed assays of an altExp (#121)", {
   expect_equal(stored$tag, letters[1:5])
   expect_equal(assayNames(stored), c("counts", ""))
   expect_equal(assay(stored, 2), m[1:2, 1:5] + 1)
+})
+
+test_that("Removing a main assay that subsets were made from stops (#122)", {
+  es <- makeParentEs()
+  msg <- paste0("Assay 'counts' is the parent assay of subset 's'.",
+                dependentsHint(1))
+  removed <- es
+  expect_error(assay(removed, "counts") <- NULL, msg, fixed = TRUE)
+  expect_error(counts(removed) <- NULL, msg, fixed = TRUE)
+  expect_error(assays(removed) <- assays(removed)["logcounts"], msg,
+               fixed = TRUE)
+  expect_error(assay(removed, "counts", dependents = "error") <- NULL, msg,
+               fixed = TRUE)
+  # nothing changed
+  expect_identical(removed, es)
+  # two assays at once
+  expect_error(
+    assays(removed) <- S4Vectors::SimpleList(),
+    paste0("Assay 'counts' is the parent assay of subset 's'. Assay ",
+           "'logcounts' is the parent assay of subset 'w'.",
+           dependentsHint(2)),
+    fixed = TRUE
+  )
+  # dependents is checked, even when no subset is affected
+  bad <- "'dependents' must be \"error\", \"keep\" or \"remove\"."
+  expect_error(assay(removed, "counts", dependents = "maybe") <- NULL, bad,
+               fixed = TRUE)
+  expect_error(assay(removed, "extra", dependents = NA) <- assay(es),
+               bad, fixed = TRUE)
+  # adding and replacing assays are unchanged
+  assay(removed, "extra") <- assay(es, "counts") + 1
+  assay(removed, "counts") <- assay(es, "counts") + 1
+  expect_equal(assay(removed, "s"), assay(removed, "counts")[1:3, 2:7])
+  # an assay no subset was made from is removed as before
+  assay(removed, "extra") <- NULL
+  expect_equal(assayNames(removed), c("counts", "logcounts"))
+})
+
+test_that("dependents = \"keep\" keeps subsets of a removed assay (#122)", {
+  es <- makeParentEs()
+  before <- subsetViews(es)
+  kept <- es
+  expect_equal(
+    capture_messages(assay(kept, "counts", dependents = "keep") <- NULL),
+    "Subset 's' now stores its own assay 'counts'.\n"
+  )
+  expect_equal(assayNames(kept), "logcounts")
+  expect_equal(subsetNames(kept), subsetNames(es))
+  # every subset sees what it saw, except w, which only saw counts linked
+  expect_equal(subsetViews(kept, c("s", "t", "u")), before[c("s", "t", "u")])
+  expect_equal(subsetAssayNames(kept, "w"), "logcounts")
+  expect_equal(assay(kept, "w"), before$w$logcounts)
+  for (name in c("s", "t", "u")) {
+    expect_equal(assay(kept, name), assay(es, name))
+    expect_equal(subsetParent(kept, name), subsetParent(es, name))
+  }
+  expect_true("s/counts" %in% subsetAssayNames(kept))
+  # the kept copy isn't linked to a new main assay of that name
+  assay(kept, "counts") <- assay(es, "counts") * 0
+  expect_equal(assay(kept, "s"), assay(es, "s"))
+  expect_equal(assay(kept, "u"), assay(es, "u"))
+  # new subsets can be made from the kept subset
+  kept <- createSubset(kept, "k", rows = 1, cols = 1:2, parentAssay = "s")
+  expect_equal(assay(kept, "k"), assay(es, "s")[1, 1:2, drop = FALSE])
+
+  # through assays<-, with logcounts removed too: w keeps its own copy
+  kept <- es
+  expect_equal(
+    capture_messages(
+      assays(kept, dependents = "keep") <- S4Vectors::SimpleList()
+    ),
+    c("Subset 's' now stores its own assay 'counts'.\n",
+      "Subset 'w' now stores its own assay 'logcounts'.\n")
+  )
+  for (name in subsetNames(es))
+    expect_equal(assay(kept, name), assay(es, name))
+})
+
+test_that("dependents = \"remove\" removes subsets of a removed assay (#122)", {
+  es <- makeParentEs()
+  removed <- es
+  expect_warning(
+    assay(removed, "counts", dependents = "remove") <- NULL,
+    paste0("Removed subsets 's', 't' and 'u': the assay 'counts' they were ",
+           "made from was removed."),
+    fixed = TRUE
+  )
+  expect_equal(subsetNames(removed), "w")
+  expect_equal(assay(removed, "w"), assay(es, "w"))
+  removed <- es
+  expect_equal(
+    capture_warnings(
+      assays(removed, dependents = "remove") <- S4Vectors::SimpleList()
+    ),
+    c(paste0("Removed subsets 's', 't' and 'u': the assay 'counts' they ",
+             "were made from was removed."),
+      paste0("Removed subset 'w': the assay 'logcounts' it was made from ",
+             "was removed."))
+  )
+  expect_equal(subsetCount(removed), 0L)
+})
+
+test_that("dependents applies to a SummarizedExperiment's assays (#122)", {
+  m <- matrix(as.numeric(1:40), nrow = 4,
+              dimnames = list(paste0("g", 1:4), paste0("c", 1:10)))
+  es <- ExperimentSubset(SummarizedExperiment(list(counts = m, other = m)))
+  es <- createSubset(es, "s", rows = 1:2, cols = 1:5, parentAssay = "counts")
+  removed <- es
+  expect_error(assay(removed, "counts") <- NULL,
+               "Assay 'counts' is the parent assay of subset 's'.",
+               fixed = TRUE)
+  expect_message(assay(removed, "counts", dependents = "keep") <- NULL,
+                 "Subset 's' now stores its own assay 'counts'.",
+                 fixed = TRUE)
+  expect_equal(assay(removed, "s"), m[1:2, 1:5])
+  expect_s4_class(removed, "SubsetSummarizedExperiment")
+})
+
+test_that("setSubsetExperiment takes dependents (#122)", {
+  es <- makeParentEs()
+  value <- getSubsetExperiment(es, "s")
+  assay(value, "scaled") <- NULL
+  msg <- paste0("Assay 'scaled' of subset 's' is the parent assay of ",
+                "subset 't'.", dependentsHint(1))
+  expect_error(setSubsetExperiment(es, "s", value), msg, fixed = TRUE)
+  expect_message(
+    kept <- setSubsetExperiment(es, "s", value, dependents = "keep"),
+    "Subset 't' now stores its own assay 'scaled'.", fixed = TRUE
+  )
+  expect_false("scaled" %in% subsetAssayNames(kept, "s"))
+  expect_equal(assay(kept, "t"), assay(es, "t"))
+  # u saw s's scaled only as a linked assay
+  expect_equal(assay(kept, "u"), assay(es, "u"))
+  expect_false("scaled" %in% subsetAssayNames(kept, "u"))
+  expect_warning(
+    removed <- setSubsetExperiment(es, "s", value, dependents = "remove"),
+    paste0("Removed subset 't': the assay 'scaled' of subset 's' it was ",
+           "made from was removed."),
+    fixed = TRUE
+  )
+  expect_equal(subsetNames(removed), c("s", "u", "w"))
+  expect_error(setSubsetExperiment(es, "s", value, dependents = "no"),
+               "'dependents' must be", fixed = TRUE)
+})
+
+test_that("removeSubset() removes subsets (#122)", {
+  es <- makeParentEs()
+  expect_equal(subsetNames(removeSubset(es, "t")), c("s", "u", "w"))
+  expect_equal(subsetNames(removeSubset(es, c("w", "t"))), c("s", "u"))
+  # with every subset made from it
+  expect_equal(subsetNames(removeSubset(es, c("s", "t", "u"))), "w")
+  expect_error(removeSubset(es, "nope"),
+               "nope subset does not exist. 'subsetName' must be the name of ",
+               fixed = TRUE)
+  expect_error(removeSubset(es, character(0)),
+               "'subsetName' must be one or more subset names.", fixed = TRUE)
+  expect_error(
+    removeSubset(es, "s"),
+    paste0("Subset 's' is the parent of subsets 't' and 'u'.",
+           dependentsHint(2)),
+    fixed = TRUE
+  )
+  expect_warning(
+    removed <- removeSubset(es, "s", dependents = "remove"),
+    paste0("Removed subsets 't' and 'u': the subset 's' they were made from ",
+           "was removed."),
+    fixed = TRUE
+  )
+  expect_equal(subsetNames(removed), "w")
+  expect_s4_class(removed, "SubsetSingleCellExperiment")
+  expect_error(removeSubset(es, "t", dependents = "all"),
+               "'dependents' must be", fixed = TRUE)
+})
+
+test_that("removeSubset(dependents = \"keep\") re-roots children (#122)", {
+  es <- makeParentEs()
+  before <- subsetViews(es)
+  expect_equal(
+    capture_messages(kept <- removeSubset(es, "s", dependents = "keep")),
+    c("Subset 't' now stores its own assay 'scaled'.\n",
+      "Subset 'u' now stores its own assay 'scaled'.\n")
+  )
+  expect_equal(subsetNames(kept), c("t", "u", "w"))
+  expect_equal(subsetViews(kept), before[c("t", "u", "w")])
+  for (name in c("t", "u")) {
+    expect_equal(assay(kept, name), assay(es, name))
+    expect_equal(subsetRownames(kept, name), subsetRownames(es, name))
+    expect_equal(subsetColnames(kept, name), subsetColnames(es, name))
+  }
+  expect_equal(subsetParent(kept, "t"), list("scaled"))
+  expect_equal(subsetParent(kept, "u"), list("counts"))
+  # u's counts stay linked to the main object's
+  assay(kept, "counts") <- assay(es, "counts") + 1
+  expect_equal(assay(kept, "u"), assay(kept, "counts")[2:3, 3:5])
+  expect_equal(assay(kept, "t"), assay(es, "t"))
+
+  # below a subset p: the parent names p
+  es <- makeParentEs()
+  es <- createSubset(es, "p", rows = 1:3, cols = 1:8, parentAssay = "counts")
+  es <- createSubset(es, "q", rows = 1:2, cols = 2:6, parentAssay = "p")
+  es <- setSubsetAssay(es, "q", assay(es, "q") + 1, "plus")
+  es <- createSubset(es, "r", rows = 2, cols = 1:3, parentAssay = "q/plus")
+  expect_message(kept <- removeSubset(es, "q", dependents = "keep"),
+                 "Subset 'r' now stores its own assay 'plus'.", fixed = TRUE)
+  expect_equal(assay(kept, "r"), assay(es, "r"))
+  expect_equal(subsetParent(kept, "r"), list("p/plus", "p", "counts"))
+  expect_equal(subsetColnames(kept, "r"), subsetColnames(es, "r"))
+  # two subsets of one chain
+  expect_message(kept <- removeSubset(es, c("p", "q"), dependents = "keep"),
+                 "Subset 'r' now stores its own assay 'plus'.", fixed = TRUE)
+  expect_equal(assay(kept, "r"), assay(es, "r"))
+  expect_equal(subsetParent(kept, "r"), list("plus"))
+  expect_equal(subsetRownames(kept, "r"), subsetRownames(es, "r"))
+})
+
+test_that("removeSubset(dependents = \"keep\") keeps what a child saw (#122)", {
+  # an altExp clean stores a piece of, seen by a subset made from clean
+  es <- makeAdtEs()
+  es <- createSubset(es, "child", cols = 2:5, parentAssay = "clean")
+  adtBefore <- altExp(es, "ADT", subsetName = "child")
+  expect_message(kept <- removeSubset(es, "clean", dependents = "keep"),
+                 "Subset 'child' now stores its own assay 'ADT/clr'.",
+                 fixed = TRUE)
+  expect_equal(altExp(kept, "ADT", subsetName = "child"), adtBefore)
+  expect_equal(assay(kept, "child"), assay(es, "child"))
+
+  # a subset made from clean's view of ADT
+  es <- makeAdtEs()
+  es <- createSubset(es, "clean.antibodies", rows = c("CD3", "CD8"),
+                     cols = 2:5, parentAssay = "clean/clr", altExp = "ADT")
+  expect_message(kept <- removeSubset(es, "clean", dependents = "keep"),
+                 "Subset 'clean.antibodies' now stores its own assay 'clr'.",
+                 fixed = TRUE)
+  expect_equal(assay(kept, "clean.antibodies"),
+               assay(es, "clean.antibodies"))
+  expect_equal(subsetParent(kept, "clean.antibodies"), list("ADT/clr"))
+  expect_equal(subsetColnames(kept, "clean.antibodies"),
+               subsetColnames(es, "clean.antibodies"))
+  # not when clean's ADT has other rows than the main one
+  cleanAdt <- altExp(es, "ADT", subsetName = "clean")[c("CD3", "CD8"), ]
+  suppressMessages(
+    altExp(es, "ADT", subsetName = "clean", unlink = TRUE) <- cleanAdt
+  )
+  expect_error(
+    removeSubset(es, "clean", dependents = "keep"),
+    paste0("Subset 'clean.antibodies' can't be kept: altExp 'ADT' of ",
+           "subset 'clean' has other rows than that of its parent. Use ",
+           "dependents = \"remove\"."),
+    fixed = TRUE
+  )
+
+  # spatial coordinates a removed subset stored
+  es <- ExperimentSubset(makeImageSpe())
+  es <- createSubset(es, "s1", cols = 2:6)
+  subsetSpatialCoords(es, "s1") <- unname(subsetSpatialCoords(es, "s1")) + 1
+  es <- createSubset(es, "child", cols = 2:3, parentAssay = "s1")
+  coords <- subsetSpatialCoords(es, "child")
+  expect_message(kept <- removeSubset(es, "s1", dependents = "keep"),
+                 "Subset 'child' now stores its own spatialCoords.",
+                 fixed = TRUE)
+  expect_equal(subsetSpatialCoords(kept, "child"), coords)
+
+  # and a row tree
+  tse <- makeTreeTse()
+  es <- ExperimentSubset(tse)
+  es <- createSubset(es, "s1", rows = 2:7, cols = 1:4)
+  es <- createSubset(es, "s2", rows = 2:4, cols = 1:2, parentAssay = "s1")
+  subsetRowTree(es, "s1") <- makeOwnTree(tse)
+  links <- subsetRowLinks(es, "s2")
+  expect_message(kept <- removeSubset(es, "s1", dependents = "keep"),
+                 "Subset 's2' now stores its own rowTree.", fixed = TRUE)
+  expect_identical(subsetRowTree(kept, "s2"), makeOwnTree(tse))
+  expect_equal(subsetRowLinks(kept, "s2"), links)
 })
