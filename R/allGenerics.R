@@ -673,6 +673,10 @@ setGeneric(
 #'   Names of assays that are not linked, or unchanged, are ignored, so
 #'   \code{unlink = "decontXcounts"} stores a changed \code{decontXcounts}
 #'   but stops if \code{counts} was changed too. Default \code{FALSE}.
+#' @param dependents \code{"error"}, \code{"keep"} or \code{"remove"}: what
+#'   happens to the subsets made from an assay that \code{value} no longer
+#'   has, of the subset or of an altExp it stores. See
+#'   \code{\link{removeSubset}}. Default \code{"error"}.
 #' @return Updated \code{ExperimentSubset} object. Linked assays that are
 #'   in \code{value} hold the same values as what the subset sees (whatever
 #'   their dimnames, type or class) are not stored, and neither are the main
@@ -683,8 +687,8 @@ setGeneric(
 #'   \code{value} stays linked.
 #'   Everything else in \code{value} replaces the subset's own data: an own
 #'   assay, reducedDim, altExp or column that \code{value} no longer has is
-#'   removed from the subset, except an assay another subset was made from,
-#'   which is an error. Nothing else is stored: not row ranges, row and
+#'   removed from the subset; for an assay another subset was made from, see
+#'   \code{dependents}. Nothing else is stored: not row ranges, row and
 #'   column trees, spatial coordinates, images, \code{colPairs},
 #'   \code{rowPairs} or \code{mainExpName}.
 #' @rdname setSubsetExperiment
@@ -702,8 +706,75 @@ setGeneric(
 #' reducedDimNames(es, subsetName = "subset1")
 setGeneric(
   name = "setSubsetExperiment",
-  def = function(x, subsetName, value, unlink = FALSE) {
+  def = function(x, subsetName, value, unlink = FALSE,
+                 dependents = "error") {
     standardGeneric("setSubsetExperiment")
+  },
+  signature = "x"
+)
+
+#' @title Remove subsets, and what happens to the subsets made from them
+#' @description \code{removeSubset} removes subsets from an
+#'   \code{ExperimentSubset} object. Its \code{dependents} argument says
+#'   what happens to the subsets made from them, and the same argument does
+#'   so wherever what a subset was made from can go away:
+#'   \itemize{
+#'     \item a main assay, removed with \code{assay(x, i) <- NULL} or
+#'       \code{assays(x) <- value};
+#'     \item an assay of a subset, removed with \code{setSubsetExperiment};
+#'     \item an assay of an altExp, removed with \code{altExp<-},
+#'       \code{altExps<-} or \code{setSubsetExperiment}, or lost when the
+#'       main altExp gets other rows and what a subset stored in it no
+#'       longer fits;
+#'     \item an altExp that subsets were made from with
+#'       \code{createSubset(altExp =)}, removed with \code{altExp<-} or
+#'       \code{altExps<-};
+#'     \item a subset, removed with \code{removeSubset}.
+#'   }
+#' @param x Input \code{ExperimentSubset} object.
+#' @param subsetName \code{character} The names of one or more subsets to
+#'   remove.
+#' @param dependents \code{"error"}, \code{"keep"} or \code{"remove"}: what
+#'   happens to the subsets made from what is removed.
+#'   \itemize{
+#'     \item \code{"error"} stops, naming them, and changes nothing.
+#'     \item \code{"keep"} keeps them intact: each stores its own copy of
+#'       what it saw of what is removed, with a message such as "Subset 's'
+#'       now stores its own assay 'counts'.", and sees the same data as
+#'       before. That copy isn't linked: an assay of the same name added
+#'       later doesn't replace it. For \code{removeSubset}, a subset made
+#'       from a removed subset is then made from that subset's parent
+#'       instead, with its own copy of the assays, altExps, spatial
+#'       coordinates and trees it saw from the removed subset; one made with
+#'       \code{createSubset(altExp =)} from the removed subset's altExp can
+#'       only be kept if its parent's altExp has the same rows. When a whole
+#'       altExp is removed, \code{"keep"} is not supported yet.
+#'     \item \code{"remove"} removes them, and every subset made from them,
+#'       with a warning naming them.
+#'   }
+#'   A subset that only saw a removed assay linked from its parent, but was
+#'   made from another one, isn't affected: it no longer sees it. Default
+#'   \code{"error"}.
+#' @return Updated \code{ExperimentSubset} object, of the same class.
+#' @rdname removeSubset
+#' @export
+#' @examples
+#' data(sce_chcl, package = "scds")
+#' es <- ExperimentSubset(sce_chcl)
+#' es <- createSubset(es, subsetName = "subset1", rows = 1:100, cols = 1:50)
+#' es <- createSubset(es, subsetName = "subset2", rows = 1:10, cols = 1:5,
+#'                    parentAssay = "subset1")
+#' # subset2 was made from subset1, so removing subset1 stops unless
+#' # dependents says what happens to subset2
+#' es2 <- removeSubset(es, subsetName = "subset1", dependents = "keep")
+#' subsetNames(es2)
+#' # the same for a main assay that subsets were made from
+#' assay(es, "counts", dependents = "keep") <- NULL
+#' subsetAssayNames(es, subsetName = "subset1")
+setGeneric(
+  name = "removeSubset",
+  def = function(x, subsetName, dependents = "error") {
+    standardGeneric("removeSubset")
   },
   signature = "x"
 )

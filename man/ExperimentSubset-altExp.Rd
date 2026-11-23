@@ -131,6 +131,10 @@ Default \code{FALSE}.}
     stored. A message names each assay that is unlinked. Default
     \code{FALSE}. Any other value is an error without
     \code{subsetName}.}
+  \item{\code{dependents}}{For \code{altExp<-} and \code{altExps<-}:
+    \code{"error"}, \code{"keep"} or \code{"remove"}, what happens to
+    the subsets made from an assay or an altExp that goes; see
+    \code{\link{removeSubset}}. Default \code{"error"}.}
 }
 Other arguments are passed on to the \code{SingleCellExperiment}
 method. With \code{subsetName}, \code{altExpNames()} and
@@ -201,6 +205,12 @@ A subset sees the main object's altExps, and those stored on
   show in them. Renaming it renames what they store of it. Removing it,
   or storing it with other rows or another class, drops what they added
   to it, with a warning; an altExp a subset stores whole is kept.
+
+  When that removes an assay or an altExp that subsets were made from, it
+  stops unless \code{dependents} says what happens to them (see
+  \code{\link{removeSubset}}). The same holds when a subset's
+  \code{altExp<-} or \code{altExps<-} removes an assay of an altExp it
+  stores.
 
   A subset can also be made from an altExp, with its own features, by
   \code{createSubset(altExp =)}; see \code{\link{createSubset}}. Such a

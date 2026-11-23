@@ -23,6 +23,7 @@ reference:
 - title: Creating and managing subsets
   contents:
   - createSubset
+  - removeSubset
   - subsetNames
   - subsetCount
   - subsetDim

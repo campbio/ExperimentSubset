@@ -9,17 +9,17 @@
 \alias{setSubsetExperiment,SubsetSpatialExperiment-method}
 \title{Store a standalone experiment object back into a subset}
 \usage{
-setSubsetExperiment(x, subsetName, value, unlink = FALSE)
+setSubsetExperiment(x, subsetName, value, unlink = FALSE, dependents = "error")
 
-\S4method{setSubsetExperiment}{SubsetSummarizedExperiment}(x, subsetName, value, unlink = FALSE)
+\S4method{setSubsetExperiment}{SubsetSummarizedExperiment}(x, subsetName, value, unlink = FALSE, dependents = "error")
 
-\S4method{setSubsetExperiment}{SubsetRangedSummarizedExperiment}(x, subsetName, value, unlink = FALSE)
+\S4method{setSubsetExperiment}{SubsetRangedSummarizedExperiment}(x, subsetName, value, unlink = FALSE, dependents = "error")
 
-\S4method{setSubsetExperiment}{SubsetSingleCellExperiment}(x, subsetName, value, unlink = FALSE)
+\S4method{setSubsetExperiment}{SubsetSingleCellExperiment}(x, subsetName, value, unlink = FALSE, dependents = "error")
 
-\S4method{setSubsetExperiment}{SubsetTreeSummarizedExperiment}(x, subsetName, value, unlink = FALSE)
+\S4method{setSubsetExperiment}{SubsetTreeSummarizedExperiment}(x, subsetName, value, unlink = FALSE, dependents = "error")
 
-\S4method{setSubsetExperiment}{SubsetSpatialExperiment}(x, subsetName, value, unlink = FALSE)
+\S4method{setSubsetExperiment}{SubsetSpatialExperiment}(x, subsetName, value, unlink = FALSE, dependents = "error")
 }
 \arguments{
 \item{x}{Input \code{ExperimentSubset} object.}
@@ -42,6 +42,11 @@ is stored. A message names each assay that is unlinked.
 Names of assays that are not linked, or unchanged, are ignored, so
 \code{unlink = "decontXcounts"} stores a changed \code{decontXcounts}
 but stops if \code{counts} was changed too. Default \code{FALSE}.}
+
+\item{dependents}{\code{"error"}, \code{"keep"} or \code{"remove"}: what
+happens to the subsets made from an assay that \code{value} no longer
+has, of the subset or of an altExp it stores. See
+\code{\link{removeSubset}}. Default \code{"error"}.}
 }
 \value{
 Updated \code{ExperimentSubset} object. Linked assays that are
@@ -54,8 +59,8 @@ Updated \code{ExperimentSubset} object. Linked assays that are
   \code{value} stays linked.
   Everything else in \code{value} replaces the subset's own data: an own
   assay, reducedDim, altExp or column that \code{value} no longer has is
-  removed from the subset, except an assay another subset was made from,
-  which is an error. Nothing else is stored: not row ranges, row and
+  removed from the subset; for an assay another subset was made from, see
+  \code{dependents}. Nothing else is stored: not row ranges, row and
   column trees, spatial coordinates, images, \code{colPairs},
   \code{rowPairs} or \code{mainExpName}.
 }
