@@ -61,13 +61,10 @@ and for every antibody.
 [`library`](https://rdrr.io/r/base/library.html)`(``DropletTestFiles``)`\
 \
 `# download both matrices (cached after the first time)`\
-`rawFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(``"tenx-3.1.0-5k_pbmc_protein_v3/1.0.0/raw.tar.gz"``)`
-
-\
+`rawFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(``"tenx-3.1.0-5k_pbmc_protein_v3/1.0.0/raw.tar.gz"``)`\
 `filteredFile`` ``<-`` `[`getTestFile`](https://rdrr.io/pkg/DropletTestFiles/man/listTestFiles.html)`(`\
 `  ``"tenx-3.1.0-5k_pbmc_protein_v3/1.0.0/filtered.tar.gz"`\
-`)`
-
+`)`\
 \
 `# unpack them into a temporary folder`\
 `dataFolder`` ``<-`` `[`file.path`](https://rdrr.io/r/base/file.path.html)`(`[`tempdir`](https://rdrr.io/r/base/tempfile.html)`(``)``, ``"pbmc5k"``)`\
@@ -1062,7 +1059,7 @@ are named after the methods.
     ##  [7] singleCellTK_2.23.6             DelayedArray_0.39.8            
     ##  [9] SparseArray_1.13.5              S4Arrays_1.13.3                
     ## [11] abind_1.4-8                     Matrix_1.7-6                   
-    ## [13] ExperimentSubset_1.23.55        TreeSummarizedExperiment_2.21.0
+    ## [13] ExperimentSubset_1.23.56        TreeSummarizedExperiment_2.21.0
     ## [15] Biostrings_2.81.9               XVector_0.53.0                 
     ## [17] SpatialExperiment_1.23.0        scuttle_1.23.2                 
     ## [19] DropletUtils_1.33.2             SingleCellExperiment_1.35.2    

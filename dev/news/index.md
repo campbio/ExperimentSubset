@@ -1,5 +1,21 @@
 # Changelog
 
+## ExperimentSubset 1.23.56 (2026-11-22)
+
+- Storing an altExp in a subset, with `altExp(x, e, subsetName =) <-`,
+  `altExps(x, subsetName =) <-` or
+  [`setSubsetExperiment()`](https://campbio.github.io/ExperimentSubset/dev/reference/setSubsetExperiment.md),
+  no longer fails with “cannot subset by character when names are NULL”
+  when another altExp the subset sees has an assay without a name. Since
+  assays are matched by name, changing, adding or removing assays of an
+  altExp that has assays without names now stops with “altExp ‘HTO’ has
+  assays without names, so changes to its assays can’t be stored. Name
+  them with assayNames\<- first.” Before, these failed with errors such
+  as “subscript contains invalid names”. Storing such an altExp with its
+  assays unchanged, for example with new colData, works. No other change
+  in results
+  ([\#121](https://github.com/campbio/ExperimentSubset/issues/121))
+
 ## ExperimentSubset 1.23.55 (2026-11-21)
 
 - New `altExp` argument of
