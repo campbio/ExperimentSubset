@@ -791,9 +791,13 @@ NULL
   isSce <- methods::is(internal, "SingleCellExperiment")
   altExpPlan <- list(sources = character(0))
   if (isSce) {
-    seen <- .withSubsetAltExps(x, subsetName)
-    .checkAltExpAssayNames(altExps(seen, withDimnames = FALSE),
-                           altExps(value, withDimnames = FALSE))
+    # the altExps the subset sees are built only when needed
+    newAltExps <- altExps(value, withDimnames = FALSE)
+    if (any(vapply(as.list(newAltExps), .hasUnnamedAssays, logical(1)))) {
+      seen <- .withSubsetAltExps(x, subsetName)
+      .checkAltExpAssayNames(altExps(seen, withDimnames = FALSE),
+                             newAltExps)
+    }
     altExpPlan <- .planAltExps(x, subsetName, altExps(value))
   }
   sources <- c(.linkedSources(x, owners, subsetName, stored),
@@ -1563,17 +1567,30 @@ NULL
 }
 
 # Stops if an altExp in value, a named list of altExps, has assays without
-# names, unless current, the altExps before the change, has one of that
-# name with the same assays, as in an object saved with them (#121, #124)
+# names, unless an altExp in current, the altExps before the change, has
+# the same assays under any name, as in an object saved with them that
+# keeps them unchanged or renames the altExp (#121, #124). Each altExp is
+# checked, also when two share a name; one that changes an altExp current
+# has under its name gets #121's message.
 .checkAltExpAssayNames <- function(current, value) {
-  for (name in names(value)) {
-    new <- value[[name]]
+  current <- as.list(current)
+  value <- as.list(value)
+  for (i in seq_along(value)) {
+    new <- value[[i]]
     if (!.hasUnnamedAssays(new))
       next
-    if (!name %in% names(current))
+    newAssays <- assays(new, withDimnames = FALSE)
+    same <- vapply(current, function(old) {
+      .sameAssayList(assays(old, withDimnames = FALSE), newAssays)
+    }, logical(1))
+    if (any(same))
+      next
+    name <- names(value)[i]
+    j <- match(name, names(current))
+    if (is.na(j))
       stop("altExp '", name, "' has assays without names. Name them with ",
            "assayNames<- first.")
-    .checkSameAssays(current[[name]], new, name)
+    .checkSameAssays(current[[j]], new, name)
   }
   invisible(NULL)
 }

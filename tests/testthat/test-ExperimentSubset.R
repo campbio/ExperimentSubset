@@ -6281,6 +6281,10 @@ test_that("altExp<- on the main object needs assay names (#124)", {
   assayNames(withNA) <- NA_character_
   expect_error(altExp(changed, "HTO") <- withNA, ex$newAltExp("HTO"),
                fixed = TRUE)
+  # the second of two altExps of the same name
+  named <- SingleCellExperiment(list(counts = m[1:2, ]))
+  expect_error(altExps(changed) <- list(HTO = named, HTO = bad),
+               ex$newAltExp("HTO"), fixed = TRUE)
   expect_identical(changed, es)
 
   # replacing a named altExp, by name, by position or as the first
@@ -6311,6 +6315,14 @@ test_that("Saved unnamed altExp assays work until they change (#124)", {
   removed <- saved
   altExp(removed, "HTO") <- NULL
   expect_equal(altExpNames(removed), "ADT")
+  # renaming it, with altExps<- or altExpNames<-
+  renamed <- saved
+  altExps(renamed) <- list(TAGS = altExp(saved, "HTO"),
+                           ADT = altExp(saved, "ADT"))
+  expect_equal(altExpNames(renamed), c("TAGS", "ADT"))
+  renamed <- saved
+  altExpNames(renamed) <- c("TAGS", "ADT")
+  expect_equal(altExpNames(renamed), c("TAGS", "ADT"))
 
   # changing its assays stops
   changed <- altExp(saved, "HTO")
@@ -6342,6 +6354,10 @@ test_that("Subsets' altExp setters need assay names (#124)", {
   altExp(out, "NEW") <- bad
   expect_error(setSubsetExperiment(changed, "s", out), ex$newAltExp("NEW"),
                fixed = TRUE)
+  # the second of two altExps of the same name
+  expect_error(altExps(changed, subsetName = "s") <- list(NEW = bad[, 1:5],
+                                                          NEW = bad),
+               ex$newAltExp("NEW"), fixed = TRUE)
   # a linked altExp, with other rows
   expect_error(altExp(changed, "HTO", subsetName = "s") <- bad[1, ],
                ex$changedAltExp("HTO"), fixed = TRUE)
