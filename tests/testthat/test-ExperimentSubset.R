@@ -6310,7 +6310,8 @@ test_that("Saved unnamed altExp assays work until they change (#124)", {
   tagged$tag <- letters[1:10]
   altExp(saved, "HTO") <- tagged
   expect_equal(altExp(saved, "HTO")$tag, letters[1:10])
-  altExp(saved, "ADT") <- SingleCellExperiment(list(counts = m[1:3, ]))
+  adt <- SingleCellExperiment(list(counts = m[1:3, ]))
+  altExp(saved, "ADT") <- adt
   expect_equal(altExpNames(saved), c("HTO", "ADT"))
   removed <- saved
   altExp(removed, "HTO") <- NULL
@@ -6323,6 +6324,26 @@ test_that("Saved unnamed altExp assays work until they change (#124)", {
   renamed <- saved
   altExpNames(renamed) <- c("TAGS", "ADT")
   expect_equal(altExpNames(renamed), c("TAGS", "ADT"))
+
+  # a copy of it, under another name or the same, stops
+  copied <- saved
+  expect_error(altExp(copied, "COPY") <- altExp(saved, "HTO"),
+               ex$newAltExp("COPY"), fixed = TRUE)
+  expect_error(altExps(copied) <- list(HTO = altExp(saved, "HTO"),
+                                       HTO = altExp(saved, "HTO")),
+               ex$newAltExp("HTO"), fixed = TRUE)
+  expect_identical(copied, saved)
+
+  # combining saved objects keeps it, but not one from another input
+  other <- saved
+  colnames(other) <- paste0("d", 1:10)
+  combined <- combineCols(saved, other)
+  expect_equal(dim(altExp(combined, "HTO")), c(2L, 20L))
+  plain <- SingleCellExperiment(list(counts = m),
+                                altExps = list(HTO = hto, ADT = adt))
+  colnames(plain) <- paste0("d", 1:10)
+  expect_error(combineCols(saved, plain), ex$newAltExp("HTO"),
+               fixed = TRUE)
 
   # changing its assays stops
   changed <- altExp(saved, "HTO")
@@ -6362,6 +6383,20 @@ test_that("Subsets' altExp setters need assay names (#124)", {
   expect_error(altExp(changed, "HTO", subsetName = "s") <- bad[1, ],
                ex$changedAltExp("HTO"), fixed = TRUE)
   expect_identical(changed, es)
+
+  # a copy of a saved altExp with unnamed assays, in a subset
+  saved <- savedEs(SingleCellExperiment(
+    list(counts = m),
+    altExps = list(HTO = SingleCellExperiment(list(m[1:2, ])))
+  ))
+  saved <- createSubset(saved, "s", cols = 1:5)
+  copied <- saved
+  expect_error(
+    altExp(copied, "COPY", subsetName = "s") <-
+      altExp(saved, "HTO", subsetName = "s"),
+    ex$newAltExp("COPY"), fixed = TRUE
+  )
+  expect_identical(copied, saved)
 })
 
 test_that("A saved unnamed altExp is kept with dependents = 'keep' (#124)", {

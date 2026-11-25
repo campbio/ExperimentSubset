@@ -44,14 +44,23 @@ saved with such assays load and work until their assays change: the
    or assay(x, \"name\") <- value." With subsets, a rename keeps #126's
    message, which comes first; `.followAssayRenames()` also checks,
    which fixes the crash.
-4. `.checkAltExpAssayNames(current, value)`: for each altExp in `value`
-   with unnamed assays, stops if `current` has none of that name (item
-   2's message), or else with `.checkSameAssays()` (#121's message) if
-   its assays changed. Called by the main `altExp<-` and `altExps<-`
+4. `.checkAltExpAssayNames(current, value)`: each altExp in `value`
+   with unnamed assays, by position, must be one of `current` with the
+   same assays, under its name or renamed (under a name of `current`'s
+   that `value` no longer has), each of `current` standing for one at
+   most, so a copy stops. Otherwise it stops with item 2's message, or
+   with `.checkSameAssays()` (#121's message) when `current` has an
+   altExp of that name. Called by the main `altExp<-` and `altExps<-`
    (current: `x`'s altExps), by both with `subsetName` and by
    `setSubsetExperiment()` (current: the altExps the subset sees), and
    by the constructor (current: none). Not in `.planAltExps()`, so
    `dependents = "keep"` copies of a saved object's altExps still work.
+5. `combineCols()` and `combineRows()` wrap their result without the
+   constructor's altExp check, and check the altExps of the inputs that
+   aren't ExperimentSubset objects instead, so saved objects combine.
+
+Amended after review (2026-11-25): items 4 (renames, copies, duplicate
+names) and 5.
 
 ## Tests
 
