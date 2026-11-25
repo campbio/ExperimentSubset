@@ -796,16 +796,9 @@ NULL
   # from, for the messages once everything is stored
   isSce <- methods::is(internal, "SingleCellExperiment")
   altExpPlan <- list(sources = character(0))
-  if (isSce) {
-    # the altExps the subset sees are built only when needed
-    newAltExps <- altExps(value, withDimnames = FALSE)
-    if (any(vapply(as.list(newAltExps), .hasUnnamedAssays, logical(1)))) {
-      seen <- .withSubsetAltExps(x, subsetName)
-      .checkAltExpAssayNames(altExps(seen, withDimnames = FALSE),
-                             newAltExps)
-    }
+  .checkSubsetAltExpNames(x, subsetName, value)
+  if (isSce)
     altExpPlan <- .planAltExps(x, subsetName, altExps(value))
-  }
   sources <- c(.linkedSources(x, owners, subsetName, stored),
                altExpPlan$sources)
   sources <- .checkUnlinked(sources, subsetName, unlink)
@@ -837,6 +830,19 @@ NULL
   for (name in names(sources))
     .unlinkMessage(subsetName, name, sources[[name]])
   x
+}
+
+# .checkAltExpAssayNames() for the altExps of value, for
+# setSubsetExperiment(), if it has altExps, against those subsetName sees,
+# which are built only when value has one with assays without names (#124)
+.checkSubsetAltExpNames <- function(x, subsetName, value) {
+  if (!methods::is(value, "SingleCellExperiment"))
+    return(invisible(NULL))
+  newAltExps <- altExps(value, withDimnames = FALSE)
+  if (!any(vapply(as.list(newAltExps), .hasUnnamedAssays, logical(1))))
+    return(invisible(NULL))
+  seen <- .withSubsetAltExps(x, subsetName)
+  .checkAltExpAssayNames(altExps(seen, withDimnames = FALSE), newAltExps)
 }
 
 # Names of the assays of value, for setSubsetExperiment(), that subsetName
@@ -2516,6 +2522,19 @@ NULL
   stored
 }
 
+# out, the result of combineCols() or combineRows() of objects, as the
+# matching Subset class. The altExps of the inputs that aren't
+# ExperimentSubset objects are checked, rather than out's, so altExps
+# saved with assays without names stay (#124)
+.asCombined <- function(out, objects) {
+  .checkAssayNames(out, altExps = FALSE)
+  for (object in objects) {
+    if (!methods::is(object, "ExperimentSubset"))
+      .checkAssayNames(object)
+  }
+  .asSubsetClass(out)
+}
+
 # Gives out, the result of combining objects along "cols" or "rows", the
 # subsets of every object. cbind() and rbind() of the parent class keep
 # only the first object's subsets (#67); combineCols() and combineRows()
@@ -2527,16 +2546,8 @@ NULL
 # converted to the class out extends, if that differs, and its names on
 # the matched dimension follow out's (see .followNames())
 .combineSubsets <- function(out, objects, along, useNames = FALSE) {
-  if (!methods::is(out, "ExperimentSubset")) {
-    # the altExps of the inputs that aren't ExperimentSubset objects are
-    # checked, so altExps saved with assays without names stay (#124)
-    .checkAssayNames(out, altExps = FALSE)
-    for (object in objects) {
-      if (!methods::is(object, "ExperimentSubset"))
-        .checkAssayNames(object)
-    }
-    out <- .asSubsetClass(out)
-  }
+  if (!methods::is(out, "ExperimentSubset"))
+    out <- .asCombined(out, objects)
   maps <- .combineMaps(objects, out, along, useNames)
   baseClass <- .baseClass(out)
   byCols <- along == "cols"
