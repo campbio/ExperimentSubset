@@ -38,6 +38,8 @@
   if (length(taken) > 0)
     stop("Assay names must differ from subset names; '", taken[1],
          "' is a subset.")
+  if (identical(assayNames(x), assayNames(out)))
+    return(out)
   if (.renamedOnly(x, out))
     return(.followAssayRenames(x, out))
   if (all(assayNames(x) %in% assayNames(out)))
@@ -53,7 +55,13 @@
 # main assays. A subset that would see an assay of its own, or of a
 # subset above it, in place of a renamed linked one is an error.
 .followAssayRenames <- function(before, after) {
-  renamed <- .renamed(assayNames(before), assayNames(after))
+  newNames <- assayNames(after)
+  if (subsetCount(before) > 0
+      && (anyNA(newNames) || !all(nzchar(newNames))
+          || anyDuplicated(newNames) > 0))
+    stop("Main assays that subsets were made from need names that are ",
+         "unique, not empty and not NA.")
+  renamed <- .renamed(assayNames(before), newNames)
   if (length(renamed) == 0)
     return(after)
   for (name in subsetNames(before)) {
@@ -74,7 +82,7 @@
     if (!bare && (is.null(parts) || !parts[2] %in% names(renamed)))
       next
     assayName <- if (bare) parent else parts[2]
-    if (assayName %in% assayNames(.internalAssay(subset))
+    if (owners[assayName] %in% name
         || (!bare
             && !identical(.assayOwners(before, parts[1])[[assayName]], "")))
       next
