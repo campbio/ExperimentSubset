@@ -203,7 +203,16 @@ NULL
 #'   Removing a main assay that subsets were made from, with
 #'   \code{assay(x, i) <- NULL} or \code{assays(x) <- value}, stops unless
 #'   \code{dependents} says what happens to them (see
-#'   \code{\link{removeSubset}}).
+#'   \code{\link{removeSubset}}). Renaming main assays, with
+#'   \code{assayNames<-} or an \code{assays<-} that only renames them
+#'   (the same assays in the same order), renames them in what the
+#'   subsets made from them record as their parent, so those subsets keep
+#'   reading the same data. A subset that stores its own copy of the assay
+#'   it was made from keeps reading that copy. A main assay can't take the
+#'   name of a subset, or the name of an assay that a subset seeing it, or
+#'   a subset that one was made from, stores itself. While subsets exist,
+#'   a rename can't give main assays names that are empty, \code{NA} or
+#'   used twice.
 #' @param x An \code{ExperimentSubset} object.
 #' @param i \code{character(1)} The name of a main assay, a subset name, or
 #'   \code{"subset/assay"}.
