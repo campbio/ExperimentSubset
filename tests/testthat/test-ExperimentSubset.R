@@ -5956,8 +5956,12 @@ test_that("removeSubset(dependents = \"keep\") keeps what a child saw (#122)", {
 
 test_that("dependents skips a subset whose parent was already gone (#122)", {
   es <- makeParentEs()
-  # a rename leaves s and u without their parent assay (#126)
-  assayNames(es)[assayNames(es) == "counts"] <- "raw"
+  # s, and so u, made from an assay that is gone: set directly, since a
+  # rename is followed (#126)
+  subsets <- ExperimentSubset:::.subsets(es)
+  subsets[["s"]] <- ExperimentSubset:::.copySubset(subsets[["s"]],
+                                                   parentAssay = "raw")
+  es <- ExperimentSubset:::`.subsets<-`(es, subsets)
   expect_warning(
     assay(es, "logcounts", dependents = "remove") <- NULL,
     "Removed subset 'w': the assay 'logcounts' it was made from was removed.",
@@ -5970,12 +5974,19 @@ test_that("removeSubset(dependents = \"keep\") below a lost parent (#122)", {
   es <- makeParentEs()
   es <- createSubset(es, "c", rows = 1, cols = 1:2, parentAssay = "u")
   expected <- assay(es, "c")
-  # u saw counts linked, so c is made from s, as when nothing is missing
-  assayNames(es)[assayNames(es) == "counts"] <- "raw"
+  # u saw counts linked, so c is made from s, as when nothing is missing;
+  # s's parent is set directly, since a rename is followed (#126)
+  setParent <- function(es, parent) {
+    subsets <- ExperimentSubset:::.subsets(es)
+    subsets[["s"]] <- ExperimentSubset:::.copySubset(subsets[["s"]],
+                                                     parentAssay = parent)
+    ExperimentSubset:::`.subsets<-`(es, subsets)
+  }
+  es <- setParent(es, "raw")
   expect_silent(kept <- removeSubset(es, "u", dependents = "keep"))
   expect_equal(subsetParent(kept, "c")[[1]], "s")
   # and still sees its data once counts is back
-  assayNames(kept)[assayNames(kept) == "raw"] <- "counts"
+  kept <- setParent(kept, "counts")
   expect_equal(assay(kept, "c"), expected)
 })
 
@@ -6123,4 +6134,17 @@ test_that("A subset with no recorded parent doesn't stop a rename (#126)", {
   es <- ExperimentSubset:::`.subsets<-`(es, subsets)
   assayNames(es) <- c("raw", "lc")
   expect_equal(subsetParent(es, "s"), list("raw"))
+})
+
+test_that("A subset with its own copy of a qualified parent keeps it (#126)", {
+  es <- makeParentEs()
+  es <- createSubset(es, "c", rows = 1:2, cols = 1:2,
+                     parentAssay = "s/logcounts")
+  own <- assay(es, "c") + 500
+  suppressMessages(
+    es <- setSubsetAssay(es, "c", own, "logcounts", unlink = TRUE)
+  )
+  assayNames(es) <- c("raw", "lc")
+  expect_equal(subsetParent(es, "c"), list("s/logcounts", "s", "raw"))
+  expect_equal(assay(es, "c"), own)
 })

@@ -46,12 +46,12 @@
 }
 
 # after, before with its main assays renamed, with the parents of the
-# subsets made from a renamed assay following it: a bare parent, unless
-# the subset stores its own assay of that name (as dependents = "keep"
-# leaves it, #122), and "P/assay" where P sees that assay linked from the
-# main object. Subsets made from an altExp don't see the main assays. A
-# subset that would see an assay of its own, or of a subset above it, in
-# place of a renamed linked one is an error.
+# subsets made from a renamed assay following it: a bare parent, and
+# "P/assay" where P sees that assay linked from the main object. A subset
+# that stores its own assay of that name, as dependents = "keep" leaves
+# it (#122), keeps reading it. Subsets made from an altExp don't see the
+# main assays. A subset that would see an assay of its own, or of a
+# subset above it, in place of a renamed linked one is an error.
 .followAssayRenames <- function(before, after) {
   renamed <- .renamed(assayNames(before), assayNames(after))
   if (length(renamed) == 0)
@@ -69,17 +69,17 @@
     parent <- .parentAssay(subset)
     if (is.null(parent))
       next
-    if (parent %in% names(renamed)) {
-      if (parent %in% assayNames(.internalAssay(subset)))
-        next
-      parent <- renamed[[parent]]
-    } else {
-      parts <- .splitQualified(parent)
-      if (is.null(parts) || !parts[2] %in% names(renamed)
-          || !identical(.assayOwners(before, parts[1])[[parts[2]]], ""))
-        next
-      parent <- paste0(parts[1], "/", renamed[[parts[2]]])
-    }
+    parts <- .splitQualified(parent)
+    bare <- parent %in% names(renamed)
+    if (!bare && (is.null(parts) || !parts[2] %in% names(renamed)))
+      next
+    assayName <- if (bare) parent else parts[2]
+    if (assayName %in% assayNames(.internalAssay(subset))
+        || (!bare
+            && !identical(.assayOwners(before, parts[1])[[assayName]], "")))
+      next
+    parent <- if (bare) renamed[[assayName]] else
+      paste0(parts[1], "/", renamed[[assayName]])
     .subsets(after)[[name]] <- .copySubset(subset, parentAssay = parent)
   }
   after

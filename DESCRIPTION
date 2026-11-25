@@ -48,5 +48,5 @@ Collate:
     'SubsetMethods.R'
     'SubsetSpatialExperiment.R'
     'SubsetTreeSummarizedExperiment.R'
-Config/roxygen2/version: 8.1.1
+Config/roxygen2/version: 8.1.0
 Config/testthat/edition: 3
