@@ -661,7 +661,8 @@ setGeneric(
 #' @param value An object of the main object's class (not a subclass or a
 #'   parent class) with the subset's dimensions and the subset's row and
 #'   column names, in the same order. A tool that drops rows or columns is
-#'   followed by \code{createSubset} instead.
+#'   followed by \code{createSubset} instead. Every assay of \code{value},
+#'   and of its altExps, needs a name that is not empty or \code{NA}.
 #' @param unlink \code{TRUE}, \code{FALSE} or a character vector of
 #'   \code{assay} names. Store assays of \code{value} that have the name of
 #'   an assay linked from the subset's parent but different values, as with

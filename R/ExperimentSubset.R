@@ -855,7 +855,8 @@ NULL
 }
 
 # Stops unless value, for setSubsetExperiment(), has the class, dimensions
-# and row and column names of subsetName's internal object
+# and row and column names of subsetName's internal object, and assays
+# that all have names
 .checkSubsetValue <- function(internal, subsetName, value) {
   if (!identical(as.character(class(value)), as.character(class(internal))))
     stop("'value' must be a ", class(internal), ", the class of the main ",
@@ -872,6 +873,10 @@ NULL
       stop("The ", what, " of 'value' must be the ", what, " of subset '",
            subsetName, "', in the same order.")
   }
+  # assays are stored by name (#132)
+  if (.hasUnnamedAssays(value))
+    stop("Assays without names are not supported. Name every assay of ",
+         "'value' with assayNames<- first.")
   invisible(NULL)
 }
 

@@ -6416,3 +6416,31 @@ test_that("A saved unnamed altExp is kept with dependents = 'keep' (#124)", {
   expect_equal(unname(assay(kept, withDimnames = FALSE)),
                unname(m[1:2, 1:3]))
 })
+
+test_that("setSubsetExperiment() needs names on value's assays (#132)", {
+  ex <- namesExample()
+  m <- ex$m
+  es <- ExperimentSubset(list(counts = m))
+  es <- createSubset(es, "s", cols = 1:5)
+  suppressMessages(
+    es <- setSubsetAssay(es, "s", assay(es, "s") * 2, "own")
+  )
+  msg <- paste("Assays without names are not supported. Name every assay",
+               "of 'value' with assayNames<- first.")
+  changed <- es
+  # no names at all, which used to remove "own" without an error
+  noNames <- getSubsetExperiment(es, "s")
+  assays(noNames, withDimnames = FALSE) <- list(m[, 1:5] * 3)
+  expect_error(setSubsetExperiment(changed, "s", noNames), msg,
+               fixed = TRUE)
+  # one assay without a name, and an NA name
+  oneUnnamed <- getSubsetExperiment(es, "s")
+  assays(oneUnnamed) <- c(assays(oneUnnamed), list(m[, 1:5] * 3))
+  expect_error(setSubsetExperiment(changed, "s", oneUnnamed), msg,
+               fixed = TRUE)
+  assayNames(oneUnnamed)[3] <- NA
+  expect_error(setSubsetExperiment(changed, "s", oneUnnamed), msg,
+               fixed = TRUE)
+  expect_identical(changed, es)
+  expect_equal(subsetAssayNames(es), c("s", "s/own"))
+})

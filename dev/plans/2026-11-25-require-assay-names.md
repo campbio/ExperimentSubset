@@ -59,8 +59,12 @@ saved with such assays load and work until their assays change: the
    constructor's altExp check, and check the altExps of the inputs that
    aren't ExperimentSubset objects instead, so saved objects combine.
 
+6. `setSubsetExperiment()` stops in `.checkSubsetValue()` when `value`
+   has assays without names (#132). Before, with no names at all, it
+   removed the subset's own assays and stored nothing, without an error.
+
 Amended after review (2026-11-25): items 4 (renames, copies, duplicate
-names) and 5.
+names) and 5; item 6 folded in from #132 on the developer's request.
 
 ## Tests
 
@@ -76,8 +80,3 @@ their object that way instead; their assertions stay.
 One sentence on the `ExperimentSubset()` help page and on the assay and
 altExp setter pages; `make docs`. NEWS entry under 1.23.60, marked as a
 change in behavior, with the crash fix.
-
-## Out of scope
-
-`setSubsetExperiment()` with an unnamed main assay stops with a
-confusing message; logged as its own issue.
