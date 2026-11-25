@@ -38,10 +38,9 @@
   if (length(taken) > 0)
     stop("Assay names must differ from subset names; '", taken[1],
          "' is a subset.")
-  if (identical(assayNames(x), assayNames(out)))
-    return(out)
-  if (.renamedOnly(x, out))
+  if (!identical(assayNames(x), assayNames(out)) && .renamedOnly(x, out))
     return(.followAssayRenames(x, out))
+  .checkMainAssayNames(x, out)
   if (all(assayNames(x) %in% assayNames(out)))
     return(out)
   .resolveDependents(x, out, dependents)
@@ -61,6 +60,7 @@
           || anyDuplicated(newNames) > 0))
     stop("Main assays that subsets were made from need names that are ",
          "unique, not empty and not NA.")
+  .checkMainAssayNames(before, after)
   renamed <- .renamed(assayNames(before), newNames)
   if (length(renamed) == 0)
     return(after)

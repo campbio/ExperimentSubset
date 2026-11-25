@@ -212,6 +212,11 @@ A subset sees the main object's altExps, and those stored on
   \code{altExp<-} or \code{altExps<-} removes an assay of an altExp it
   stores.
 
+  Every assay of an altExp needs a name that is not empty or \code{NA},
+  with or without \code{subsetName}. An altExp with assays without
+  names can't be added, and one saved with them can be stored again
+  only with its assays unchanged, for example with new \code{colData}.
+
   A subset can also be made from an altExp, with its own features, by
   \code{createSubset(altExp =)}; see \code{\link{createSubset}}. Such a
   subset sees only the altExps it, or a subset it was made from, stores.

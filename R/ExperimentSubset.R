@@ -41,7 +41,9 @@ AssaySubset <- function(subsetName = "subset",
 #'   from a named \code{list} of assay matrices. A subset can also be created
 #'   directly by passing a named \code{list} to the \code{subset} parameter,
 #'   with elements named \code{subsetName}, \code{rows}, \code{cols} and
-#'   \code{parentAssay}.
+#'   \code{parentAssay}. Assays are found by name, so every assay of
+#'   \code{x}, and of its altExps, needs a name that is not empty or
+#'   \code{NA}.
 #' @param x An experiment object of one of the five supported classes, or a
 #'   named \code{list} of assay matrices, which is passed to the
 #'   \code{SingleCellExperiment} constructor as its assays. An object of a
@@ -120,13 +122,26 @@ ExperimentSubset <- function(x,
   es
 }
 
-# Stops if any assay of x has no name
+# Stops if x has no assay names, or any assay of x, or of one of its
+# altExps, has no name (#124)
 .checkAssayNames <- function(x) {
-  if (is.null(assayNames(x))
-      || "" %in% assayNames(x))
+  if (is.null(assayNames(x)) || .hasUnnamedAssays(x))
     stop("Experiment objects with unnamed assays are not supported. ",
          "Use assayNames<- setter method to set assay names before ",
          "creating ES object.")
+  if (methods::is(x, "SingleCellExperiment"))
+    .checkAltExpAssayNames(list(), altExps(x, withDimnames = FALSE))
+}
+
+# Stops if after, a change of before's main assays, has assays without
+# names, unless its assays are before's, unchanged, as in an object saved
+# with them (#124)
+.checkMainAssayNames <- function(before, after) {
+  if (.hasUnnamedAssays(after)
+      && !.sameAssayList(assays(before, withDimnames = FALSE),
+                         assays(after, withDimnames = FALSE)))
+    stop("Assays without names are not supported. Name every assay, ",
+         "with assayNames<- or assay(x, \"name\") <- value.")
 }
 
 #' @title Metadata of subsets in ExperimentSubset objects
@@ -213,6 +228,11 @@ NULL
 #'   a subset that one was made from, stores itself. While subsets exist,
 #'   a rename can't give main assays names that are empty, \code{NA} or
 #'   used twice.
+#'
+#'   Every main assay needs a name that is not empty or \code{NA}:
+#'   \code{assays<-}, and \code{assay(x, i) <-} with a position, stop if
+#'   any assay would be left without one. An object saved with such
+#'   assays works until its assays change.
 #' @param x An \code{ExperimentSubset} object.
 #' @param i \code{character(1)} The name of a main assay, a subset name, or
 #'   \code{"subset/assay"}.
@@ -770,8 +790,12 @@ NULL
   # from, for the messages once everything is stored
   isSce <- methods::is(internal, "SingleCellExperiment")
   altExpPlan <- list(sources = character(0))
-  if (isSce)
+  if (isSce) {
+    seen <- .withSubsetAltExps(x, subsetName)
+    .checkAltExpAssayNames(altExps(seen, withDimnames = FALSE),
+                           altExps(value, withDimnames = FALSE))
     altExpPlan <- .planAltExps(x, subsetName, altExps(value))
+  }
   sources <- c(.linkedSources(x, owners, subsetName, stored),
                altExpPlan$sources)
   sources <- .checkUnlinked(sources, subsetName, unlink)
@@ -1062,6 +1086,11 @@ NULL
 #'   \code{altExp<-} or \code{altExps<-} removes an assay of an altExp it
 #'   stores.
 #'
+#'   Every assay of an altExp needs a name that is not empty or \code{NA},
+#'   with or without \code{subsetName}. An altExp with assays without
+#'   names can't be added, and one saved with them can be stored again
+#'   only with its assays unchanged, for example with new \code{colData}.
+#'
 #'   A subset can also be made from an altExp, with its own features, by
 #'   \code{createSubset(altExp =)}; see \code{\link{createSubset}}. Such a
 #'   subset sees only the altExps it, or a subset it was made from, stores.
@@ -1261,6 +1290,8 @@ NULL
       out <- callNextMethod(x, ..., value = value)
     else
       out <- callNextMethod(x, e, ..., value = value)
+    .checkAltExpAssayNames(altExps(x, withDimnames = FALSE),
+                           altExps(out, withDimnames = FALSE))
     return(.carryAltExps(x, out, "", dependents = dependents))
   }
   subsetName <- arglist[["subsetName"]]
@@ -1270,11 +1301,13 @@ NULL
   # the SingleCellExperiment method checks value and handles e,
   # withDimnames and withColData on everything the subset sees
   internal <- .withSubsetAltExps(x, subsetName)
+  current <- altExps(internal, withDimnames = FALSE)
   if (missing(e))
     args <- c(list(internal), .otherArgs(...), list(value = value))
   else
     args <- c(list(internal, e), .otherArgs(...), list(value = value))
   internal <- do.call(`altExp<-`, args)
+  .checkAltExpAssayNames(current, altExps(internal, withDimnames = FALSE))
   .storeAltExps(x, subsetName, altExps(internal, withDimnames = FALSE),
                 unlink, dependents)
 }
@@ -1284,16 +1317,21 @@ NULL
   arglist <- list(...)
   unlink <- .unlinkArg(arglist)
   dependents <- .dependentsArg(arglist)
-  if (!"subsetName" %in% names(arglist))
-    return(.carryAltExps(x, callNextMethod(x, ..., value = value), "",
-                         dependents = dependents))
+  if (!"subsetName" %in% names(arglist)) {
+    out <- callNextMethod(x, ..., value = value)
+    .checkAltExpAssayNames(altExps(x, withDimnames = FALSE),
+                           altExps(out, withDimnames = FALSE))
+    return(.carryAltExps(x, out, "", dependents = dependents))
+  }
   subsetName <- arglist[["subsetName"]]
   .isSubset(x, subsetName)
   .checkCanStore(.internalAssay(.subsets(x)[[subsetName]]), subsetName,
                  "SingleCellExperiment", "altExps")
   internal <- .withSubsetAltExps(x, subsetName)
+  current <- altExps(internal, withDimnames = FALSE)
   args <- c(list(internal), .otherArgs(...), list(value = value))
   internal <- do.call(`altExps<-`, args)
+  .checkAltExpAssayNames(current, altExps(internal, withDimnames = FALSE))
   .storeAltExps(x, subsetName, altExps(internal, withDimnames = FALSE),
                 unlink, dependents)
 }
@@ -1517,11 +1555,27 @@ NULL
   changed
 }
 
-# TRUE if object has assays and any of them has no name
+# TRUE if object has assays and any of them has no name: NULL, "" or NA
 .hasUnnamedAssays <- function(object) {
   n <- assayNames(object)
   length(assays(object, withDimnames = FALSE)) > 0 &&
-    (is.null(n) || !all(nzchar(n)))
+    (is.null(n) || anyNA(n) || !all(nzchar(n)))
+}
+
+# Stops if an altExp in value, a named list of altExps, has assays without
+# names, unless current, the altExps before the change, has one of that
+# name with the same assays, as in an object saved with them (#121, #124)
+.checkAltExpAssayNames <- function(current, value) {
+  for (name in names(value)) {
+    new <- value[[name]]
+    if (!.hasUnnamedAssays(new))
+      next
+    if (!name %in% names(current))
+      stop("altExp '", name, "' has assays without names. Name them with ",
+           "assayNames<- first.")
+    .checkSameAssays(current[[name]], new, name)
+  }
+  invisible(NULL)
 }
 
 # Stops unless new has old's assays, with the same names, in the same
