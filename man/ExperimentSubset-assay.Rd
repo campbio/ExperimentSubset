@@ -133,7 +133,12 @@ Get or set an assay of the main object or of a subset.
   Removing a main assay that subsets were made from, with
   \code{assay(x, i) <- NULL} or \code{assays(x) <- value}, stops unless
   \code{dependents} says what happens to them (see
-  \code{\link{removeSubset}}).
+  \code{\link{removeSubset}}). Renaming main assays, with
+  \code{assayNames<-} or \code{assays<-}, renames them in the parents
+  that subsets record, except where a subset stores its own assay of
+  the old name. A main assay can't take a subset's name, or a name that
+  would hide it, in a subset that sees it, behind an assay that subset
+  stores.
 }
 \examples{
 # an object with 10 genes and 20 cells

@@ -1,7 +1,7 @@
 Package: ExperimentSubset
 Type: Package
 Title: Manages Subsets of Data with Bioconductor Experiment Objects
-Version: 1.23.58
+Version: 1.23.59
 Authors@R: c(person(given="Irzam", family="Sarfraz", email="irzam9095@gmail.com", role=c("aut"),
               comment = c(ORCID = "0000-0001-8121-792X")),
             person(given="Muhammad", family="Asif", email="asif@ntu.edu.pk", role=c("aut","ths"),
@@ -48,5 +48,5 @@ Collate:
     'SubsetMethods.R'
     'SubsetSpatialExperiment.R'
     'SubsetTreeSummarizedExperiment.R'
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1
 Config/testthat/edition: 3
