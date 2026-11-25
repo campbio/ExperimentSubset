@@ -4646,11 +4646,14 @@ test_that("createSubset() needs a named first assay or parentAssay (#36)", {
 
 test_that("createSubset() stops when a parent subset lost its assay (#36)", {
   es <- bracketExample()$es
-  # s1 was made from "counts", which is gone: removing it stops (#122),
-  # but subsets don't follow a rename yet (#126)
-  assayNames(es)[assayNames(es) == "counts"] <- "raw"
+  # s1 made from an assay that is gone: removing it stops (#122) and a
+  # rename is followed (#126), so set the parent directly
+  subsets <- ExperimentSubset:::.subsets(es)
+  subsets[["s1"]] <- ExperimentSubset:::.copySubset(subsets[["s1"]],
+                                                    parentAssay = "raw")
+  es <- ExperimentSubset:::`.subsets<-`(es, subsets)
   expect_error(createSubset(es, "child", rows = 1:2, parentAssay = "s1"),
-               "'counts' is not an assay of subset 's1'.", fixed = TRUE)
+               "'raw' is not an assay of subset 's1'.", fixed = TRUE)
 
   # a subset from before parents were recorded reads its own "counts";
   # s2 stores none
@@ -5988,4 +5991,136 @@ test_that("removeSubset() keeps a SummarizedExperiment's subsets (#122)", {
                  "Subset 't' now stores its own assay 'scaled'.", fixed = TRUE)
   expect_equal(assay(kept, "t"), assay(es, "t"))
   expect_equal(subsetParent(kept, "t"), list("scaled"))
+})
+
+# Renaming main assays (#126) ----------------------------------------------
+
+test_that("Subsets follow a rename of their main assay (#126)", {
+  m <- matrix(as.numeric(1:40), nrow = 4,
+              dimnames = list(paste0("g", 1:4), paste0("c", 1:10)))
+  es <- ExperimentSubset(SingleCellExperiment(list(counts = m)))
+  # q stores its own copy of counts
+  es <- createSubset(es, "q", rows = 2:4, cols = 3:9, parentAssay = "counts")
+  own <- assay(es, "q") + 1000
+  suppressMessages(
+    es <- setSubsetAssay(es, "q", own, "counts", unlink = TRUE)
+  )
+  es <- createSubset(es, "u", rows = 1:3, cols = 1:6, parentAssay = "counts")
+  renamed <- es
+  assayNames(renamed)[1] <- "raw"
+  expect_equal(assay(renamed, "u"), m[1:3, 1:6])
+  expect_equal(subsetParent(renamed, "u"), list("raw"))
+  # q keeps reading its own copy
+  expect_equal(assay(renamed, "q"), own)
+  expect_equal(subsetParent(renamed, "q"), list("counts"))
+  # assays<- with new names does the same
+  viaAssays <- es
+  assays(viaAssays) <- setNames(assays(es), "raw")
+  expect_identical(viaAssays, renamed)
+})
+
+test_that("Subsets follow swapped main assay names (#126)", {
+  es <- makeParentEs()
+  before <- subsetViews(es, c("s", "w", "t", "u"))
+  assayNames(es) <- c("logcounts", "counts")
+  expect_equal(subsetParent(es, "s"), list("logcounts"))
+  expect_equal(subsetParent(es, "w"), list("counts"))
+  expect_equal(assay(es, "s"), assay(es, "logcounts")[1:3, 2:7])
+  expect_equal(assay(es, "w"), assay(es, "counts")[1:2, 1:2])
+  # the subsets below s still read what they did
+  expect_equal(subsetParent(es, "t"), list("s/scaled", "s", "logcounts"))
+  expect_equal(assay(es, "t"), before$t$scaled)
+  expect_equal(assay(es, "u"), before$u$counts)
+})
+
+test_that("Qualified parents follow a rename of a linked assay (#126)", {
+  es <- makeParentEs()
+  es <- createSubset(es, "x", rows = 1:2, cols = 1:3,
+                     parentAssay = "s/logcounts")
+  expected <- assay(es, "x")
+  # y is made from what s stores itself as counts
+  suppressMessages(
+    es <- setSubsetAssay(es, "s", assay(es, "s") + 100, "counts",
+                         unlink = TRUE)
+  )
+  es <- createSubset(es, "y", rows = 2:3, cols = 1:2, parentAssay = "s/counts")
+  ownY <- assay(es, "y")
+  assayNames(es) <- c("raw", "lc")
+  expect_equal(subsetParent(es, "x"), list("s/lc", "s", "counts"))
+  expect_equal(assay(es, "x"), expected)
+  expect_equal(subsetParent(es, "y"), list("s/counts", "s", "counts"))
+  expect_equal(assay(es, "y"), ownY)
+})
+
+test_that("A main assay can't take a subset's name (#126)", {
+  es <- makeParentEs()
+  msg <- "Assay names must differ from subset names; 's' is a subset."
+  renamed <- es
+  expect_error(assayNames(renamed)[2] <- "s", msg, fixed = TRUE)
+  expect_error(
+    assays(renamed) <- c(assays(es), S4Vectors::SimpleList(s = assay(es))),
+    msg, fixed = TRUE
+  )
+  expect_identical(renamed, es)
+})
+
+test_that("A rename can't hide a linked assay behind a stored one (#126)", {
+  es <- makeParentEs()
+  renamed <- es
+  expect_error(
+    assayNames(renamed)[1] <- "scaled",
+    "Subset 's' already stores an assay called 'scaled'. Rename it first.",
+    fixed = TRUE
+  )
+  expect_identical(renamed, es)
+})
+
+test_that("A rename doesn't capture a bare stored-assay parent (#126)", {
+  # a subset recorded the way versions before 1.23.15 did, with a bare
+  # parent stored in s1, which stores its own counts too
+  .subsets <- ExperimentSubset:::.subsets
+  `.subsets<-` <- ExperimentSubset:::`.subsets<-`
+  m <- matrix(as.numeric(1:40), nrow = 4,
+              dimnames = list(paste0("g", 1:4), paste0("c", 1:10)))
+  es <- ExperimentSubset(SingleCellExperiment(list(counts = m)))
+  es <- createSubset(es, "s1", rows = 1:3, cols = 1:6)
+  suppressMessages(
+    es <- setSubsetAssay(es, "s1", assay(es, "s1") + 1, "counts",
+                         unlink = TRUE)
+  )
+  stored <- assay(es, "s1") * 10
+  es <- setSubsetAssay(es, "s1", stored, "stored")
+  es <- createSubset(es, "child", rows = 1:2, cols = 1:2,
+                     parentAssay = "s1/stored")
+  subsetList <- .subsets(es)
+  subsetList[["child"]] <- ExperimentSubset:::.copySubset(
+    subsetList[["child"]], parentAssay = "stored"
+  )
+  .subsets(es) <- subsetList
+  assayNames(es) <- "stored"
+  expect_equal(assay(es, "child"), stored[1:2, 1:2])
+  expect_equal(subsetParent(es, "child"), list("s1/stored", "s1", "counts"))
+})
+
+test_that("Subsets made from an altExp ignore main assay renames (#126)", {
+  es <- makeAdtEs()
+  es <- createSubset(es, "adt", rows = c("CD3", "CD8"), cols = 2:5,
+                     altExp = "ADT")
+  expected <- assay(es, "adt")
+  assayNames(es) <- "raw"
+  expect_equal(subsetParent(es, "adt"), list("ADT/counts"))
+  expect_equal(assay(es, "adt"), expected)
+  expect_equal(subsetParent(es, "clean"), list("raw"))
+  expect_equal(assay(es, "clean"), assay(es, "raw")[, 3:14])
+})
+
+test_that("A subset with no recorded parent doesn't stop a rename (#126)", {
+  # as saved before parents were recorded
+  es <- makeParentEs()
+  subsets <- ExperimentSubset:::.subsets(es)
+  subsets[["w"]] <- ExperimentSubset:::.copySubset(subsets[["w"]],
+                                                   parentAssay = NULL)
+  es <- ExperimentSubset:::`.subsets<-`(es, subsets)
+  assayNames(es) <- c("raw", "lc")
+  expect_equal(subsetParent(es, "s"), list("raw"))
 })

@@ -26,13 +26,63 @@
 
 # assays<- on the main object, and so assay(x, i) <- NULL, which calls it:
 # the subsets made from a removed assay follow dependents. A rename, such
-# as from assayNames<-, which also calls it, isn't a removal (#126).
+# as from assayNames<-, which also calls it, isn't a removal: the subsets
+# made from a renamed assay follow it (#126). Parents are qualified first,
+# so a bare stored-assay parent can't be taken by a main assay renamed to
+# its name.
 `.assays<-` <- function(x, withDimnames = TRUE, ..., value) {
   dependents <- .dependentsArg(list(...))
+  x <- .qualifyParents(x)
   out <- callNextMethod(x, withDimnames = withDimnames, ..., value = value)
-  if (all(assayNames(x) %in% assayNames(out)) || .renamedOnly(x, out))
+  taken <- intersect(setdiff(assayNames(out), assayNames(x)), subsetNames(x))
+  if (length(taken) > 0)
+    stop("Assay names must differ from subset names; '", taken[1],
+         "' is a subset.")
+  if (.renamedOnly(x, out))
+    return(.followAssayRenames(x, out))
+  if (all(assayNames(x) %in% assayNames(out)))
     return(out)
   .resolveDependents(x, out, dependents)
+}
+
+# after, before with its main assays renamed, with the parents of the
+# subsets made from a renamed assay following it: a bare parent, unless
+# the subset stores its own assay of that name (as dependents = "keep"
+# leaves it, #122), and "P/assay" where P sees that assay linked from the
+# main object. Subsets made from an altExp don't see the main assays. A
+# subset that would see an assay of its own, or of a subset above it, in
+# place of a renamed linked one is an error.
+.followAssayRenames <- function(before, after) {
+  renamed <- .renamed(assayNames(before), assayNames(after))
+  if (length(renamed) == 0)
+    return(after)
+  for (name in subsetNames(before)) {
+    if (!is.null(.rowRoot(before, name)))
+      next
+    owners <- .assayOwners(before, name)
+    linked <- names(renamed)[owners[names(renamed)] %in% ""]
+    hidden <- intersect(renamed[linked], names(owners)[owners != ""])
+    if (length(hidden) > 0)
+      stop("Subset '", owners[[hidden[1]]], "' already stores an assay ",
+           "called '", hidden[1], "'. Rename it first.")
+    subset <- .subsets(before)[[name]]
+    parent <- .parentAssay(subset)
+    if (is.null(parent))
+      next
+    if (parent %in% names(renamed)) {
+      if (parent %in% assayNames(.internalAssay(subset)))
+        next
+      parent <- renamed[[parent]]
+    } else {
+      parts <- .splitQualified(parent)
+      if (is.null(parts) || !parts[2] %in% names(renamed)
+          || !identical(.assayOwners(before, parts[1])[[parts[2]]], ""))
+        next
+      parent <- paste0(parts[1], "/", renamed[[parts[2]]])
+    }
+    .subsets(after)[[name]] <- .copySubset(subset, parentAssay = parent)
+  }
+  after
 }
 
 # TRUE if new has the assays of old, the same objects in the same order,
