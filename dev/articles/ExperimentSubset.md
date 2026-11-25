@@ -913,7 +913,7 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.58        TreeSummarizedExperiment_2.22.0
+    ##  [1] ExperimentSubset_1.23.59        TreeSummarizedExperiment_2.22.0
     ##  [3] Biostrings_2.82.0               XVector_0.54.0                 
     ##  [5] SpatialExperiment_1.24.0        SingleCellExperiment_1.36.0    
     ##  [7] SummarizedExperiment_1.44.0     Biobase_2.74.0                 

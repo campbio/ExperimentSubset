@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.58</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.59</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,10 @@
       <small>Source: <a href="https://github.com/campbio/ExperimentSubset/blob/devel/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.23.59" id="experimentsubset-12359-2026-11-25">ExperimentSubset 1.23.59 (2026-11-25)<a class="anchor" aria-label="anchor" href="#experimentsubset-12359-2026-11-25"></a></h2>
+<ul><li>Renaming main assays, with <code>assayNames&lt;-</code> or an <code>assays&lt;-</code> that only renames them, now renames the parent recorded by the subsets made from them. Before, those subsets kept the old name: a subset made from <code>"counts"</code>, renamed <code>"raw"</code>, read the cells at its positions in another subset’s own <code>"counts"</code> when exactly one subset stored one, with no error; swapping two names made it read the other assay; and a subset made from <code>"s/counts"</code> gave “‘counts’ is not an assay of subset”. A subset that stores its own copy of the assay it was made from, such as one kept with <code>dependents = "keep"</code>, keeps reading that copy and its recorded parent, whether <code>"counts"</code> or <code>"s/counts"</code>; <code>"s/counts"</code> also stays when <code>s</code> stores its own <code>"counts"</code>. Subsets made from an altExp don’t change. Three changes now stop, with nothing changed: giving a main assay a subset’s name, through a rename or by adding one with <code>assays&lt;-</code> (“Assay names must differ from subset names; ‘s’ is a subset.”), which was allowed before and made parents naming that subset mean the assay; a rename to a name that is empty, <code>NA</code> or used twice, while subsets exist (“Main assays that subsets were made from need names that are unique, not empty and not NA.”); and a rename that would make a subset see an assay it, or a subset it was made from, stores itself in place of the main assay it saw linked (“Subset ‘s’ already stores an assay called ‘raw’. Rename it first.”). Subsets in objects saved before 1.23.15 that record a bare stored-assay parent are switched to the qualified name first, so a main assay renamed to that name doesn’t take their place. Results change only for subsets made from a renamed main assay (<a href="https://github.com/campbio/ExperimentSubset/issues/126" class="external-link">#126</a>)</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.23.58" id="experimentsubset-12358-2026-11-23">ExperimentSubset 1.23.58 (2026-11-23)<a class="anchor" aria-label="anchor" href="#experimentsubset-12358-2026-11-23"></a></h2>
 <ul><li>

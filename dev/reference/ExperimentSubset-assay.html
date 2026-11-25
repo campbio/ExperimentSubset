@@ -24,7 +24,16 @@ assay(x, i) &amp;lt;- value stores value in a subset when
 Removing a main assay that subsets were made from, with
   assay(x, i) &amp;lt;- NULL or assays(x) &amp;lt;- value, stops unless
   dependents says what happens to them (see
-  removeSubset)."><meta property="og:description" content="Get or set an assay of the main object or of a subset.
+  removeSubset). Renaming main assays, with
+  assayNames&amp;lt;- or an assays&amp;lt;- that only renames them
+  (the same assays in the same order), renames them in what the
+  subsets made from them record as their parent, so those subsets keep
+  reading the same data. A subset that stores its own copy of the assay
+  it was made from keeps reading that copy. A main assay can't take the
+  name of a subset, or the name of an assay that a subset seeing it, or
+  a subset that one was made from, stores itself. While subsets exist,
+  a rename can't give main assays names that are empty, NA or
+  used twice."><meta property="og:description" content="Get or set an assay of the main object or of a subset.
   Unlike the other methods, assay() and assay&amp;lt;- name the
   subset with i, not with subsetName.
 assay(x, i) returns:
@@ -49,7 +58,16 @@ assay(x, i) &amp;lt;- value stores value in a subset when
 Removing a main assay that subsets were made from, with
   assay(x, i) &amp;lt;- NULL or assays(x) &amp;lt;- value, stops unless
   dependents says what happens to them (see
-  removeSubset)."><meta name="robots" content="noindex"></head><body>
+  removeSubset). Renaming main assays, with
+  assayNames&amp;lt;- or an assays&amp;lt;- that only renames them
+  (the same assays in the same order), renames them in what the
+  subsets made from them record as their parent, so those subsets keep
+  reading the same data. A subset that stores its own copy of the assay
+  it was made from keeps reading that copy. A main assay can't take the
+  name of a subset, or the name of an assay that a subset seeing it, or
+  a subset that one was made from, stores itself. While subsets exist,
+  a rename can't give main assays names that are empty, NA or
+  used twice."><meta name="robots" content="noindex"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -57,7 +75,7 @@ Removing a main assay that subsets were made from, with
 
     <a class="navbar-brand me-2" href="../index.html">ExperimentSubset</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.58</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">1.23.59</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -115,7 +133,16 @@ Removing a main assay that subsets were made from, with
 <p>Removing a main assay that subsets were made from, with
   <code>assay(x, i) &lt;- NULL</code> or <code>assays(x) &lt;- value</code>, stops unless
   <code>dependents</code> says what happens to them (see
-  <code><a href="removeSubset.html">removeSubset</a></code>).</p>
+  <code><a href="removeSubset.html">removeSubset</a></code>). Renaming main assays, with
+  <code>assayNames&lt;-</code> or an <code>assays&lt;-</code> that only renames them
+  (the same assays in the same order), renames them in what the
+  subsets made from them record as their parent, so those subsets keep
+  reading the same data. A subset that stores its own copy of the assay
+  it was made from keeps reading that copy. A main assay can't take the
+  name of a subset, or the name of an assay that a subset seeing it, or
+  a subset that one was made from, stores itself. While subsets exist,
+  a rename can't give main assays names that are empty, <code>NA</code> or
+  used twice.</p>
     </div>
 
     <div class="section level2">

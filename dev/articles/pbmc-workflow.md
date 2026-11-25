@@ -1059,7 +1059,7 @@ are named after the methods.
     ##  [7] singleCellTK_2.24.0             DelayedArray_0.40.0            
     ##  [9] SparseArray_1.13.5              S4Arrays_1.14.0                
     ## [11] abind_1.4-8                     Matrix_1.7-6                   
-    ## [13] ExperimentSubset_1.23.58        TreeSummarizedExperiment_2.22.0
+    ## [13] ExperimentSubset_1.23.59        TreeSummarizedExperiment_2.22.0
     ## [15] Biostrings_2.82.0               XVector_0.54.0                 
     ## [17] SpatialExperiment_1.24.0        scuttle_1.24.0                 
     ## [19] DropletUtils_1.34.0             SingleCellExperiment_1.36.0    
