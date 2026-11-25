@@ -913,15 +913,15 @@ and `metadata`.
     ## [8] base     
     ## 
     ## other attached packages:
-    ##  [1] ExperimentSubset_1.23.57        TreeSummarizedExperiment_2.21.0
-    ##  [3] Biostrings_2.81.9               XVector_0.53.0                 
-    ##  [5] SpatialExperiment_1.23.0        SingleCellExperiment_1.35.2    
-    ##  [7] SummarizedExperiment_1.43.0     Biobase_2.73.2                 
-    ##  [9] GenomicRanges_1.65.4            Seqinfo_1.3.2                  
-    ## [11] IRanges_2.47.5                  S4Vectors_0.51.10              
-    ## [13] BiocGenerics_0.59.13            generics_0.1.4                 
-    ## [15] MatrixGenerics_1.25.0           matrixStats_1.5.0              
-    ## [17] BiocStyle_2.41.0               
+    ##  [1] ExperimentSubset_1.23.58        TreeSummarizedExperiment_2.22.0
+    ##  [3] Biostrings_2.82.0               XVector_0.54.0                 
+    ##  [5] SpatialExperiment_1.24.0        SingleCellExperiment_1.36.0    
+    ##  [7] SummarizedExperiment_1.44.0     Biobase_2.74.0                 
+    ##  [9] GenomicRanges_1.66.0            Seqinfo_1.4.0                  
+    ## [11] IRanges_2.48.0                  S4Vectors_0.52.0               
+    ## [13] BiocGenerics_0.60.0             generics_0.1.4                 
+    ## [15] MatrixGenerics_1.26.0           matrixStats_1.5.0              
+    ## [17] BiocStyle_2.42.0               
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] rjson_0.2.23        xfun_0.62           bslib_0.12.0       
@@ -929,16 +929,16 @@ and `metadata`.
     ##  [7] vctrs_0.7.3         tools_4.6.1         parallel_4.6.1     
     ## [10] tibble_3.3.1        pkgconfig_2.0.3     Matrix_1.7-6       
     ## [13] desc_1.4.3          lifecycle_1.0.5     compiler_4.6.1     
-    ## [16] treeio_1.37.1       textshaping_1.0.5   codetools_0.2-20   
+    ## [16] treeio_1.38.0       textshaping_1.0.5   codetools_0.2-20   
     ## [19] htmltools_0.5.9     sass_0.4.10         lazyeval_0.2.3     
     ## [22] yaml_2.3.12         tidyr_1.3.2         pkgdown_2.2.1      
     ## [25] pillar_1.11.1       crayon_1.5.3        jquerylib_0.1.4    
-    ## [28] BiocParallel_1.47.0 DelayedArray_0.39.8 cachem_1.1.0       
+    ## [28] BiocParallel_1.48.0 DelayedArray_0.40.0 cachem_1.1.0       
     ## [31] magick_2.9.1        abind_1.4-8         nlme_3.1-171       
     ## [34] tidyselect_1.2.1    digest_0.6.39       purrr_1.2.2        
     ## [37] dplyr_1.2.1         bookdown_0.48       fastmap_1.2.0      
     ## [40] grid_4.6.1          cli_3.6.6           SparseArray_1.13.5 
-    ## [43] magrittr_2.0.5      S4Arrays_1.13.3     ape_5.8-1          
+    ## [43] magrittr_2.0.5      S4Arrays_1.14.0     ape_5.8-1          
     ## [46] rappdirs_0.3.4      rmarkdown_2.32      otel_0.2.0         
     ## [49] ragg_1.5.2          evaluate_1.0.5      knitr_1.52         
     ## [52] rlang_1.3.0         Rcpp_1.1.2          tidytree_0.4.9     

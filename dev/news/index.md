@@ -1,5 +1,17 @@
 # Changelog
 
+## ExperimentSubset 1.23.58 (2026-11-23)
+
+- `removeSubset(dependents = "keep")` on a subset made from an assay
+  that was gone already, such as one renamed with `assayNames<-`
+  ([\#126](https://github.com/campbio/ExperimentSubset/issues/126)), now
+  records its parent, such as `"s"`, as the parent of the subsets made
+  directly from it, as it does when nothing is missing. Before, it
+  recorded `"s/counts"`, which reads the same data. Also removes
+  internal code that no change could reach, and adds tests. The data
+  every subset sees is unchanged
+  ([\#122](https://github.com/campbio/ExperimentSubset/issues/122))
+
 ## ExperimentSubset 1.23.57 (2026-11-23)
 
 - New `removeSubset(x, subsetName, dependents = "error")` removes one or
