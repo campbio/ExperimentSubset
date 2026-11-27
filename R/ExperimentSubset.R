@@ -2149,7 +2149,9 @@ NULL
 # named by assay, with where each is stored: "" for the main object or its
 # altExp, or the subset whose part of the altExp stores it. Read from the
 # stored parts without cutting them, merged as .subsetAltExpView() merges
-# them.
+# them. An assay without a name, only in an object saved before every
+# assay needed one (#124), is left out: subsets find assays by name
+# (#134).
 .rootAssayHolders <- function(x, root) {
   holders <- ""
   if (!is.null(root) && !is.null(root$container)) {
@@ -2163,6 +2165,8 @@ NULL
     part <- if (is.null(root)) object else .storedAltExp(object, root$altExp)
     partOwners <- rep(holder, length(assayNames(part)))
     names(partOwners) <- assayNames(part)
+    partOwners <- partOwners[!is.na(names(partOwners))
+                             & nzchar(names(partOwners))]
     role <- if (is.null(root)) NA else .holderRole(x, holder, root$altExp)
     if (!.mergesInto(shape, part, role)) {
       shape <- part
@@ -2194,13 +2198,10 @@ NULL
 # stored, "" for the main object or a subset name. Each subset's own
 # assays hide those of the same name linked from further up the chain.
 # root (from .rowRoot()) and chain (from .subsetChain()) can be given, to
-# read x's assays along the subset's chain in another object. A root
-# assay without a name, only in an object saved before every assay needed
-# one (#124), is left out: subsets find assays by name (#134).
+# read x's assays along the subset's chain in another object.
 .assayOwners <- function(x, subsetName, root = .rowRoot(x, subsetName),
                          chain = .subsetChain(x, subsetName)) {
   rootAssays <- names(.rootAssayHolders(x, root))
-  rootAssays <- rootAssays[!is.na(rootAssays) & nzchar(rootAssays)]
   owners <- rep("", length(rootAssays))
   names(owners) <- rootAssays
   for (subset in .rootChain(chain, root)) {
