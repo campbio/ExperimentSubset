@@ -2194,10 +2194,13 @@ NULL
 # stored, "" for the main object or a subset name. Each subset's own
 # assays hide those of the same name linked from further up the chain.
 # root (from .rowRoot()) and chain (from .subsetChain()) can be given, to
-# read x's assays along the subset's chain in another object.
+# read x's assays along the subset's chain in another object. A root
+# assay without a name, only in an object saved before every assay needed
+# one (#124), is left out: subsets find assays by name (#134).
 .assayOwners <- function(x, subsetName, root = .rowRoot(x, subsetName),
                          chain = .subsetChain(x, subsetName)) {
   rootAssays <- names(.rootAssayHolders(x, root))
+  rootAssays <- rootAssays[!is.na(rootAssays) & nzchar(rootAssays)]
   owners <- rep("", length(rootAssays))
   names(owners) <- rootAssays
   for (subset in .rootChain(chain, root)) {
