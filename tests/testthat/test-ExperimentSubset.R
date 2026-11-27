@@ -5933,6 +5933,30 @@ test_that("removeSubset(dependents = \"keep\") skips unnamed assays (#134)", {
     # the second assay stays in the main object, unchanged
     expect_identical(assayNames(kept), assayNames(es), info = secondName)
     expect_equal(assays(kept)[[2]], counts + 1, info = secondName)
+
+    # the same with rows from an altExp whose second assay is so named
+    adt <- SingleCellExperiment(list(counts = counts[1:4, ],
+                                     plus = counts[1:4, ] + 1))
+    assayNames(adt)[2] <- secondName
+    es <- savedEs(SingleCellExperiment(list(counts = counts)))
+    es <- setSavedAltExp(es, "ADT", adt)
+    es <- createSubset(es, "s", rows = 1:3, altExp = "ADT")
+    es <- setSubsetAssay(es, "s", assay(es, "s") * 2, "scaled")
+    es <- createSubset(es, "t", rows = 1:2, parentAssay = "s")
+    expect_equal(
+      capture_messages(kept <- removeSubset(es, "s", dependents = "keep")),
+      "Subset 't' now stores its own assay 'scaled'.\n",
+      info = secondName
+    )
+    expect_equal(subsetAssayNames(kept), c("t", "t/scaled"),
+                 info = secondName)
+    expect_equal(subsetParent(kept, "t"), list("ADT/counts"),
+                 info = secondName)
+    expect_equal(assay(kept, "t"), counts[1:2, ], info = secondName)
+    expect_equal(assay(kept, "t", subsetAssayName = "scaled"),
+                 counts[1:2, ] * 2, info = secondName)
+    expect_identical(assayNames(altExp(kept, "ADT")), assayNames(adt),
+                     info = secondName)
   }
 })
 
