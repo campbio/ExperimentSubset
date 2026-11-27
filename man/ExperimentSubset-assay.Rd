@@ -143,6 +143,11 @@ Get or set an assay of the main object or of a subset.
   a subset that one was made from, stores itself. While subsets exist,
   a rename can't give main assays names that are empty, \code{NA} or
   used twice.
+
+  Every main assay needs a name that is not empty or \code{NA}:
+  \code{assays<-}, and \code{assay(x, i) <-} with a position, stop if
+  any assay would be left without one. An object saved with such
+  assays works until its assays change.
 }
 \examples{
 # an object with 10 genes and 20 cells

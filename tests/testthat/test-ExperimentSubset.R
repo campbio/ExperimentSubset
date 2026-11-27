@@ -24,6 +24,21 @@ expectSubsetOf <- function(es, subsetName, rows, cols) {
                assay(es, "counts")[rows, cols, drop = FALSE])
 }
 
+# x as an ExperimentSubset without the constructor's checks, as an object
+# saved before every assay needed a name (#124) can be
+savedEs <- function(x) {
+  methods::as(x, "SubsetSingleCellExperiment")
+}
+
+# es with altExp name set to value by SingleCellExperiment's method,
+# without the package's checks, as an object saved before every assay
+# needed a name (#124) can have it
+setSavedAltExp <- function(es, name, value) {
+  setAltExp <- methods::selectMethod("altExp<-",
+                                     c("SingleCellExperiment", "character"))
+  setAltExp(es, name, value = value)
+}
+
 # es with the parent that subset subsetName records set to parent, as an
 # object saved by an older version, or one whose parent is gone, has it
 setParent <- function(es, subsetName, parent) {
@@ -4643,12 +4658,14 @@ test_that("createSubset() matches row names stored only on the assay (#36)", {
 
 test_that("createSubset() needs a named first assay or parentAssay (#36)", {
   counts <- matrix(as.numeric(1:20), nrow = 4)
-  es <- ExperimentSubset(SingleCellExperiment(list(counts = counts)))
   noName <- paste("'parentAssay' is needed: 'x' has no named first assay",
                   "to make the subset from.")
   # no assays, unnamed assays, and an unnamed first assay
   for (value in list(list(), list(counts), list(counts, counts = counts))) {
-    assays(es, withDimnames = FALSE) <- value
+    # unnamed assays only in an object saved before they were refused (#124)
+    sce <- SingleCellExperiment(list(counts = counts))
+    assays(sce, withDimnames = FALSE) <- value
+    es <- savedEs(sce)
     expect_error(createSubset(es, "s1", rows = 1:2), noName, fixed = TRUE,
                  info = paste(length(value), "assays"))
   }
@@ -5254,12 +5271,11 @@ test_that("Objects saved before the altExpName slot still work (#92)", {
 })
 
 test_that("More checks and carry-along cases of altExp subsets (#92)", {
-  # an altExp whose first assay has no name
+  # an altExp whose first assay has no name, as saved before #124
   es <- makeAdtEs(cleanClr = FALSE)
-  withHto <- es
-  altExp(withHto, "HTO") <- SummarizedExperiment(
+  withHto <- setSavedAltExp(es, "HTO", SummarizedExperiment(
     list(assay(altExp(es, "ADT")))
-  )
+  ))
   expect_error(createSubset(withHto, "a", altExp = "HTO"),
                paste0("'parentAssay' is needed: altExp 'HTO' has no named ",
                       "first assay to make the subset from."), fixed = TRUE)
@@ -5545,7 +5561,8 @@ test_that("A subset stores an altExp next to an unnamed assay (#121)", {
   hto <- SingleCellExperiment(list(m[1:2, ]))
   sce <- SingleCellExperiment(list(counts = m),
                               altExps = list(ADT = adt, HTO = hto))
-  es <- ExperimentSubset(sce)
+  # unnamed altExp assays only in an object saved before #124
+  es <- savedEs(sce)
   es <- createSubset(es, "clean", cols = 1:5, parentAssay = "counts")
 
   # storing ADT, which HTO's unnamed assay used to break
@@ -5572,7 +5589,8 @@ test_that("A subset can't change unnamed assays of an altExp (#121)", {
               dimnames = list(paste0("g", 1:4), paste0("c", 1:10)))
   hto <- SingleCellExperiment(list(m[1:2, ]))
   sce <- SingleCellExperiment(list(counts = m), altExps = list(HTO = hto))
-  es <- ExperimentSubset(sce)
+  # unnamed altExp assays only in an object saved before #124
+  es <- savedEs(sce)
   es <- createSubset(es, "clean", cols = 1:5, parentAssay = "counts")
   msg <- paste0("altExp 'HTO' has assays without names, so changes to its ",
                 "assays can't be stored. Name them with assayNames<- first.")
@@ -5609,7 +5627,8 @@ test_that("A subset can't change unnamed assays of an altExp (#121)", {
   # them unchanged, with new colData, works
   hto <- SingleCellExperiment(list(counts = m[1:2, ], m[1:2, ] + 1))
   sce <- SingleCellExperiment(list(counts = m), altExps = list(HTO = hto))
-  es <- ExperimentSubset(sce)
+  # unnamed altExp assays only in an object saved before #124
+  es <- savedEs(sce)
   es <- createSubset(es, "clean", cols = 1:5, parentAssay = "counts")
   changed <- altExp(es, "HTO", subsetName = "clean")
   assay(changed, "counts", withDimnames = FALSE) <- assay(changed, 1) * 2
@@ -6148,4 +6167,280 @@ test_that("A rename to an empty, NA or repeated name stops (#126)", {
                  fixed = TRUE, info = paste(value, collapse = ", "))
   }
   expect_identical(renamed, es)
+})
+
+# A 4 x 10 matrix with dimnames, and the messages for assays without names
+# (#124)
+namesExample <- function() {
+  m <- matrix(as.numeric(1:40), 4, 10,
+              dimnames = list(paste0("g", 1:4), paste0("c", 1:10)))
+  list(
+    m = m,
+    main = paste("Assays without names are not supported. Name every",
+                 "assay, with assayNames<- or assay(x, \"name\") <- value."),
+    newAltExp = function(name) {
+      paste0("altExp '", name, "' has assays without names. Name them ",
+             "with assayNames<- first.")
+    },
+    changedAltExp = function(name) {
+      paste0("altExp '", name, "' has assays without names, so changes ",
+             "to its assays can't be stored. Name them with assayNames<- ",
+             "first.")
+    }
+  )
+}
+
+test_that("Main assays without names can't be added (#124)", {
+  ex <- namesExample()
+  m <- ex$m
+  es <- ExperimentSubset(list(counts = m))
+  changed <- es
+  expect_error(assays(changed) <- list(m), ex$main, fixed = TRUE)
+  expect_error(assays(changed) <- list(counts = m, m), ex$main,
+               fixed = TRUE)
+  expect_error(assays(changed) <- list(counts = m, m + 1), ex$main,
+               fixed = TRUE)
+  expect_error(assay(changed, 2) <- m, ex$main, fixed = TRUE)
+  expect_error(assayNames(changed) <- "", ex$main, fixed = TRUE)
+  expect_error(assayNames(changed) <- NA_character_, ex$main, fixed = TRUE)
+  withNA <- list(counts = m, m + 1)
+  names(withNA)[2] <- NA
+  expect_error(assays(changed) <- withNA, ex$main, fixed = TRUE)
+  expect_identical(changed, es)
+
+  # with subsets too
+  es <- createSubset(es, "s", rows = 1:2)
+  changed <- es
+  expect_error(assay(changed, 2) <- m, ex$main, fixed = TRUE)
+  expect_error(assays(changed) <- list(m), ex$main, fixed = TRUE)
+  expect_identical(changed, es)
+
+  # named assays, and no assays, are fine
+  assay(es, "plus") <- m + 1
+  expect_equal(assayNames(es), c("counts", "plus"))
+  empty <- ExperimentSubset(list(counts = m))
+  assays(empty) <- list()
+  expect_length(assays(empty), 0)
+})
+
+test_that("Saved unnamed main assays work until they change (#124)", {
+  ex <- namesExample()
+  m <- ex$m
+  saved <- savedEs(SingleCellExperiment(list(counts = m, m + 1)))
+  expect_equal(assayNames(saved), c("counts", ""))
+  same <- saved
+  assays(same) <- assays(same)
+  expect_identical(same, saved)
+  expect_equal(assay(saved, 2), m + 1)
+  saved <- createSubset(saved, "s", rows = 1:2)
+  expect_equal(assay(saved, "s"), m[1:2, ])
+
+  changed <- saved
+  expect_error(assay(changed, "counts") <- m * 2, ex$main, fixed = TRUE)
+  expect_error(assay(changed, 2) <- m * 2, ex$main, fixed = TRUE)
+  expect_identical(changed, saved)
+
+  # naming them allows changes
+  assayNames(saved) <- c("counts", "plus")
+  assay(saved, "counts") <- m * 2
+  expect_equal(assay(saved, "s"), m[1:2, ] * 2)
+})
+
+test_that("ExperimentSubset() needs names on altExps' assays (#124)", {
+  ex <- namesExample()
+  m <- ex$m
+  adt <- SingleCellExperiment(list(counts = m[1:3, ]))
+  for (hto in list(SingleCellExperiment(list(m[1:2, ])),
+                   SingleCellExperiment(list(counts = m[1:2, ],
+                                             m[1:2, ] + 1)))) {
+    sce <- SingleCellExperiment(list(counts = m),
+                                altExps = list(ADT = adt, HTO = hto))
+    expect_error(ExperimentSubset(sce), ex$newAltExp("HTO"), fixed = TRUE)
+  }
+  # an NA name, on an altExp's assay or a main one
+  hto <- SingleCellExperiment(list(m[1:2, ]))
+  assayNames(hto) <- NA_character_
+  sce <- SingleCellExperiment(list(counts = m), altExps = list(HTO = hto))
+  expect_error(ExperimentSubset(sce), ex$newAltExp("HTO"), fixed = TRUE)
+  sce <- SingleCellExperiment(list(counts = m))
+  assayNames(sce) <- NA_character_
+  expect_error(ExperimentSubset(sce), "unnamed assays", fixed = TRUE)
+})
+
+test_that("altExp<- on the main object needs assay names (#124)", {
+  ex <- namesExample()
+  m <- ex$m
+  bad <- SingleCellExperiment(list(m[1:2, ]))
+  es <- ExperimentSubset(list(counts = m))
+  changed <- es
+  expect_error(altExp(changed, "HTO") <- bad, ex$newAltExp("HTO"),
+               fixed = TRUE)
+  expect_error(altExps(changed) <- list(HTO = bad), ex$newAltExp("HTO"),
+               fixed = TRUE)
+  withNA <- bad
+  assayNames(withNA) <- NA_character_
+  expect_error(altExp(changed, "HTO") <- withNA, ex$newAltExp("HTO"),
+               fixed = TRUE)
+  # the second of two altExps of the same name
+  named <- SingleCellExperiment(list(counts = m[1:2, ]))
+  expect_error(altExps(changed) <- list(HTO = named, HTO = bad),
+               ex$newAltExp("HTO"), fixed = TRUE)
+  expect_identical(changed, es)
+
+  # replacing a named altExp, by name, by position or as the first
+  altExp(es, "HTO") <- SingleCellExperiment(list(counts = m[1:2, ]))
+  changed <- es
+  expect_error(altExp(changed, "HTO") <- bad, ex$changedAltExp("HTO"),
+               fixed = TRUE)
+  expect_error(altExp(changed, 1) <- bad, ex$changedAltExp("HTO"),
+               fixed = TRUE)
+  expect_error(altExp(changed) <- bad, ex$changedAltExp("HTO"),
+               fixed = TRUE)
+  expect_identical(changed, es)
+})
+
+test_that("Saved unnamed altExp assays work until they change (#124)", {
+  ex <- namesExample()
+  m <- ex$m
+  hto <- SingleCellExperiment(list(m[1:2, ]))
+  saved <- savedEs(SingleCellExperiment(list(counts = m),
+                                        altExps = list(HTO = hto)))
+  # new colData, another altExp, and removing it are fine
+  tagged <- altExp(saved, "HTO")
+  tagged$tag <- letters[1:10]
+  altExp(saved, "HTO") <- tagged
+  expect_equal(altExp(saved, "HTO")$tag, letters[1:10])
+  adt <- SingleCellExperiment(list(counts = m[1:3, ]))
+  altExp(saved, "ADT") <- adt
+  expect_equal(altExpNames(saved), c("HTO", "ADT"))
+  removed <- saved
+  altExp(removed, "HTO") <- NULL
+  expect_equal(altExpNames(removed), "ADT")
+  # renaming it, with altExps<- or altExpNames<-
+  renamed <- saved
+  altExps(renamed) <- list(TAGS = altExp(saved, "HTO"),
+                           ADT = altExp(saved, "ADT"))
+  expect_equal(altExpNames(renamed), c("TAGS", "ADT"))
+  renamed <- saved
+  altExpNames(renamed) <- c("TAGS", "ADT")
+  expect_equal(altExpNames(renamed), c("TAGS", "ADT"))
+
+  # a copy of it, under another name or the same, stops
+  copied <- saved
+  expect_error(altExp(copied, "COPY") <- altExp(saved, "HTO"),
+               ex$newAltExp("COPY"), fixed = TRUE)
+  expect_error(altExps(copied) <- list(HTO = altExp(saved, "HTO"),
+                                       HTO = altExp(saved, "HTO")),
+               ex$newAltExp("HTO"), fixed = TRUE)
+  expect_identical(copied, saved)
+
+  # combining saved objects keeps it, but not one from another input
+  other <- saved
+  colnames(other) <- paste0("d", 1:10)
+  combined <- combineCols(saved, other)
+  expect_equal(dim(altExp(combined, "HTO")), c(2L, 20L))
+  plain <- SingleCellExperiment(list(counts = m),
+                                altExps = list(HTO = hto, ADT = adt))
+  colnames(plain) <- paste0("d", 1:10)
+  expect_error(combineCols(saved, plain), ex$newAltExp("HTO"),
+               fixed = TRUE)
+
+  # changing its assays stops
+  changed <- altExp(saved, "HTO")
+  assay(changed, withDimnames = FALSE) <- assay(changed) * 2
+  same <- saved
+  expect_error(altExp(same, "HTO") <- changed, ex$changedAltExp("HTO"),
+               fixed = TRUE)
+  expect_identical(same, saved)
+})
+
+test_that("Subsets' altExp setters need assay names (#124)", {
+  ex <- namesExample()
+  m <- ex$m
+  sce <- SingleCellExperiment(
+    list(counts = m),
+    altExps = list(HTO = SingleCellExperiment(list(counts = m[1:2, ])))
+  )
+  es <- ExperimentSubset(sce)
+  es <- createSubset(es, "s", cols = 1:5)
+  bad <- SingleCellExperiment(list(m[1:2, 1:5]))
+  changed <- es
+  # a new altExp
+  expect_error(altExp(changed, "NEW", subsetName = "s") <- bad,
+               ex$newAltExp("NEW"), fixed = TRUE)
+  expect_error(altExps(changed, subsetName = "s") <- list(HTO = bad[, 1:5],
+                                                          NEW = bad),
+               ex$changedAltExp("HTO"), fixed = TRUE)
+  out <- getSubsetExperiment(es, "s")
+  altExp(out, "NEW") <- bad
+  expect_error(setSubsetExperiment(changed, "s", out), ex$newAltExp("NEW"),
+               fixed = TRUE)
+  # the second of two altExps of the same name
+  expect_error(altExps(changed, subsetName = "s") <- list(NEW = bad[, 1:5],
+                                                          NEW = bad),
+               ex$newAltExp("NEW"), fixed = TRUE)
+  # a linked altExp, with other rows
+  expect_error(altExp(changed, "HTO", subsetName = "s") <- bad[1, ],
+               ex$changedAltExp("HTO"), fixed = TRUE)
+  expect_identical(changed, es)
+
+  # a copy of a saved altExp with unnamed assays, in a subset
+  saved <- savedEs(SingleCellExperiment(
+    list(counts = m),
+    altExps = list(HTO = SingleCellExperiment(list(m[1:2, ])))
+  ))
+  saved <- createSubset(saved, "s", cols = 1:5)
+  copied <- saved
+  expect_error(
+    altExp(copied, "COPY", subsetName = "s") <-
+      altExp(saved, "HTO", subsetName = "s"),
+    ex$newAltExp("COPY"), fixed = TRUE
+  )
+  expect_identical(copied, saved)
+})
+
+test_that("A saved unnamed altExp is kept with dependents = 'keep' (#124)", {
+  ex <- namesExample()
+  m <- ex$m
+  hto <- SingleCellExperiment(list(m[1:2, ]))
+  es <- savedEs(SingleCellExperiment(list(counts = m),
+                                     altExps = list(HTO = hto)))
+  es <- createSubset(es, "a", cols = 1:5, parentAssay = "counts")
+  tagged <- altExp(es, "HTO", subsetName = "a")
+  tagged$tag <- letters[1:5]
+  altExp(es, "HTO", subsetName = "a") <- tagged
+  es <- createSubset(es, "b", cols = 1:3, parentAssay = "a")
+  suppressMessages(es <- removeSubset(es, "a", dependents = "keep"))
+  kept <- altExp(es, "HTO", subsetName = "b")
+  expect_equal(kept$tag, letters[1:3])
+  expect_equal(unname(assay(kept, withDimnames = FALSE)),
+               unname(m[1:2, 1:3]))
+})
+
+test_that("setSubsetExperiment() needs names on value's assays (#132)", {
+  ex <- namesExample()
+  m <- ex$m
+  es <- ExperimentSubset(list(counts = m))
+  es <- createSubset(es, "s", cols = 1:5)
+  suppressMessages(
+    es <- setSubsetAssay(es, "s", assay(es, "s") * 2, "own")
+  )
+  msg <- paste("Assays without names are not supported. Name every assay",
+               "of 'value' with assayNames<- first.")
+  changed <- es
+  # no names at all, which used to remove "own" without an error
+  noNames <- getSubsetExperiment(es, "s")
+  assays(noNames, withDimnames = FALSE) <- list(m[, 1:5] * 3)
+  expect_error(setSubsetExperiment(changed, "s", noNames), msg,
+               fixed = TRUE)
+  # one assay without a name, and an NA name
+  oneUnnamed <- getSubsetExperiment(es, "s")
+  assays(oneUnnamed) <- c(assays(oneUnnamed), list(m[, 1:5] * 3))
+  expect_error(setSubsetExperiment(changed, "s", oneUnnamed), msg,
+               fixed = TRUE)
+  assayNames(oneUnnamed)[3] <- NA
+  expect_error(setSubsetExperiment(changed, "s", oneUnnamed), msg,
+               fixed = TRUE)
+  expect_identical(changed, es)
+  expect_equal(subsetAssayNames(es), c("s", "s/own"))
 })

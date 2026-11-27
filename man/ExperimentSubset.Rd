@@ -40,7 +40,9 @@ This constructor function sets up an \code{ExperimentSubset}
   from a named \code{list} of assay matrices. A subset can also be created
   directly by passing a named \code{list} to the \code{subset} parameter,
   with elements named \code{subsetName}, \code{rows}, \code{cols} and
-  \code{parentAssay}.
+  \code{parentAssay}. Assays are found by name, so every assay of
+  \code{x}, and of its altExps, needs a name that is not empty or
+  \code{NA}.
 }
 \examples{
 data(sce_chcl, package = "scds")
