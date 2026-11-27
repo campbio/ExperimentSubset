@@ -440,6 +440,10 @@
   owners <- .assayOwners(before, child)
   rootHolders <- .rootAssayHolders(before, .rowRoot(before, child))
   for (name in names(owners)) {
+    # an unnamed root assay, only in an object saved before every assay
+    # needed a name (#124): subsets find assays by name, so never see it
+    if (is.na(name) || name == "")
+      next
     owner <- owners[[name]]
     from <- if (owner == "") rootHolders[[name]] else owner
     if (from != removed)

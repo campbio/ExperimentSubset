@@ -5905,6 +5905,37 @@ test_that("removeSubset(dependents = \"keep\") re-roots children (#122)", {
   expect_equal(subsetRownames(kept, "r"), subsetRownames(es, "r"))
 })
 
+test_that("removeSubset(dependents = \"keep\") skips unnamed assays (#134)", {
+  counts <- matrix(as.numeric(1:200), nrow = 10,
+                   dimnames = list(paste0("g", 1:10), paste0("c", 1:20)))
+  # a named second assay, then unnamed ones as in an object saved before
+  # they were refused (#124): all give the same result
+  for (secondName in list("plus", "", NA_character_)) {
+    sce <- SingleCellExperiment(list(counts = counts, plus = counts + 1))
+    assayNames(sce)[2] <- secondName
+    es <- savedEs(sce)
+    es <- createSubset(es, "s", rows = 1:6)
+    es <- setSubsetAssay(es, "s", assay(es, "s") * 2, "scaled")
+    es <- createSubset(es, "t", rows = 1:3, parentAssay = "s")
+    # t stores the assay s stored, and still sees counts linked
+    expect_equal(
+      capture_messages(kept <- removeSubset(es, "s", dependents = "keep")),
+      "Subset 't' now stores its own assay 'scaled'.\n",
+      info = secondName
+    )
+    expect_equal(subsetNames(kept), "t", info = secondName)
+    expect_equal(subsetAssayNames(kept), c("t", "t/scaled"),
+                 info = secondName)
+    expect_equal(subsetParent(kept, "t"), list("counts"), info = secondName)
+    expect_equal(assay(kept, "t"), counts[1:3, ], info = secondName)
+    expect_equal(assay(kept, "t", subsetAssayName = "scaled"),
+                 counts[1:3, ] * 2, info = secondName)
+    # the second assay stays in the main object, unchanged
+    expect_identical(assayNames(kept), assayNames(es), info = secondName)
+    expect_equal(assays(kept)[[2]], counts + 1, info = secondName)
+  }
+})
+
 test_that("removeSubset(dependents = \"keep\") keeps what a child saw (#122)", {
   # an altExp clean stores a piece of, seen by a subset made from clean
   es <- makeAdtEs()
