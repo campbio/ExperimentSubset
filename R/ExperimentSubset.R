@@ -2149,7 +2149,9 @@ NULL
 # named by assay, with where each is stored: "" for the main object or its
 # altExp, or the subset whose part of the altExp stores it. Read from the
 # stored parts without cutting them, merged as .subsetAltExpView() merges
-# them.
+# them. An assay without a name, only in an object saved before every
+# assay needed one (#124), is left out: subsets find assays by name
+# (#134).
 .rootAssayHolders <- function(x, root) {
   holders <- ""
   if (!is.null(root) && !is.null(root$container)) {
@@ -2163,6 +2165,8 @@ NULL
     part <- if (is.null(root)) object else .storedAltExp(object, root$altExp)
     partOwners <- rep(holder, length(assayNames(part)))
     names(partOwners) <- assayNames(part)
+    partOwners <- partOwners[!is.na(names(partOwners))
+                             & nzchar(names(partOwners))]
     role <- if (is.null(root)) NA else .holderRole(x, holder, root$altExp)
     if (!.mergesInto(shape, part, role)) {
       shape <- part
